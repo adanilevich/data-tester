@@ -1,0 +1,7 @@
+# development tools
+flake8  # code style (pycodestyle), error linter (pyflakes), complexity (mccabe)
+mypy  # type checker
+black  # code formatter
+
+# testing
+pytest
