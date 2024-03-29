@@ -1,2 +1,2 @@
 def my_function() -> str:
-    return 1
+    return "asdf"
