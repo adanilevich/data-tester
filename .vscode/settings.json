@@ -1,3 +1,10 @@
 {
-    "python.defaultInterpreterPath": "/usr/local/bin/python"
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "python.analysis.extraPaths": [
+        "src",
+        ".",
+    ],
+    "flake8.args": [
+        "--max-line-length", "90",
+    ]
 }
