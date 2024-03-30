@@ -31,7 +31,7 @@ class TestCase:
                backend: IBackend, notifiers: List[INotifier]) -> TestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on
-        class attribute 'type'
+        class attribute 'type'.
         """
 
         # check all defined subclasses
