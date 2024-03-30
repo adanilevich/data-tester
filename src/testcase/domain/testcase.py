@@ -30,8 +30,8 @@ class TestCase:
     def create(cls, type: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
                backend: IBackend, notifiers: List[INotifier]) -> TestCase:
         """
-        Creates a testcase object (subclass instance of TestCase) based on
-        class attribute 'type'.
+        Creates a testcase object (subclass instance of TestCase) based on class attribute
+        'type' - the testtype must be implemented as subclass of TestCase.
         """
 
         # check all defined subclasses
