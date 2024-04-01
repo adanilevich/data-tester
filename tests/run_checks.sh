@@ -10,5 +10,5 @@ flake8 ../ -v --max-line-length 90
 
 echo ""
 echo "RUNNING TESTS"
-coverage run --rcfile=tests/coverage.ini -m pytest tests/
-coverage report --rcfile=tests/coverage.ini
+coverage run --rcfile=.coveragerc -m pytest tests/
+coverage report --rcfile=.coveragerc
