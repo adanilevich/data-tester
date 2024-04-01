@@ -2,29 +2,20 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/adanilevich/data-tester/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                                                        |    Stmts |     Miss |  Cover |   Missing |
-|------------------------------------------------------------ | -------: | -------: | -----: | --------: |
-| src/\_\_init\_\_.py                                         |        0 |        0 |   100% |           |
-| src/testcase/\_\_init\_\_.py                                |        0 |        0 |   100% |           |
-| src/testcase/application/\_\_init\_\_.py                    |        0 |        0 |   100% |           |
-| src/testcase/driven\_adapters/\_\_init\_\_.py               |        0 |        0 |   100% |           |
-| src/testcase/driven\_adapters/backends/\_\_init\_\_.py      |        0 |        0 |   100% |           |
-| src/testcase/driven\_adapters/notifiers/\_\_init\_\_.py     |        0 |        0 |   100% |           |
-| src/testcase/driven\_adapters/notifiers/stdout\_notifier.py |        4 |        4 |     0% |       1-6 |
-| src/testcase/driven\_ports/\_\_init\_\_.py                  |        0 |        0 |   100% |           |
-| src/testcase/driven\_ports/backend\_interface.py            |        6 |        6 |     0% |       1-9 |
-| src/testcase/driven\_ports/notifier\_interface.py           |        5 |        5 |     0% |      1-15 |
-| src/testcase/driver\_adapters/\_\_init\_\_.py               |        0 |        0 |   100% |           |
-| src/testcase/driver\_ports/\_\_init\_\_.py                  |        0 |        0 |   100% |           |
-| src/testcase/dtos.py                                        |       47 |       47 |     0% |      1-64 |
-| src/testcase/precondition\_checkers/\_\_init\_\_.py         |        0 |        0 |   100% |           |
-| src/testcase/precondition\_checkers/abstract\_checker.py    |       15 |       15 |     0% |      1-33 |
-| src/testcase/precondition\_checkers/checkable.py            |       16 |       16 |     0% |      1-30 |
-| src/testcase/precondition\_checkers/checker\_interface.py   |       17 |       17 |     0% |      1-51 |
-| src/testcase/precondition\_checkers/testobject\_exists.py   |       11 |       11 |     0% |      1-25 |
-| src/testcase/testcases/\_\_init\_\_.py                      |        0 |        0 |   100% |           |
-| src/testcase/testcases/testcase.py                          |       97 |       97 |     0% |     1-159 |
-|                                                   **TOTAL** |  **218** |  **218** | **0%** |           |
+| Name                                                        |    Stmts |     Miss |   Cover |   Missing |
+|------------------------------------------------------------ | -------: | -------: | ------: | --------: |
+| src/testcase/driven\_adapters/notifiers/stdout\_notifier.py |        4 |        4 |      0% |       1-6 |
+| src/testcase/driven\_ports/backend\_interface.py            |        6 |        1 |     83% |         9 |
+| src/testcase/driven\_ports/notifier\_interface.py           |        5 |        1 |     80% |        15 |
+| src/testcase/dtos.py                                        |       47 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/abstract\_checker.py    |       15 |        1 |     93% |        26 |
+| src/testcase/precondition\_checkers/checkable.py            |       16 |        3 |     81% |20, 25, 30 |
+| src/testcase/precondition\_checkers/checker\_interface.py   |       17 |        1 |     94% |        32 |
+| src/testcase/precondition\_checkers/testobject\_exists.py   |       11 |        0 |    100% |           |
+| src/testcase/testcases/testcase.py                          |       97 |        3 |     97% |63, 91, 122 |
+|                                                   **TOTAL** |  **218** |   **14** | **94%** |           |
+
+11 empty files skipped.
 
 
 ## Setup coverage badge
