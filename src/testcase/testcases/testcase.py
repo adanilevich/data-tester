@@ -95,7 +95,7 @@ class TestCase(AbstractCheckable):
         """
 
         # check all defined subclasses
-        known_testtypes: Dict[str, cls.__class__] = dict()
+        known_testtypes: Dict[str, Any] = dict()
         for cls_ in cls.__subclasses__():
             type_ = cls_.type
             known_testtypes[type_] = cls_
