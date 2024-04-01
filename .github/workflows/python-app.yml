@@ -45,7 +45,7 @@ jobs:
     - name: tests
       run: |
         coverage run --rcfile=tests/coverage.ini -m pytest tests/
-        coverage report --rcfile=tests/coverage.ini
+        coverage report -m --rcfile=tests/coverage.ini
     - name: Coverage comment
       uses: py-cov-action/python-coverage-comment-action@v3
       with:
