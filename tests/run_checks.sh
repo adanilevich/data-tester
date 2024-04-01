@@ -10,4 +10,5 @@ flake8 ../ -v --max-line-length 90
 
 echo ""
 echo "RUNNING TESTS"
-pytest --cov-report json:coverage.json --cov=src tests/
+coverage run --rcfile=tests/coverage.ini -m pytest tests/
+coverage report --rcfile=tests/coverage.ini
