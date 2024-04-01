@@ -1,13 +1,30 @@
 import pytest
 from typing import List
-from src.testcase.domain.testcase import IBackend, INotifier, TestCase
-from src.common_interfaces.testobject import TestObjectDTO
-from src.common_interfaces.specification import SpecificationDTO
+from src.testcase.precondition_checkers.checker import AbstractChecker
+from src.testcase.precondition_checkers.checkable import AbstractCheckable
+from src.testcase.testcases.testcase import (
+    TestCase, SpecificationDTO, TestObjectDTO, TestCaseResultDTO, TestResult,
+    DomainConfigDTO
+)
+from src.testcase.driven_ports.notifier_interface import INotifier
+from src.testcase.driven_ports.backend_interface import IBackend
 
 
 class DummyTestCase(TestCase):
     type = "DUMMY"
-    preconditions = ["dummy_check_fulfilled"]
+    preconditions = []  # to be set by testcase
+    required_specs = []  # to be set by testcase
+
+    def _execute(self):
+        self.result = TestResult.OK
+
+
+class DummyChecker(AbstractChecker):
+    def check(self, check: str, checkable: AbstractCheckable) -> bool:
+        if check == "must_fail":
+            return False
+        else:
+            return True
 
 
 class TestExecutingTestcases:
@@ -17,6 +34,11 @@ class TestExecutingTestcases:
         SpecificationDTO(type="schema", content=None, location="loc", valid=True),
         SpecificationDTO(type="sql", content="sdfs", location="loc", valid=False),
     ]
+    domain_config = DomainConfigDTO(
+        domain="my_domain",
+        compare_sample_default_sample_size=2,
+        compare_sample_sample_size_per_object=dict()
+    )
     notifications: List[str] = []
 
     @pytest.fixture(autouse=True)
@@ -52,29 +74,118 @@ class TestExecutingTestcases:
             type=type,
             testobject=self.testobject,
             specs=self.specifications,
+            domain_config=self.domain_config,
+            run_id="my_id",
             backend=self.backend,
             notifiers=self.notifiers
         )
         return testcase
 
-    def test_that_unknown_testcase_cant_be_created(self):
+    def test_cant_create_unknown_testcase(self):
 
         with pytest.raises(NotImplementedError) as err:
             self.create_testcase(type="unknown")
             assert err.value == "Testcase bad is not implemented!"
 
-    def test_testcase_is_created(self):
+    def test_creating_testcases(self):
         testcase = self.create_testcase(type="DUMMY")
         assert testcase.type == "DUMMY"
         assert testcase.status.value == "INITIATED"
         assert testcase.result.value == "N/A"
         assert "Initiating testcase" in self.notifications[0]
 
-    def test_redundant_testtype_definition(self):
+    def test_handling_fulfilled_preconditions(self):
+        testcase = self.create_testcase(type="DUMMY")
 
-        class RedundantTestcase(TestCase):
-            type = "DUMMY"  # create should throw an error since this type already exists
+        testcase.required_specs = []
+        testcase.preconditions = ["ok", "any"]
+        check_result = testcase._check_preconditions(checker=DummyChecker())
 
-        with pytest.raises(ValueError) as err:
-            self.create_testcase(type="DUMMY")
-            assert "Testtype DUMMY was defined twice" in err
+        assert check_result is True
+        assert testcase.status.name == "PRECONDITIONS"
+        for check in testcase.preconditions:
+            assert f"Checking if {check} ..." in self.notifications
+
+    def test_handling_nok_preconditions(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        testcase.required_specs = []
+        testcase.preconditions = ["any", "must_fail"]
+        check_result = testcase._check_preconditions(checker=DummyChecker())
+
+        assert check_result is False
+        assert testcase.status.name == "ABORTED"
+        msgs = self.notifications
+        assert "Check result for any: True" in msgs
+        assert "Stopping execution due to failed precondition: must_fail!" in msgs
+
+    def test_handling_when_specs_are_not_provided(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        testcase.required_specs = ["weird_input"]
+        testcase.preconditions = []
+        check_result = testcase._check_preconditions(checker=DummyChecker())
+
+        assert check_result is False
+        assert testcase.status.name == "ABORTED"
+        assert "weird_input not provided. Stopping execution!" in self.notifications
+
+    def test_handling_when_specs_are_provided(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        testcase.required_specs = ["sql", "schema"]
+        testcase.preconditions = []
+        check_result = testcase._check_preconditions(checker=DummyChecker())
+
+        assert check_result is True
+        assert testcase.status.name == "PRECONDITIONS"
+
+    def test_execution_with_unfilfilled_preconditions(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        testcase.required_specs = []
+        testcase.preconditions = ["must_fail"]
+        result = testcase.execute(checker=DummyChecker())
+
+        assert testcase.status.name == "ABORTED"
+        assert testcase.result.name == "NA"
+        assert isinstance(result, TestCaseResultDTO)
+
+    def test_execution_with_exception(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        # substitute _execute method with an exception raiser
+        def exc(*args, **kwarts):
+            raise ValueError("Dummy Error!")
+
+        testcase._execute = exc
+
+        testcase.required_specs = []
+        testcase.preconditions = []
+        result = testcase.execute(checker=DummyChecker())
+
+        assert testcase.status.name == "ERROR"
+        assert testcase.result.name == "NA"
+        assert isinstance(result, TestCaseResultDTO)
+
+    def test_execution_when_everything_is_ok(self):
+        testcase = self.create_testcase(type="DUMMY")
+
+        testcase.required_specs = []
+        testcase.preconditions = []
+        result = testcase.execute(checker=DummyChecker())
+
+        assert testcase.status.name == "FINISHED"
+        assert testcase.result.name == "OK"
+        assert isinstance(result, TestCaseResultDTO)
+
+    def test_adding_details(self):
+        testcase = self.create_testcase(type="DUMMY")
+        detail_1 = {"detail1": "data_1"}
+        detail_2 = {"detail2": "data_2"}
+        testcase.add_detail(detail_1)
+        testcase.add_detail(detail_2)
+
+        assert detail_1 in testcase.details
+        assert detail_2 in testcase.details
+        assert len(testcase.details) == 2
