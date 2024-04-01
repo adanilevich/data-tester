@@ -1,7 +1,7 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: Build
+name: Test
 
 on:
   push:
@@ -9,25 +9,23 @@ on:
   pull_request:
     branches: [ "master" ]
 
-permissions:
-  contents: read
-
 jobs:
+
   test:
-    name: Runs tests & displays coverage information in GitHub
+    name: Test
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
-      contents: write
+      pull-requests: write  # required by coverage action to comment coverage on PRs
+      contents: write  # required by coverage action to push to coverage-commend-action branch
     steps:
     - uses: actions/checkout@v4
 
-    - name: set_up_python
+    - name: set up python
       uses: actions/setup-python@v3
       with:
         python-version: "3.12"
 
-    - name: install_dependencies
+    - name: install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
@@ -49,7 +47,8 @@ jobs:
         coverage run --rcfile=.coveragerc -m pytest tests/
         coverage report -m --rcfile=.coveragerc
 
-    - name: Coverage comment
+    - name: coverage report
+      # see https://github.com/marketplace/actions/python-coverage-comment
       uses: py-cov-action/python-coverage-comment-action@v3
       with:
         GITHUB_TOKEN: ${{ github.token }}
