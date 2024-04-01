@@ -10,4 +10,4 @@ flake8 ../ -v --max-line-length 90
 
 echo ""
 echo "RUNNING TESTS"
-pytest tests/
+pytest --cov-report json:coverage.json --cov=src tests/

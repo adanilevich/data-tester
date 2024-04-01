@@ -1,10 +1,10 @@
 import pytest
 from typing import List
-from src.testcase.precondition_checkers.checker import AbstractChecker
+from src.testcase.precondition_checkers.checker_interface import IPreconditionChecker
 from src.testcase.precondition_checkers.checkable import AbstractCheckable
-from src.testcase.testcases.testcase import (
-    TestCase, SpecificationDTO, TestObjectDTO, TestCaseResultDTO, TestResult,
-    DomainConfigDTO
+from src.testcase.testcases.testcase import TestCase
+from src.testcase.dtos import (
+    SpecificationDTO, TestObjectDTO, TestCaseResultDTO, TestResult, DomainConfigDTO
 )
 from src.testcase.driven_ports.notifier_interface import INotifier
 from src.testcase.driven_ports.backend_interface import IBackend
@@ -19,7 +19,7 @@ class DummyTestCase(TestCase):
         self.result = TestResult.OK
 
 
-class DummyChecker(AbstractChecker):
+class DummyChecker(IPreconditionChecker):
     def check(self, check: str, checkable: AbstractCheckable) -> bool:
         if check == "must_fail":
             return False

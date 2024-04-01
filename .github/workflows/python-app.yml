@@ -41,4 +41,8 @@ jobs:
         mypy .
     - name: tests
       run: |
-        pytest tests/
+        pytest --cov-report json:coverage.json --cov=src tests/
+    - name: Coverage comment
+      uses: py-cov-action/python-coverage-comment-action@v3
+      with:
+        GITHUB_TOKEN: ${{ github.token }}
