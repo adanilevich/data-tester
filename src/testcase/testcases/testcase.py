@@ -1,77 +1,19 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from abc import abstractmethod
-from enum import Enum
 from uuid import uuid4
 from datetime import datetime
-from src.testcase.driven_ports.backend_interface import IBackend
-from src.testcase.driven_ports.notifier_interface import INotifier
-from src.testcase.precondition_checkers.checker import (
-    AbstractChecker, PreConditionChecker
-)
-from src.testcase.precondition_checkers.checkable import AbstractCheckable
 from typing import Dict, List, Optional, Union, Any
 
-
-@dataclass
-class TestObjectDTO:
-    __test__ = False  # prevents pytest collection
-    name: str
-    domain: str
-    project: str
-    instance: str
-
-
-@dataclass
-class SpecificationDTO:
-    type: str
-    content: Any
-    location: str
-    valid: Union[bool, None] = None
-
-
-class TestStatus(Enum):
-    __test__ = False  # prevents pytest collection
-    NOT_STARTED = "NOT STARTED"
-    INITIATED = "INITIATED"
-    ABORTED = "ABORTED"
-    PRECONDITIONS = "CHECKING PRECONDITIONS"
-    EXECUTING = "EXECUTING"
-    ERROR = "ERROR"
-    FINISHED = "FINISHED"
-
-
-class TestResult(Enum):
-    __test__ = False  # prevents pytest collection
-    NA = "N/A"
-    OK = "OK"
-    NOK = "NOK"
-
-
-@dataclass
-class TestCaseResultDTO:
-    __test__ = False  # prevents pytest collection
-    id: str
-    run_id: str
-    type: str
-    testobject: TestObjectDTO
-    status: TestStatus
-    result: TestResult
-    specifications: List[SpecificationDTO]
-    start_ts: str
-    end_ts: Union[str, None]
-
-
-@dataclass
-class DomainConfigDTO:
-    """
-    This serves as a generic data container for business-related configurations.
-    The required attributes are defined by configuration needs of implemented Testcases,
-    e.g., the testcase compare_sample requires a sample size definition.
-    """
-    domain: str
-    compare_sample_default_sample_size: int
-    compare_sample_sample_size_per_object: Dict[str, int]
+from src.testcase.dtos import (
+    TestObjectDTO, SpecificationDTO, DomainConfigDTO, TestStatus, TestResult,
+    TestCaseResultDTO
+)
+from src.testcase.driven_ports.backend_interface import IBackend
+from src.testcase.driven_ports.notifier_interface import INotifier
+from src.testcase.precondition_checkers.checker_interface import (
+    IPreconditionChecker, PreConditionChecker
+)
+from src.testcase.precondition_checkers.checkable import AbstractCheckable
 
 
 def get_datetime() -> str:
@@ -148,7 +90,7 @@ class TestCase(AbstractCheckable):
     def update_summary(self, summary: str):
         self.summary = summary
 
-    def _check_preconditions(self, checker: AbstractChecker) -> bool:
+    def _check_preconditions(self, checker: IPreconditionChecker) -> bool:
 
         self.status = TestStatus.PRECONDITIONS
 
@@ -157,6 +99,7 @@ class TestCase(AbstractCheckable):
             self.notify(f"Checking if {required_spec} is provided ...")
             if required_spec not in [spec.type for spec in self.specs]:
                 self.notify(f"{required_spec} not provided. Stopping execution!")
+                self.result = TestResult.NA
                 self.status = TestStatus.ABORTED
                 return False
 
@@ -192,7 +135,8 @@ class TestCase(AbstractCheckable):
         )
         return dto
 
-    def execute(self, checker: Optional[AbstractChecker] = None) -> TestCaseResultDTO:
+    def execute(self,
+                checker: Optional[IPreconditionChecker] = None) -> TestCaseResultDTO:
 
         checker = checker or PreConditionChecker()
         if not self._check_preconditions(checker=checker):
