@@ -2,18 +2,23 @@
 
 [Full report](https://htmlpreview.github.io/?https://github.com/adanilevich/data-tester/blob/python-coverage-comment-action-data/htmlcov/index.html)
 
-| Name                                                        |    Stmts |     Miss |   Cover |   Missing |
-|------------------------------------------------------------ | -------: | -------: | ------: | --------: |
-| src/testcase/driven\_adapters/notifiers/stdout\_notifier.py |        4 |        4 |      0% |       1-6 |
-| src/testcase/driven\_ports/backend\_interface.py            |        6 |        1 |     83% |         9 |
-| src/testcase/driven\_ports/notifier\_interface.py           |        5 |        1 |     80% |        15 |
-| src/testcase/dtos.py                                        |       47 |        0 |    100% |           |
-| src/testcase/precondition\_checkers/abstract\_checker.py    |       15 |        1 |     93% |        26 |
-| src/testcase/precondition\_checkers/checkable.py            |       16 |        3 |     81% |20, 25, 30 |
-| src/testcase/precondition\_checkers/checker\_interface.py   |       17 |        1 |     94% |        32 |
-| src/testcase/precondition\_checkers/testobject\_exists.py   |       11 |        0 |    100% |           |
-| src/testcase/testcases/testcase.py                          |       97 |        3 |     97% |63, 91, 122 |
-|                                                   **TOTAL** |  **218** |   **14** | **94%** |           |
+| Name                                                            |    Stmts |     Miss |   Cover |   Missing |
+|---------------------------------------------------------------- | -------: | -------: | ------: | --------: |
+| src/testcase/driven\_adapters/notifiers/in\_memory\_notifier.py |        7 |        0 |    100% |           |
+| src/testcase/driven\_adapters/notifiers/stdout\_notifier.py     |        4 |        0 |    100% |           |
+| src/testcase/driven\_ports/backend\_interface.py                |        5 |        0 |    100% |           |
+| src/testcase/driven\_ports/notifier\_interface.py               |        4 |        0 |    100% |           |
+| src/testcase/dtos.py                                            |       47 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/abstract\_checker.py        |       14 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/checkable.py                |       15 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/checker\_interface.py       |       16 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/testobject\_exists.py       |       11 |        0 |    100% |           |
+| src/testcase/testcases/dummy\_exception\_testcase.py            |       10 |        0 |    100% |           |
+| src/testcase/testcases/dummy\_nok\_testcase.py                  |       11 |        0 |    100% |           |
+| src/testcase/testcases/dummy\_ok\_testcase.py                   |       11 |        0 |    100% |           |
+| src/testcase/testcases/testcase.py                              |       85 |        1 |     99% |        91 |
+| src/testcase/testcases/testcase\_factory.py                     |       16 |        0 |    100% |           |
+|                                                       **TOTAL** |  **256** |    **1** | **99%** |           |
 
 11 empty files skipped.
 
