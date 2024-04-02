@@ -189,3 +189,6 @@ class TestExecutingTestcases:
         assert detail_1 in testcase.details
         assert detail_2 in testcase.details
         assert len(testcase.details) == 2
+
+    def test_raises_error(self):
+        assert False
