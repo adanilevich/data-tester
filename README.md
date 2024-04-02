@@ -5,20 +5,20 @@
 | Name                                                              |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------------------------------ | -------: | -------: | ------: | --------: |
 | src/testcase/application/run\_testcases.py                        |       24 |        2 |     92% |     39-40 |
-| src/testcase/dependency\_injector/di.py                           |       24 |        1 |     96% |        28 |
+| src/testcase/di/di.py                                             |       24 |        1 |     96% |        28 |
 | src/testcase/driven\_adapters/backends/dummy\_backend.py          |        5 |        1 |     80% |        10 |
 | src/testcase/driven\_adapters/backends/dummy\_backend\_factory.py |        6 |        0 |    100% |           |
 | src/testcase/driven\_adapters/notifiers/in\_memory\_notifier.py   |        7 |        0 |    100% |           |
 | src/testcase/driven\_adapters/notifiers/stdout\_notifier.py       |        4 |        0 |    100% |           |
-| src/testcase/driven\_ports/backend\_factory\_interface.py         |        6 |        0 |    100% |           |
-| src/testcase/driven\_ports/backend\_interface.py                  |        5 |        0 |    100% |           |
-| src/testcase/driven\_ports/notifier\_interface.py                 |        4 |        0 |    100% |           |
+| src/testcase/driven\_ports/i\_backend.py                          |        5 |        0 |    100% |           |
+| src/testcase/driven\_ports/i\_backend\_factory.py                 |        6 |        0 |    100% |           |
+| src/testcase/driven\_ports/i\_notifier.py                         |        4 |        0 |    100% |           |
 | src/testcase/driver\_adapters/cli\_testcase\_runner.py            |       13 |        0 |    100% |           |
-| src/testcase/driver\_ports/run\_testcases\_interface.py           |       18 |        0 |    100% |           |
+| src/testcase/driver\_ports/i\_run\_testcases.py                   |       18 |        0 |    100% |           |
 | src/testcase/dtos.py                                              |       69 |        0 |    100% |           |
 | src/testcase/precondition\_checkers/abstract\_checker.py          |       14 |        0 |    100% |           |
 | src/testcase/precondition\_checkers/checkable.py                  |       15 |        0 |    100% |           |
-| src/testcase/precondition\_checkers/checker\_interface.py         |       16 |        0 |    100% |           |
+| src/testcase/precondition\_checkers/i\_checker.py                 |       16 |        0 |    100% |           |
 | src/testcase/precondition\_checkers/testobject\_exists.py         |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_exception\_testcase.py              |       10 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_nok\_testcase.py                    |       11 |        0 |    100% |           |

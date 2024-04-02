@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/testcase/dependency_injector/di.py: 96%</title>
+    <title>Coverage for src/testcase/di/di.py: 96%</title>
     <link rel="icon" sizes="32x32" href="favicon_32.png">
     <link rel="stylesheet" href="style.css" type="text/css">
     <script type="text/javascript" src="coverage_html.js" defer></script>
@@ -11,7 +11,7 @@
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src/testcase/dependency_injector/di.py</b>:
+            <span class="text">Coverage for </span><b>src/testcase/di/di.py</b>:
             <span class="pc_cov">96%</span>
         </h1>
         <aside id="help_panel_wrapper">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_c669b197a079a097_dummy_backend_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-02 20:07 +0000
+            created at 2024-04-02 21:21 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -81,7 +81,7 @@
 </header>
 <main id="source">
     <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">A simple drop-in replacement for a proper dependency injector.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">A simple self-built replacement for a proper dependency injector.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">This class will instantiate Backends, Notifiers, Handlers based on ENV vars.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">import</span> <span class="nam">os</span>&nbsp;</span><span class="r"></span></p>
@@ -93,9 +93,9 @@
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_adapters</span><span class="op">.</span><span class="nam">notifiers</span><span class="op">.</span><span class="nam">in_memory_notifier</span> <span class="key">import</span> <span class="nam">InMemoryNotifier</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_adapters</span><span class="op">.</span><span class="nam">notifiers</span><span class="op">.</span><span class="nam">stdout_notifier</span> <span class="key">import</span> <span class="nam">StdoutNotifier</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">application</span><span class="op">.</span><span class="nam">run_testcases</span> <span class="key">import</span> <span class="nam">RunTestCasesCommandHandler</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driver_ports</span><span class="op">.</span><span class="nam">run_testcases_interface</span> <span class="key">import</span> <span class="nam">IRunTestCasesCommandHandler</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_ports</span><span class="op">.</span><span class="nam">backend_factory_interface</span> <span class="key">import</span> <span class="nam">IBackendFactory</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_ports</span><span class="op">.</span><span class="nam">notifier_interface</span> <span class="key">import</span> <span class="nam">INotifier</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driver_ports</span><span class="op">.</span><span class="nam">i_run_testcases</span> <span class="key">import</span> <span class="nam">IRunTestCasesCommandHandler</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_ports</span><span class="op">.</span><span class="nam">i_backend_factory</span> <span class="key">import</span> <span class="nam">IBackendFactory</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">driven_ports</span><span class="op">.</span><span class="nam">i_notifier</span> <span class="key">import</span> <span class="nam">INotifier</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t"><span class="key">class</span> <span class="nam">DependencyInjector</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -128,7 +128,7 @@
             <a id="nextFileLink" class="nav" href="d_c669b197a079a097_dummy_backend_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-02 20:07 +0000
+            created at 2024-04-02 21:21 +0000
         </p>
     </div>
 </footer>
