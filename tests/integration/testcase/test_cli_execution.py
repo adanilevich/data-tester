@@ -1,6 +1,6 @@
 import os
 
-from src.testcase.dependency_injector.di import DependencyInjector
+from src.testcase.di.di import DependencyInjector
 from src.testcase.driver_adapters.cli_testcase_runner import CliTestCaseRunner
 
 

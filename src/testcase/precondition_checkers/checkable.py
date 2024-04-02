@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from src.testcase.driven_ports.backend_interface import IBackend
+from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.dtos import TestObjectDTO
 
 

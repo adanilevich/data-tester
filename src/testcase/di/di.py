@@ -1,5 +1,5 @@
 """
-A simple drop-in replacement for a proper dependency injector.
+A simple self-built replacement for a proper dependency injector.
 This class will instantiate Backends, Notifiers, Handlers based on ENV vars.
 """
 import os
@@ -11,9 +11,9 @@ from src.testcase.driven_adapters.backends.dummy_backend_factory import (
 from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
 from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifier
 from src.testcase.application.run_testcases import RunTestCasesCommandHandler
-from src.testcase.driver_ports.run_testcases_interface import IRunTestCasesCommandHandler
-from src.testcase.driven_ports.backend_factory_interface import IBackendFactory
-from src.testcase.driven_ports.notifier_interface import INotifier
+from src.testcase.driver_ports.i_run_testcases import IRunTestCasesCommandHandler
+from src.testcase.driven_ports.i_backend_factory import IBackendFactory
+from src.testcase.driven_ports.i_notifier import INotifier
 
 
 class DependencyInjector:

@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
-from src.testcase.driven_ports.backend_interface import IBackend
+from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
 from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifier
 from src.testcase.testcases.testcase_factory import TestCaseFactory

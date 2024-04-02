@@ -8,9 +8,9 @@ from src.testcase.dtos import (
     TestObjectDTO, SpecificationDTO, DomainConfigDTO, TestStatus, TestResult,
     TestCaseResultDTO
 )
-from src.testcase.driven_ports.backend_interface import IBackend
-from src.testcase.driven_ports.notifier_interface import INotifier
-from src.testcase.precondition_checkers.checker_interface import (
+from src.testcase.driven_ports.i_backend import IBackend
+from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.precondition_checkers.i_checker import (
     IPreconditionChecker, PreConditionChecker
 )
 from src.testcase.precondition_checkers.checkable import AbstractCheckable

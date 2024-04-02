@@ -3,7 +3,7 @@ import pytest
 
 from src.testcase.precondition_checkers.checkable import AbstractCheckable
 from src.testcase.precondition_checkers.abstract_checker import AbstractChecker
-from src.testcase.precondition_checkers.checker_interface import PreConditionChecker
+from src.testcase.precondition_checkers.i_checker import PreConditionChecker
 from src.testcase.dtos import TestObjectDTO
 
 
