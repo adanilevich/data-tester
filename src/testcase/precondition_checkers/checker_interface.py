@@ -17,19 +17,20 @@ class IPreconditionChecker(ABC):
     @abstractmethod
     def check(self, check: str, checkable: AbstractCheckable) -> bool:
         """
-        Specific checkers must implement all checks required. Consumers of the interface
-        (e.g. a TestCase instance) are not concerned how checks are implemented.
+        Specific checkers must implement all checks which will be possibly passed
+        via 'check' parameter. Consumers of this interface (e.g. a TestCase instance)
+        are not concerned how checks are implemented.
 
         Args:
             check (str): name of the check to be executed, e.g. "testobject_exists".
-                These names are defined as class attributes of TestCase(s)
+                Keep in mind: a list of all required checks is defined as a class
+                attribute of each subclass (test case) of TestCase
             checkable (AbstractCheckable): Object which conforms to AbstractCheckable
-                interface. Typically a TestCase object hands over itself as checkable.
+                interface. Typically a TestCase object hands itself over as a checkable.
 
         Returns:
-            bool: Check result. Must return True if all ok, otherwise False
+            bool: Check result. Returns True if check result is ok, otherwise False
         """
-        raise NotImplementedError("Can't use AbstractChecker")
 
 
 class PreConditionChecker(IPreconditionChecker):

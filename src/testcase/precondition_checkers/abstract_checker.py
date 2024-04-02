@@ -23,7 +23,6 @@ class AbstractChecker(ABC):
     @abstractmethod
     def _check(self, checkable: AbstractCheckable) -> bool:
         """Implement actual check logic for each subclass here"""
-        raise NotImplementedError("AbstractChecker not implemented")
 
     def check(self, checkable: AbstractCheckable) -> bool:
         """

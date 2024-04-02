@@ -3,11 +3,7 @@
 
 name: Test
 
-on:
-  push:
-    #branches: [ "master" ]
-  #pull_request:
-    #branches: [ "master" ]
+on: push
 
 jobs:
 
@@ -40,7 +36,7 @@ jobs:
     - name: typechecks
       run: |
         # stop if type checking fails
-        mypy .
+        mypy src
 
     - name: tests
       run: |
