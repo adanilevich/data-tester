@@ -2,8 +2,8 @@
 from typing import Dict, List, Callable
 from src.testcase.testcases.testcase import TestCase
 from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
-from src.testcase.driven_ports.backend_interface import IBackend
-from src.testcase.driven_ports.notifier_interface import INotifier
+from src.testcase.driven_ports.i_backend import IBackend
+from src.testcase.driven_ports.i_notifier import INotifier
 
 # we need tp explicitely import all modules where subclasses of TestCase are defined
 # such that they are registered and can be created

@@ -2,7 +2,7 @@ from typing import Dict
 
 from src.testcase.precondition_checkers.checkable import AbstractCheckable
 from src.testcase.precondition_checkers.testobject_exists import TestobjectExistsChecker
-from src.testcase.driven_ports.backend_interface import IBackend
+from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.dtos import TestObjectDTO
 
 

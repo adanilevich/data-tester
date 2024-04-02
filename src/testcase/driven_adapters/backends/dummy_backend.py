@@ -1,6 +1,6 @@
 from typing import List
 
-from src.testcase.driven_ports.backend_interface import IBackend
+from src.testcase.driven_ports.i_backend import IBackend
 
 
 class DummyBackend(IBackend):

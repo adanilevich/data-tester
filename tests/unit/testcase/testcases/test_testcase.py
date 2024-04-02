@@ -1,4 +1,4 @@
-from src.testcase.precondition_checkers.checker_interface import IPreconditionChecker
+from src.testcase.precondition_checkers.i_checker import IPreconditionChecker
 from src.testcase.precondition_checkers.checkable import AbstractCheckable
 from src.testcase.dtos import TestCaseResultDTO
 
