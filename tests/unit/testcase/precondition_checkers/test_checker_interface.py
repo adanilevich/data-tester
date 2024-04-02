@@ -11,7 +11,6 @@ class DummyCheckable(AbstractCheckable):
 
     def __init__(self):
 
-        self.backend = None  # no backend will be used for testing the factory / interface
         self.testobject = TestObjectDTO(
             name="any",
             domain="any",

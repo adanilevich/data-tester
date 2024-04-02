@@ -8,7 +8,7 @@
     "flake8.args": [
         "--max-line-length", "90",
     ],
-    // define add root folder to PYTHONPATH here -- it wil be picked up by all terminal
+    // Add workspace folder to PYTHONPATH here. This will be used by all terminal
     // processes (not necessarily the case when adding via .env)
     // see https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file
     "terminal.integrated.env.linux": {
@@ -16,5 +16,5 @@
     },
     "mypy-type-checker.importStrategy": "fromEnvironment",
     "mypy-type-checker.reportingScope": "workspace",
-    "mypy-type-checker.preferDaemon": true
+    "mypy-type-checker.preferDaemon": true,
 }

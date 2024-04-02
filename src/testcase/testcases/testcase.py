@@ -2,7 +2,7 @@ from __future__ import annotations
 from abc import abstractmethod
 from uuid import uuid4
 from datetime import datetime
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Union
 
 from src.testcase.dtos import (
     TestObjectDTO, SpecificationDTO, DomainConfigDTO, TestStatus, TestResult,
@@ -22,49 +22,18 @@ def get_datetime() -> str:
 
 
 class TestCase(AbstractCheckable):
-    type: str = "ABSTRACT"
+
+    ttype: str = "ABSTRACT"
     preconditions: List[str] = []
     required_specs: List[str] = []
     __test__ = False  # prevents pytest collection
-
-    @classmethod
-    def create(cls, type: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-               domain_config: DomainConfigDTO, run_id: str,
-               backend: IBackend, notifiers: List[INotifier]) -> TestCase:
-        """
-        Creates a testcase object (subclass instance of TestCase) based on class attribute
-        'type' - the specified test type must be implemented as subclass of TestCase.
-        """
-
-        # check all defined subclasses
-        known_testtypes: Dict[str, Any] = dict()
-        for cls_ in cls.__subclasses__():
-            type_ = cls_.type
-            known_testtypes[type_] = cls_
-
-        if type not in known_testtypes:
-            raise NotImplementedError(f"Testcase {type} is not implemented!")
-        else:
-            testcase = known_testtypes[type](
-                testobject=testobject,
-                specs=specs,
-                domain_config=domain_config,
-                run_id=run_id,
-                backend=backend,
-                notifiers=notifiers,
-            )
-            return testcase
 
     def __init__(self, testobject: TestObjectDTO, specs: List[SpecificationDTO],
                  domain_config: DomainConfigDTO, run_id: str,
                  backend: IBackend, notifiers: List[INotifier]) -> None:
 
-        if self.type == "ABSTRACT":
-            raise NotImplementedError("Can't instantiate ABSTRACT testcase")
-
         self.notifiers: List[INotifier] = notifiers
-        self.notify(f"Initiating testcase {self.type} for {testobject.name}")
-
+        self.notify(f"Initiating testcase {self.ttype} for {testobject.name}")
         self.id: str = str(uuid4())
         self.start_ts: str = get_datetime()
         self.end_ts: Union[str, None] = None
@@ -125,7 +94,7 @@ class TestCase(AbstractCheckable):
         dto = TestCaseResultDTO(
             id=self.id,
             run_id=self.run_id,
-            type=self.type,
+            type=self.ttype,
             testobject=self.testobject,
             status=self.status,
             result=self.result,

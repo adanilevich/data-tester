@@ -6,4 +6,4 @@ class IBackend(ABC):
 
     @abstractmethod
     def get_testobjects(self, domain: str, project: str, instance) -> List[str]:
-        pass
+        """Get a list of testobjects existing for given domain, project and instance"""

@@ -2,26 +2,17 @@ from typing import Dict
 
 from src.testcase.precondition_checkers.checkable import AbstractCheckable
 from src.testcase.precondition_checkers.testobject_exists import TestobjectExistsChecker
+from src.testcase.driven_ports.backend_interface import IBackend
 from src.testcase.dtos import TestObjectDTO
 
 
-class DummyBackend:
+class DummyBackend(IBackend):
 
     def get_testobjects(self, *args, **kwargs):
         return ["testobject_1", "testobject_2"]
 
 
 class DummyCheckable(AbstractCheckable):
-
-    def __init__(self):
-        self.backend = DummyBackend()
-        self.testobject = TestObjectDTO(
-            name="change this in testcase",
-            domain="any",
-            project="any",
-            instance="any",
-        )
-        self.summary = ""
 
     def add_detail(self, detail: Dict[str, str]):
         pass
@@ -35,6 +26,9 @@ class DummyCheckable(AbstractCheckable):
 
 def create_checkable(testobject: str) -> AbstractCheckable:
     checkable = DummyCheckable()
+    checkable.testobject = TestObjectDTO(
+        name="any", domain="any", instance="any", project="any")
+    checkable.backend = DummyBackend()
     checkable.testobject.name = testobject
     return checkable
 
