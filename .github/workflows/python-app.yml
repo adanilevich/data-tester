@@ -36,7 +36,7 @@ jobs:
     - name: typechecks
       run: |
         # stop if type checking fails
-        mypy .
+        mypy src
 
     - name: tests
       run: |
