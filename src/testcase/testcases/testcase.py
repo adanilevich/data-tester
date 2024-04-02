@@ -94,9 +94,11 @@ class TestCase(AbstractCheckable):
         dto = TestCaseResultDTO(
             id=self.id,
             run_id=self.run_id,
-            type=self.ttype,
+            testtype=self.ttype,
             testobject=self.testobject,
             status=self.status,
+            summary=self.summary,
+            details=self.details,
             result=self.result,
             specifications=self.specs,
             start_ts=self.start_ts,

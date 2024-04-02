@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
-from src.testcase.testcases.testcase_factory import TestCaseFactory
+from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
 
 
 class TestTestCaseFactory:
@@ -19,7 +19,7 @@ class TestTestCaseFactory:
 
     def test_cant_create_unknown_testcase(self, in_memory_notifier, dummy_backend):
 
-        with pytest.raises(NotImplementedError) as err:
+        with pytest.raises(TestCaseUnknownError) as err:
             TestCaseFactory.create(
                 ttype="unknown",
                 testobject=self.testobject,

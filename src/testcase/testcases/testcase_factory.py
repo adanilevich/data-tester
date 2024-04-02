@@ -1,13 +1,12 @@
 # flake8: noqa
-# type: ignore
-from typing import Dict, List
+from typing import Dict, List, Callable
 from src.testcase.testcases.testcase import TestCase
 from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
 from src.testcase.driven_ports.backend_interface import IBackend
 from src.testcase.driven_ports.notifier_interface import INotifier
 
 # we need tp explicitely import all modules where subclasses of TestCase are defined
-# such that they are registered
+# such that they are registered and can be created
 # noinspection PyUnresolvedReferences
 from src.testcase.testcases import (
     dummy_ok_testcase,
@@ -16,10 +15,16 @@ from src.testcase.testcases import (
 )
 
 
+class TestCaseUnknownError(NotImplementedError):
+    __test__ = False
+    pass
+
+
 class TestCaseFactory:
     """Registers and creates subclasses of TestCase based on requested ttype"""
 
-    known_testtypes: Dict[str, type(TestCase)] = dict()
+    # type: ignore
+    known_testtypes: Dict[str, Callable] = dict()
 
     @classmethod
     def create(cls, ttype: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
@@ -35,7 +40,7 @@ class TestCaseFactory:
             cls.known_testtypes.update({cls_.ttype: cls_})
 
         if ttype not in cls.known_testtypes:
-            raise NotImplementedError(f"Testcase {ttype} is not implemented!")
+            raise TestCaseUnknownError(f"Testcase {ttype} is not implemented!")
         else:
             testcase = cls.known_testtypes[ttype](
                 testobject=testobject,
