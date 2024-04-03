@@ -226,9 +226,15 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
 
         # create tables
         if table == "stage_customers":
-            tableschema = "(date STRING, id INTEGER, region STRING, type STRING, name STRING)"
+            tableschema = (
+                "(date STRING, id INTEGER, region STRING, type STRING, name STRING,"
+                "source_file STRING)"
+            )
         elif table == "stage_transactions":
-            tableschema = "(date STRING, id INTEGER, customer_id INTEGER, amount FLOAT)"
+            tableschema = (
+                "(date STRING, id INTEGER, customer_id INTEGER, amount FLOAT,"
+                "source_file STRING)"
+            )
         elif table == "core_customer_transactions":
             tableschema = (
                 "(id INTEGER, transaction_date DATE, amount INTEGER, customer_id INTEGER,"
@@ -301,12 +307,13 @@ def load_staging_layer(conf: LoadConfig = load_config):
             database = stage_config.domain + '_' + stage_config.project
             schema = stage_config.instace
             table = "stage_" + stage_config.table
+            filename = csv_filepath.split('/')[-1]
 
             # truncate loading of customers 2 to 4/6 rows simulate load errors
             limit_clause = "LIMIT 4" if xlsx_filepath == files.customers_2 else ""
             duckdb.execute(f"""
                 INSERT INTO {database}.{schema}.{table} 
-                SELECT * FROM '{csv_filepath}' 
+                SELECT *, '{filename}' AS source_file FROM '{csv_filepath}' 
                 {limit_clause};
             """)
             loaded_tables.append(database + '.' + schema + '.' + table)
