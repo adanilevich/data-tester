@@ -4,7 +4,7 @@
 
 | Name                                                              |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------------------------------ | -------: | -------: | ------: | --------: |
-| src/testcase/application/run\_testcases.py                        |       24 |        2 |     92% |     39-40 |
+| src/testcase/application/run\_testcases.py                        |       24 |        0 |    100% |           |
 | src/testcase/di/di.py                                             |       24 |        1 |     96% |        28 |
 | src/testcase/driven\_adapters/backends/dummy\_backend.py          |        5 |        1 |     80% |        10 |
 | src/testcase/driven\_adapters/backends/dummy\_backend\_factory.py |        6 |        0 |    100% |           |
@@ -25,7 +25,7 @@
 | src/testcase/testcases/dummy\_ok\_testcase.py                     |       11 |        0 |    100% |           |
 | src/testcase/testcases/testcase.py                                |       85 |        1 |     99% |        91 |
 | src/testcase/testcases/testcase\_factory.py                       |       19 |        0 |    100% |           |
-|                                                         **TOTAL** |  **377** |    **5** | **99%** |           |
+|                                                         **TOTAL** |  **377** |    **3** | **99%** |           |
 
 12 empty files skipped.
 
