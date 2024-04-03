@@ -8,7 +8,8 @@ pytest
 coverage
 
 # backends
-duckdb
+duckdb  # needed for example and for e2e tests
+fsspec  # needed both for example, 2e2 testa and also for input finders and report storage
 
 # calculation engine
 polars  # lets try this instead of pandas
