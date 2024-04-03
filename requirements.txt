@@ -6,3 +6,11 @@ black  # code formatter
 # testing
 pytest
 coverage
+
+# backends
+duckdb
+
+# calculation engine
+polars  # lets try this instead of pandas
+xlsx2csv  # required for polars to read excel
+pyarrow
