@@ -5,7 +5,7 @@ from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.dtos import TestObjectDTO
 
 
-class AbstractCheckable(ABC):
+class ICheckable(ABC):
     """
     Defines the interface which is required by a precondition checker.
     Since precondition checkers mainly operate on TestCase objects, TestCase inherits

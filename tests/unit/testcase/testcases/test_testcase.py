@@ -1,10 +1,11 @@
-from src.testcase.precondition_checkers.i_checker import IPreconditionChecker
-from src.testcase.precondition_checkers.checkable import AbstractCheckable
+from src.testcase.precondition_checks.i_precondition_checker import (
+    IPreconditionChecker)
+from src.testcase.precondition_checks.i_checkable import ICheckable
 from src.testcase.dtos import TestCaseResultDTO
 
 
 class DummyChecker(IPreconditionChecker):
-    def check(self, check: str, checkable: AbstractCheckable) -> bool:
+    def check(self, check: str, checkable: ICheckable) -> bool:
         if check == "must_fail":
             return False
         else:

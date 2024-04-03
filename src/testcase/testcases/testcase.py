@@ -10,10 +10,10 @@ from src.testcase.dtos import (
 )
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
-from src.testcase.precondition_checkers.i_checker import (
-    IPreconditionChecker, PreConditionChecker
-)
-from src.testcase.precondition_checkers.checkable import AbstractCheckable
+from src.testcase.precondition_checks.i_precondition_checker import (
+    IPreconditionChecker)
+from src.testcase.precondition_checks.precondition_checker import PreConditionChecker
+from src.testcase.precondition_checks.i_checkable import ICheckable
 
 
 def get_datetime() -> str:
@@ -21,7 +21,7 @@ def get_datetime() -> str:
     return datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
 
-class TestCase(AbstractCheckable):
+class TestCase(ICheckable):
 
     ttype: str = "ABSTRACT"
     preconditions: List[str] = []

@@ -1,16 +1,15 @@
-from src.testcase.precondition_checkers.abstract_checker import AbstractChecker
-from src.testcase.precondition_checkers.checkable import AbstractCheckable
+from src.testcase.precondition_checks.abstract_check import AbstractCheck
+from src.testcase.precondition_checks.i_checkable import ICheckable
 
 
-@AbstractChecker.register
-class TestobjectExistsChecker(AbstractChecker):
+class CheckTestObjectExists(AbstractCheck):
     """
     Check if a testobject (e.g. table) exists in given domain, project and instance.
     Uses backend from checkable (e.g. TestCase instance) to fetch database information.
     """
     name = "testobject_exists"
 
-    def _check(self, checkable: AbstractCheckable) -> bool:
+    def _check(self, checkable: ICheckable) -> bool:
 
         existing_testobjects = checkable.backend.get_testobjects(
             domain=checkable.testobject.domain,
