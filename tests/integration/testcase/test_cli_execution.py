@@ -11,7 +11,11 @@ testobjects = [
      "name": "my_testobject_2"},
     {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
      "name": "my_testobject_3"},
+    {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
+     "name": "my_testobject_4"},
 ]
+
+testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
 
 domain_config = {
     "domain": "my_domain",
@@ -23,8 +27,6 @@ specs = [
     {"type": "schema", "content": "any", "location": "my_location", "valid": True},
     {"type": "sql", "content": "any", "location": "my_location", "valid": True},
 ]
-
-testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION"]
 
 testcases = [
     {"testobject": testobject, "testtype": testtype, "specs": specs,
@@ -40,13 +42,23 @@ def test_dummy_cli_execution():
 
     results = runner.run_testcases(testcases=testcases)
 
-    assert len(results) == 3
+    # assume as many results are returned as testcases defined
+    assert len(results) == len(testcases)
 
+    # assume that results are mapped correctly
     testtype_to_result_mapper = {
-        "DUMMY_OK": "OK", "DUMMY_NOK": "NOK", "DUMMY_EXCEPTION": "N/A"
+        "DUMMY_OK": ("OK", "FINISHED"),
+        "DUMMY_NOK": ("NOK", "FINISHED"),
+        "DUMMY_EXCEPTION": ("N/A", "ERROR"),
+        "UNKNOWN": ("N/A", "ERROR")
     }
 
     for result in results:
-        assert result["result"] == testtype_to_result_mapper[result["testtype"]]
-
+        testtype = result["testtype"]
+        testcase_result = result["result"]
+        testcase_status = result["status"]
+        expected_result = testtype_to_result_mapper[testtype][0]
+        expected_status = testtype_to_result_mapper[testtype][1]
+        assert testcase_result == expected_result
+        assert testcase_status == expected_status
 
