@@ -7,6 +7,8 @@ from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifie
 from src.testcase.testcases.testcase_factory import TestCaseFactory
 from src.testcase.testcases.testcase import TestCase
 
+from tests.data.data.prepare_data import prepare_data
+
 
 class DummyBackend(IBackend):
 
