@@ -1,19 +1,17 @@
 import pytest
 
-from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
+from src.testcase.dtos import (
+    TestObjectDTO, SpecificationDTO, DomainConfigDTO,
+    CompareSampleTestCaseConfigDTO, SchemaTestCaseConfigDTO
+)
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
 from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifier
+from src.testcase.driven_adapters.backends.dummy.dummy_backend import DummyBackend
 from src.testcase.testcases.testcase_factory import TestCaseFactory
-from src.testcase.testcases.testcase import TestCase
+from src.testcase.testcases.abstract_testcase import AbstractTestCase
 
 from tests.data.data.prepare_data import prepare_data
-
-
-class DummyBackend(IBackend):
-
-    def get_testobjects(self, *args, **kwargs):
-        return ["my_testobject", "your_testobject"]
 
 
 @pytest.fixture
@@ -33,7 +31,7 @@ def stdout_notifier() -> StdoutNotifier:
 
 @pytest.fixture
 def testcase_creator():
-    def create_testcase(ttype: str) -> TestCase:
+    def create_testcase(ttype: str) -> AbstractTestCase:
         testobject = TestObjectDTO(
             name="my_testobject",
             domain="my_domain",
@@ -43,8 +41,8 @@ def testcase_creator():
 
         domain_config = DomainConfigDTO(
             domain="my_domain",
-            compare_sample_default_sample_size=1000,
-            compare_sample_sample_size_per_object=dict(my_object=100, your_object=10)
+            compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100),
+            schema_testcase_config=SchemaTestCaseConfigDTO(compare_data_types=["int", "str"])
         )
 
         testcase = TestCaseFactory.create(

@@ -21,7 +21,7 @@ def get_datetime() -> str:
     return datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
 
-class TestCase(ICheckable):
+class AbstractTestCase(ICheckable):
 
     ttype: str = "ABSTRACT"
     preconditions: List[str] = []
@@ -46,6 +46,7 @@ class TestCase(ICheckable):
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         self.details: List[Dict[str, str]] = []
+        self.diff: List[Dict[str, str]] = []
 
         self.status = TestStatus.INITIATED
 
@@ -100,6 +101,7 @@ class TestCase(ICheckable):
             summary=self.summary,
             details=self.details,
             result=self.result,
+            diff=self.diff,  # must be set by specific implementation
             specifications=self.specs,
             start_ts=self.start_ts,
             end_ts=self.end_ts,
@@ -120,7 +122,7 @@ class TestCase(ICheckable):
         try:
             self._execute()
             self.status = TestStatus.FINISHED
-            self.notify("Successfully finished test execution")
+            self.notify(f"Finished test execution with result: {self.result.name}")
         except Exception as err:
             self.result = TestResult.NA
             self.status = TestStatus.ERROR

@@ -1,6 +1,9 @@
 import pytest
 
-from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
+from src.testcase.dtos import (
+    TestObjectDTO, SpecificationDTO, DomainConfigDTO,
+    SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO
+)
 from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
 
 
@@ -13,8 +16,8 @@ class TestTestCaseFactory:
     ]
     domain_config = DomainConfigDTO(
         domain="my_domain",
-        compare_sample_default_sample_size=2,
-        compare_sample_sample_size_per_object=dict()
+        schema_testcase_config=SchemaTestCaseConfigDTO(compare_data_types=["int", "str"]),
+        compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100)
     )
 
     def test_cant_create_unknown_testcase(self, in_memory_notifier, dummy_backend):

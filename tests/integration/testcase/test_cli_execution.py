@@ -19,8 +19,11 @@ testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
 
 domain_config = {
     "domain": "my_domain",
-    "compare_sample_default_sample_size": 1000,
-    "compare_sample_sample_size_per_object": {"my_testobject_1": 100}
+    "schema_testcase_config": {"compare_data_types": ["int", "str"]},
+    "compare_sample_testcase_config": {
+        "sample_size": 1000,
+        "sample_size_per_object": {"my_testobject_1": 100}
+    }
 }
 
 specs = [
