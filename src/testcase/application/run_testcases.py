@@ -47,7 +47,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     end_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     testobject=command.testobject,
                     run_id=run_id,
-                    diff=[],
+                    diff=dict(),
                     testtype=command.testtype,
                     specifications=command.specs,
                 )

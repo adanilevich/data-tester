@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from typing import List, Dict, Any, Tuple, Optional
 
 import duckdb
@@ -9,7 +10,7 @@ from src.testcase.driven_adapters.backends.local.demo_naming_resolver import (
     DemoNamingResolver)
 from src.testcase.driven_adapters.backends.local.demo_query_handler import (
     DemoQueryHandler)
-from src.testcase.driven_ports.i_backend import IBackend, SchemaDTO, ColumnDTO
+from src.testcase.driven_ports.i_backend import IBackend, SchemaDTO
 from src.testcase.dtos import DomainConfigDTO
 
 
@@ -27,7 +28,10 @@ class LocalBackend(IBackend):
     (projects) of database, a QueryHandler must be provided.
     """
 
-    supports_db_comparison: bool = False
+    supports_db_comparison = False
+    supports_clustering = False
+    supports_partitions = False
+    supports_primary_keys = False
 
     def __init__(self, files_path: str, db_path: str, domain_config: DomainConfigDTO,
                  naming_resolver: DemoNamingResolver, query_handler: DemoQueryHandler,
@@ -99,7 +103,7 @@ class LocalBackend(IBackend):
         return file_testobjects + db_testobject
 
     def get_filenames(self, domain: str, project: str, instance: str, testobject: str) \
-        -> List[str]:
+            -> List[str]:
         """See interface definition (parent class IBackend)."""
 
         object_type = self.naming_resolver.get_object_type(domain, testobject)
@@ -132,16 +136,16 @@ class LocalBackend(IBackend):
         return count
 
     def _get_db_rowcount(self, domain: str, project: str, instance: str, testobject: str,
-                         filters: Optional[List[Tuple[str, str]]] = None,) \
+                         filters: Optional[List[Tuple[str, str]]] = None, ) \
             -> int:
 
-        filters: List[Tuple[str, str]] = filters or []
+        filters_: List[Tuple[str, str]] = filters or []
 
         catalog, schema, table = self.naming_resolver.resolve_db(
             domain, project, instance, testobject)
 
         where_clause = "WHERE 1 = 1"
-        for col_name, operation in filters:
+        for col_name, operation in filters_:
             if operation.startswith("="):
                 value = operation.removeprefix("=")
                 where_clause += (
@@ -150,7 +154,7 @@ class LocalBackend(IBackend):
                 )
 
         count_df = self.db.query(f"""
-                SELECT 
+                SELECT
                     COUNT * AS cnt FROM {catalog}.{schema}.{table}
                 {where_clause}
             """).pl()
@@ -200,13 +204,15 @@ class LocalBackend(IBackend):
 
         # convert to polars dataframe with columns 'col', 'dtype'
         schema_as_df = self.db.query(schema_query).pl()
-        # convert to record-oriented dicts, e.g. list of dicts with keys 'col', 'dtype:
-        schema_as_dict = schema_as_df.to_dicts()
-
+        # convert to dict with keys 'col', 'dtype' and value-lists as values
+        schema_as_named_dict = schema_as_df.to_dict(as_series=False)
+        # convert to a dict with column names as keys and dtypes as values
+        schema_as_dict = dict(
+            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"])
+        )
         return SchemaDTO.from_dict(schema_as_dict=schema_as_dict)
 
-    @staticmethod
-    def harmonize_schema(schema: SchemaDTO) -> SchemaDTO:
+    def harmonize_schema(self, schema: SchemaDTO) -> SchemaDTO:
         """
         In our DWH project, the convention is that datatypes are relevant for comparison
         only in their simplified form, e.g. complex datatypes like ARRAY, STRUCT are
@@ -223,10 +229,9 @@ class LocalBackend(IBackend):
                     - 'TEXT', 'STRING', 'VARCHAR(n)' are translated to 'string'
         """
 
-        harmonized_schema = SchemaDTO(columns=[])
-        for column in schema.columns:
-            column_name = column.name
-            dtype = column.dtype.lower()
+        harmonized_columns = {}
+        for column_name, dtype in schema.columns.items():
+            dtype = dtype.lower()
             complex_dtypes = ["array", "list", "interval", "struct"]
 
             # if dtype contains one of the complex dtype keywords, we return it as is
@@ -248,6 +253,9 @@ class LocalBackend(IBackend):
             else:
                 harmonized_dtype = dtype
 
-            harmonized_schema.columns.append(ColumnDTO(column_name, harmonized_dtype))
+            harmonized_columns.update({column_name: harmonized_dtype})
 
-        return harmonized_schema
+        harmonized_schema_dto = replace(schema)
+        harmonized_schema_dto.columns = harmonized_columns
+
+        return harmonized_schema_dto

@@ -46,7 +46,10 @@ class AbstractTestCase(ICheckable):
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         self.details: List[Dict[str, str]] = []
-        self.diff: List[Dict[str, str]] = []
+        # diff is a list of lists or dicts:
+        #  lists contain a record-oriented dict representation of a dataframe
+        #
+        self.diff: Dict[str, Union[List, Dict]] = dict()
 
         self.status = TestStatus.INITIATED
 

@@ -88,7 +88,7 @@ class TestCaseResultDTO:
     testtype: str
     status: TestStatus
     result: TestResult
-    diff: List[Dict[str, str]]  # found diff as a table in record-oriented dict
+    diff: Dict[str, Union[List, Dict]]  # found diff as a table in record-oriented dict
     summary: str
     details: List[Dict[str, str]]
     specifications: List[SpecificationDTO]
