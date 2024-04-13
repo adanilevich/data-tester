@@ -4,9 +4,11 @@ from dataclasses import dataclass
 from typing import List
 from abc import ABC, abstractmethod
 
-from src.testcase.dtos import (
-    TestObjectDTO, DomainConfigDTO, SpecificationDTO, TestCaseResultDTO
+from src.dtos.testcase import (
+    TestObjectDTO, TestCaseResultDTO
 )
+from src.dtos.configs import DomainConfigDTO
+from src.dtos.specifications import SpecificationDTO
 
 
 @dataclass

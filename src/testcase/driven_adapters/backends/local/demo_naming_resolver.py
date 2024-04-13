@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, List
 
-from src.testcase.dtos import DomainConfigDTO
+from src.dtos.configs import DomainConfigDTO
 
 
 class TestobjectType(Enum):
@@ -17,7 +17,7 @@ class DemoNamingResolver:
         self.config = domain_cofig
 
     def _fetch_resolver(self, domain: str):
-        if domain in ["payments, sales"]:
+        if domain in ["payments", "sales"]:
             return DemoDefaultResolver(domain_config=self.config)
         else:
             raise NotImplementedError(f"Resolver domain {domain} unknown!")
@@ -59,7 +59,7 @@ class DemoDefaultResolver:
 
     @staticmethod
     def resolve_files(domain: str, project: str, instance: str,
-                      obj: Optional[str] = None) -> str:
+                      obj: Optional[str] = None) -> List[str]:
         """
         Returns (relative) path in raw data layer of our dummy demo DWH.
         Translates between  business coordinates and technical paths in local filesystem
@@ -82,7 +82,7 @@ class DemoDefaultResolver:
             if not obj.startswith("raw_"):
                 raise ValueError(f"Testobjects in raw_layer must start with raw_: {obj}")
             base_path += "/" + obj.removeprefix("raw_") + "/"
-        return base_path
+        return [base_path]
 
     @staticmethod
     def resolve_db(domain: str, project: str, instance: str, obj: Optional[str] = None) \

@@ -6,18 +6,18 @@ from typing import List, Dict, Any, Tuple, Optional
 import duckdb
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
-from src.testcase.driven_adapters.backends.local.demo_naming_resolver import (
-    DemoNamingResolver)
-from src.testcase.driven_adapters.backends.local.demo_query_handler import (
-    DemoQueryHandler)
-from src.testcase.driven_ports.i_backend import IBackend, SchemaDTO
-from src.testcase.dtos import DomainConfigDTO
+from src.testcase.driven_adapters.backends.local import (
+    DemoNamingResolver, DemoQueryHandler
+)
+from src.testcase.driven_ports.i_backend import IBackend
+from src.dtos.specifications import SchemaSpecificationDTO
+from src.dtos.configs import DomainConfigDTO
 
 
 class LocalBackend(IBackend):
     """
-    Local backend for interacting with local storage. File storage is simply data
-    stored on disks. Table storage is a duckdb-based DWH. This backend is implemented
+    Local backend testing. File storage is simply data stored on disks.
+    Table storage is a duckdb-based DWH. This backend is implemented
     mainly for demo purpose and purpose of integration tests.
 
     For resolving business naming conventions to technical paths (e.g. db names),
@@ -35,7 +35,7 @@ class LocalBackend(IBackend):
 
     def __init__(self, files_path: str, db_path: str, domain_config: DomainConfigDTO,
                  naming_resolver: DemoNamingResolver, query_handler: DemoQueryHandler,
-                 fs: LocalFileSystem, db=duckdb):
+                 fs: Optional[LocalFileSystem] = None, db=duckdb):
         """
         Initialize backend.
 
@@ -55,7 +55,7 @@ class LocalBackend(IBackend):
         self.config: DomainConfigDTO = domain_config
         self.naming_resolver: DemoNamingResolver = naming_resolver
         self.query_handler: DemoQueryHandler = query_handler
-        self.fs: LocalFileSystem = fs
+        self.fs: LocalFileSystem = fs or LocalFileSystem()
         self.db = db
 
         # initialize databases
@@ -66,7 +66,7 @@ class LocalBackend(IBackend):
         db_files = [f for f in self.fs.ls(self.db_path) if f.endswith(".db")]
         for db_file in db_files:
             db_name = db_file.split("/")[-1].removesuffix(".db")
-            self.db.execute(f"ATTACH '{db_file}' AS {db_name}")
+            self.db.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
 
     def get_testobjects(self, domain: str, project: str, instance: str) -> List[str]:
         """
@@ -79,7 +79,7 @@ class LocalBackend(IBackend):
         # e.g. <base_path>/raw and <base_path>/export
         rel_filepaths: List[str] = self.naming_resolver.resolve_files(
             domain, project, instance)
-        abs_filepaths = [self.files_path + path_ for path_ in rel_filepaths]
+        abs_filepaths = [self.files_path + "/" + path_ for path_ in rel_filepaths]
 
         file_testobjects: List[str] = []
         for filepath in abs_filepaths:
@@ -92,11 +92,12 @@ class LocalBackend(IBackend):
 
         # SECOND, get testobjects from dwh / database layer
         catalog, schema = self.naming_resolver.resolve_db(domain, project, instance)
-        tables_df = self.db.query(f"""
+        query = f"""
             SELECT table_name FROM INFORMATION_SCHEMA.TABLES
-            WHERE table_catalog = {catalog}
-            AND table_schema = {schema}
-        """).pl()
+            WHERE table_catalog = '{catalog}'
+            AND table_schema = '{schema}'
+        """
+        tables_df = self.db.query(query).pl()
 
         db_testobject = tables_df.to_dict(as_series=False)["table_name"]
 
@@ -180,7 +181,7 @@ class LocalBackend(IBackend):
         return result
 
     def get_schema(self, domain: str, project: str, instance: str,
-                   testobject: str) -> SchemaDTO:
+                   testobject: str) -> SchemaSpecificationDTO:
         """
         Gets table schema from duckdb, harmonizes datatypes according to conventions and
         returns results. Schema retrieval of file objects is not supported.
@@ -195,11 +196,11 @@ class LocalBackend(IBackend):
             domain, project, instance, testobject)
 
         schema_query = f"""
-                SELECT column_name AS col, dtype AS dtype
+                SELECT column_name AS col, data_type AS dtype
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE table_catalog = {catalog}
-                AND table_schema = {schema}
-                AND table_name = {table}
+                WHERE table_catalog = '{catalog}'
+                AND table_schema = '{schema}'
+                AND table_name = '{table}'
             """
 
         # convert to polars dataframe with columns 'col', 'dtype'
@@ -210,9 +211,15 @@ class LocalBackend(IBackend):
         schema_as_dict = dict(
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"])
         )
-        return SchemaDTO.from_dict(schema_as_dict=schema_as_dict)
 
-    def harmonize_schema(self, schema: SchemaDTO) -> SchemaDTO:
+        result = SchemaSpecificationDTO(
+            location=".".join([domain, project, instance, testobject]),
+            columns=schema_as_dict,
+        )
+
+        return result
+
+    def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         """
         In our DWH project, the convention is that datatypes are relevant for comparison
         only in their simplified form, e.g. complex datatypes like ARRAY, STRUCT are

@@ -1,21 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Optional, Union
-from dataclasses import dataclass, asdict
+from typing import List
 
-
-@dataclass
-class SchemaDTO:
-    columns: Dict[str, str]  # schema as dict with keys 'column', 'dtype'
-    primary_keys: Optional[List[str]] = None  # list of primary keys (if supported)
-    partition_columns: Optional[List[str]] = None  # list of table partition keys
-    clustering_columns: Optional[List[str]] = None  # lsit of table clustering keys
-
-    def dict(self) -> Dict[str, Union[Dict, Optional[List]]]:
-        return asdict(self)
-
-    @classmethod
-    def from_dict(cls, schema_as_dict: Dict):
-        return cls(schema_as_dict)
+from src.dtos.specifications import SchemaSpecificationDTO
 
 
 class IBackend(ABC):
@@ -34,9 +20,9 @@ class IBackend(ABC):
 
     @abstractmethod
     def get_schema(self, domain: str, project: str, instance: str,
-                   testobject: str) -> SchemaDTO:
+                   testobject: str) -> SchemaSpecificationDTO:
         """Get schema (column names and datatyples) of testobject."""
 
     @abstractmethod
-    def harmonize_schema(self, schema: SchemaDTO) -> SchemaDTO:
+    def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         """Translate schema from DB-specific dtypes to conventions known by users"""

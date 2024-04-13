@@ -2,12 +2,13 @@ from __future__ import annotations
 from abc import abstractmethod
 from uuid import uuid4
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
-from src.testcase.dtos import (
-    TestObjectDTO, SpecificationDTO, DomainConfigDTO, TestStatus, TestResult,
-    TestCaseResultDTO
+from src.dtos.testcase import (
+    TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
 )
+from src.dtos.configs import DomainConfigDTO
+from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
 from src.testcase.precondition_checks.i_precondition_checker import (
@@ -45,7 +46,8 @@ class AbstractTestCase(ICheckable):
         self.backend: IBackend = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
-        self.details: List[Dict[str, str]] = []
+        self.facts: List[Dict[str, str]] = []  # list of key facts about test execution
+        self.details: List[Dict[str, str]] = []  # list of in-depth details about execut.
         # diff is a list of lists or dicts:
         #  lists contain a record-oriented dict representation of a dataframe
         #
@@ -57,7 +59,10 @@ class AbstractTestCase(ICheckable):
         for notifier in self.notifiers:
             notifier.notify(message)
 
-    def add_detail(self, detail: Dict[str, str]):
+    def add_fact(self, fact: Dict[str, Any]):
+        self.facts.append(fact)
+
+    def add_detail(self, detail: Dict[str, Any]):
         self.details.append(detail)
 
     def update_summary(self, summary: str):

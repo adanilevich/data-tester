@@ -1,22 +1,23 @@
 import pytest
 
-from src.testcase.dtos import (
-    TestObjectDTO, SpecificationDTO, DomainConfigDTO,
-    SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO
+from src.dtos.testcase import TestObjectDTO
+from src.dtos.configs import (
+    SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO, DomainConfigDTO
 )
-from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
+from src.dtos.specifications import SpecificationDTO
+from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class TestTestCaseFactory:
 
     testobject = TestObjectDTO(name="to", domain="dom", project="proj", instance="inst")
     specifications = [
-        SpecificationDTO(type="schema", content=None, location="loc", valid=True),
-        SpecificationDTO(type="sql", content="sdfs", location="loc", valid=False),
+        SpecificationDTO(type="schema", location="loc"),
+        SpecificationDTO(type="sql", location="loc"),
     ]
     domain_config = DomainConfigDTO(
         domain="my_domain",
-        schema_testcase_config=SchemaTestCaseConfigDTO(compare_data_types=["int", "str"]),
+        schema_testcase_config=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
         compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100)
     )
 

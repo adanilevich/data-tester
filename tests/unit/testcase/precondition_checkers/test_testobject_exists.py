@@ -2,7 +2,7 @@ from typing import Dict
 
 from src.testcase.precondition_checks.i_checkable import ICheckable
 from src.testcase.precondition_checks.check_testobject_exists import CheckTestObjectExists
-from src.testcase.dtos import TestObjectDTO
+from src.dtos.testcase import TestObjectDTO
 
 
 class DummyBackend:

@@ -27,8 +27,8 @@ domain_config = {
 }
 
 specs = [
-    {"type": "schema", "content": "any", "location": "my_location", "valid": True},
-    {"type": "sql", "content": "any", "location": "my_location", "valid": True},
+    {"type": "schema", "location": "my_location"},
+    {"type": "sql", "location": "my_location"},
 ]
 
 testcases = [

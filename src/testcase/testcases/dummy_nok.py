@@ -1,7 +1,7 @@
 from src.testcase.testcases.abstract_testcase import AbstractTestCase
 
 
-class DummyNokAbstractTestCase(AbstractTestCase):
+class DummyNokTestCase(AbstractTestCase):
     """This testcase always returns ok -- test purpose only."""
     ttype = "DUMMY_NOK"
     required_specs = []

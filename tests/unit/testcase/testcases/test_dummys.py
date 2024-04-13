@@ -1,4 +1,4 @@
-from src.testcase.testcases.abstract_testcase import AbstractTestCase
+from src.testcase.testcases import AbstractTestCase
 
 
 class TestDummyTestcases:

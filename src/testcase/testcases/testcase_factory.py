@@ -1,7 +1,9 @@
 # flake8: noqa
 from typing import Dict, List, Callable
 from src.testcase.testcases.abstract_testcase import AbstractTestCase
-from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
+from src.dtos.testcase import TestObjectDTO
+from src.dtos.configs import DomainConfigDTO
+from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
 

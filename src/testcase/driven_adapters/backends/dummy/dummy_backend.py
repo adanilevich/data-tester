@@ -1,6 +1,7 @@
 from typing import List
 
-from src.testcase.driven_ports.i_backend import IBackend, SchemaDTO
+from src.testcase.driven_ports.i_backend import IBackend
+from src.dtos.specifications import SchemaSpecificationDTO
 
 
 class DummyBackend(IBackend):
@@ -10,8 +11,8 @@ class DummyBackend(IBackend):
         return ["testobject1", "testobject2"]
 
     def get_schema(self, domain: str, project: str, instance: str,
-                   testobject: str) -> SchemaDTO:
-        return SchemaDTO(columns={"my_col": "my_dtype"})
+                   testobject: str) -> SchemaSpecificationDTO:
+        return SchemaSpecificationDTO(columns={"my_col": "my_dtype"})
 
-    def harmonize_schema(self, schema: SchemaDTO) -> SchemaDTO:
+    def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         return schema
