@@ -7,11 +7,11 @@ from src.dtos.specifications import SchemaSpecificationDTO
 
 @dataclass
 class ColumnDiffEntryDTO:
-    expected_col: Optional[str] = None
+    expected_column: Optional[str] = None
     expected_dtype: Optional[str] = None
-    actual_col: Optional[str] = None
+    actual_column: Optional[str] = None
     actual_dtype: Optional[str] = None
-    result_col: Optional[str] = None
+    result_column: Optional[str] = None
     result_dtype: Optional[str] = None
     result_all: Optional[str] = None
 
@@ -45,6 +45,8 @@ class SchemaTestCase(AbstractTestCase):
             self.status = self.status.ABORTED
             self.result = self.result.NA
             return None
+        else:
+            self.add_fact({"Specification": expected_schema.location})
 
         # we start by comparing columns and datatypes
         columns_diff_dto, column_comparison_result = self._compare_columns(
@@ -54,8 +56,7 @@ class SchemaTestCase(AbstractTestCase):
         )
         columns_diff_as_list = columns_diff_dto.dict()["diffs"]
         self.diff.update({"column_diff": columns_diff_as_list})
-        if column_comparison_result is not True:
-            self.add_detail({"Columns Comparison": str(columns_diff_as_list)})
+        self.add_detail({"Columns Comparison": str(columns_diff_as_list)})
 
         # next, we compare partitioning
         if self.backend.supports_partitions:
@@ -65,8 +66,7 @@ class SchemaTestCase(AbstractTestCase):
                 compare_what="partitioning"
             )
             self.diff.update({"partitioning_diff": partitioning_diff})
-            if partitioning_comparison_result is not True:
-                self.add_detail({"Partitioning Comparison": str(partitioning_diff)})
+            self.add_detail({"Partitioning Comparison": str(partitioning_diff)})
         else:
             partitioning_comparison_result = None
 
@@ -78,8 +78,7 @@ class SchemaTestCase(AbstractTestCase):
                 compare_what="clustering"
             )
             self.diff.update({"clustering_diff": clustering_diff})
-            if column_comparison_result is not True:
-                self.add_detail({"Clustering Comparison": str(clustering_diff)})
+            self.add_detail({"Clustering Comparison": str(clustering_diff)})
         else:
             clustering_comparison_result = None
 
@@ -91,13 +90,13 @@ class SchemaTestCase(AbstractTestCase):
                 compare_what="primary_keys"
             )
             self.diff.update({"pk_diff": pk_diff})
-            if pk_comparison_result is not True:
-                self.add_detail({"Primary Keys Comparison": str(pk_diff)})
+            self.add_detail({"Primary Keys Comparison": str(pk_diff)})
         else:
             pk_comparison_result = None
 
         # finally, all results are evaluated to an overall test result
         self.result = self.result.OK
+        self.summary = ""
         for result, name in [
             (column_comparison_result, "Column comparison"),
             (partitioning_comparison_result, "Partitioning comparison"),
@@ -122,7 +121,7 @@ class SchemaTestCase(AbstractTestCase):
         return None
 
     def _get_actual_schema(self) -> SchemaSpecificationDTO:
-        self.notify(f"Getting data object schema for {self.testobject.name}")
+        self.notify(f"Getting data object schema for testobject {self.testobject.name}")
         result_schema_raw = self.backend.get_schema(
             domain=self.testobject.domain,
             project=self.testobject.project,
@@ -134,7 +133,7 @@ class SchemaTestCase(AbstractTestCase):
 
     def _get_expected_schema(self) -> Optional[SchemaSpecificationDTO]:
         """Gets expected schema specification from provided specs"""
-        self.notify(f"Getting expected schema for {self.testobject.name}")
+        self.notify(f"Getting expected schema for testobject {self.testobject.name}")
         # unpack expected schema from provided specifications
         provided_schema_specs: List[SchemaSpecificationDTO] = []
         expected_schema: Optional[SchemaSpecificationDTO] = None
@@ -167,22 +166,22 @@ class SchemaTestCase(AbstractTestCase):
 
         for expected_col, expected_dtype in expected.columns.items():
             diff_entry = ColumnDiffEntryDTO()
-            diff_entry.expected_col = expected_col
+            diff_entry.expected_column = expected_col
             diff_entry.expected_dtype = expected_dtype
             if expected_col in actual.columns:
-                diff_entry.actual_col = expected_col
+                diff_entry.actual_column = expected_col
                 diff_entry.actual_dtype = actual.columns[expected_col]
-                diff_entry.result_col = "OK"
+                diff_entry.result_column = "OK"
                 if diff_entry.actual_dtype == diff_entry.expected_dtype:
                     diff_entry.result_dtype = "OK"
                 else:
-                    if diff_entry.actual_dtype in compare_datatypes and \
-                            diff_entry.expected_dtype in compare_datatypes:
+                    # proceed only if exected dtype is configured for comparison
+                    if diff_entry.expected_dtype in compare_datatypes:
                         diff_entry.result_dtype = "NOK"
             else:
-                diff_entry.result_col = "NOK"
+                diff_entry.result_column = "NOK"
 
-            if diff_entry.result_dtype == "NOK" or diff_entry.result_col == "NOK":
+            if diff_entry.result_dtype == "NOK" or diff_entry.result_column == "NOK":
                 diff_entry.result_all = "NOK"
             else:
                 diff_entry.result_all = "OK"
@@ -193,8 +192,9 @@ class SchemaTestCase(AbstractTestCase):
                 pass
             else:
                 diff_entry = ColumnDiffEntryDTO()
-                diff_entry.actual_col, diff_entry.actual_dtype = actual_col, actual_dtype
-                diff_entry.result_col = "NOK"
+                diff_entry.actual_column = actual_col
+                diff_entry.actual_dtype = actual_dtype
+                diff_entry.result_column = "NOK"
                 diff_entry.result_all = "NOK"
                 diff.diffs.append(diff_entry)
 

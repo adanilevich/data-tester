@@ -16,9 +16,9 @@ from src.dtos.configs import DomainConfigDTO
 
 class LocalBackend(IBackend):
     """
-    Local backend testing. File storage is simply data stored on disks.
-    Table storage is a duckdb-based DWH. This backend is implemented
-    mainly for demo purpose and purpose of integration tests.
+    Local backend: File storage is simply data stored on disks. Table storage is a
+    duckdb-based DWH. This backend is implemented mainly for demo purpose and purpose
+    of integration tests.
 
     For resolving business naming conventions to technical paths (e.g. db names),
     a NamingResolver needs to be provided, which is used by almost all methods

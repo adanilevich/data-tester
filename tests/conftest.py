@@ -33,7 +33,8 @@ def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
         compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100),
-        schema_testcase_config=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"])
+        schema_testcase_config=SchemaTestCaseConfigDTO(
+            compare_datatypes=["int", "string", "bool"])
     )
     return domain_config
 
@@ -42,12 +43,11 @@ def domain_config() -> DomainConfigDTO:
 def testcase_creator(domain_config):
     def create_testcase(ttype: str) -> AbstractTestCase:
         testobject = TestObjectDTO(
-            name="my_testobject",
-            domain="my_domain",
-            project="my_project",
-            instance="my_instance",
+            name="stage_customers",
+            domain="payments",
+            project="test",
+            instance="alpha",
         )
-
         testcase = TestCaseFactory.create(
             ttype=ttype,
             testobject=testobject,
@@ -60,9 +60,7 @@ def testcase_creator(domain_config):
             backend=DummyBackend(),
             notifiers=[InMemoryNotifier(), StdoutNotifier()]
         )
-
         return testcase
-
     return create_testcase
 
 

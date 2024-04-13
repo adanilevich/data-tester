@@ -13,7 +13,8 @@ from src.testcase.driven_ports.i_notifier import INotifier
 from src.testcase.testcases import (
     dummy_ok,
     dummy_nok,
-    dummy_exception
+    dummy_exception,
+    schema
 )
 
 
@@ -42,7 +43,8 @@ class TestCaseFactory:
             cls.known_testtypes.update({cls_.ttype: cls_})
 
         if ttype not in cls.known_testtypes:
-            raise TestCaseUnknownError(f"Testcase {ttype} is not implemented!")
+            msg = f"Test '{ttype}' not implemented! Implemented: {cls.known_testtypes}"
+            raise TestCaseUnknownError(msg)
         else:
             testcase = cls.known_testtypes[ttype](
                 testobject=testobject,

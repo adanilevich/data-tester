@@ -34,7 +34,7 @@ class TestTestCaseFactory:
                 notifiers=[in_memory_notifier]
             )
 
-        assert "Testcase unknown is not implemented!" in str(err)
+        assert "Test 'unknown' not implemented!" in str(err)
 
     def test_creating_testcases(self, dummy_backend, in_memory_notifier):
         testcase = TestCaseFactory.create(

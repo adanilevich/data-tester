@@ -81,7 +81,9 @@ class AbstractTestCase(ICheckable):
                 self.status = TestStatus.ABORTED
                 return False
 
-        self.notify("Executing precondition checks ...")
+        self.notify(f"All required specs are OK: {','.join(self.required_specs)}")
+
+        self.notify(f"Checking preconditions: {','.join(self.preconditions)} ...")
         for check in self.preconditions:
             self.notify(f"Checking if {check} ...")
             check_result = checker.check(check=check, checkable=self)
