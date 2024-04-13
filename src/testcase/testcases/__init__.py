@@ -4,4 +4,5 @@ from src.testcase.testcases.dummy_exception import DummyExceptionTestCase
 from src.testcase.testcases.dummy_ok import DummyOkTestCase
 from src.testcase.testcases.dummy_nok import DummyNokTestCase
 from src.testcase.testcases.schema import SchemaTestCase
+from src.testcase.testcases.rowcount import RowCountTestCase
 from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError

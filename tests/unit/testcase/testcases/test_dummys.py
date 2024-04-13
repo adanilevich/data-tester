@@ -20,6 +20,6 @@ class TestDummyTestcases:
     def test_exception_testcase(self, testcase_creator):
         testcase: AbstractTestCase = testcase_creator(ttype="DUMMY_EXCEPTION")
         testcase.execute()
-        assert testcase.summary == "This testcase always raises an Exception."
+        assert "always raises an error" in testcase.summary
         assert testcase.status == testcase.status.ERROR
         assert testcase.result == testcase.result.NA

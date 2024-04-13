@@ -129,9 +129,9 @@ class LocalBackend(IBackend):
 
         object_type = self.naming_resolver.get_object_type(domain, testobject)
         if object_type == object_type.FILE:
-            count = self._get_db_rowcount(domain, stage, instance, testobject, filters)
+            count = self._get_file_rowcount(domain, stage, instance, testobject, filters)
         else:
-            count = self._get_file_rowcount(
+            count = self._get_db_rowcount(
                 domain, stage, instance, testobject, filters)
 
         return count
@@ -146,22 +146,22 @@ class LocalBackend(IBackend):
             domain, stage, instance, testobject)
 
         where_clause = "WHERE 1 = 1"
-        for col_name, operation in filters_:
+        for column_name, operation in filters_:
             if operation.startswith("="):
                 value = operation.removeprefix("=")
                 where_clause += (
-                    f"\n\tAND {col_name} == {value}"
+                    f"\n\tAND {column_name} == {value}"
                     f" FROM {catalog}.{schema}.{table}"
                 )
 
-        count_df = self.db.query(f"""
-                SELECT
-                    COUNT * AS cnt FROM {catalog}.{schema}.{table}
-                {where_clause}
-            """).pl()
+        query = f"""
+            SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}
+            {where_clause}
+        """
+        count_df = self.db.query(query).pl()
 
         count_dict = count_df.to_dict(as_series=False)  # dict {colname: [values]}
-        count = count_dict["cnt"][0]
+        count = count_dict["__cnt__"][0]
 
         return count
 
@@ -171,7 +171,7 @@ class LocalBackend(IBackend):
                          "layer) is not yet supported.")
 
     def run_query(self, query: str, domain: str, stage: str, instance: str) \
-            -> Dict[str, list[Any]]:
+            -> Dict[str, List[Any]]:
         """See interface definition (parent class IBackend)."""
 
         translated_query = self.query_handler.translate(query, domain, stage, instance)

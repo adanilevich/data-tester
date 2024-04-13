@@ -11,10 +11,11 @@ from src.dtos.configs import DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
-from src.testcase.precondition_checks.i_precondition_checker import (
-    IPreconditionChecker)
-from src.testcase.precondition_checks.precondition_checker import PreConditionChecker
-from src.testcase.precondition_checks.i_checkable import ICheckable
+from src.testcase.precondition_checks import (
+    ICheckable,
+    IPreconditionChecker,
+    PreConditionChecker,
+)
 
 
 def get_datetime() -> str:
@@ -72,7 +73,6 @@ class AbstractTestCase(ICheckable):
 
         self.status = TestStatus.PRECONDITIONS
 
-        self.notify("Checking specifications ...")
         for required_spec in self.required_specs:
             self.notify(f"Checking if {required_spec} is provided ...")
             if required_spec not in [spec.type for spec in self.specs]:
@@ -80,10 +80,9 @@ class AbstractTestCase(ICheckable):
                 self.result = TestResult.NA
                 self.status = TestStatus.ABORTED
                 return False
+            else:
+                self.notify(f"{required_spec} found.")
 
-        self.notify(f"All required specs are OK: {','.join(self.required_specs)}")
-
-        self.notify(f"Checking preconditions: {','.join(self.preconditions)} ...")
         for check in self.preconditions:
             self.notify(f"Checking if {check} ...")
             check_result = checker.check(check=check, checkable=self)
@@ -94,7 +93,6 @@ class AbstractTestCase(ICheckable):
                 self.status = TestStatus.ABORTED
                 return False
 
-        self.notify("All precondition checks successful!")
         return True
 
     @abstractmethod
@@ -136,7 +134,9 @@ class AbstractTestCase(ICheckable):
         except Exception as err:
             self.result = TestResult.NA
             self.status = TestStatus.ERROR
-            self.notify(f"Technical error during test execution: {str(err)}")
+            msg = f"Technical error during test execution: {str(err)}"
+            self.notify(msg)
+            self.summary = msg
 
         self.end_ts = get_datetime()
         return self._as_dto()
