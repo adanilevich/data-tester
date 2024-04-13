@@ -5,13 +5,13 @@ from src.testcase.driver_adapters.cli_testcase_runner import CliTestCaseRunner
 
 
 testobjects = [
-    {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
+    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
      "name": "my_testobject_1"},
-    {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
+    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
      "name": "my_testobject_2"},
-    {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
+    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
      "name": "my_testobject_3"},
-    {"domain": "my_domain", "project": "my_project", "instance": "my_instance",
+    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
      "name": "my_testobject_4"},
 ]
 
@@ -64,4 +64,3 @@ def test_dummy_cli_execution():
         expected_status = testtype_to_result_mapper[testtype][1]
         assert testcase_result == expected_result
         assert testcase_status == expected_status
-

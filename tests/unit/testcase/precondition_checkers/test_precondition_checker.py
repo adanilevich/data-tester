@@ -14,7 +14,7 @@ class DummyCheckable(ICheckable):
         self.testobject = TestObjectDTO(
             name="any",
             domain="any",
-            project="any",
+            stage="any",
             instance="any",
         )
         self.summary = ""

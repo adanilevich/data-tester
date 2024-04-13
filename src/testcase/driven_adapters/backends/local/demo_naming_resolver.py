@@ -27,16 +27,16 @@ class DemoNamingResolver:
         object_type = resolver.get_object_type(testobject)
         return object_type
 
-    def resolve_files(self, domain: str, project: str, instance: str,
+    def resolve_files(self, domain: str, stage: str, instance: str,
                       obj: Optional[str] = None):
         resolver = self._fetch_resolver(domain=domain)
-        coordinates = resolver.resolve_files(domain, project, instance, obj)
+        coordinates = resolver.resolve_files(domain, stage, instance, obj)
         return coordinates
 
-    def resolve_db(self, domain: str, project: str, instance: str,
+    def resolve_db(self, domain: str, stage: str, instance: str,
                    obj: Optional[str] = None):
         resolver = self._fetch_resolver(domain=domain)
-        coordinates = resolver.resolve_db(domain, project, instance, obj)
+        coordinates = resolver.resolve_db(domain, stage, instance, obj)
         return coordinates
 
 
@@ -58,7 +58,7 @@ class DemoDefaultResolver:
             return TestobjectType.TABLE
 
     @staticmethod
-    def resolve_files(domain: str, project: str, instance: str,
+    def resolve_files(domain: str, stage: str, instance: str,
                       obj: Optional[str] = None) -> List[str]:
         """
         Returns (relative) path in raw data layer of our dummy demo DWH.
@@ -66,7 +66,7 @@ class DemoDefaultResolver:
 
         Args:
             domain: domain name - corresponds to top-level folder
-            project: stage/environment - corresponds to 2nd level folder in
+            stage: stage/environment - corresponds to 2nd level folder in
             instance: instance of dwh - 3rd level folder structure in local filesystem
             obj: name of testobject. If provided, full path to folder which corresponds
                 to given testobject is provided, else to parent folder
@@ -76,8 +76,8 @@ class DemoDefaultResolver:
                 business coordinates
         """
 
-        # files are stored by <domain>/<project>/<instance>/<business object name>
-        base_path = domain + "/" + project + "/" + instance + "/"
+        # files are stored by <domain>/<stage>/<instance>/<business object name>
+        base_path = domain + "/" + stage + "/" + instance + "/"
         if obj is not None:
             if not obj.startswith("raw_"):
                 raise ValueError(f"Testobjects in raw_layer must start with raw_: {obj}")
@@ -85,15 +85,15 @@ class DemoDefaultResolver:
         return [base_path]
 
     @staticmethod
-    def resolve_db(domain: str, project: str, instance: str, obj: Optional[str] = None) \
+    def resolve_db(domain: str, stage: str, instance: str, obj: Optional[str] = None) \
             -> Union[Tuple[str, str], Tuple[str, str, str]]:
         """
         Returns duckdb database coordinates which correspond to specified business
         coordinates of the testobject(s)
 
         Args:
-            domain: domain name - domain_project correspond to a database in duckdb
-            project: stage/environment - domain_project correspond to a database in duckdb
+            domain: domain name - domain_stage correspond to a database in duckdb
+            stage: stage/environment - domain_stage correspond to a database in duckdb
             instance: instance of dwh - corresponds to database schema in duckdb
             obj: name of testobject - corresponds to table or view name in duckdb
 
@@ -101,9 +101,9 @@ class DemoDefaultResolver:
             (catalog, schema) or (catalog, schema, table): duckdb coordinates correspon-
                 ding to business coordinates
         """
-        # databases aka catalogs are organized <domain>_<project>, e.g. 'payments_test'
+        # databases aka catalogs are organized <domain>_<stage>, e.g. 'payments_test'
         # instances correspond to db schemata
-        catalog = domain + "_" + project
+        catalog = domain + "_" + stage
         schema = instance
         if obj is None:
             return catalog, schema

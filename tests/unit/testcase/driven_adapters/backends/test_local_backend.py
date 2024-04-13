@@ -19,7 +19,7 @@ def local_backend(domain_config, prepare_local_data):
 
 class TestLocalBackend:
 
-    @pytest.mark.parametrize("domain,project,instance,testobjects_expected", [
+    @pytest.mark.parametrize("domain,stage,instance,testobjects_expected", [
         ("payments", "uat", "main", ["stage_customers", "raw_customers"]),
         ("sales", "test", "main", ["stage_customers", "raw_customers"]),
         ("payments", "test", "alpha", [
@@ -27,11 +27,9 @@ class TestLocalBackend:
             "core_customer_transactions"
         ]),
     ])
-    def test_getting_testobjects(self, local_backend, domain, project, instance,
+    def test_getting_testobjects(self, local_backend, domain, stage, instance,
                                  testobjects_expected):
-        testobjects_obtained = local_backend.get_testobjects(
-            domain, project, instance
-        )
+        testobjects_obtained = local_backend.get_testobjects(domain, stage, instance)
 
         assert set(testobjects_obtained) == set(testobjects_expected)
 

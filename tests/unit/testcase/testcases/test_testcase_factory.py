@@ -10,7 +10,7 @@ from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 class TestTestCaseFactory:
 
-    testobject = TestObjectDTO(name="to", domain="dom", project="proj", instance="inst")
+    testobject = TestObjectDTO(name="to", domain="dom", stage="proj", instance="inst")
     specifications = [
         SpecificationDTO(type="schema", location="loc"),
         SpecificationDTO(type="sql", location="loc"),

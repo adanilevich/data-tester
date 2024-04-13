@@ -124,7 +124,7 @@ class SchemaTestCase(AbstractTestCase):
         self.notify(f"Getting data object schema for testobject {self.testobject.name}")
         result_schema_raw = self.backend.get_schema(
             domain=self.testobject.domain,
-            project=self.testobject.project,
+            stage=self.testobject.stage,
             instance=self.testobject.instance,
             testobject=self.testobject.name
         )

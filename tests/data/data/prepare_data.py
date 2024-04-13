@@ -53,7 +53,7 @@ files = XlsxFiles()
 class RawConfig:
     """Defines loading of raw layer, e.g. file storage layer"""
     domain: str
-    project: str
+    stage: str
     instace: str
     folder: str
 
@@ -62,7 +62,7 @@ class RawConfig:
 class StageConfig:
     """Defines loading of data into staging layer, e.g. first table layer in DWH"""
     domain: str
-    project: str
+    stage: str
     instace: str
     table: str
 
@@ -79,7 +79,7 @@ class FileConfig:
 class CoreConfig:
     """Defines if data is loaded to core layer, e.g. table customer_transactions"""
     domain: str
-    project: str
+    stage: str
     instance: str
 
 
@@ -109,51 +109,51 @@ file_configs: List[FileConfig] = [
     FileConfig(
         xlsx_file=files.customers_1,
         raw=[
-            RawConfig(domain="payments", project="uat", instace="main", folder="customers"),
-            RawConfig(domain="payments", project="test", instace="alpha", folder="customers"),
-            RawConfig(domain="payments", project="test", instace="beta", folder="customers"),
+            RawConfig(domain="payments", stage="uat", instace="main", folder="customers"),
+            RawConfig(domain="payments", stage="test", instace="alpha", folder="customers"),
+            RawConfig(domain="payments", stage="test", instace="beta", folder="customers"),
         ],
         stage=[
-            StageConfig(domain="payments", project="uat", instace="main", table="customers"),
-            StageConfig(domain="payments", project="test", instace="alpha", table="customers"),
-            StageConfig(domain="payments", project="test", instace="beta", table="customers"),
+            StageConfig(domain="payments", stage="uat", instace="main", table="customers"),
+            StageConfig(domain="payments", stage="test", instace="alpha", table="customers"),
+            StageConfig(domain="payments", stage="test", instace="beta", table="customers"),
         ]
     ),
     # configure loading for customers 2
     FileConfig(
         xlsx_file=files.customers_2,
         raw=[
-            RawConfig(domain="payments", project="test", instace="alpha", folder="customers"),
-            RawConfig(domain="sales", project="test", instace="main", folder="customers"),
+            RawConfig(domain="payments", stage="test", instace="alpha", folder="customers"),
+            RawConfig(domain="sales", stage="test", instace="main", folder="customers"),
         ],
         stage=[
-            StageConfig(domain="payments", project="test", instace="alpha", table="customers"),
-            StageConfig(domain="sales", project="test", instace="main", table="customers"),
+            StageConfig(domain="payments", stage="test", instace="alpha", table="customers"),
+            StageConfig(domain="sales", stage="test", instace="main", table="customers"),
         ]
     ),
     # configure loading for transactions 1
     FileConfig(
         xlsx_file=files.transactions_1,
         raw=[
-            RawConfig(domain="payments", project="test", instace="alpha", folder="transactions"),
-            RawConfig(domain="payments", project="test", instace="beta", folder="transactions"),
+            RawConfig(domain="payments", stage="test", instace="alpha", folder="transactions"),
+            RawConfig(domain="payments", stage="test", instace="beta", folder="transactions"),
         ],
         stage=[
-            StageConfig(domain="payments", project="test", instace="alpha", table="transactions"),
-            StageConfig(domain="payments", project="test", instace="beta", table="transactions"),
+            StageConfig(domain="payments", stage="test", instace="alpha", table="transactions"),
+            StageConfig(domain="payments", stage="test", instace="beta", table="transactions"),
         ]
     ),
     # configure loading for transactions 2
     FileConfig(
         xlsx_file=files.transactions_2,
-        raw=[RawConfig(domain="payments", project="test", instace="alpha", folder="transactions")],
-        stage=[StageConfig(domain="payments", project="test", instace="alpha", table="transactions")]
+        raw=[RawConfig(domain="payments", stage="test", instace="alpha", folder="transactions")],
+        stage=[StageConfig(domain="payments", stage="test", instace="alpha", table="transactions")]
     ),
 ]
 
 core_configs: List[CoreConfig] = [
-    CoreConfig(domain="payments", project="test", instance="alpha"),
-    CoreConfig(domain="payments", project="test", instance="beta")
+    CoreConfig(domain="payments", stage="test", instance="alpha"),
+    CoreConfig(domain="payments", stage="test", instance="beta")
 ]
 
 load_config: LoadConfig = LoadConfig(file_configs=file_configs, core_configs=core_configs)
@@ -168,7 +168,7 @@ def setup_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH,
     objects: List[Tuple[str, str, str, str]] = []  # list of required combos of domain/prject/folder
     for file_conf in conf.file_configs:
         for raw_conf in file_conf.raw:
-            obj = (raw_conf.domain, raw_conf.project, raw_conf.instace, raw_conf.folder)
+            obj = (raw_conf.domain, raw_conf.stage, raw_conf.instace, raw_conf.folder)
             if obj not in objects:
                 objects.append(obj)
     print("All folder objects to be created: ", objects)
@@ -193,17 +193,17 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
     print("\nSETTING UP DATABASES:")
 
     objects: List[Tuple[str, str, str, str, str]] = []
-    # create unique list of domain-project-instance-table-layer required for staging:
+    # create unique list of domain-stage-instance-table-layer required for staging:
     for file_config in conf.file_configs:
         for stage_config in file_config.stage:
-            obj = (stage_config.domain, stage_config.project, stage_config.instace,
+            obj = (stage_config.domain, stage_config.stage, stage_config.instace,
                    stage_config.table, "stage")
             if obj not in objects:
                 objects.append(obj)
 
     # create same for core layer; table name is always the same here:
     for core_config in conf.core_configs:
-        obj = (core_config.domain, core_config.project, core_config.instance,
+        obj = (core_config.domain, core_config.stage, core_config.instance,
                "customer_transactions", "core")
         objects.append(obj)
 
@@ -266,7 +266,7 @@ def get_csv_raw_path(xlsx_path: Path, conf: Union[RawConfig, StageConfig],
     else:
         obj = conf.table
 
-    csv_path = (raw_layer_base_path / conf.domain / conf.project / conf.instace /
+    csv_path = (raw_layer_base_path / conf.domain / conf.stage / conf.instace /
                 obj / csv_filename)
     return str(csv_path)
 
@@ -304,7 +304,7 @@ def load_staging_layer(conf: LoadConfig = load_config):
                 xlsx_path=xlsx_filepath,
                 conf=stage_config,
             )
-            database = stage_config.domain + '_' + stage_config.project
+            database = stage_config.domain + '_' + stage_config.stage
             schema = stage_config.instace
             table = "stage_" + stage_config.table
             filename = csv_filepath.split('/')[-1]
@@ -349,7 +349,7 @@ def load_core_layer(conf: LoadConfig = load_config):
 
     print("\nLOADING CORE LAYER:")
     for core_config in conf.core_configs:
-        database = core_config.domain + '_' + core_config.project
+        database = core_config.domain + '_' + core_config.stage
         schema = core_config.instance
 
         duckdb.execute(f"""

@@ -11,7 +11,7 @@ spec = SchemaSpecificationDTO(
 )
 
 testobject = TestObjectDTO(
-    domain="payments", project="test", instance="alpha", name="stage_customers")
+    domain="payments", stage="test", instance="alpha", name="stage_customers")
 
 
 def test_straight_through_execution(domain_config, prepare_local_data):
