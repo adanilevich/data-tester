@@ -1,20 +1,24 @@
 import pytest
 
-from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
-from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
+from src.dtos.testcase import TestObjectDTO
+from src.dtos.configs import (
+    SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO, DomainConfigDTO
+)
+from src.dtos.specifications import SpecificationDTO
+from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class TestTestCaseFactory:
 
     testobject = TestObjectDTO(name="to", domain="dom", project="proj", instance="inst")
     specifications = [
-        SpecificationDTO(type="schema", content=None, location="loc", valid=True),
-        SpecificationDTO(type="sql", content="sdfs", location="loc", valid=False),
+        SpecificationDTO(type="schema", location="loc"),
+        SpecificationDTO(type="sql", location="loc"),
     ]
     domain_config = DomainConfigDTO(
         domain="my_domain",
-        compare_sample_default_sample_size=2,
-        compare_sample_sample_size_per_object=dict()
+        schema_testcase_config=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
+        compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100)
     )
 
     def test_cant_create_unknown_testcase(self, in_memory_notifier, dummy_backend):
@@ -30,7 +34,7 @@ class TestTestCaseFactory:
                 notifiers=[in_memory_notifier]
             )
 
-        assert "Testcase unknown is not implemented!" in str(err)
+        assert "Test 'unknown' not implemented!" in str(err)
 
     def test_creating_testcases(self, dummy_backend, in_memory_notifier):
         testcase = TestCaseFactory.create(

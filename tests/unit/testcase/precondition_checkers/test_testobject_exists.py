@@ -2,13 +2,13 @@ from typing import Dict
 
 from src.testcase.precondition_checks.i_checkable import ICheckable
 from src.testcase.precondition_checks.check_testobject_exists import CheckTestObjectExists
-from src.testcase.driven_ports.i_backend import IBackend
-from src.testcase.dtos import TestObjectDTO
+from src.dtos.testcase import TestObjectDTO
 
 
-class DummyBackend(IBackend):
+class DummyBackend:
 
-    def get_testobjects(self, *args, **kwargs):
+    @staticmethod
+    def get_testobjects(*args, **kwargs):
         return ["testobject_1", "testobject_2"]
 
 

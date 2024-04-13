@@ -4,7 +4,7 @@ import pytest
 from src.testcase.precondition_checks.i_checkable import ICheckable
 from src.testcase.precondition_checks.precondition_checker import (
     PreConditionChecker, CheckTestObjectExists, CheckAlwaysOk, CheckAlwaysNok)
-from src.testcase.dtos import TestObjectDTO
+from src.dtos.testcase import TestObjectDTO
 
 
 class DummyCheckable(ICheckable):

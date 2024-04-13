@@ -1,7 +1,9 @@
 # flake8: noqa
 from typing import Dict, List, Callable
-from src.testcase.testcases.testcase import TestCase
-from src.testcase.dtos import TestObjectDTO, SpecificationDTO, DomainConfigDTO
+from src.testcase.testcases.abstract_testcase import AbstractTestCase
+from src.dtos.testcase import TestObjectDTO
+from src.dtos.configs import DomainConfigDTO
+from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
 
@@ -9,9 +11,10 @@ from src.testcase.driven_ports.i_notifier import INotifier
 # such that they are registered and can be created
 # noinspection PyUnresolvedReferences
 from src.testcase.testcases import (
-    dummy_ok_testcase,
-    dummy_nok_testcase,
-    dummy_exception_testcase
+    dummy_ok,
+    dummy_nok,
+    dummy_exception,
+    schema
 )
 
 
@@ -29,18 +32,19 @@ class TestCaseFactory:
     @classmethod
     def create(cls, ttype: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
                domain_config: DomainConfigDTO, run_id: str,
-               backend: IBackend, notifiers: List[INotifier]) -> TestCase:
+               backend: IBackend, notifiers: List[INotifier]) -> AbstractTestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on class attribute
         'type' - the specified test type must be implemented as subclass of TestCase.
         """
 
         # populate known_testtypes with subclasses of TestCase
-        for cls_ in TestCase.__subclasses__():
+        for cls_ in AbstractTestCase.__subclasses__():
             cls.known_testtypes.update({cls_.ttype: cls_})
 
         if ttype not in cls.known_testtypes:
-            raise TestCaseUnknownError(f"Testcase {ttype} is not implemented!")
+            msg = f"Test '{ttype}' not implemented! Implemented: {cls.known_testtypes}"
+            raise TestCaseUnknownError(msg)
         else:
             testcase = cls.known_testtypes[ttype](
                 testobject=testobject,

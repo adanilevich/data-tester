@@ -1,7 +1,7 @@
-from src.testcase.testcases.testcase import TestCase
+from src.testcase.testcases.abstract_testcase import AbstractTestCase
 
 
-class DummyExceptionTestCase(TestCase):
+class DummyExceptionTestCase(AbstractTestCase):
     """This testcase always returns ok -- test purpose only."""
     ttype = "DUMMY_EXCEPTION"
     required_specs = []

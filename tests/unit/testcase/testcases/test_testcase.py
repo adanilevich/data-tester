@@ -1,7 +1,7 @@
 from src.testcase.precondition_checks.i_precondition_checker import (
     IPreconditionChecker)
 from src.testcase.precondition_checks.i_checkable import ICheckable
-from src.testcase.dtos import TestCaseResultDTO
+from src.dtos.testcase import TestCaseResultDTO
 
 
 class DummyChecker(IPreconditionChecker):

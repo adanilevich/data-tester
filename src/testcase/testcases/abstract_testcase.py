@@ -2,12 +2,13 @@ from __future__ import annotations
 from abc import abstractmethod
 from uuid import uuid4
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 
-from src.testcase.dtos import (
-    TestObjectDTO, SpecificationDTO, DomainConfigDTO, TestStatus, TestResult,
-    TestCaseResultDTO
+from src.dtos.testcase import (
+    TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
 )
+from src.dtos.configs import DomainConfigDTO
+from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
 from src.testcase.precondition_checks.i_precondition_checker import (
@@ -21,7 +22,7 @@ def get_datetime() -> str:
     return datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
 
-class TestCase(ICheckable):
+class AbstractTestCase(ICheckable):
 
     ttype: str = "ABSTRACT"
     preconditions: List[str] = []
@@ -45,7 +46,12 @@ class TestCase(ICheckable):
         self.backend: IBackend = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
-        self.details: List[Dict[str, str]] = []
+        self.facts: List[Dict[str, str]] = []  # list of key facts about test execution
+        self.details: List[Dict[str, str]] = []  # list of in-depth details about execut.
+        # diff is a list of lists or dicts:
+        #  lists contain a record-oriented dict representation of a dataframe
+        #
+        self.diff: Dict[str, Union[List, Dict]] = dict()
 
         self.status = TestStatus.INITIATED
 
@@ -53,7 +59,10 @@ class TestCase(ICheckable):
         for notifier in self.notifiers:
             notifier.notify(message)
 
-    def add_detail(self, detail: Dict[str, str]):
+    def add_fact(self, fact: Dict[str, Any]):
+        self.facts.append(fact)
+
+    def add_detail(self, detail: Dict[str, Any]):
         self.details.append(detail)
 
     def update_summary(self, summary: str):
@@ -72,7 +81,9 @@ class TestCase(ICheckable):
                 self.status = TestStatus.ABORTED
                 return False
 
-        self.notify("Executing precondition checks ...")
+        self.notify(f"All required specs are OK: {','.join(self.required_specs)}")
+
+        self.notify(f"Checking preconditions: {','.join(self.preconditions)} ...")
         for check in self.preconditions:
             self.notify(f"Checking if {check} ...")
             check_result = checker.check(check=check, checkable=self)
@@ -100,6 +111,7 @@ class TestCase(ICheckable):
             summary=self.summary,
             details=self.details,
             result=self.result,
+            diff=self.diff,  # must be set by specific implementation
             specifications=self.specs,
             start_ts=self.start_ts,
             end_ts=self.end_ts,
@@ -120,7 +132,7 @@ class TestCase(ICheckable):
         try:
             self._execute()
             self.status = TestStatus.FINISHED
-            self.notify("Successfully finished test execution")
+            self.notify(f"Finished test execution with result: {self.result.name}")
         except Exception as err:
             self.result = TestResult.NA
             self.status = TestStatus.ERROR

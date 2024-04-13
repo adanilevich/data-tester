@@ -3,6 +3,8 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Union, List, Dict
 
+from src.dtos.specifications import SpecificationDTO
+
 
 @dataclass
 class TestObjectDTO:
@@ -27,31 +29,6 @@ class TestObjectDTO:
             domain=self.domain,
             project=self.project,
             instance=self.instance
-        )
-
-
-@dataclass
-class SpecificationDTO:
-    type: str
-    content: Union[str, dict]
-    location: str
-    valid: Union[bool, None] = None
-
-    @classmethod
-    def from_dict(cls, spec_as_dict: dict) -> SpecificationDTO:
-        return cls(
-            type=spec_as_dict["type"],
-            content=spec_as_dict["content"],
-            location=spec_as_dict["location"],
-            valid=spec_as_dict["valid"]
-        )
-
-    def dict(self) -> dict:
-        return dict(
-            type=self.type,
-            content=self.content,
-            location=self.location,
-            valid=str(self.valid)
         )
 
 
@@ -88,6 +65,7 @@ class TestCaseResultDTO:
     testtype: str
     status: TestStatus
     result: TestResult
+    diff: Dict[str, Union[List, Dict]]  # found diff as a table in record-oriented dict
     summary: str
     details: List[Dict[str, str]]
     specifications: List[SpecificationDTO]
@@ -107,27 +85,4 @@ class TestCaseResultDTO:
             specifications=[spec.dict() for spec in self.specifications],
             start_ts=self.start_ts,
             end_ts=self.end_ts
-        )
-
-
-@dataclass
-class DomainConfigDTO:
-    """
-    This serves as a generic data container for business-related configurations.
-    The required attributes are defined by configuration needs of implemented Testcases,
-    e.g., the testcase compare_sample requires a sample size definition.
-    """
-    domain: str
-    compare_sample_default_sample_size: int
-    compare_sample_sample_size_per_object: Dict[str, int]
-
-    @classmethod
-    def from_dict(cls, domain_config_dict: dict) -> DomainConfigDTO:
-        return cls(
-            domain=domain_config_dict["domain"],
-            compare_sample_default_sample_size=domain_config_dict[
-                "compare_sample_default_sample_size"],
-            compare_sample_sample_size_per_object=domain_config_dict[
-                "compare_sample_sample_size_per_object"
-            ]
         )

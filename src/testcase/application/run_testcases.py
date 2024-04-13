@@ -8,7 +8,7 @@ from src.testcase.driver_ports.i_run_testcases import (
 )
 from src.testcase.driven_ports.i_backend_factory import IBackendFactory
 from src.testcase.driven_ports.i_notifier import INotifier
-from src.testcase.dtos import TestCaseResultDTO, TestResult, TestStatus
+from src.dtos.testcase import TestCaseResultDTO, TestResult, TestStatus
 from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
 
 
@@ -47,6 +47,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     end_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     testobject=command.testobject,
                     run_id=run_id,
+                    diff=dict(),
                     testtype=command.testtype,
                     specifications=command.specs,
                 )
