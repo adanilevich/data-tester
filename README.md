@@ -14,7 +14,7 @@
 | src/testcase/driven\_adapters/backends/local/\_\_init\_\_.py            |        4 |        0 |    100% |           |
 | src/testcase/driven\_adapters/backends/local/demo\_naming\_resolver.py  |       50 |        4 |     92% | 23, 82-84 |
 | src/testcase/driven\_adapters/backends/local/demo\_query\_handler.py    |       20 |       10 |     50% |13-15, 19-22, 28, 31-34 |
-| src/testcase/driven\_adapters/backends/local/local\_backend.py          |      112 |       38 |     66% |110-124, 130-137, 143-166, 171, 178-181, 247, 251, 253, 256-261 |
+| src/testcase/driven\_adapters/backends/local/local\_backend.py          |      112 |       38 |     66% |110-124, 130-137, 143-166, 170, 177-180, 246, 250, 252, 255-260 |
 | src/testcase/driven\_adapters/backends/local/local\_backend\_factory.py |       16 |        0 |    100% |           |
 | src/testcase/driven\_adapters/notifiers/\_\_init\_\_.py                 |        2 |        0 |    100% |           |
 | src/testcase/driven\_adapters/notifiers/in\_memory\_notifier.py         |        7 |        0 |    100% |           |
