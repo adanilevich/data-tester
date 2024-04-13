@@ -22,10 +22,10 @@ class LocalBackend(IBackend):
 
     For resolving business naming conventions to technical paths (e.g. db names),
     a NamingResolver needs to be provided, which is used by almost all methods
-    which operate on 'domain', 'project' or 'instance' keywords in their signature.
+    which operate on 'domain', 'stage' or 'instance' keywords in their signature.
 
     For translating test queries provided by business to different instances and stages
-    (projects) of database, a QueryHandler must be provided.
+    of database, a QueryHandler must be provided.
     """
 
     supports_db_comparison = False
@@ -68,7 +68,7 @@ class LocalBackend(IBackend):
             db_name = db_file.split("/")[-1].removesuffix(".db")
             self.db.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
 
-    def get_testobjects(self, domain: str, project: str, instance: str) -> List[str]:
+    def get_testobjects(self, domain: str, stage: str, instance: str) -> List[str]:
         """
         Gets both file-like testobjects (e.g. file directories in raw layer)
         and existing testobjects from db, e.g. tables and views.
@@ -78,7 +78,7 @@ class LocalBackend(IBackend):
         # For that, get base paths to file like objects - these could be several paths,
         # e.g. <base_path>/raw and <base_path>/export
         rel_filepaths: List[str] = self.naming_resolver.resolve_files(
-            domain, project, instance)
+            domain, stage, instance)
         abs_filepaths = [self.files_path + "/" + path_ for path_ in rel_filepaths]
 
         file_testobjects: List[str] = []
@@ -91,7 +91,7 @@ class LocalBackend(IBackend):
                     file_testobjects.append(testobject_name)
 
         # SECOND, get testobjects from dwh / database layer
-        catalog, schema = self.naming_resolver.resolve_db(domain, project, instance)
+        catalog, schema = self.naming_resolver.resolve_db(domain, stage, instance)
         query = f"""
             SELECT table_name FROM INFORMATION_SCHEMA.TABLES
             WHERE table_catalog = '{catalog}'
@@ -103,7 +103,7 @@ class LocalBackend(IBackend):
 
         return file_testobjects + db_testobject
 
-    def get_filenames(self, domain: str, project: str, instance: str, testobject: str) \
+    def get_filenames(self, domain: str, stage: str, instance: str, testobject: str) \
             -> List[str]:
         """See interface definition (parent class IBackend)."""
 
@@ -113,7 +113,7 @@ class LocalBackend(IBackend):
             raise ValueError("Only file-like testobjects are supported")
 
         filepath = self.naming_resolver.resolve_files(
-            domain, project, instance, testobject)
+            domain, stage, instance, testobject)
 
         filenames: List[str] = []
         for file_or_dir in self.fs.ls(filepath):
@@ -123,27 +123,27 @@ class LocalBackend(IBackend):
 
         return filenames
 
-    def get_rowcount(self, domain: str, project: str, instance: str, testobject: str,
+    def get_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
                      filters: Optional[List[Tuple[str, str]]] = None) -> int:
         """See interface definition (parent class IBackend)."""
 
         object_type = self.naming_resolver.get_object_type(domain, testobject)
         if object_type == object_type.FILE:
-            count = self._get_db_rowcount(domain, project, instance, testobject, filters)
+            count = self._get_db_rowcount(domain, stage, instance, testobject, filters)
         else:
             count = self._get_file_rowcount(
-                domain, project, instance, testobject, filters)
+                domain, stage, instance, testobject, filters)
 
         return count
 
-    def _get_db_rowcount(self, domain: str, project: str, instance: str, testobject: str,
+    def _get_db_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
                          filters: Optional[List[Tuple[str, str]]] = None, ) \
             -> int:
 
         filters_: List[Tuple[str, str]] = filters or []
 
         catalog, schema, table = self.naming_resolver.resolve_db(
-            domain, project, instance, testobject)
+            domain, stage, instance, testobject)
 
         where_clause = "WHERE 1 = 1"
         for col_name, operation in filters_:
@@ -165,23 +165,22 @@ class LocalBackend(IBackend):
 
         return count
 
-    def _get_file_rowcount(self, domain: str, project: str, instance: str,
-                           testobject: str,
+    def _get_file_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
                            filters: Optional[List[Tuple[str, str]]] = None) -> int:
         raise ValueError("Getting rowcount for file-like testobjects (e.g. raw "
                          "layer) is not yet supported.")
 
-    def run_query(self, query: str, domain: str, project: str,
-                  instance: str) -> Dict[str, list[Any]]:
+    def run_query(self, query: str, domain: str, stage: str, instance: str) \
+            -> Dict[str, list[Any]]:
         """See interface definition (parent class IBackend)."""
 
-        translated_query = self.query_handler.translate(query, domain, project, instance)
+        translated_query = self.query_handler.translate(query, domain, stage, instance)
         result = self.db.query(translated_query).pl().to_dict(as_series=False)
 
         return result
 
-    def get_schema(self, domain: str, project: str, instance: str,
-                   testobject: str) -> SchemaSpecificationDTO:
+    def get_schema(self, domain: str, stage: str, instance: str, testobject: str) \
+            -> SchemaSpecificationDTO:
         """
         Gets table schema from duckdb, harmonizes datatypes according to conventions and
         returns results. Schema retrieval of file objects is not supported.
@@ -193,7 +192,7 @@ class LocalBackend(IBackend):
                              "layer) is not supported.")
 
         catalog, schema, table = self.naming_resolver.resolve_db(
-            domain, project, instance, testobject)
+            domain, stage, instance, testobject)
 
         schema_query = f"""
                 SELECT column_name AS col, data_type AS dtype
@@ -213,7 +212,7 @@ class LocalBackend(IBackend):
         )
 
         result = SchemaSpecificationDTO(
-            location=".".join([domain, project, instance, testobject]),
+            location=".".join([domain, stage, instance, testobject]),
             columns=schema_as_dict,
         )
 
@@ -221,7 +220,7 @@ class LocalBackend(IBackend):
 
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         """
-        In our DWH project, the convention is that datatypes are relevant for comparison
+        In our DWH stage, the convention is that datatypes are relevant for comparison
         only in their simplified form, e.g. complex datatypes like ARRAY, STRUCT are
         not relevant for automated comparisons. Here, a harmonization between
         duckdb dtypes and aligned conventions take place.

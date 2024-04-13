@@ -4,7 +4,7 @@ from src.testcase.precondition_checks.i_checkable import ICheckable
 
 class CheckTestObjectExists(AbstractCheck):
     """
-    Check if a testobject (e.g. table) exists in given domain, project and instance.
+    Check if a testobject (e.g. table) exists in given domain, stage and instance.
     Uses backend from checkable (e.g. TestCase instance) to fetch database information.
     """
     name = "testobject_exists"
@@ -13,7 +13,7 @@ class CheckTestObjectExists(AbstractCheck):
 
         existing_testobjects = checkable.backend.get_testobjects(
             domain=checkable.testobject.domain,
-            project=checkable.testobject.project,
+            stage=checkable.testobject.stage,
             instance=checkable.testobject.instance,
         )
 

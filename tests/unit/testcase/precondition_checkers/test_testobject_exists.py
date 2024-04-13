@@ -27,7 +27,7 @@ class DummyCheckable(ICheckable):
 def create_checkable(testobject: str) -> ICheckable:
     checkable = DummyCheckable()
     checkable.testobject = TestObjectDTO(
-        name="any", domain="any", instance="any", project="any")
+        name="any", domain="any", instance="any", stage="any")
     checkable.backend = DummyBackend()
     checkable.testobject.name = testobject
     return checkable

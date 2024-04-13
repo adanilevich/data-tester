@@ -7,10 +7,10 @@ from src.dtos.specifications import SchemaSpecificationDTO
 class DummyBackend(IBackend):
     """Dummy backend for test purpose only"""
 
-    def get_testobjects(self, domain: str, project: str, instance: str) -> List[str]:
+    def get_testobjects(self, domain: str, stage: str, instance: str) -> List[str]:
         return ["testobject1", "testobject2"]
 
-    def get_schema(self, domain: str, project: str, instance: str,
+    def get_schema(self, domain: str, stage: str, instance: str,
                    testobject: str) -> SchemaSpecificationDTO:
         return SchemaSpecificationDTO(columns={"my_col": "my_dtype"})
 

@@ -8,10 +8,10 @@ class DemoQueryHandler:
     def __init__(self, domain_config: DomainConfigDTO):
         self.config: DomainConfigDTO = domain_config
 
-    def translate(self, query: str, domain: str, project, instance: str) -> str:
+    def translate(self, query: str, domain: str, stage: str, instance: str) -> str:
 
         translator = self._fetch_translator(domain=domain)
-        translated_query = translator.translate(query, project, instance)
+        translated_query = translator.translate(query, stage, instance)
         return translated_query
 
     def _fetch_translator(self, domain: str):
@@ -27,8 +27,8 @@ class DefaultDemoTranslator:
     def __init__(self, domain_config: DomainConfigDTO):
         self.config: DomainConfigDTO = domain_config
 
-    def translate(self, query: str, project: str, instance: str) -> str:
+    def translate(self, query: str, stage: str, instance: str) -> str:
         if self.config:
-            return query + f"\n--{project}" + f"\n--{instance}"
+            return query + f"\n--{stage}" + f"\n--{instance}"
         else:
             return query

@@ -45,7 +45,7 @@ def testcase_creator(domain_config):
         testobject = TestObjectDTO(
             name="stage_customers",
             domain="payments",
-            project="test",
+            stage="test",
             instance="alpha",
         )
         testcase = TestCaseFactory.create(

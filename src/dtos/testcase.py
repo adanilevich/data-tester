@@ -11,7 +11,7 @@ class TestObjectDTO:
     __test__ = False  # prevents pytest collection
     name: str
     domain: str
-    project: str
+    stage: str
     instance: str
 
     @classmethod
@@ -19,7 +19,7 @@ class TestObjectDTO:
         return cls(
             name=testobject_as_dict["name"],
             domain=testobject_as_dict["domain"],
-            project=testobject_as_dict["project"],
+            stage=testobject_as_dict["stage"],
             instance=testobject_as_dict["instance"]
         )
 
@@ -27,7 +27,7 @@ class TestObjectDTO:
         return dict(
             name=self.name,
             domain=self.domain,
-            project=self.project,
+            stage=self.stage,
             instance=self.instance
         )
 

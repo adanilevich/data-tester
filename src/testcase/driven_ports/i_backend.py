@@ -15,11 +15,11 @@ class IBackend(ABC):
     supports_primary_keys: bool
 
     @abstractmethod
-    def get_testobjects(self, domain: str, project: str, instance) -> List[str]:
-        """Get a list of testobjects existing for given domain, project and instance"""
+    def get_testobjects(self, domain: str, stage: str, instance) -> List[str]:
+        """Get a list of testobjects existing for given domain, stage and instance"""
 
     @abstractmethod
-    def get_schema(self, domain: str, project: str, instance: str,
+    def get_schema(self, domain: str, stage: str, instance: str,
                    testobject: str) -> SchemaSpecificationDTO:
         """Get schema (column names and datatyples) of testobject."""
 
