@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.testcase.precondition_checks.i_checkable import ICheckable
+from src.testcase.precondition_checks import ICheckable
 
 
 class IPreconditionChecker(ABC):

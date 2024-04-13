@@ -1,21 +1,14 @@
 # flake8: noqa
 from typing import Dict, List, Callable
-from src.testcase.testcases.abstract_testcase import AbstractTestCase
 from src.dtos.testcase import TestObjectDTO
 from src.dtos.configs import DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
 from src.testcase.driven_ports.i_backend import IBackend
 from src.testcase.driven_ports.i_notifier import INotifier
 
-# we need tp explicitely import all modules where subclasses of TestCase are defined
-# such that they are registered and can be created
-# noinspection PyUnresolvedReferences
-from src.testcase.testcases import (
-    dummy_ok,
-    dummy_nok,
-    dummy_exception,
-    schema
-)
+# we need to import all subclasses of TestCase  such that they are registered
+# and can be created. This is done in testcase.__init__.py which is imported here
+from src.testcase.testcases import *
 
 
 class TestCaseUnknownError(NotImplementedError):

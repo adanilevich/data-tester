@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any, Optional, Tuple
 
 from src.testcase.driven_ports.i_backend import IBackend
 from src.dtos.specifications import SchemaSpecificationDTO
@@ -16,3 +16,11 @@ class DummyBackend(IBackend):
 
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         return schema
+
+    def run_query(self, query: str, domain: str, stage: str, instance: str) \
+            -> Dict[str, List[Any]]:
+        return {"col": [1, 2, 3]}
+
+    def get_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
+                     filters: Optional[List[Tuple[str, str]]] = None) -> int:
+        return 10

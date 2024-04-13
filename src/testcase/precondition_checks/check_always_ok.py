@@ -1,5 +1,4 @@
-from src.testcase.precondition_checks.abstract_check import AbstractCheck
-from src.testcase.precondition_checks.i_checkable import ICheckable
+from src.testcase.precondition_checks import AbstractCheck, ICheckable
 
 
 class CheckAlwaysOk(AbstractCheck):

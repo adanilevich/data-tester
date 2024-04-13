@@ -39,6 +39,16 @@ class SchemaSpecificationDTO(SpecificationDTO):
 
     def __post_init__(self):
         super().__post_init__()
-        self.type = "schema"
         if len(self.columns) == 0:
-            raise ValueError("Schema specification must have non-empty columns")
+            raise ValueError("Schema specification must have non-empty columns.")
+
+
+@dataclass
+class RowCountSqlDTO(SpecificationDTO):
+    type: str = "rowcount_sql"
+    query: str = ""
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self.query == "":
+            raise ValueError("Please provide a non-empty rowcount query.")

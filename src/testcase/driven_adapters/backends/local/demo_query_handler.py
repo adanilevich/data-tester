@@ -28,7 +28,9 @@ class DefaultDemoTranslator:
         self.config: DomainConfigDTO = domain_config
 
     def translate(self, query: str, stage: str, instance: str) -> str:
+        assert stage is not None
+        assert instance is not None
         if self.config:
-            return query + f"\n--{stage}" + f"\n--{instance}"
+            return query
         else:
             return query

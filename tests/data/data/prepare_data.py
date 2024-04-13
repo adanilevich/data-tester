@@ -216,10 +216,11 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
     fs.mkdir(str(path), create_parents=False)
 
     # create databases and tables:
-    for obj in objects:
-        database = obj[0] + '_' + obj[1]  # database files are <domain>-<stage>.db
-        schema = obj[2]  # schema always corresponds to instance
-        table = obj[-1] + '_' + obj[3]  # table names are <layer>_<objectname>
+    for domain, stage, instance, objectname, layer in objects:
+        # database files are <domain>_<stage>.db, e.g. payments_test.db
+        database = domain + '_' + stage
+        schema = instance  # schema always corresponds to instance
+        table = layer + '_' + objectname  # table names are <layer>_<objectname>
 
         # create database: duckdb database files are created if not exist
         duckdb.execute(f"ATTACH IF NOT EXISTS '{str(path/database)}.db' AS {database}")
