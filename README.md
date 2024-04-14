@@ -24,24 +24,25 @@
 | src/testcase/driven\_ports/i\_notifier.py                               |        4 |        0 |    100% |           |
 | src/testcase/driver\_adapters/cli\_testcase\_runner.py                  |       13 |        0 |    100% |           |
 | src/testcase/driver\_ports/i\_run\_testcases.py                         |       20 |        0 |    100% |           |
-| src/testcase/precondition\_checks/\_\_init\_\_.py                       |        8 |        0 |    100% |           |
+| src/testcase/precondition\_checks/\_\_init\_\_.py                       |        9 |        0 |    100% |           |
 | src/testcase/precondition\_checks/abstract\_check.py                    |        8 |        0 |    100% |           |
 | src/testcase/precondition\_checks/check\_always\_nok.py                 |        5 |        0 |    100% |           |
 | src/testcase/precondition\_checks/check\_always\_ok.py                  |        5 |        0 |    100% |           |
+| src/testcase/precondition\_checks/check\_specs\_are\_unique.py          |       23 |        0 |    100% |           |
 | src/testcase/precondition\_checks/check\_testobject\_exists.py          |        9 |        0 |    100% |           |
-| src/testcase/precondition\_checks/check\_testobject\_not\_empty.py      |        9 |        2 |     78% |     23-24 |
-| src/testcase/precondition\_checks/i\_checkable.py                       |       15 |        0 |    100% |           |
+| src/testcase/precondition\_checks/check\_testobject\_not\_empty.py      |        9 |        0 |    100% |           |
+| src/testcase/precondition\_checks/i\_checkable.py                       |       18 |        0 |    100% |           |
 | src/testcase/precondition\_checks/i\_precondition\_checker.py           |        5 |        0 |    100% |           |
-| src/testcase/precondition\_checks/precondition\_checker.py              |       13 |        0 |    100% |           |
+| src/testcase/precondition\_checks/precondition\_checker.py              |       15 |        0 |    100% |           |
 | src/testcase/testcases/\_\_init\_\_.py                                  |        7 |        0 |    100% |           |
-| src/testcase/testcases/abstract\_testcase.py                            |       90 |        1 |     99% |       100 |
+| src/testcase/testcases/abstract\_testcase.py                            |       84 |        1 |     99% |        92 |
 | src/testcase/testcases/dummy\_exception.py                              |       10 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_nok.py                                    |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_ok.py                                     |       11 |        0 |    100% |           |
-| src/testcase/testcases/rowcount.py                                      |       65 |        0 |    100% |           |
-| src/testcase/testcases/schema.py                                        |      139 |        3 |     98% |119, 182, 244 |
+| src/testcase/testcases/rowcount.py                                      |       55 |        1 |     98% |        77 |
+| src/testcase/testcases/schema.py                                        |      129 |        4 |     97% |114, 139, 169, 231 |
 | src/testcase/testcases/testcase\_factory.py                             |       21 |        0 |    100% |           |
-|                                                               **TOTAL** |  **897** |   **44** | **95%** |           |
+|                                                               **TOTAL** |  **900** |   **44** | **95%** |           |
 
 11 empty files skipped.
 
