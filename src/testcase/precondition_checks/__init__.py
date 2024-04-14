@@ -7,4 +7,5 @@ from src.testcase.precondition_checks.check_always_nok import CheckAlwaysNok
 from src.testcase.precondition_checks.check_testobject_exists import CheckTestObjectExists
 from src.testcase.precondition_checks.check_testobject_not_empty import CheckTestObjectNotEmpty
 from src.testcase.precondition_checks.check_specs_are_unique import CheckSpecsAreUnique
+from src.testcase.precondition_checks.check_primary_keys_are_specified import CheckPrimaryKeysAreSpecified
 from src.testcase.precondition_checks.precondition_checker import PreConditionChecker

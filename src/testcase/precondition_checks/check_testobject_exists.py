@@ -1,4 +1,5 @@
 from src.testcase.precondition_checks import AbstractCheck, ICheckable
+from src.dtos.testcase import DBInstanceDTO
 
 
 class CheckTestObjectExists(AbstractCheck):
@@ -10,11 +11,12 @@ class CheckTestObjectExists(AbstractCheck):
 
     def _check(self, checkable: ICheckable) -> bool:
 
-        existing_testobjects = checkable.backend.get_testobjects(
+        db = DBInstanceDTO(
             domain=checkable.testobject.domain,
             stage=checkable.testobject.stage,
-            instance=checkable.testobject.instance,
+            instance=checkable.testobject.instance
         )
+        existing_testobjects = checkable.backend.get_testobjects(db)
 
         if checkable.testobject.name in existing_testobjects:
             return True

@@ -8,7 +8,7 @@ from src.dtos.testcase import (
     TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
 )
 from src.dtos.configs import DomainConfigDTO
-from src.dtos.specifications import SpecificationDTO
+from src.dtos.specifications import SpecificationDTO, ANY_SPECIFICATION_TYPE
 from src.testcase.ports import IBackend, INotifier
 from src.testcase.precondition_checks import (
     ICheckable,
@@ -85,6 +85,25 @@ class AbstractTestCase(ICheckable):
                 return False
 
         return True
+
+    def _get_spec(self, spec_class: Any) -> ANY_SPECIFICATION_TYPE:
+        """
+        Retrieves unique specification of requested type from all specifications which
+        were provided via the __init__ method
+        """
+
+        provided_specs: List[spec_class] = []
+        for spec in self.specs:
+            if isinstance(spec, spec_class):
+                provided_specs.append(spec)
+
+        if len(provided_specs) > 1:
+            type_ = provided_specs[0].type
+            msg = (f"Non-unique specfication of type {type_} provided: {provided_specs}. "
+                   f"Prechecks failed.")
+            raise ValueError(msg)
+
+        return provided_specs[0]
 
     @abstractmethod
     def _execute(self):

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.dtos.configs import DomainConfigDTO
+from src.dtos.testcase import DBInstanceDTO
 
 
 class DemoQueryHandler:
@@ -8,10 +9,10 @@ class DemoQueryHandler:
     def __init__(self, domain_config: DomainConfigDTO):
         self.config: DomainConfigDTO = domain_config
 
-    def translate(self, query: str, domain: str, stage: str, instance: str) -> str:
+    def translate(self, query: str, db: DBInstanceDTO) -> str:
 
-        translator = self._fetch_translator(domain=domain)
-        translated_query = translator.translate(query, stage, instance)
+        translator = self._fetch_translator(domain=db.domain)
+        translated_query = translator.translate(query, db.stage, db.instance)
         return translated_query
 
     def _fetch_translator(self, domain: str):

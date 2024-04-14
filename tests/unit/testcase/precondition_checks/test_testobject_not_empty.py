@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.precondition_checks import CheckTestObjectNotEmpty, ICheckable
-
+from src.dtos.testcase import TestObjectDTO
 
 class TestTestObjectNotEmptyChecker:
 
@@ -9,8 +9,8 @@ class TestTestObjectNotEmptyChecker:
     def checkable(self, checkable_creator) -> ICheckable:
         checkable = checkable_creator.create()
 
-        def get_rowcount_(testobject: str, *args, **kwargs) -> int:
-            if "zero" in testobject:
+        def get_rowcount_(testobject: TestObjectDTO, *args, **kwargs) -> int:
+            if "zero" in testobject.name:
                 return 0
             else:
                 return 10

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Dict, List, get_type_hints
+from typing import Optional, Dict, List, get_type_hints, Union
 
 
 @dataclass
@@ -52,3 +52,18 @@ class RowCountSqlDTO(SpecificationDTO):
         super().__post_init__()
         if self.query == "":
             raise ValueError("Please provide a non-empty rowcount query.")
+
+
+@dataclass
+class CompareSampleSqlDTO(SpecificationDTO):
+    type: str = "compare_sample_sql"
+    query: str = ""
+
+    def __post_init__(self):
+        super().__post_init__()
+        if self.query == "":
+            raise ValueError("Please provide a non-empty compare sample query.")
+
+
+ANY_SPECIFICATION_TYPE = Union[
+    SchemaSpecificationDTO, RowCountSqlDTO, CompareSampleSqlDTO]
