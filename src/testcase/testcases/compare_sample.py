@@ -1,5 +1,5 @@
-from typing import Dict, List, Any
 import polars as pl
+import time
 
 from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import CompareSampleSqlDTO, SchemaSpecificationDTO
@@ -52,7 +52,7 @@ class CompareSampleTestCase(AbstractTestCase):
                     primary_keys=primary_keys,
                     key_sample=sample_keys,
                 )
-                columns = list(expected.keys())
+                columns = expected.columns
             except Exception as err:
                 msg = "Error while sampling from test query: " + str(err)
                 raise err.__class__(msg)
@@ -72,20 +72,20 @@ class CompareSampleTestCase(AbstractTestCase):
         else:
             raise NotImplementedError("Using backend comparison not implemented")
 
-        real_sample_size = len(list(expected.values())[0])
+        real_sample_size = expected.shape[0]
+        diff_size = diff.shape[0]
 
-        if len(list(diff.values())[0]) == 0:
+        if diff_size == 0:
             self.result = self.result.OK
             self.summary = (f"Sample (of size {real_sample_size}) from testobject equals "
                             f"sample from test sql.")
         else:
             # trimm diff to ca. 500 examples to not blow up memory
-            diff_example = {
-                key: value[:500] for key, value in diff.items()
-            }
-            self.diff.update({"compare_sample_diff_example": diff_example})
+            diff_example = diff.head(500)
+            self.diff.update({
+                "compare_sample_diff_example": diff_example.to_dict(as_series=False)
+            })
             self.result = self.result.NOK
-            diff_size = len(diff[list(diff.keys())[0]])
             msg = f"Testobject differs from test sql in {diff_size} sample row(s)."
             self.summary = msg
 
@@ -103,37 +103,45 @@ class CompareSampleTestCase(AbstractTestCase):
         return sample_size
 
     @staticmethod
-    def _get_diff(expected: Dict[str, List[Any]], actual: Dict[str, List[Any]]) \
-            -> Dict[str, List[Any]]:
+    def _get_diff(expected: pl.DataFrame, actual: pl.DataFrame) -> pl.DataFrame:
 
-        exp_df = pl.DataFrame(expected)
-        act_df = pl.DataFrame(actual)
-
+        start = time.time()
         try:
-            schema = exp_df.schema
-            act_df = act_df.cast(schema, strict=True)  # type: ignore
+            schema = expected.schema
+            actual = actual.cast(schema, strict=True)  # type: ignore
         except pl.ComputeError:
-            act_df = act_df.cast(pl.String)
-            exp_df = exp_df.cast(pl.String)
+            actual = actual.cast(pl.String)
+            expected = expected.cast(pl.String)
+        end = time.time()
+        print("Datatype casting: ", (end - start))
 
         def add_rowhash(df_: pl.DataFrame) -> pl.DataFrame:
             return df_.with_columns((df_.hash_rows()).alias("__rowhash__"))
 
-        act_df = add_rowhash(act_df)
-        exp_df = add_rowhash(exp_df)
+        start = time.time()
+        actual = add_rowhash(actual)
+        expected = add_rowhash(expected)
+        end = time.time()
+        print("Rowhash calculation: ", (end - start))
 
         # Compare dataframes via an anti-join
-        exp_not_act = exp_df.join(act_df, on="__rowhash__", how="anti")
+        start = time.time()
+        exp_not_act = expected.join(actual, on="__rowhash__", how="anti")
         exp_not_act = exp_not_act.with_columns(pl.lit("testobject").alias("__source__"))
 
-        act_not_exp = act_df.join(exp_df, on="__rowhash__", how="anti")
+        act_not_exp = actual.join(expected, on="__rowhash__", how="anti")
         act_not_exp = act_not_exp.with_columns(pl.lit("testquery").alias("__source__"))
+        end = time.time()
+        print("Diff comparison: ", (end - start))
 
         # merge results
+        start = time.time()
         diff = (
             exp_not_act
             .extend(act_not_exp)
             .sort(by=["__rowhash__", "__source__"])
         )
+        end = time.time()
+        print("Merging diffs: ", (end - start))
 
-        return diff.to_dict(as_series=False)
+        return diff
