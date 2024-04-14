@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="d_bc43c574bf49603f_i_checkable_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-14 12:35 +0000
+            created at 2024-04-14 20:05 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -92,18 +92,13 @@
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">    <span class="key">def</span> <span class="nam">_check</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">checkable</span><span class="op">:</span> <span class="nam">ICheckable</span><span class="op">)</span> <span class="op">-></span> <span class="nam">bool</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">        <span class="nam">rowcount</span> <span class="op">=</span> <span class="nam">checkable</span><span class="op">.</span><span class="nam">backend</span><span class="op">.</span><span class="nam">get_rowcount</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">            <span class="nam">domain</span><span class="op">=</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">domain</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">            <span class="nam">stage</span><span class="op">=</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">stage</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">            <span class="nam">instance</span><span class="op">=</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">instance</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">            <span class="nam">testobject</span><span class="op">=</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">name</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">        <span class="key">if</span> <span class="nam">rowcount</span> <span class="op">></span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">            <span class="nam">checkable</span><span class="op">.</span><span class="nam">update_summary</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Testobject </span><span class="op">{</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst"> is empty!</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">        <span class="nam">rowcount</span> <span class="op">=</span> <span class="nam">checkable</span><span class="op">.</span><span class="nam">backend</span><span class="op">.</span><span class="nam">get_rowcount</span><span class="op">(</span><span class="nam">testobject</span><span class="op">=</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">        <span class="key">if</span> <span class="nam">rowcount</span> <span class="op">></span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">            <span class="key">return</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">            <span class="nam">checkable</span><span class="op">.</span><span class="nam">update_summary</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Testobject </span><span class="op">{</span><span class="nam">checkable</span><span class="op">.</span><span class="nam">testobject</span><span class="op">.</span><span class="nam">name</span><span class="op">}</span><span class="fst"> is empty!</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">            <span class="key">return</span> <span class="key">False</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -113,7 +108,7 @@
             <a id="nextFileLink" class="nav" href="d_bc43c574bf49603f_i_checkable_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-14 12:35 +0000
+            created at 2024-04-14 20:05 +0000
         </p>
     </div>
 </footer>
