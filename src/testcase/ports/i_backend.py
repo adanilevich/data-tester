@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional, Tuple
+import polars as pl
 
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.testcase import TestObjectDTO, DBInstanceDTO
@@ -35,7 +36,7 @@ class IBackend(ABC):
         """
 
     @abstractmethod
-    def run_query(self, query: str) -> Dict[str, List[Any]]:
+    def run_query(self, query: str) -> pl.DataFrame:
         """
         Executes a query against the defined database. Client is responsible for
         translating the query using translate_query().
@@ -71,7 +72,7 @@ class IBackend(ABC):
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
             columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
+    ) -> pl.DataFrame:
         """
         Given a test sql (query), a list of column names (interpreted as primary keys),
         a corresponding list of sample values, obtains a random sample
@@ -86,7 +87,7 @@ class IBackend(ABC):
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
             key_sample: List[str], columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
+    ) -> pl.DataFrame:
         """
         Given a list of column names (interpreted as primary keys) and a corresponding
         list of values, obtains a random sample of defined (or all) columns from the

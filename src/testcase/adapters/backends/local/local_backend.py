@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from typing import List, Dict, Any, Tuple, Optional
+from typing import List, Tuple, Optional
 from random import randint
 
 import duckdb
+import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
 from src.testcase.adapters.backends.local import (
@@ -158,13 +159,12 @@ class LocalBackend(IBackend):
         translated_query = self.query_handler.translate(query, db)
         return translated_query
 
-    def run_query(self, query: str) -> Dict[str, List[Any]]:
+    def run_query(self, query: str) -> pl.DataFrame:
         """See interface definition (parent class IBackend)."""
 
         result_as_df = self.duckdb.query(query).pl()
-        result_as_dict = result_as_df.to_dict(as_series=False)
 
-        return result_as_dict
+        return result_as_df
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
         """
@@ -303,7 +303,7 @@ class LocalBackend(IBackend):
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
             columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
+    ) -> pl.DataFrame:
 
         if len(key_sample) == 0 or len(primary_keys) == 0:
             raise ValueError("Provide a non-empty list of primary keys and samples!")
@@ -322,14 +322,13 @@ class LocalBackend(IBackend):
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
         result_as_df = self.duckdb.query(sample_query).pl()
-        result_as_dict = result_as_df.to_dict(as_series=False)
 
-        return result_as_dict
+        return result_as_df
 
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
             key_sample: List[str], columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
+    ) -> pl.DataFrame:
 
         if len(key_sample) == 0 or len(primary_keys) == 0:
             raise ValueError("Provide a non-empty list of primary keys and samples!")
@@ -353,6 +352,5 @@ class LocalBackend(IBackend):
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
         result_as_df = self.duckdb.query(sample_query).pl()
-        result_as_dict = result_as_df.to_dict(as_series=False)
 
-        return result_as_dict
+        return result_as_df

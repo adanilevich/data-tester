@@ -40,7 +40,7 @@ jobs:
 
     - name: tests
       run: |
-        coverage run --rcfile=.coveragerc -m pytest tests/
+        coverage run --rcfile=.coveragerc -m pytest -m "not skip_test and not infrastructure" tests/
         coverage report -m --rcfile=.coveragerc
 
     - name: coverage report

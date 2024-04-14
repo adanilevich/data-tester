@@ -25,7 +25,7 @@ class TestLocalBackend:
         return query
 
     @pytest.fixture
-    def backend(domain_config, prepare_local_data):
+    def backend(self, domain_config, prepare_local_data):
         return LocalBackendFactory().create(domain_config=domain_config)
 
     @pytest.mark.parametrize("domain,stage,instance,testobjects_expected", [
@@ -87,7 +87,7 @@ class TestLocalBackend:
 
         assert "Provide a non-empty list of primary keys" in str(err)
 
-    def test_that_unique_keys_are_sampled(self, backend,test_query):
+    def test_that_unique_keys_are_sampled(self, backend, test_query):
 
         primary_keys = ["id"]
 
@@ -99,7 +99,7 @@ class TestLocalBackend:
         # all sampled key values must be unique
         assert len(set(key_sample)) == 5
 
-    def test_sampling_with_underspecified_keys_works(self, backend, test_query):
+    def test_key_sampling_with_underspecified_keys_works(self, backend, test_query):
 
         primary_keys = ["customer_name", "customer_id"]
 
@@ -120,7 +120,7 @@ class TestLocalBackend:
         sample = backend.get_sample_from_query(
             query=test_query, primary_keys=primary_keys, key_sample=key_sample)
 
-        assert sum(sample["amount"]) == 3010
+        assert sample.select("amount").sum().to_series()[0] == 3010
 
     def test_sampling_from_query_using_non_unique_keys(self, backend, test_query):
 
@@ -130,7 +130,7 @@ class TestLocalBackend:
         sample = backend.get_sample_from_query(
             query=test_query, primary_keys=primary_keys, key_sample=key_sample)
 
-        assert sum(sample["amount"]) == 21
+        assert sample.select("amount").sum().to_series()[0] == 21
 
     def test_sampling_from_testobject_using_unique_keys(self, backend):
         testobject = TestObjectDTO(
@@ -141,7 +141,7 @@ class TestLocalBackend:
         sample = backend.get_sample_from_testobject(
             testobject=testobject, primary_keys=primary_keys, key_sample=key_sample)
 
-        assert sum(sample["amount"]) == 3010
+        assert sample.select("amount").sum().to_series()[0] == 3010
 
     def test_sampling_from_testobject_using_non_unique_keys(self, backend):
         testobject = TestObjectDTO(
@@ -152,7 +152,7 @@ class TestLocalBackend:
         sample = backend.get_sample_from_testobject(
             testobject=testobject, primary_keys=primary_keys, key_sample=key_sample)
 
-        assert sum(sample["amount"]) == 21
+        assert sample.select("amount").sum().to_series()[0] == 21
 
     def test_sampling_from_testobject_using_column_filters(self, backend):
         testobject = TestObjectDTO(
@@ -168,4 +168,4 @@ class TestLocalBackend:
             columns=columns
         )
 
-        assert list(sample.keys()) == columns + ["__concat_key__"]
+        assert list(sample.columns) == columns + ["__concat_key__"]

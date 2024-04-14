@@ -15,3 +15,4 @@ fsspec  # needed both for example, 2e2 testa and also for input finders and repo
 polars  # lets try this instead of pandas
 xlsx2csv  # required for polars to read excel
 pyarrow
+numpy  # for performance testing and numerical calculations

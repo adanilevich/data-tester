@@ -1,6 +1,7 @@
 from typing import Dict, Any
 
 import pytest
+import polars as pl
 
 from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import RowCountSqlDTO
@@ -18,13 +19,19 @@ class TestRowCountTestCase:
 
         testcase_ = testcase_creator.create(ttype="ROWCOUNT")
 
-        def run_query_(query, *args, **kwargs) -> Dict[str, Any]:
+        def run_query_(query, *args, **kwargs) -> pl.DataFrame:
             if "good" in query:
-                return {"count": [10, 10], "__source__": ["expected", "actual"]}
+                return pl.DataFrame(
+                    {"count": [10, 10], "__source__": ["expected", "actual"]}
+                )
             if "strange" in query:  # backend should never return more than 2 counts
-                return {"count": [10, 5, 3], "__source__": ["expected", "actual", "df"]}
+                return pl.DataFrame(
+                    {"count": [10, 5, 3], "__source__": ["expected", "actual", "df"]}
+                )
             if "bad" in query:
-                return {"count": [10, 5], "__source__": ["expected", "actual"]}
+                return pl.DataFrame(
+                    {"count": [10, 5], "__source__": ["expected", "actual"]}
+                )
             if "exception" in query:
                 raise ValueError("This is a simulated exception.")
 

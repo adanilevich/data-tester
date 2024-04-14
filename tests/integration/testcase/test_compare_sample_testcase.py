@@ -1,3 +1,5 @@
+import pytest
+
 from src.testcase.testcases import TestCaseFactory
 from src.dtos.specifications import CompareSampleSqlDTO, SchemaSpecificationDTO
 from src.dtos.testcase import TestObjectDTO

@@ -1,4 +1,6 @@
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional, Tuple
+
+import polars as pl
 
 from src.testcase.ports.i_backend import IBackend
 from src.dtos.specifications import SchemaSpecificationDTO
@@ -22,8 +24,8 @@ class DummyBackend(IBackend):
     def translate_query(self, query: str, db: DBInstanceDTO) -> str:
         return query
 
-    def run_query(self, query: str) -> Dict[str, List[Any]]:
-        return {"col": [1, 2, 3]}
+    def run_query(self, query: str) -> pl.DataFrame:
+        return pl.DataFrame({"col": [1, 2, 3]})
 
     def get_rowcount(self, testobject: TestObjectDTO,
                      filters: Optional[List[Tuple[str, str]]] = None) -> int:
@@ -37,11 +39,11 @@ class DummyBackend(IBackend):
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
             columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
-        return {"a": [10, 20], "b": [30, 40]}
+    ) -> pl.DataFrame:
+        return pl.DataFrame({"a": [10, 20], "b": [30, 40]})
 
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
             key_sample: List[str], columns: Optional[List[str]] = None
-    ) -> Dict[str, List[Any]]:
-        return {"a": [10, 20], "b": [30, 40]}
+    ) -> pl.DataFrame:
+        return pl.DataFrame({"a": [10, 20], "b": [30, 40]})

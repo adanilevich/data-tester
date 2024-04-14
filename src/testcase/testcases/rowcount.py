@@ -40,13 +40,13 @@ class RowCountTestCase(AbstractTestCase):
             raise err.__class__(error_message)
 
         count_column_name = "cnt"
-        for column_name in query_result:
+        for column_name in query_result.columns:
             if column_name != "__source__":
                 count_column_name = column_name
 
         counts_as_tuples = list(zip(
-            query_result[count_column_name],
-            query_result["__source__"]
+            query_result.to_dict(as_series=False)[count_column_name],
+            query_result.to_dict(as_series=False)["__source__"]
         ))
         if self._validate_counts(counts_as_tuples) is False:
             return None
