@@ -1,7 +1,7 @@
 import os
 
 from src.testcase.di.di import DependencyInjector
-from src.testcase.driver_adapters.cli_testcase_runner import CliTestCaseRunner
+from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
 
 
 testobjects = [

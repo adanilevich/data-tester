@@ -1,8 +1,6 @@
 from typing import List
 
-from src.testcase.driver_ports.i_run_testcases import (
-    IRunTestCasesCommandHandler, RunTestCaseCommand
-)
+from src.testcase.ports import IRunTestCasesCommandHandler, RunTestCaseCommand
 
 
 class CliTestCaseRunner:

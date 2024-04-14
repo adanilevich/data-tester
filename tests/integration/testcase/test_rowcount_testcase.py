@@ -1,8 +1,8 @@
 from src.testcase.testcases import TestCaseFactory
 from src.dtos.specifications import RowCountSqlDTO
 from src.dtos.testcase import TestObjectDTO
-from src.testcase.driven_adapters.backends.local import LocalBackendFactory
-from src.testcase.driven_adapters.notifiers import InMemoryNotifier, StdoutNotifier
+from src.testcase.adapters.backends import LocalBackendFactory
+from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
 
 spec = RowCountSqlDTO(

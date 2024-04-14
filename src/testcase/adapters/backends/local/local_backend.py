@@ -6,10 +6,10 @@ from typing import List, Dict, Any, Tuple, Optional
 import duckdb
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
-from src.testcase.driven_adapters.backends.local import (
+from src.testcase.adapters.backends.local import (
     DemoNamingResolver, DemoQueryHandler
 )
-from src.testcase.driven_ports.i_backend import IBackend
+from src.testcase.ports.i_backend import IBackend
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.configs import DomainConfigDTO
 

@@ -3,18 +3,19 @@ from typing import Dict
 
 import pytest
 
-from src.dtos.testcase import (
-    TestObjectDTO
+from src.dtos.testcase import TestObjectDTO
+from src.dtos.configs import (
+    SchemaTestCaseConfigDTO,
+    CompareSampleTestCaseConfigDTO,
+    DomainConfigDTO
 )
-from src.dtos.configs import SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO, DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
-from src.testcase.driven_ports.i_backend import IBackend
-from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
-from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifier
-from src.testcase.driven_adapters.backends.dummy.dummy_backend import DummyBackend
+from src.testcase.ports import IBackend
+from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
+from src.testcase.adapters.backends import DummyBackend
 from src.testcase.testcases import TestCaseFactory, AbstractTestCase
-from tests.data.data.prepare_data import clean_up, prepare_data
 from src.testcase.precondition_checks import ICheckable
+from tests.data.data.prepare_data import clean_up, prepare_data
 
 
 @pytest.fixture

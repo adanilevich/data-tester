@@ -1,8 +1,8 @@
 from src.dtos.configs import DomainConfigDTO
-from src.testcase.driven_adapters.backends.local import (
+from src.testcase.adapters.backends.local import (
     LocalBackend, DemoNamingResolver, DemoQueryHandler
 )
-from src.testcase.driven_ports.i_backend_factory import IBackendFactory
+from src.testcase.ports.i_backend_factory import IBackendFactory
 from pathlib import Path
 
 PATH = Path(__file__).parent

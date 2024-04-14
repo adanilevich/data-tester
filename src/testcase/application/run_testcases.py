@@ -2,14 +2,10 @@ from typing import List
 from uuid import uuid4
 from datetime import datetime
 
-from src.testcase.driver_ports.i_run_testcases import (
-    IRunTestCasesCommandHandler,
-    RunTestCaseCommand
-)
-from src.testcase.driven_ports.i_backend_factory import IBackendFactory
-from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.ports import IRunTestCasesCommandHandler, RunTestCaseCommand
+from src.testcase.ports import IBackendFactory, INotifier
 from src.dtos.testcase import TestCaseResultDTO, TestResult, TestStatus
-from src.testcase.testcases.testcase_factory import TestCaseFactory, TestCaseUnknownError
+from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):

@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional, Tuple
 
-from src.testcase.driven_ports.i_backend import IBackend
+from src.testcase.ports.i_backend import IBackend
 from src.dtos.specifications import SchemaSpecificationDTO
 
 

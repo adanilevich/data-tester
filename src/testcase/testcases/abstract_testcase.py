@@ -9,8 +9,7 @@ from src.dtos.testcase import (
 )
 from src.dtos.configs import DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
-from src.testcase.driven_ports.i_backend import IBackend
-from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.ports import IBackend, INotifier
 from src.testcase.precondition_checks import (
     ICheckable,
     IPreconditionChecker,
