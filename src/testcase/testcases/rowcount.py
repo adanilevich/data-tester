@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Any
+from typing import List, Tuple, Any
 
 from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import RowCountSqlDTO
@@ -15,17 +15,13 @@ class RowCountTestCase(AbstractTestCase):
     """
     ttype = "ROWCOUNT"
     required_specs = ["rowcount_sql"]
-    preconditions = ["testobject_exists", "testobject_not_empty"]
+    preconditions = ["specs_are_unique", "testobject_exists", "testobject_not_empty"]
 
     def _execute(self):
 
-        rowcount_sql = self._get_rowcount_query()
-        if rowcount_sql is None:
-            self.status = self.status.ABORTED
-            self.result = self.result.NA
-            return None
-        else:
-            self.add_fact({"Rowcount Query": rowcount_sql.location})
+        # we rely on precondition checks that unique rowcount sql is provided
+        rowcount_sql = self._get_rowcount_sql()
+        self.add_fact({"Rowcount Query": rowcount_sql.location})
 
         query = rowcount_sql.query + """
             SELECT *, 'expected' AS __source__ FROM __expected_count__
@@ -69,26 +65,18 @@ class RowCountTestCase(AbstractTestCase):
 
         return None
 
-    def _get_rowcount_query(self) -> Optional[RowCountSqlDTO]:
+    def _get_rowcount_sql(self) -> RowCountSqlDTO:
 
-        provided_queries: List[RowCountSqlDTO] = []
-        rowcount_query: Optional[RowCountSqlDTO] = None
+        provided_sqls: List[RowCountSqlDTO] = []
 
         for spec in self.specs:
             if isinstance(spec, RowCountSqlDTO):
-                provided_queries.append(spec)
-                rowcount_query = spec
+                provided_sqls.append(spec)
 
-        # if more than one rowcount_sql is provided, abort execution.
-        # But: we don't check for 'no specs provided' since this is done by precon checks
-        if len(provided_queries) > 1:
-            msg = "Testcase stopped: more than one rowcount query is provided!"
-            self.update_summary(msg)
-            self.add_detail({"Provided rowcount queries": str(provided_queries)})
-            self.notify(msg)
-            return None
-        else:
-            return rowcount_query
+        if len(provided_sqls) > 1:
+            raise ValueError("Non-unique rowcound sqls provided. Prechecks failed.")
+
+        return provided_sqls[0]
 
     def _validate_counts(self, counts_as_tuples: List[Tuple[str, Any]]) -> bool:
 

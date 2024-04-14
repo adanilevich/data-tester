@@ -2,7 +2,7 @@ from typing import Dict, Any
 
 import pytest
 
-from src.testcase.testcases import RowCountTestCase
+from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import RowCountSqlDTO
 
 
@@ -14,8 +14,9 @@ class TestRowCountTestCase:
     )
 
     @pytest.fixture
-    def testcase(self, testcase_creator) -> RowCountTestCase:
-        testcase_ = testcase_creator(ttype="ROWCOUNT")
+    def testcase(self, testcase_creator) -> AbstractTestCase:
+
+        testcase_ = testcase_creator.create(ttype="ROWCOUNT")
 
         def run_query_(query, *args, **kwargs) -> Dict[str, Any]:
             if "good" in query:
@@ -31,15 +32,6 @@ class TestRowCountTestCase:
         testcase_.specs = [self.spec]
 
         return testcase_
-
-    def test_execution_stops_if_several_sqls_are_provided(self, testcase):
-        testcase.specs = [self.spec, self.spec]
-
-        testcase._execute()
-
-        assert testcase.status == testcase.status.ABORTED
-        assert testcase.result == testcase.result.NA
-        assert "more than one rowcount query is provided" in testcase.summary
 
     def test_execution_stops_if_invalid_query_is_provided(self, testcase):
         self.spec.query = "strange"

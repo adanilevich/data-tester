@@ -73,22 +73,14 @@ class AbstractTestCase(ICheckable):
 
         self.status = TestStatus.PRECONDITIONS
 
-        for required_spec in self.required_specs:
-            self.notify(f"Checking if {required_spec} is provided ...")
-            if required_spec not in [spec.type for spec in self.specs]:
-                self.notify(f"{required_spec} not provided. Stopping execution!")
-                self.result = TestResult.NA
-                self.status = TestStatus.ABORTED
-                return False
-            else:
-                self.notify(f"{required_spec} found.")
-
         for check in self.preconditions:
-            self.notify(f"Checking if {check} ...")
+            check_name = check.replace("_", " ")
+            self.notify(f"Checking that {check_name} ...")
             check_result = checker.check(check=check, checkable=self)
-            self.notify(f"Check result for {check}: {str(check_result)}")
+            self.notify(f"{check_name.title()}: {str(check_result)}")
             if not check_result:
-                self.notify(f"Stopping execution due to failed precondition: {check}!")
+                msg = f"Stopping execution due to failed precondition: {check_name}!"
+                self.notify(msg)
                 self.result = TestResult.NA
                 self.status = TestStatus.ABORTED
                 return False

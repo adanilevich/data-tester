@@ -1,53 +1,39 @@
-from typing import Dict
+from typing import Dict, List
+
+import pytest
 
 from src.testcase.precondition_checks import ICheckable, CheckTestObjectExists
-from src.dtos.testcase import TestObjectDTO
 
 
-# noinspection PyUnusedLocal
-class DummyBackend:
+class TestTestObjectExistsChecker:
 
-    @staticmethod
-    def get_testobjects(*args, **kwargs):
-        return ["testobject_1", "testobject_2"]
+    @pytest.fixture
+    def checkable(self, checkable_creator) -> ICheckable:
+        checkable = checkable_creator.create()
 
+        def get_testobjects_(*args, **kwargs) -> List[str]:
+            return ["testobject_1", "testobject_2"]
 
-class DummyCheckable(ICheckable):
+        checkable.backend.get_testobjects = get_testobjects_
 
-    def add_detail(self, detail: Dict[str, str]):
-        pass
+        return checkable
 
-    def update_summary(self, summary: str):
-        self.summary = summary
+    def test_checker_if_testobject_exists(self, checkable):
+        checkable = checkable
+        checkable.testobject.name = "testobject_1"
+        checker = CheckTestObjectExists()
 
-    def notify(self, message: str):
-        pass
+        result = checker._check(checkable)
 
+        assert result is True
+        assert checkable.summary == ""
 
-def create_checkable(testobject: str) -> ICheckable:
-    checkable = DummyCheckable()
-    checkable.testobject = TestObjectDTO(
-        name="any", domain="any", instance="any", stage="any")
-    checkable.backend = DummyBackend()
-    checkable.testobject.name = testobject
-    return checkable
+    def test_checker_if_testobject_doesnt_exist(self, checkable):
+        checkable = checkable
+        checkable.testobject.name = "testobject_not_exists"
+        checker = CheckTestObjectExists()
 
+        result = checker._check(checkable)
 
-def test_checker_if_testobject_exists():
-    checkable = create_checkable(testobject="testobject_1")
-    checker = CheckTestObjectExists()
-
-    result = checker._check(checkable)
-
-    assert result is True
-    assert checkable.summary == ""
-
-
-def test_checker_if_testobject_doesnt_exist():
-    checkable = create_checkable(testobject="testobject_not_exists")
-    checker = CheckTestObjectExists()
-
-    result = checker._check(checkable)
-
-    assert result is False
-    assert checkable.summary == "Testobject testobject_not_exists not found!"
+        assert result is False
+        assert checkable.summary == "Testobject testobject_not_exists not found!"

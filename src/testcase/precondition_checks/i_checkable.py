@@ -3,6 +3,7 @@ from typing import Dict, List
 
 from src.testcase.driven_ports.i_backend import IBackend
 from src.dtos.testcase import TestObjectDTO
+from src.dtos.specifications import SpecificationDTO
 
 
 class ICheckable(ABC):
@@ -14,6 +15,8 @@ class ICheckable(ABC):
 
     testobject: TestObjectDTO  # checking testobject existence required testobject spec
     backend: IBackend  # precondition checkers orchestrate backend methods
+    required_specs: List[str] = []
+    specs: List[SpecificationDTO] = []
     summary: str = ""
     details: List[Dict[str, str]] = []
 
