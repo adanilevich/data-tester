@@ -40,7 +40,7 @@ class SchemaTestCase(AbstractTestCase):
     def _execute(self):
 
         actual_schema: SchemaSpecificationDTO = self._get_actual_schema()
-        expected_schema: SchemaSpecificationDTO = self._get_expected_schema()
+        expected_schema: SchemaSpecificationDTO = self._get_spec(SchemaSpecificationDTO)
         self.add_fact({"Specification": expected_schema.location})
 
         # we start by comparing columns and datatypes
@@ -117,28 +117,9 @@ class SchemaTestCase(AbstractTestCase):
 
     def _get_actual_schema(self) -> SchemaSpecificationDTO:
         self.notify(f"Getting data object schema for testobject {self.testobject.name}")
-        result_schema_raw = self.backend.get_schema(
-            domain=self.testobject.domain,
-            stage=self.testobject.stage,
-            instance=self.testobject.instance,
-            testobject=self.testobject.name
-        )
+        result_schema_raw = self.backend.get_schema(self.testobject)
         result_schema = self.backend.harmonize_schema(result_schema_raw)
         return result_schema
-
-    def _get_expected_schema(self) -> SchemaSpecificationDTO:
-        """Gets expected schema specification from provided specs"""
-        self.notify(f"Getting expected schema for testobject {self.testobject.name}")
-
-        provided_schema_specs: List[SchemaSpecificationDTO] = []
-        for spec in self.specs:
-            if isinstance(spec, SchemaSpecificationDTO):
-                provided_schema_specs.append(spec)
-
-        if len(provided_schema_specs) != 1:
-            raise ValueError("Schema spec is not unique. Pre-checks must have failed!")
-
-        return provided_schema_specs[0]
 
     @staticmethod
     def _compare_columns(expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,

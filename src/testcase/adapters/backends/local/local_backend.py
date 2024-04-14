@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 from typing import List, Dict, Any, Tuple, Optional
+from random import randint
 
 import duckdb
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
@@ -12,6 +13,7 @@ from src.testcase.adapters.backends.local import (
 from src.testcase.ports.i_backend import IBackend
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.configs import DomainConfigDTO
+from src.dtos.testcase import TestObjectDTO, DBInstanceDTO
 
 
 class LocalBackend(IBackend):
@@ -56,7 +58,7 @@ class LocalBackend(IBackend):
         self.naming_resolver: DemoNamingResolver = naming_resolver
         self.query_handler: DemoQueryHandler = query_handler
         self.fs: LocalFileSystem = fs or LocalFileSystem()
-        self.db = db
+        self.duckdb = db
 
         # initialize databases
         self._init_dbs()
@@ -66,9 +68,9 @@ class LocalBackend(IBackend):
         db_files = [f for f in self.fs.ls(self.db_path) if f.endswith(".db")]
         for db_file in db_files:
             db_name = db_file.split("/")[-1].removesuffix(".db")
-            self.db.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
+            self.duckdb.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
 
-    def get_testobjects(self, domain: str, stage: str, instance: str) -> List[str]:
+    def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
         """
         Gets both file-like testobjects (e.g. file directories in raw layer)
         and existing testobjects from db, e.g. tables and views.
@@ -77,8 +79,7 @@ class LocalBackend(IBackend):
         # FIRST: get file-like testobjects
         # For that, get base paths to file like objects - these could be several paths,
         # e.g. <base_path>/raw and <base_path>/export
-        rel_filepaths: List[str] = self.naming_resolver.resolve_files(
-            domain, stage, instance)
+        rel_filepaths: List[str] = self.naming_resolver.resolve_files(db=db)
         abs_filepaths = [self.files_path + "/" + path_ for path_ in rel_filepaths]
 
         file_testobjects: List[str] = []
@@ -91,59 +92,40 @@ class LocalBackend(IBackend):
                     file_testobjects.append(testobject_name)
 
         # SECOND, get testobjects from dwh / database layer
-        catalog, schema = self.naming_resolver.resolve_db(domain, stage, instance)
+        catalog, schema, _ = self.naming_resolver.resolve_db(db=db)
         query = f"""
             SELECT table_name FROM INFORMATION_SCHEMA.TABLES
             WHERE table_catalog = '{catalog}'
             AND table_schema = '{schema}'
         """
-        tables_df = self.db.query(query).pl()
+        tables_df = self.duckdb.query(query).pl()
 
         db_testobject = tables_df.to_dict(as_series=False)["table_name"]
 
         return file_testobjects + db_testobject
 
-    def get_filenames(self, domain: str, stage: str, instance: str, testobject: str) \
-            -> List[str]:
+    def get_rowcount(
+            self, testobject: TestObjectDTO,
+            filters: Optional[List[Tuple[str, str]]] = None
+    ) -> int:
         """See interface definition (parent class IBackend)."""
 
-        object_type = self.naming_resolver.get_object_type(domain, testobject)
-
-        if object_type != object_type.FILE:
-            raise ValueError("Only file-like testobjects are supported")
-
-        filepath = self.naming_resolver.resolve_files(
-            domain, stage, instance, testobject)
-
-        filenames: List[str] = []
-        for file_or_dir in self.fs.ls(filepath):
-            if self.fs.isfile(file_or_dir):
-                filename = file_or_dir.split("/")[-1]
-                filenames.append(filename)
-
-        return filenames
-
-    def get_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
-                     filters: Optional[List[Tuple[str, str]]] = None) -> int:
-        """See interface definition (parent class IBackend)."""
-
-        object_type = self.naming_resolver.get_object_type(domain, testobject)
+        object_type = self.naming_resolver.get_object_type(testobject=testobject)
         if object_type == object_type.FILE:
-            count = self._get_file_rowcount(domain, stage, instance, testobject, filters)
+            count = self._get_file_rowcount(testobject, filters)
         else:
-            count = self._get_db_rowcount(
-                domain, stage, instance, testobject, filters)
+            count = self._get_db_rowcount(testobject, filters)
 
         return count
 
-    def _get_db_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
-                         filters: Optional[List[Tuple[str, str]]] = None, ) \
-            -> int:
+    def _get_db_rowcount(
+            self, testobject: TestObjectDTO,
+            filters: Optional[List[Tuple[str, str]]] = None,
+    ) -> int:
 
         filters_: List[Tuple[str, str]] = filters or []
-
-        catalog, schema, table = self.naming_resolver.resolve_db(
-            domain, stage, instance, testobject)
+        db = DBInstanceDTO(testobject.domain, testobject.stage, testobject.instance)
+        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
 
         where_clause = "WHERE 1 = 1"
         for column_name, operation in filters_:
@@ -158,41 +140,45 @@ class LocalBackend(IBackend):
             SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}
             {where_clause}
         """
-        count_df = self.db.query(query).pl()
+        count_df = self.duckdb.query(query).pl()
 
         count_dict = count_df.to_dict(as_series=False)  # dict {colname: [values]}
         count = count_dict["__cnt__"][0]
 
         return count
 
-    def _get_file_rowcount(self, domain: str, stage: str, instance: str, testobject: str,
-                           filters: Optional[List[Tuple[str, str]]] = None) -> int:
+    def _get_file_rowcount(
+            self, testobject: TestObjectDTO,
+            filters: Optional[List[Tuple[str, str]]] = None
+    ) -> int:
         raise ValueError("Getting rowcount for file-like testobjects (e.g. raw "
                          "layer) is not yet supported.")
 
-    def run_query(self, query: str, domain: str, stage: str, instance: str) \
-            -> Dict[str, List[Any]]:
+    def translate_query(self, query: str, db: DBInstanceDTO) -> str:
+        translated_query = self.query_handler.translate(query, db)
+        return translated_query
+
+    def run_query(self, query: str) -> Dict[str, List[Any]]:
         """See interface definition (parent class IBackend)."""
 
-        translated_query = self.query_handler.translate(query, domain, stage, instance)
-        result = self.db.query(translated_query).pl().to_dict(as_series=False)
+        result_as_df = self.duckdb.query(query).pl()
+        result_as_dict = result_as_df.to_dict(as_series=False)
 
-        return result
+        return result_as_dict
 
-    def get_schema(self, domain: str, stage: str, instance: str, testobject: str) \
-            -> SchemaSpecificationDTO:
+    def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
         """
         Gets table schema from duckdb, harmonizes datatypes according to conventions and
         returns results. Schema retrieval of file objects is not supported.
         """
 
-        object_type = self.naming_resolver.get_object_type(domain, testobject)
+        object_type = self.naming_resolver.get_object_type(testobject)
         if object_type == object_type.FILE:
             raise ValueError("Getting schema for file-like testobjects (e.g. raw "
                              "layer) is not supported.")
 
-        catalog, schema, table = self.naming_resolver.resolve_db(
-            domain, stage, instance, testobject)
+        db = DBInstanceDTO(testobject.domain, testobject.stage, testobject.instance)
+        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
 
         schema_query = f"""
                 SELECT column_name AS col, data_type AS dtype
@@ -203,7 +189,7 @@ class LocalBackend(IBackend):
             """
 
         # convert to polars dataframe with columns 'col', 'dtype'
-        schema_as_df = self.db.query(schema_query).pl()
+        schema_as_df = self.duckdb.query(schema_query).pl()
         # convert to dict with keys 'col', 'dtype' and value-lists as values
         schema_as_named_dict = schema_as_df.to_dict(as_series=False)
         # convert to a dict with column names as keys and dtypes as values
@@ -212,7 +198,7 @@ class LocalBackend(IBackend):
         )
 
         result = SchemaSpecificationDTO(
-            location=".".join([domain, stage, instance, testobject]),
+            location=".".join(testobject.dict().values()),
             columns=schema_as_dict,
         )
 
@@ -265,3 +251,108 @@ class LocalBackend(IBackend):
         harmonized_schema_dto.columns = harmonized_columns
 
         return harmonized_schema_dto
+
+    @staticmethod
+    def _get_concat_key(primary_keys: List[str]) -> str:
+        concat_key = ", '|', ".join([f"CAST({key} AS STRING)" for key in primary_keys])
+        return f"CONCAT({concat_key})"
+
+    @staticmethod
+    def _get_column_selection(columns: Optional[List[str]] = None) -> str:
+        if columns is None:
+            column_selection = "*"
+        else:
+            cols = [col for col in columns if col != "__concat_key__"]
+            column_selection = ", ".join(cols)
+        return column_selection
+
+    def _setup_test_db(self, key_sample: List[str]):
+        """Re-creates a database and populates a table with key values"""
+        key_values = ", ".join([f"('{key_value}')" for key_value in key_sample])
+        create_statement = f"""
+            DROP SCHEMA IF EXISTS __test__ CASCADE;
+            CREATE SCHEMA __test__;
+            CREATE TABLE __test__.__concat_keys__ (__concat_key__ STRING);
+            INSERT INTO __test__.__concat_keys__ VALUES {key_values}
+        """
+        self.duckdb.execute(create_statement)
+
+    def get_sample_keys(
+            self, query: str, primary_keys: List[str], sample_size: int,
+    ) -> List[str]:
+        """See interface definition (parent class IBackend)."""
+
+        if len(primary_keys) == 0:
+            raise ValueError("Provide a non-empty list of primary keys!")
+
+        concat_key = self._get_concat_key(primary_keys)
+
+        random_number = randint(0, 100)
+        sample_query = f"""
+            {query}
+            SELECT DISTINCT({concat_key}) AS __concat_key__
+            FROM __expected__
+            ORDER BY SHA256(CONCAT('{random_number}', __concat_key__))
+            LIMIT {sample_size}
+        """
+        result_as_df = self.duckdb.query(sample_query).pl()
+        result_as_dict = result_as_df.to_dict(as_series=False)["__concat_key__"]
+
+        return result_as_dict
+
+    def get_sample_from_query(
+            self, query: str, primary_keys: List[str], key_sample: List[str],
+            columns: Optional[List[str]] = None
+    ) -> Dict[str, List[Any]]:
+
+        if len(key_sample) == 0 or len(primary_keys) == 0:
+            raise ValueError("Provide a non-empty list of primary keys and samples!")
+
+        self._setup_test_db(key_sample=key_sample)
+        concat_key = self._get_concat_key(primary_keys)
+        column_selection = self._get_column_selection(columns)
+
+        sample_query = f"""
+            {query}
+            SELECT __obj__.* FROM (
+                SELECT {column_selection}, {concat_key} AS __concat_key__
+                FROM __expected__
+            ) AS __obj__
+            INNER JOIN __test__.__concat_keys__ AS __keys__
+                ON __obj__.__concat_key__ = __keys__.__concat_key__
+        """
+        result_as_df = self.duckdb.query(sample_query).pl()
+        result_as_dict = result_as_df.to_dict(as_series=False)
+
+        return result_as_dict
+
+    def get_sample_from_testobject(
+            self, testobject: TestObjectDTO, primary_keys: List[str],
+            key_sample: List[str], columns: Optional[List[str]] = None
+    ) -> Dict[str, List[Any]]:
+
+        if len(key_sample) == 0 or len(primary_keys) == 0:
+            raise ValueError("Provide a non-empty list of primary keys and samples!")
+
+        testobject_type = self.naming_resolver.get_object_type(testobject)
+        if testobject_type == testobject_type.FILE:
+            raise ValueError("Sampling files not yet supported")
+
+        db = DBInstanceDTO.from_testobject(testobject)
+        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
+        column_selection = self._get_column_selection(columns)
+        self._setup_test_db(key_sample=key_sample)
+        concat_key = self._get_concat_key(primary_keys)
+
+        sample_query = f"""
+            SELECT __obj__.* FROM (
+                SELECT {column_selection}, {concat_key} AS __concat_key__
+                FROM {catalog}.{schema}.{table}
+            ) AS __obj__
+            INNER JOIN __test__.__concat_keys__ AS __keys__
+                ON __obj__.__concat_key__ = __keys__.__concat_key__
+        """
+        result_as_df = self.duckdb.query(sample_query).pl()
+        result_as_dict = result_as_df.to_dict(as_series=False)
+
+        return result_as_dict

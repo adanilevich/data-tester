@@ -2,6 +2,7 @@ from typing import List, Tuple, Any
 
 from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import RowCountSqlDTO
+from src.dtos.testcase import DBInstanceDTO
 
 
 class RowCountTestCase(AbstractTestCase):
@@ -19,23 +20,21 @@ class RowCountTestCase(AbstractTestCase):
 
     def _execute(self):
 
-        # we rely on precondition checks that unique rowcount sql is provided
-        rowcount_sql = self._get_rowcount_sql()
+        rowcount_sql = self._get_spec(RowCountSqlDTO)
         self.add_fact({"Rowcount Query": rowcount_sql.location})
+        db = DBInstanceDTO.from_testobject(self.testobject)
 
         query = rowcount_sql.query + """
             SELECT *, 'expected' AS __source__ FROM __expected_count__
             UNION ALL
             SELECT *, 'actual' AS __source__ FROM __actual_count__
         """
+        translated_query = self.backend.translate_query(query, db)
+        self.add_detail({"Original query": query})
+        self.add_detail({"Applied query": translated_query})
 
         try:
-            query_result = self.backend.run_query(
-                query=query,
-                domain=self.testobject.domain,
-                stage=self.testobject.stage,
-                instance=self.testobject.instance
-            )
+            query_result = self.backend.run_query(translated_query)
         except Exception as err:
             error_message = f"Error during rowcount query execution: {str(err)}"
             raise err.__class__(error_message)
@@ -64,19 +63,6 @@ class RowCountTestCase(AbstractTestCase):
         self._evaluate_results(expected_count, actual_count)
 
         return None
-
-    def _get_rowcount_sql(self) -> RowCountSqlDTO:
-
-        provided_sqls: List[RowCountSqlDTO] = []
-
-        for spec in self.specs:
-            if isinstance(spec, RowCountSqlDTO):
-                provided_sqls.append(spec)
-
-        if len(provided_sqls) > 1:
-            raise ValueError("Non-unique rowcound sqls provided. Prechecks failed.")
-
-        return provided_sqls[0]
 
     def _validate_counts(self, counts_as_tuples: List[Tuple[str, Any]]) -> bool:
 

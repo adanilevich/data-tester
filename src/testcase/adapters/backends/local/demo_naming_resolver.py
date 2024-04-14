@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Optional, Union, Tuple, List
+from typing import Optional, Tuple, List
 
 from src.dtos.configs import DomainConfigDTO
+from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
 
 
 class TestobjectType(Enum):
@@ -22,21 +23,23 @@ class DemoNamingResolver:
         else:
             raise NotImplementedError(f"Resolver domain {domain} unknown!")
 
-    def get_object_type(self, domain: str, testobject: str) -> TestobjectType:
-        resolver = self._fetch_resolver(domain=domain)
+    def get_object_type(self, testobject: TestObjectDTO) -> TestobjectType:
+        resolver = self._fetch_resolver(domain=testobject.domain)
         object_type = resolver.get_object_type(testobject)
         return object_type
 
-    def resolve_files(self, domain: str, stage: str, instance: str,
-                      obj: Optional[str] = None):
-        resolver = self._fetch_resolver(domain=domain)
-        coordinates = resolver.resolve_files(domain, stage, instance, obj)
+    def resolve_files(
+            self, db: DBInstanceDTO, testobject_name: Optional[str] = None
+    ) -> List[str]:
+        resolver = self._fetch_resolver(domain=db.domain)
+        coordinates = resolver.resolve_files(db, testobject_name)
         return coordinates
 
-    def resolve_db(self, domain: str, stage: str, instance: str,
-                   obj: Optional[str] = None):
-        resolver = self._fetch_resolver(domain=domain)
-        coordinates = resolver.resolve_db(domain, stage, instance, obj)
+    def resolve_db(
+            self, db: DBInstanceDTO, testobject_name: Optional[str] = None
+    ) -> Tuple[str, str, Optional[str]]:
+        resolver = self._fetch_resolver(domain=db.domain)
+        coordinates = resolver.resolve_db(db, testobject_name)
         return coordinates
 
 
@@ -46,30 +49,29 @@ class DemoDefaultResolver:
         self.config: DomainConfigDTO = domain_config
 
     @staticmethod
-    def get_object_type(testobject: str):
+    def get_object_type(testobject: TestObjectDTO):
         """
         In our project, convention is that raw (ingest) testobjects are called
         'raw_...' (e.g. 'raw_customers') and export files are called 'export_'.
         Other than that all testobjects are tables or views.
         """
-        if testobject.startswith("raw_") or testobject.startswith("export_"):
+        if testobject.name.startswith("raw_") or testobject.name.startswith("export_"):
             return TestobjectType.FILE
         else:
             return TestobjectType.TABLE
 
     @staticmethod
-    def resolve_files(domain: str, stage: str, instance: str,
-                      obj: Optional[str] = None) -> List[str]:
+    def resolve_files(
+            db: DBInstanceDTO, testobject_name: Optional[str] = None
+    ) -> List[str]:
         """
         Returns (relative) path in raw data layer of our dummy demo DWH.
         Translates between  business coordinates and technical paths in local filesystem
 
         Args:
-            domain: domain name - corresponds to top-level folder
-            stage: stage/environment - corresponds to 2nd level folder in
-            instance: instance of dwh - 3rd level folder structure in local filesystem
-            obj: name of testobject. If provided, full path to folder which corresponds
-                to given testobject is provided, else to parent folder
+            db: unanbiguous identification of database to be tested
+            testobject_name: name of testobject. If provided, full path to folder which
+                corresponds to given testobject is provided, else to parent folder
 
         Returns:
             path: relative path in local filesystem which corresponds to specified
@@ -77,25 +79,26 @@ class DemoDefaultResolver:
         """
 
         # files are stored by <domain>/<stage>/<instance>/<business object name>
-        base_path = domain + "/" + stage + "/" + instance + "/"
-        if obj is not None:
-            if not obj.startswith("raw_"):
-                raise ValueError(f"Testobjects in raw_layer must start with raw_: {obj}")
-            base_path += "/" + obj.removeprefix("raw_") + "/"
+        base_path = db.domain + "/" + db.stage + "/" + db.instance + "/"
+        if testobject_name is not None:
+            if not testobject_name.startswith("raw_"):
+                msg = f"Testobjects in raw_layer must start with raw_: {testobject_name}"
+                raise ValueError(msg)
+            base_path += "/" + testobject_name.removeprefix("raw_") + "/"
         return [base_path]
 
     @staticmethod
-    def resolve_db(domain: str, stage: str, instance: str, obj: Optional[str] = None) \
-            -> Union[Tuple[str, str], Tuple[str, str, str]]:
+    def resolve_db(
+            db: DBInstanceDTO, testobject_name: Optional[str] = None
+    ) -> Tuple[str, str, Optional[str]]:
         """
         Returns duckdb database coordinates which correspond to specified business
         coordinates of the testobject(s)
 
         Args:
-            domain: domain name - domain_stage correspond to a database in duckdb
-            stage: stage/environment - domain_stage correspond to a database in duckdb
-            instance: instance of dwh - corresponds to database schema in duckdb
-            obj: name of testobject - corresponds to table or view name in duckdb
+            db: unanbiguous identification of database to be tested
+            testobject_name: name of testobject - corresponds to table or view name
+                in duckdb
 
         Returns:
             (catalog, schema) or (catalog, schema, table): duckdb coordinates correspon-
@@ -103,10 +106,6 @@ class DemoDefaultResolver:
         """
         # databases aka catalogs are organized <domain>_<stage>, e.g. 'payments_test'
         # instances correspond to db schemata
-        catalog = domain + "_" + stage
-        schema = instance
-        if obj is None:
-            return catalog, schema
-        else:
-            table = obj
-            return catalog, schema, table
+        catalog = db.domain + "_" + db.stage
+        schema = db.instance
+        return catalog, schema, testobject_name

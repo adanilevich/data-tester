@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Union, List, Dict
 
 from src.dtos.specifications import SpecificationDTO
@@ -8,6 +8,7 @@ from src.dtos.specifications import SpecificationDTO
 
 @dataclass
 class TestObjectDTO:
+    """Unambigiusly identifies the testobject (e.g. table) to be tested"""
     __test__ = False  # prevents pytest collection
     name: str
     domain: str
@@ -24,12 +25,30 @@ class TestObjectDTO:
         )
 
     def dict(self) -> dict:
-        return dict(
-            name=self.name,
-            domain=self.domain,
-            stage=self.stage,
-            instance=self.instance
+        return asdict(self)
+
+
+@dataclass
+class DBInstanceDTO:
+    """Unambiguously identifies the database to be tested."""
+    domain: str
+    stage: str
+    instance: str
+
+    @classmethod
+    def from_dict(cls, db_as_dict: dict) -> DBInstanceDTO:
+        return cls(**db_as_dict)
+
+    @classmethod
+    def from_testobject(cls, testobject: TestObjectDTO) -> DBInstanceDTO:
+        return cls(
+            domain=testobject.domain,
+            stage=testobject.stage,
+            instance=testobject.instance
         )
+
+    def dict(self):
+        return asdict(self)
 
 
 class TestStatus(Enum):
