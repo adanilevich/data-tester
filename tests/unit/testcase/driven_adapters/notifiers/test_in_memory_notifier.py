@@ -1,4 +1,4 @@
-from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
+from src.testcase.adapters.notifiers import InMemoryNotifier
 
 
 def test_notifying():

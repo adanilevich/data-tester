@@ -1,9 +1,13 @@
 from typing import Dict
 import pytest
 
-from src.testcase.precondition_checks.i_checkable import ICheckable
-from src.testcase.precondition_checks.precondition_checker import (
-    PreConditionChecker, CheckTestObjectExists, CheckAlwaysOk, CheckAlwaysNok)
+from src.testcase.precondition_checks import (
+    ICheckable,
+    PreConditionChecker,
+    CheckTestObjectExists,
+    CheckAlwaysOk,
+    CheckAlwaysNok
+)
 from src.dtos.testcase import TestObjectDTO
 
 

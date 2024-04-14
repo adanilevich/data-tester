@@ -1,6 +1,6 @@
 import pytest
 
-from src.testcase.driven_adapters.backends.local import LocalBackendFactory
+from src.testcase.adapters.backends import LocalBackendFactory
 
 
 class TestLocalBackendFactory:

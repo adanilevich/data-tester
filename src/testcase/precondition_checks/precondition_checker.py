@@ -1,3 +1,4 @@
+# flake8: noqa
 from typing import Dict, Callable
 
 # We need to import all subclasses of AbstractCheck  such that they are registered and can

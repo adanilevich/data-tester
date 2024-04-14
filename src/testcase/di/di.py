@@ -5,15 +5,15 @@ This class will instantiate Backends, Notifiers, Handlers based on ENV vars.
 import os
 from typing import List
 
-from src.testcase.driven_adapters.backends.dummy.dummy_backend_factory import (
+from src.testcase.adapters.backends.dummy.dummy_backend_factory import (
     DummyBackendFactory
 )
-from src.testcase.driven_adapters.notifiers.in_memory_notifier import InMemoryNotifier
-from src.testcase.driven_adapters.notifiers.stdout_notifier import StdoutNotifier
+from src.testcase.adapters.notifiers.in_memory_notifier import InMemoryNotifier
+from src.testcase.adapters.notifiers.stdout_notifier import StdoutNotifier
 from src.testcase.application.run_testcases import RunTestCasesCommandHandler
-from src.testcase.driver_ports.i_run_testcases import IRunTestCasesCommandHandler
-from src.testcase.driven_ports.i_backend_factory import IBackendFactory
-from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.ports.i_run_testcases import IRunTestCasesCommandHandler
+from src.testcase.ports.i_backend_factory import IBackendFactory
+from src.testcase.ports.i_notifier import INotifier
 
 
 class DependencyInjector:

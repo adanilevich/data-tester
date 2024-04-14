@@ -1,6 +1,6 @@
 from typing import List
 
-from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.ports.i_notifier import INotifier
 
 
 class InMemoryNotifier(INotifier):

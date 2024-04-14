@@ -3,8 +3,8 @@ from typing import Dict, List, Callable
 from src.dtos.testcase import TestObjectDTO
 from src.dtos.configs import DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
-from src.testcase.driven_ports.i_backend import IBackend
-from src.testcase.driven_ports.i_notifier import INotifier
+from src.testcase.ports.i_backend import IBackend
+from src.testcase.ports.i_notifier import INotifier
 
 # we need to import all subclasses of TestCase  such that they are registered
 # and can be created. This is done in testcase.__init__.py which is imported here

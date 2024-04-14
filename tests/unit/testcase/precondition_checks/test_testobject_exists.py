@@ -1,5 +1,4 @@
 from typing import Dict, List
-
 import pytest
 
 from src.testcase.precondition_checks import ICheckable, CheckTestObjectExists
