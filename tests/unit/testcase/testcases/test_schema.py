@@ -1,6 +1,6 @@
 import pytest
 
-from src.testcase.testcases import TestCaseFactory, SchemaTestCase
+from src.testcase.testcases import AbstractTestCase
 from src.dtos.specifications import SchemaSpecificationDTO
 
 
@@ -15,9 +15,9 @@ class TestSchemaTestCase:
     )
 
     @pytest.fixture
-    def testcase(self, testcase_creator) -> SchemaTestCase:
+    def testcase(self, testcase_creator) -> AbstractTestCase:
 
-        testcase_ = testcase_creator(ttype="SCHEMA")
+        testcase_ = testcase_creator.create(ttype="SCHEMA")
 
         # patch backend to return required resuls
         def get_schema_(*args, **kwargs) -> SchemaSpecificationDTO:
@@ -35,16 +35,6 @@ class TestSchemaTestCase:
 
         return testcase_
 
-    def test_execution_stop_if_several_schema_specs_provided(self, testcase):
-
-        # manipulate testcase to have several specs
-        testcase.specs = [self.spec, self.spec]
-
-        testcase._execute()
-
-        assert testcase.status == testcase.status.ABORTED
-        assert testcase.result == testcase.result.NA
-        assert "more than one schema spec provided" in testcase.summary
 
     def test_that_result_is_ok_for_column_comparison(self, testcase):
 

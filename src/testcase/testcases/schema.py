@@ -35,18 +35,13 @@ class SchemaTestCase(AbstractTestCase):
     """
     ttype = "SCHEMA"
     required_specs = ["schema"]
-    preconditions = ["testobject_exists"]
+    preconditions = ["specs_are_unique", "testobject_exists"]
 
     def _execute(self):
 
         actual_schema: SchemaSpecificationDTO = self._get_actual_schema()
         expected_schema: SchemaSpecificationDTO = self._get_expected_schema()
-        if expected_schema is None:
-            self.status = self.status.ABORTED
-            self.result = self.result.NA
-            return None
-        else:
-            self.add_fact({"Specification": expected_schema.location})
+        self.add_fact({"Specification": expected_schema.location})
 
         # we start by comparing columns and datatypes
         columns_diff_dto, column_comparison_result = self._compare_columns(
@@ -131,27 +126,19 @@ class SchemaTestCase(AbstractTestCase):
         result_schema = self.backend.harmonize_schema(result_schema_raw)
         return result_schema
 
-    def _get_expected_schema(self) -> Optional[SchemaSpecificationDTO]:
+    def _get_expected_schema(self) -> SchemaSpecificationDTO:
         """Gets expected schema specification from provided specs"""
         self.notify(f"Getting expected schema for testobject {self.testobject.name}")
-        # unpack expected schema from provided specifications
+
         provided_schema_specs: List[SchemaSpecificationDTO] = []
-        expected_schema: Optional[SchemaSpecificationDTO] = None
         for spec in self.specs:
             if isinstance(spec, SchemaSpecificationDTO):
-                expected_schema = spec
-                provided_schema_specs.append(expected_schema)
+                provided_schema_specs.append(spec)
 
-        # if more than one schema spec is provided, abort execution.
-        # But: we don't check for 'no specs provided' since this is done by precon checks
-        if len(provided_schema_specs) > 1:
-            msg = "Testcase stopped: more than one schema spec provided!"
-            self.update_summary(msg)
-            self.add_detail({"Provided schema specs": str(provided_schema_specs)})
-            self.notify(msg)
-            return None
-        else:
-            return expected_schema
+        if len(provided_schema_specs) != 1:
+            raise ValueError("Schema spec is not unique. Pre-checks must have failed!")
+
+        return provided_schema_specs[0]
 
     @staticmethod
     def _compare_columns(expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,

@@ -1,14 +1,8 @@
-from typing import Dict
+from typing import Dict, Callable
 
-from src.testcase.precondition_checks import (
-    IPreconditionChecker,
-    ICheckable,
-    AbstractCheck,
-    CheckTestObjectExists,
-    CheckTestObjectNotEmpty,
-    CheckAlwaysOk,
-    CheckAlwaysNok
-)
+# We need to import all subclasses of AbstractCheck  such that they are registered and can
+# be created. This is done in precondition_checks.__init__.py which is imported here
+from src.testcase.precondition_checks import *
 
 
 class PreConditionChecker(IPreconditionChecker):
@@ -17,13 +11,7 @@ class PreConditionChecker(IPreconditionChecker):
     based on the required check ('name') and then executes the check.
     """
 
-    # TODO: rework this to be similar to testcase factory
-    known_checks: Dict = {
-        "testobject_exists": CheckTestObjectExists,
-        "testobject_not_empty": CheckTestObjectNotEmpty,
-        "check_always_ok": CheckAlwaysOk,
-        "check_always_nok": CheckAlwaysNok,
-    }
+    known_checks: Dict[str, Callable] = dict()
 
     def check(self, check: str, checkable: ICheckable) -> bool:
         checker = self._checker_factory(check=check)
@@ -31,8 +19,13 @@ class PreConditionChecker(IPreconditionChecker):
         return check_result
 
     def _checker_factory(self, check: str) -> AbstractCheck:
+
+        for cls_ in AbstractCheck.__subclasses__():
+            self.known_checks.update({cls_.name: cls_})
+
         if check not in self.known_checks:
             raise NotImplementedError(f"Unknown checker name: {check}")
 
         checker = self.known_checks[check]()
+
         return checker
