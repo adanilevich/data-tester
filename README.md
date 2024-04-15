@@ -9,12 +9,12 @@
 | src/dtos/testcase.py                                                      |       65 |        2 |     97% |    40, 51 |
 | src/testcase/adapters/backends/\_\_init\_\_.py                            |        2 |        0 |    100% |           |
 | src/testcase/adapters/backends/dummy/\_\_init\_\_.py                      |        2 |        0 |    100% |           |
-| src/testcase/adapters/backends/dummy/dummy\_backend.py                    |       25 |        8 |     68% |16, 19, 22, 28, 32, 37, 43, 49 |
+| src/testcase/adapters/backends/dummy/dummy\_backend.py                    |       27 |        9 |     67% |16, 19, 23, 26, 32, 36, 42, 49, 56 |
 | src/testcase/adapters/backends/dummy/dummy\_backend\_factory.py           |        6 |        0 |    100% |           |
 | src/testcase/adapters/backends/local/\_\_init\_\_.py                      |        4 |        0 |    100% |           |
 | src/testcase/adapters/backends/local/demo\_naming\_resolver.py            |       49 |        5 |     90% | 24, 84-87 |
 | src/testcase/adapters/backends/local/demo\_query\_handler.py              |       23 |        2 |     91% |    23, 37 |
-| src/testcase/adapters/backends/local/local\_backend.py                    |      156 |       16 |     90% |116, 133-135, 155, 232, 236, 238, 241-246, 309, 334, 338 |
+| src/testcase/adapters/backends/local/local\_backend.py                    |      170 |       16 |     91% |116, 133-135, 155, 259, 263, 265, 268-273, 365, 391, 395 |
 | src/testcase/adapters/backends/local/local\_backend\_factory.py           |       16 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/\_\_init\_\_.py                           |        2 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/in\_memory\_notifier.py                   |        7 |        0 |    100% |           |
@@ -23,7 +23,7 @@
 | src/testcase/di/di.py                                                     |       24 |        1 |     96% |        28 |
 | src/testcase/drivers/cli\_testcase\_runner.py                             |       13 |        0 |    100% |           |
 | src/testcase/ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
-| src/testcase/ports/i\_backend.py                                          |       28 |        0 |    100% |           |
+| src/testcase/ports/i\_backend.py                                          |       30 |        0 |    100% |           |
 | src/testcase/ports/i\_backend\_factory.py                                 |        6 |        0 |    100% |           |
 | src/testcase/ports/i\_notifier.py                                         |        4 |        0 |    100% |           |
 | src/testcase/ports/i\_run\_testcases.py                                   |       20 |        0 |    100% |           |
@@ -39,15 +39,15 @@
 | src/testcase/precondition\_checks/i\_precondition\_checker.py             |        5 |        0 |    100% |           |
 | src/testcase/precondition\_checks/precondition\_checker.py                |       15 |        0 |    100% |           |
 | src/testcase/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
-| src/testcase/testcases/abstract\_testcase.py                              |       93 |        4 |     96% |101-104, 110 |
-| src/testcase/testcases/compare\_sample.py                                 |       89 |        6 |     93% |67-69, 112-114 |
+| src/testcase/testcases/abstract\_testcase.py                              |      114 |        4 |     96% |103-106, 129 |
+| src/testcase/testcases/compare\_sample.py                                 |      127 |       21 |     83% |100-102, 107-109, 143-145, 164-166, 180-188 |
 | src/testcase/testcases/dummy\_exception.py                                |       10 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/testcase/testcases/rowcount.py                                        |       52 |        0 |    100% |           |
 | src/testcase/testcases/schema.py                                          |      120 |        3 |     98% |114, 150, 212 |
 | src/testcase/testcases/testcase\_factory.py                               |       21 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1098** |   **53** | **95%** |           |
+|                                                                 **TOTAL** | **1175** |   **69** | **94%** |           |
 
 7 empty files skipped.
 
