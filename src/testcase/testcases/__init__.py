@@ -1,5 +1,5 @@
 # flake8: noqa
-from src.testcase.testcases.abstract_testcase import AbstractTestCase
+from src.testcase.testcases.abstract_testcase import AbstractTestCase, time_it
 from src.testcase.testcases.dummy_exception import DummyExceptionTestCase
 from src.testcase.testcases.dummy_ok import DummyOkTestCase
 from src.testcase.testcases.dummy_nok import DummyNokTestCase

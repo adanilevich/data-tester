@@ -34,7 +34,7 @@ class RowCountTestCase(AbstractTestCase):
         self.add_detail({"Applied query": translated_query})
 
         try:
-            query_result = self.backend.run_query(translated_query)
+            query_result = self.backend.run_query(translated_query, db)
         except Exception as err:
             error_message = f"Error during rowcount query execution: {str(err)}"
             raise err.__class__(error_message)

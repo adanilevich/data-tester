@@ -159,7 +159,7 @@ class LocalBackend(IBackend):
         translated_query = self.query_handler.translate(query, db)
         return translated_query
 
-    def run_query(self, query: str) -> pl.DataFrame:
+    def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         """See interface definition (parent class IBackend)."""
 
         result_as_df = self.duckdb.query(query).pl()
@@ -199,6 +199,33 @@ class LocalBackend(IBackend):
 
         result = SchemaSpecificationDTO(
             location=".".join(testobject.dict().values()),
+            columns=schema_as_dict,
+        )
+
+        return result
+
+    def get_schema_from_query(
+            self, query: str, db: DBInstanceDTO) -> SchemaSpecificationDTO:
+        """Gets schema of query. Expects query to be already translated"""
+
+        query = f"""
+            DROP TABLE IF EXISTS __query__;
+            CREATE TEMP TABLE __query__ AS (
+                {query}
+                SELECT * FROM __expected__
+            );
+            SELECT column_name as col, data_type as dtype
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE table_name = '__query__'
+        """
+        schema_as_df = self.duckdb.query(query).pl()
+        schema_as_named_dict = schema_as_df.to_dict(as_series=False)
+        schema_as_dict = dict(
+            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"])
+        )
+
+        result = SchemaSpecificationDTO(
+            location="user query",
             columns=schema_as_dict,
         )
 
@@ -253,17 +280,44 @@ class LocalBackend(IBackend):
         return harmonized_schema_dto
 
     @staticmethod
-    def _get_concat_key(primary_keys: List[str]) -> str:
-        concat_key = ", '|', ".join([f"CAST({key} AS STRING)" for key in primary_keys])
+    def _get_concat_key(
+            primary_keys: List[str], cast_to: Optional[SchemaSpecificationDTO] = None
+    ) -> str:
+        if cast_to is not None:
+            column_list = [
+                f"CAST(CAST({col} AS {dtype}) AS STRING)"
+                for col, dtype in cast_to.columns.items() if col in primary_keys
+            ]
+        else:
+            column_list = [f"CAST({key} AS STRING)" for key in primary_keys]
+        concat_key = ", '|', ".join(column_list)
         return f"CONCAT({concat_key})"
 
     @staticmethod
-    def _get_column_selection(columns: Optional[List[str]] = None) -> str:
+    def _get_column_selection(
+            columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
+    ) -> str:
         if columns is None:
-            column_selection = "*"
+            if cast_to is None:
+                cols = ["*"]
+            else:
+                cols = [
+                    f"CAST({col} AS {dtype}) AS {col}"
+                    for col, dtype in cast_to.columns.items()
+                    if col != "__concat_key__"
+                ]
         else:
-            cols = [col for col in columns if col != "__concat_key__"]
-            column_selection = ", ".join(cols)
+            if cast_to is None:
+                cols = [col for col in columns if col != "__concat_key__"]
+            else:
+                cols = [
+                    f"CAST({col} AS {cast_to.columns[col]}) AS {col}"
+                    for col in columns
+                    if col in cast_to.columns and col != "__concat_key__"
+                ]
+
+        column_selection = ", ".join(cols)
         return column_selection
 
     def _setup_test_db(self, key_sample: List[str]):
@@ -279,13 +333,14 @@ class LocalBackend(IBackend):
 
     def get_sample_keys(
             self, query: str, primary_keys: List[str], sample_size: int,
+            db: DBInstanceDTO, cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> List[str]:
         """See interface definition (parent class IBackend)."""
 
         if len(primary_keys) == 0:
             raise ValueError("Provide a non-empty list of primary keys!")
 
-        concat_key = self._get_concat_key(primary_keys)
+        concat_key = self._get_concat_key(primary_keys, cast_to=cast_to)
 
         random_number = randint(0, 100)
         sample_query = f"""
@@ -302,15 +357,16 @@ class LocalBackend(IBackend):
 
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
-            columns: Optional[List[str]] = None
+            db: DBInstanceDTO, columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
 
         if len(key_sample) == 0 or len(primary_keys) == 0:
             raise ValueError("Provide a non-empty list of primary keys and samples!")
 
         self._setup_test_db(key_sample=key_sample)
-        concat_key = self._get_concat_key(primary_keys)
-        column_selection = self._get_column_selection(columns)
+        concat_key = self._get_concat_key(primary_keys, cast_to)
+        column_selection = self._get_column_selection(columns, cast_to)
 
         sample_query = f"""
             {query}
@@ -327,7 +383,8 @@ class LocalBackend(IBackend):
 
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
-            key_sample: List[str], columns: Optional[List[str]] = None
+            key_sample: List[str], columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
 
         if len(key_sample) == 0 or len(primary_keys) == 0:
@@ -339,9 +396,9 @@ class LocalBackend(IBackend):
 
         db = DBInstanceDTO.from_testobject(testobject)
         catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
-        column_selection = self._get_column_selection(columns)
+        column_selection = self._get_column_selection(columns, cast_to)
         self._setup_test_db(key_sample=key_sample)
-        concat_key = self._get_concat_key(primary_keys)
+        concat_key = self._get_concat_key(primary_keys, cast_to)
 
         sample_query = f"""
             SELECT __obj__.* FROM (

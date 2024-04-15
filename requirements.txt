@@ -7,12 +7,12 @@ black  # code formatter
 pytest
 coverage
 
-# backends
-duckdb  # needed for example and for e2e tests
-fsspec  # needed both for example, 2e2 testa and also for input finders and report storage
+# backends ad database access
+duckdb  # needed for demo and for e2e tests
+fsspec  # needed for demo, 2e2 tests and also for input finders and report storage
+gcsfs  # needed for input finders and report storage
 
 # calculation engine
-polars  # lets try this instead of pandas
+polars  # used for data crunching - esp. for testcase COMPARE_SAMPLE
 xlsx2csv  # required for polars to read excel
-pyarrow
-numpy  # for performance testing and numerical calculations
+pyarrow  # required as backend for polars
