@@ -24,6 +24,11 @@ class IBackend(ABC):
         """Get schema (column names and datatyples) of testobject."""
 
     @abstractmethod
+    def get_schema_from_query(
+            self, query: str, db: DBInstanceDTO) -> SchemaSpecificationDTO:
+        """Get schema (column names and datatyples) of (translated) query."""
+
+    @abstractmethod
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         """Translate schema from DB-specific dtypes to conventions known by users"""
 
@@ -36,7 +41,7 @@ class IBackend(ABC):
         """
 
     @abstractmethod
-    def run_query(self, query: str) -> pl.DataFrame:
+    def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         """
         Executes a query against the defined database. Client is responsible for
         translating the query using translate_query().
@@ -60,6 +65,7 @@ class IBackend(ABC):
     @abstractmethod
     def get_sample_keys(
             self, query: str, primary_keys: List[str], sample_size: int,
+            db: DBInstanceDTO, cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> List[str]:
         """
         Given a test sql (query), and a list of column names (which must be returned
@@ -71,7 +77,8 @@ class IBackend(ABC):
     @abstractmethod
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
-            columns: Optional[List[str]] = None
+            db: DBInstanceDTO, columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
         """
         Given a test sql (query), a list of column names (interpreted as primary keys),
@@ -86,7 +93,8 @@ class IBackend(ABC):
     @abstractmethod
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
-            key_sample: List[str], columns: Optional[List[str]] = None
+            key_sample: List[str], columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
         """
         Given a list of column names (interpreted as primary keys) and a corresponding

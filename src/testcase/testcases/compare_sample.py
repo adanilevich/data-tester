@@ -1,7 +1,8 @@
-import polars as pl
-import time
+from typing import List, Tuple
 
-from src.testcase.testcases import AbstractTestCase
+import polars as pl
+
+from src.testcase.testcases import AbstractTestCase, time_it
 from src.dtos.specifications import CompareSampleSqlDTO, SchemaSpecificationDTO
 from src.dtos.testcase import DBInstanceDTO
 
@@ -20,128 +21,225 @@ class CompareSampleTestCase(AbstractTestCase):
     ]
 
     def _execute(self):
-        sql: CompareSampleSqlDTO = self._get_spec(CompareSampleSqlDTO)
-        schema: SchemaSpecificationDTO = self._get_spec(SchemaSpecificationDTO)
 
-        sample_size = self._get_sample_size()
-        self.notify(f"Starting execution with sample size {sample_size}")
-        db = DBInstanceDTO.from_testobject(self.testobject)
-        primary_keys = schema.primary_keys
-        self.add_fact({"Primary keys": primary_keys})
-        self.add_fact({"Schema specification": schema.location})
-        self.add_fact({"Compare sample SQL": sql.location})
+        self.db = DBInstanceDTO.from_testobject(self.testobject)
+        self.translated_query = self.backend.translate_query(self.sql.query, self.db)
 
-        if self.backend.supports_db_comparison is False:
+        self.add_fact({"Primary keys": self.schema.primary_keys})
+        self.add_fact({"Schema specification": self.schema.location})
+        self.add_fact({"Compare sample SQL": self.sql.location})
+        self.add_detail({"Original query": self.sql.query})
+        self.add_detail({"Applied query": self.translated_query})
 
-            translated_query = self.backend.translate_query(sql.query, db)
-            self.add_detail({"Original query": sql.query})
-            self.add_detail({"Applied query": translated_query})
-            try:
-                sample_keys = self.backend.get_sample_keys(
-                    query=translated_query,
-                    primary_keys=primary_keys,
-                    sample_size=sample_size,
-                )
-            except Exception as err:
-                msg = "Error while sampling primary keys from test query: " + str(err)
-                raise err.__class__(msg)
+        # get schema defined by testquery
+        schema_of_testquery = self._get_schema_from_query()
 
-            try:
-                expected = self.backend.get_sample_from_query(
-                    query=translated_query,
-                    primary_keys=primary_keys,
-                    key_sample=sample_keys,
-                )
-                columns = expected.columns
-            except Exception as err:
-                msg = "Error while sampling from test query: " + str(err)
-                raise err.__class__(msg)
+        # sample primary keys from query
+        sample_keys = self._sample_keys_from_query(
+            schema=schema_of_testquery
+        )
 
-            try:
-                actual = self.backend.get_sample_from_testobject(
-                    testobject=self.testobject,
-                    primary_keys=primary_keys,
-                    key_sample=sample_keys,
-                    columns=columns
-                )
-            except Exception as err:
-                msg = "Error while sampling from testobject: " + str(err)
-                raise err.__class__(msg)
+        # sample data which matches the pk sample from query
+        expected = self._sample_data_from_query(
+            sample_keys=sample_keys,
+            schema=schema_of_testquery
+        )
+        self.add_fact({"Actual sample size": expected.shape[0]})
 
-            diff = self._get_diff(expected, actual)
-        else:
-            raise NotImplementedError("Using backend comparison not implemented")
+        # sample data which matches the pk sample from testobject
+        actual = self._sample_data_from_testobject(
+            sample_keys=sample_keys,
+            columns=expected.columns,
+            schema=schema_of_testquery
+        )
 
-        real_sample_size = expected.shape[0]
-        diff_size = diff.shape[0]
+        # compare both samples
+        diff = self._compare(expected, actual)
 
-        if diff_size == 0:
+        if diff.shape[0] == 0:
             self.result = self.result.OK
-            self.summary = (f"Sample (of size {real_sample_size}) from testobject equals "
-                            f"sample from test sql.")
+            self.summary = "Sample from testobject equals sample from test sql."
         else:
-            # trimm diff to ca. 500 examples to not blow up memory
-            diff_example = diff.head(500)
-            self.diff.update({
-                "compare_sample_diff_example": diff_example.to_dict(as_series=False)
-            })
             self.result = self.result.NOK
-            msg = f"Testobject differs from test sql in {diff_size} sample row(s)."
-            self.summary = msg
+            self.summary = f"Testobject differs from SQL in {diff.shape[0]} row(s)."
+            # trimm diff to ca. 500 examples to not blow up Excel memory
+            diff_example = diff.head(500).to_dict(as_series=False)
+            self.diff.update({"compare_sample_diff_example": diff_example})
 
         return None
 
-    def _get_sample_size(self) -> int:
-
+    @property
+    def sample_size(self) -> int:
         config = self.domain_config.compare_sample_testcase_config
         sample_size_per_testobject = config.sample_size_per_object or {}
         if self.testobject.name in sample_size_per_testobject:
+            sample_size_kind = "object-specific"
             sample_size = sample_size_per_testobject[self.testobject.name]
         else:
+            sample_size_kind = "default (not object-specific)"
             sample_size = config.sample_size
 
+        detail = {"Specified sample size": sample_size}
+        if detail not in self.details:
+            self.add_detail(detail)
+            self.notify(f"Using {sample_size_kind} sample size {sample_size}.")
         return sample_size
 
-    @staticmethod
-    def _get_diff(expected: pl.DataFrame, actual: pl.DataFrame) -> pl.DataFrame:
+    @property
+    def sql(self) -> CompareSampleSqlDTO:
+        return self._get_spec(CompareSampleSqlDTO)  # type: ignore
 
-        start = time.time()
+    @property
+    def schema(self) -> SchemaSpecificationDTO:
+        return self._get_spec(SchemaSpecificationDTO)  # type: ignore
+
+    @time_it(step_name="getting schema of test query")
+    def _get_schema_from_query(self) -> SchemaSpecificationDTO:
         try:
-            schema = expected.schema
-            actual = actual.cast(schema, strict=True)  # type: ignore
-        except pl.ComputeError:
-            actual = actual.cast(pl.String)
-            expected = expected.cast(pl.String)
-        end = time.time()
-        print("Datatype casting: ", (end - start))
+            schema = self.backend.get_schema_from_query(self.translated_query, self.db)
+        except Exception as err:
+            msg = "Error while obtaining schema from test query: " + str(err)
+            raise err.__class__(msg)
+
+        pks = self.schema.primary_keys or []
+        missing_pks = [pk for pk in pks if pk not in schema.columns]
+        if not len(missing_pks) == 0:
+            missing = ", ".join(missing_pks)
+            self.add_fact({"Primary keys missing in query": missing})
+            raise ValueError(f"Primary keys are missing in query: {missing}")
+
+        return schema
+
+    @time_it(step_name="sampling primary keys from query")
+    def _sample_keys_from_query(self, schema: SchemaSpecificationDTO) -> List[str]:
+        try:
+            sample_keys = self.backend.get_sample_keys(
+                query=self.translated_query,
+                primary_keys=self.schema.primary_keys,  # type: ignore
+                sample_size=self.sample_size,
+                db=self.db,
+                cast_to=schema,
+            )
+        except Exception as err:
+            msg = "Error while sampling primary keys from test query: " + str(err)
+            raise err.__class__(msg)
+
+        return sample_keys
+
+    @time_it(step_name="sampling data from query")
+    def _sample_data_from_query(
+            self,
+            sample_keys: List[str],
+            schema: SchemaSpecificationDTO
+    ) -> pl.DataFrame:
+        try:
+            expected = self.backend.get_sample_from_query(
+                query=self.translated_query,
+                primary_keys=self.schema.primary_keys,  # type: ignore
+                key_sample=sample_keys,
+                db=self.db,
+                cast_to=schema
+            )
+        except Exception as err:
+            msg = "Error while sampling from test query: " + str(err)
+            raise err.__class__(msg)
+
+        return expected
+
+    @time_it(step_name="sampling data from testobject")
+    def _sample_data_from_testobject(
+            self,
+            sample_keys: List[str],
+            columns: List[str],
+            schema: SchemaSpecificationDTO
+    ) -> pl.DataFrame:
+        try:
+            actual = self.backend.get_sample_from_testobject(
+                testobject=self.testobject,
+                primary_keys=self.schema.primary_keys,  # type: ignore
+                key_sample=sample_keys,
+                columns=columns,
+                cast_to=schema
+            )
+        except Exception as err:
+            msg = "Error while sampling from testobject: " + str(err)
+            raise err.__class__(msg)
+
+        return actual
+
+    # noinspection PyMethodMayBeStatic
+    @time_it(step_name="harmonizing schemas")
+    def _harmonize_schemas(
+            self,
+            expected: pl.DataFrame,
+            actual: pl.DataFrame
+    ) -> Tuple[pl.DataFrame, pl.DataFrame]:
+
+        # try to same-cast to expected schema or to string - this is slow!
+        if expected.schema != actual.schema:
+            self.notify("Schemas of query sample and testobject are different.")
+            self.add_fact({"Warning": "Schema differs between query and testobject"})
+            for col, dtype in expected.schema.items():
+                if expected.schema[col] != actual.schema[col]:
+                    try:
+                        actual = actual.cast({col: dtype})
+                    except pl.PolarsError:
+                        actual = actual.cast({col: pl.String})
+                        expected = expected.cast({col: pl.String})
+        else:
+            self.notify("Testobject and query have same schema.")
+            self.add_fact({"Schema info": "Testobject and query have same schema!"})
+
+        return expected, actual
+
+    @time_it(step_name="calculating rowhashes")
+    def _calculate_rowhash(
+            self,
+            expected: pl.DataFrame,
+            actual: pl.DataFrame
+    ) -> Tuple[pl.DataFrame, pl.DataFrame]:
 
         def add_rowhash(df_: pl.DataFrame) -> pl.DataFrame:
             return df_.with_columns((df_.hash_rows()).alias("__rowhash__"))
 
-        start = time.time()
         actual = add_rowhash(actual)
         expected = add_rowhash(expected)
-        end = time.time()
-        print("Rowhash calculation: ", (end - start))
 
-        # Compare dataframes via an anti-join
-        start = time.time()
-        exp_not_act = expected.join(actual, on="__rowhash__", how="anti")
-        exp_not_act = exp_not_act.with_columns(pl.lit("testobject").alias("__source__"))
+        return expected, actual
 
-        act_not_exp = actual.join(expected, on="__rowhash__", how="anti")
-        act_not_exp = act_not_exp.with_columns(pl.lit("testquery").alias("__source__"))
-        end = time.time()
-        print("Diff comparison: ", (end - start))
+    @time_it(step_name="calculating diff")
+    def _calculate_diff(
+            self,
+            expected: pl.DataFrame,
+            actual: pl.DataFrame
+    ) -> pl.DataFrame:
 
-        # merge results
-        start = time.time()
-        diff = (
-            exp_not_act
-            .extend(act_not_exp)
-            .sort(by=["__rowhash__", "__source__"])
+        # Evaluate diff using an anti-join
+        exp_not_act = (
+            expected
+            .join(actual, on="__rowhash__", how="anti")
+            .with_columns(pl.lit("testobject").alias("__source__"))
         )
-        end = time.time()
-        print("Merging diffs: ", (end - start))
+        act_not_exp = (
+            actual
+            .join(expected, on="__rowhash__", how="anti")
+            .with_columns(pl.lit("testquery").alias("__source__"))
+        )
+        diff = exp_not_act.extend(act_not_exp)  # extend appends to dataframe
+
+        return diff
+
+    @time_it(step_name="comparing expected vs actual sample")
+    def _compare(self, expected: pl.DataFrame, actual: pl.DataFrame) -> pl.DataFrame:
+
+        expected, actual = self._harmonize_schemas(expected, actual)
+        expected, actual = self._calculate_rowhash(expected, actual)
+        diff = self._calculate_diff(expected, actual)
+
+        sort_by = None
+        if "__concat_key__" in diff.columns:
+            sort_by = ["__concat_key__", "__source__"]
+
+        diff = diff.sort(by=sort_by or diff.columns[0])
 
         return diff

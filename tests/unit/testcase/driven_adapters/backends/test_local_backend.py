@@ -15,6 +15,8 @@ class TestLocalBackendFactory:
 
 class TestLocalBackend:
 
+    db = DBInstanceDTO("payments", "test", "alpha")
+
     @pytest.fixture
     def test_query(self):
         query = """
@@ -83,7 +85,7 @@ class TestLocalBackend:
 
         with pytest.raises(ValueError) as err:
             _ = backend.get_sample_keys(
-                query=test_query, primary_keys=primary_keys, sample_size=5)
+                query=test_query, primary_keys=primary_keys, sample_size=5, db=self.db)
 
         assert "Provide a non-empty list of primary keys" in str(err)
 
@@ -92,7 +94,7 @@ class TestLocalBackend:
         primary_keys = ["id"]
 
         key_sample = backend.get_sample_keys(
-                query=test_query, primary_keys=primary_keys, sample_size=5)
+                query=test_query, primary_keys=primary_keys, sample_size=5, db=self.db)
 
         # primary keys are exact, so sample size must be equal specified size
         assert len(key_sample) == 5
@@ -104,7 +106,7 @@ class TestLocalBackend:
         primary_keys = ["customer_name", "customer_id"]
 
         key_sample = backend.get_sample_keys(
-                query=test_query, primary_keys=primary_keys, sample_size=2)
+                query=test_query, primary_keys=primary_keys, sample_size=2, db=self.db)
 
         # even for underspecified keys, key sample size must be exact
         assert len(key_sample) == 2
@@ -118,7 +120,7 @@ class TestLocalBackend:
         key_sample = ["Peter Lustig|1", "Big Company Ltd|5", "Big Company Ltd|1"]
 
         sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample)
+            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db)
 
         assert sample.select("amount").sum().to_series()[0] == 3010
 
@@ -128,7 +130,7 @@ class TestLocalBackend:
         key_sample = ["Peter Lustig"]
 
         sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample)
+            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db)
 
         assert sample.select("amount").sum().to_series()[0] == 21
 

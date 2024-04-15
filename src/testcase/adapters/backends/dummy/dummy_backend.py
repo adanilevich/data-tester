@@ -16,7 +16,11 @@ class DummyBackend(IBackend):
         return ["testobject1", "testobject2"]
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
-        return SchemaSpecificationDTO(columns={"my_col": "my_dtype"})
+        return SchemaSpecificationDTO(location="my_loc", columns={"my_col": "my_dtype"})
+
+    def get_schema_from_query(
+            self, query: str, db: DBInstanceDTO) -> SchemaSpecificationDTO:
+        return SchemaSpecificationDTO(location="my_loc", columns={"my_col": "my_dtype"})
 
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         return schema
@@ -24,7 +28,7 @@ class DummyBackend(IBackend):
     def translate_query(self, query: str, db: DBInstanceDTO) -> str:
         return query
 
-    def run_query(self, query: str) -> pl.DataFrame:
+    def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         return pl.DataFrame({"col": [1, 2, 3]})
 
     def get_rowcount(self, testobject: TestObjectDTO,
@@ -32,18 +36,21 @@ class DummyBackend(IBackend):
         return 10
 
     def get_sample_keys(
-            self, query: str, primary_keys: List[str], sample_size: int
+            self, query: str, primary_keys: List[str], sample_size: int,
+            db: DBInstanceDTO, cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> List[str]:
         return ["a_10", "b_20"]
 
     def get_sample_from_query(
             self, query: str, primary_keys: List[str], key_sample: List[str],
-            columns: Optional[List[str]] = None
+            db: DBInstanceDTO, columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
         return pl.DataFrame({"a": [10, 20], "b": [30, 40]})
 
     def get_sample_from_testobject(
             self, testobject: TestObjectDTO, primary_keys: List[str],
-            key_sample: List[str], columns: Optional[List[str]] = None
+            key_sample: List[str], columns: Optional[List[str]] = None,
+            cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> pl.DataFrame:
         return pl.DataFrame({"a": [10, 20], "b": [30, 40]})

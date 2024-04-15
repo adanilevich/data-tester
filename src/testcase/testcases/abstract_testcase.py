@@ -1,8 +1,10 @@
 from __future__ import annotations
 from abc import abstractmethod
+from functools import wraps
 from uuid import uuid4
 from datetime import datetime
 from typing import Dict, List, Optional, Union, Any
+import time
 
 from src.dtos.testcase import (
     TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
@@ -105,10 +107,6 @@ class AbstractTestCase(ICheckable):
 
         return provided_specs[0]
 
-    @abstractmethod
-    def _execute(self):
-        raise NotImplementedError(f"Implement _execute for {self.__class__}")
-
     def _as_dto(self) -> TestCaseResultDTO:
         dto = TestCaseResultDTO(
             id=self.id,
@@ -126,9 +124,14 @@ class AbstractTestCase(ICheckable):
         )
         return dto
 
+    @abstractmethod
+    def _execute(self):
+        raise NotImplementedError(f"Implement _execute for {self.__class__}")
+
     def execute(self,
                 checker: Optional[IPreconditionChecker] = None) -> TestCaseResultDTO:
 
+        self.notify(f"Starting execution of {self.ttype} for {self.testobject}")
         checker = checker or PreConditionChecker()
         if not self._check_preconditions(checker=checker):
             self.end_ts = get_datetime()
@@ -150,3 +153,27 @@ class AbstractTestCase(ICheckable):
 
         self.end_ts = get_datetime()
         return self._as_dto()
+
+
+def time_it(step_name: str):
+    """Parametrized decorator (factory): Times function execution duration
+    and broadcasts this info via the broadcast method of given function"""
+
+    def round_(num):
+        return float("%.2g" % num)
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(*args, **kwargs):
+            self = args[0]  # args[0] is 'self' of function
+            start = time.time()
+            result = function(*args, **kwargs)
+            end = time.time()
+            duration = round_(end-start)
+            detail = {f"Duration of {step_name} (s)": duration}
+            msg = f"Duration of {step_name}: {duration} s"
+            self.notify(msg)
+            self.add_detail(detail)
+            return result
+        return wrapper
+    return decorator

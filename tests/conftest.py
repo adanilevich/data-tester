@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Dict
+import time
 
 import pytest
+import polars as pl
+from fsspec.implementations.local import LocalFileSystem
+from urllib import request
 
 from src.dtos.testcase import TestObjectDTO
 from src.dtos.configs import (
@@ -131,3 +135,54 @@ def prepare_local_data():
     prepare_data()
     yield
     clean_up()
+
+
+@pytest.fixture()
+def performance_test_data() -> pl.DataFrame:
+
+    def download_performance_test_data(source_file: str, target_file: str):
+        print("Starting download from", source_file)
+        start = time.time()
+        request.urlretrieve(source_file, target_file)
+        end = time.time()
+        print("Download Duration: ", (end - start), "s")
+
+    def read_as_parquet(target_file: str) -> pl.DataFrame:
+        start = time.time()
+        df = pl.read_parquet(target_file)
+        end = time.time()
+        print("Reading parquet in a DataFrame: ", (end - start), "s")
+        print("Dataset shape:", df.shape)
+        return df
+
+    def copy_data(df: pl.DataFrame) -> pl.DataFrame:
+        start = time.time()
+        df = df.hstack(df.cast(pl.String).rename(lambda x: x + "_str"))
+        df = df.hstack(df.rename(lambda x: x + "_copy"))
+        df = df.hstack(df.rename(lambda x: x + "_again"))
+        end = time.time()
+        print("Copying data 8-fold: ", (end - start), "s")
+        print("Dataset shape:", df.shape)
+
+        return df
+
+    def clean_up_performance_test_data(target_file: str):
+        fs = LocalFileSystem()
+        if fs.exists(path=target_file):
+            print("Deleting target file", target_file)
+            fs.rm_file(target_file)
+
+    source_file_ = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2015-01.parquet"
+    target_file_ = "yellow_tripdata_2015-01.parquet"
+
+    start_ = time.time()
+    download_performance_test_data(source_file_, target_file_)
+    df_ = read_as_parquet(target_file_)
+    df_ = copy_data(df_)
+    end_ = time.time()
+
+    print("Overall time for set up of data for performance test: ", (end_-start_), "s")
+
+    yield df_
+
+    clean_up_performance_test_data(target_file_)

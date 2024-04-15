@@ -1,9 +1,7 @@
-from typing import Dict, Any, List
+from typing import List
 
 import pytest
 import random
-import numpy as np
-from string import ascii_lowercase, digits
 import time
 import polars as pl
 
@@ -37,6 +35,11 @@ class TestCompareSampleTestCase:
 
         testcase_ = testcase_creator.create(ttype="COMPARE_SAMPLE")
 
+        def get_schema_from_query(*args, **kwargs) -> SchemaSpecificationDTO:
+            return self.schema
+
+        testcase_.backend.get_schema_from_query = get_schema_from_query
+
         def get_sample_keys_(query, *args, **kwargs) -> List[str]:
             if "exception" in query:
                 raise NotImplementedError("This is a simulated exception.")
@@ -45,11 +48,10 @@ class TestCompareSampleTestCase:
 
         testcase_.backend.get_sample_keys = get_sample_keys_
 
-        def get_sample_from_query_(
-                primary_keys: List[str], *args, **kwargs) -> pl.DataFrame:
-            if "exception" in primary_keys:
+        def get_sample_from_query_(query, *args, **kwargs) -> pl.DataFrame:
+            if "error" in query:
                 raise NotImplementedError("This is a simulated exception.")
-            if "bad" in primary_keys:
+            if "bad" in query:
                 return self.data[:-1]
             else:
                 return self.data
@@ -57,7 +59,7 @@ class TestCompareSampleTestCase:
         testcase_.backend.get_sample_from_query = get_sample_from_query_
 
         def get_sample_from_testobject_(*args, **kwargs) -> pl.DataFrame:
-            return get_sample_from_query_(primary_keys=[])
+            return self.data
 
         testcase_.backend.get_sample_from_testobject = get_sample_from_testobject_
 
@@ -70,7 +72,7 @@ class TestCompareSampleTestCase:
         testcase.domain_config.compare_sample_testcase_config.sample_size_per_object = {}
         testcase.domain_config.compare_sample_testcase_config.sample_size = 1
 
-        assert testcase._get_sample_size() == 1
+        assert testcase.sample_size == 1
 
     def test_specific_sample_size_is_used_if_specified(self, testcase):
         sample_sizes = {testcase.testobject.name: 100}
@@ -78,15 +80,7 @@ class TestCompareSampleTestCase:
             sample_sizes
         testcase.domain_config.compare_sample_testcase_config.sample_size = 1
 
-        assert testcase._get_sample_size() == 100
-
-    def test_execution_stops_for_pushdown_computation(self, testcase):
-        testcase.backend.supports_db_comparison = True
-
-        with pytest.raises(NotImplementedError) as err:
-            testcase._execute()
-
-        assert "Using backend comparison not implemented" in str(err)
+        assert testcase.sample_size == 100
 
     def test_key_sampling_exception_is_caught(self, testcase):
         sql = CompareSampleSqlDTO.from_dict(self.sql.dict())
@@ -99,17 +93,6 @@ class TestCompareSampleTestCase:
         assert "Error while sampling primary keys" in str(err)
         assert "simulated exception" in str(err)
 
-    def test_query_sampling_exception_is_caught(self, testcase):
-        schema = SchemaSpecificationDTO.from_dict(self.schema.dict())
-        schema.primary_keys = ["exception"]
-        testcase.specs = [self.sql, schema]
-
-        with pytest.raises(NotImplementedError) as err:
-            testcase._execute()
-
-        assert "Error while sampling from test query" in str(err)
-        assert "simulated exception" in str(err)
-
     def test_happy_path(self, testcase):
 
         testcase._execute()
@@ -118,56 +101,49 @@ class TestCompareSampleTestCase:
         assert "from testobject equals sample from test sql" in testcase.summary
 
     def test_that_diff_is_treated_correctly(self, testcase):
-        schema = SchemaSpecificationDTO.from_dict(self.schema.dict())
-        schema.primary_keys = ["bad"]
-        testcase.specs = [self.sql, schema]
+        sql = CompareSampleSqlDTO.from_dict(self.sql.dict())
+        sql.query = "bad"
+        testcase.specs = [sql, self.schema]
 
         testcase._execute()
 
         assert testcase.result == testcase.result.NOK
         assert "compare_sample_diff_example" in testcase.diff
-        assert testcase.summary == "Testobject differs from test sql in 1 sample row(s)."
+        assert testcase.summary == "Testobject differs from SQL in 1 row(s)."
 
     # skip performance test, only execute if needed
     @pytest.mark.skip_test
-    def test_comparison_performance(self, testcase):
+    def test_in_memory_comparison_performance(self, testcase, performance_test_data):
+        """
+        Test speed of diff comparison. Result expectations so far:
+            - dataset of ca 12 Mio rows, 150 columns, compared with itself (one version
+                truncated and casted to string:
+                - data download and preparation: ca 45 s
+                - comparison duration if no casting required: 9 s (alsmost all for rowhash)
+                - comparison if dynamic casting required: 380 s (50/50 casting/rowhash)
+                - comparison duration if to-string casting: 330 s (50/50 casting/rowhash)
+                - comparison duration if only one col is casted: ca 70 s
+        """
 
         print("\nStarting performance tests for compare_sample ...")
-        num_cols = 50  # times four
 
-        def prepare_data(num_rows_: int, num_cols_: int):
-
+        def compare_data(df, other_df):
+            print("Comparing dataframes of shapes", df.shape, other_df.shape)
             start_ = time.time()
-            data = dict()
-            other_data = dict()
-
-            ints = np.random.randint(1, 1_000_000_000, (num_cols_, num_rows_)).tolist()
-            floats = np.random.uniform(0.0, 1_000_000_000_000_000.0, (num_cols_, num_rows_)).tolist()
-            chars = ascii_lowercase + digits
-            base_strings = [''.join(random.choice(chars) for _ in range(20)) for _ in range(num_rows_)]
-            strings = [np.random.choice(base_strings, num_rows_) for _ in range(num_cols_)]
-
-            for idx, _ in enumerate(ints):
-                data.update({str(idx) + "_int": ints[idx]})
-                data.update({str(idx) + "_float": floats[idx]})
-                data.update({str(idx) + "_int": strings[idx]})
-                other_data.update({str(idx) + "_int": ints[idx][:-1]})
-                other_data.update({str(idx) + "_float": floats[idx][:-1]})
-                other_data.update({str(idx) + "_int": strings[idx][:-1]})
-
-            end_ = time.time()
-            data_preparation_time = (end_ - start_)
-            print(f"\nData preparation time for {num_rows_} rows: ", data_preparation_time)
-            return pl.DataFrame(data), pl.DataFrame(other_data)
-
-        def compare_data(data_, other_data_):
-            start_ = time.time()
-            diff_ = testcase._get_diff(data_, other_data_)
+            diff_ = testcase._compare(df, other_df)
             end_ = time.time()
             comparison_time = (end_ - start_)
-            print("\nData comparison time: ", comparison_time)
+            print("\nData comparison time: ", comparison_time, "s")
             return diff_
 
-        for num_rows in [1_000, 10_000, 100_000, 1_000_000]:
-            _data, _other_data = prepare_data(num_rows, num_cols)
-            diff = compare_data(_data, _other_data)
+        # truncate to provoke difference and cast first column to string to force
+        # testcase._get_diff to cast dataframes
+        this = performance_test_data.with_columns(pl.lit("value").alias("__concat_key__"))
+        that = (
+            this[:-10]
+            #.cast({this.columns[0]: pl.String})
+            #.reverse()
+        )
+
+        diff = compare_data(this, that)
+        assert diff.shape[0] == 10
