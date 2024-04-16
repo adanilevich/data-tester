@@ -10,8 +10,8 @@ from src.dtos.testcase import (
     TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
 )
 from src.dtos.configs import DomainConfigDTO
-from src.dtos.specifications import SpecificationDTO, ANY_SPECIFICATION_TYPE
-from src.testcase.ports import IBackend, INotifier
+from src.dtos.specifications import SpecificationDTO
+from src.testcase.ports import IDataPlatform, INotifier
 from src.testcase.precondition_checks import (
     ICheckable,
     IPreconditionChecker,
@@ -33,7 +33,7 @@ class AbstractTestCase(ICheckable):
 
     def __init__(self, testobject: TestObjectDTO, specs: List[SpecificationDTO],
                  domain_config: DomainConfigDTO, run_id: str,
-                 backend: IBackend, notifiers: List[INotifier]) -> None:
+                 backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 
         self.notifiers: List[INotifier] = notifiers
         self.notify(f"Initiating testcase {self.ttype} for {testobject.name}")
@@ -45,16 +45,12 @@ class AbstractTestCase(ICheckable):
         self.specs: List[SpecificationDTO] = specs
         self.domain_config: DomainConfigDTO = domain_config
         self.run_id: str = run_id
-        self.backend: IBackend = backend
+        self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         self.facts: List[Dict[str, str]] = []  # list of key facts about test execution
         self.details: List[Dict[str, str]] = []  # list of in-depth details about execut.
-        # diff is a list of lists or dicts:
-        #  lists contain a record-oriented dict representation of a dataframe
-        #
-        self.diff: Dict[str, Union[List, Dict]] = dict()
-
+        self.diff: Dict[str, Union[List, Dict]] = dict()  # list of diffs
         self.status = TestStatus.INITIATED
 
     def notify(self, message: str):
@@ -87,25 +83,6 @@ class AbstractTestCase(ICheckable):
                 return False
 
         return True
-
-    def _get_spec(self, spec_class: Any) -> ANY_SPECIFICATION_TYPE:
-        """
-        Retrieves unique specification of requested type from all specifications which
-        were provided via the __init__ method
-        """
-
-        provided_specs: List[spec_class] = []
-        for spec in self.specs:
-            if isinstance(spec, spec_class):
-                provided_specs.append(spec)
-
-        if len(provided_specs) > 1:
-            type_ = provided_specs[0].type
-            msg = (f"Non-unique specfication of type {type_} provided: {provided_specs}. "
-                   f"Prechecks failed.")
-            raise ValueError(msg)
-
-        return provided_specs[0]
 
     def _as_dto(self) -> TestCaseResultDTO:
         dto = TestCaseResultDTO(

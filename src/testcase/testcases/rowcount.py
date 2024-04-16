@@ -20,11 +20,10 @@ class RowCountTestCase(AbstractTestCase):
 
     def _execute(self):
 
-        rowcount_sql = self._get_spec(RowCountSqlDTO)
-        self.add_fact({"Rowcount Query": rowcount_sql.location})
+        self.add_fact({"Rowcount Query": self.sql.location})
         db = DBInstanceDTO.from_testobject(self.testobject)
 
-        query = rowcount_sql.query + """
+        query = self.sql.query + """
             SELECT *, 'expected' AS __source__ FROM __expected_count__
             UNION ALL
             SELECT *, 'actual' AS __source__ FROM __actual_count__
@@ -63,6 +62,13 @@ class RowCountTestCase(AbstractTestCase):
         self._evaluate_results(expected_count, actual_count)
 
         return None
+
+    @property
+    def sql(self) -> RowCountSqlDTO:
+        for spec in self.specs:
+            if isinstance(spec, RowCountSqlDTO):
+                return spec
+        raise ValueError("Rowcount SQL not found.")
 
     def _validate_counts(self, counts_as_tuples: List[Tuple[str, Any]]) -> bool:
 

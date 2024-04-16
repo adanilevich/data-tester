@@ -8,16 +8,16 @@ import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
-from src.testcase.adapters.backends.local import (
+from src.testcase.adapters.data_platforms.demo import (
     DemoNamingResolver, DemoQueryHandler
 )
-from src.testcase.ports.i_backend import IBackend
+from src.testcase.ports import IDataPlatform
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.configs import DomainConfigDTO
 from src.dtos.testcase import TestObjectDTO, DBInstanceDTO
 
 
-class LocalBackend(IBackend):
+class LocalDataPlatform(IDataPlatform):
     """
     Local backend: File storage is simply data stored on disks. Table storage is a
     duckdb-based DWH. This backend is implemented mainly for demo purpose and purpose
@@ -43,9 +43,9 @@ class LocalBackend(IBackend):
         Initialize backend.
 
         Args:
-            files_path: path in local file system where file-like objects are stored,
-                e.g. raw or export layers of local DWH
-            db_path: path in local file system where all duckdb .db files are located
+            files_path: path in demo file system where file-like objects are stored,
+                e.g. raw or export layers of demo DWH
+            db_path: path in demo file system where all duckdb .db files are located
                 on top-level
             domain_config: domain config which is used to configure handlers
             naming_resolver: resolver object which translates between business naming

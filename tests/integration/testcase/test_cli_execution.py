@@ -19,10 +19,12 @@ testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
 
 domain_config = {
     "domain": "my_domain",
-    "schema_testcase_config": {"compare_data_types": ["int", "str"]},
-    "compare_sample_testcase_config": {
-        "sample_size": 1000,
-        "sample_size_per_object": {"my_testobject_1": 100}
+    "instances": {},
+    "testreports_locations": [],
+    "specifications_locations": [],
+    "testcases": {
+        "compare_sample": {"sample_size": 100},
+        "schema": {"compare_data_types": ["int", "str"]}
     }
 }
 

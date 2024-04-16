@@ -3,7 +3,7 @@ from typing import Dict, List, Callable
 from src.dtos.testcase import TestObjectDTO
 from src.dtos.configs import DomainConfigDTO
 from src.dtos.specifications import SpecificationDTO
-from src.testcase.ports.i_backend import IBackend
+from src.testcase.ports.i_data_platform import IDataPlatform
 from src.testcase.ports.i_notifier import INotifier
 
 # we need to import all subclasses of TestCase  such that they are registered
@@ -25,7 +25,7 @@ class TestCaseFactory:
     @classmethod
     def create(cls, ttype: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
                domain_config: DomainConfigDTO, run_id: str,
-               backend: IBackend, notifiers: List[INotifier]) -> AbstractTestCase:
+               backend: IDataPlatform, notifiers: List[INotifier]) -> AbstractTestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on class attribute
         'type' - the specified test type must be implemented as subclass of TestCase.

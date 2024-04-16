@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Optional, Any
 
 
@@ -16,22 +16,28 @@ class SchemaTestCaseConfigDTO:
 @dataclass
 class CompareSampleTestCaseConfigDTO:
     sample_size: int
-    sample_size_per_object: Optional[Dict[str, int]] = field(default_factory=dict)
+    sample_size_per_object: Dict[str, int]
 
     @classmethod
-    def from_dict(cls, config_as_dict: Dict[str, Any]):
-        specified_sample_size_per_object: Optional[Dict] = config_as_dict.get(
-            "sample_size_per_object", None)
-        if specified_sample_size_per_object is None:
-            sample_size_per_object: dict = dict()
-        elif len(specified_sample_size_per_object) == 0:
-            sample_size_per_object = dict()
-        else:
-            sample_size_per_object = specified_sample_size_per_object
-
+    def from_dict(cls, config_as_dict: Dict[str, Any]) -> CompareSampleTestCaseConfigDTO:
+        sample_size_per_object = config_as_dict.get(
+            "sample_size_per_object", dict())
         return cls(
             sample_size=config_as_dict["sample_size"],
             sample_size_per_object=sample_size_per_object
+        )
+
+
+@dataclass
+class TestCasesConfigDTO:
+    schema: SchemaTestCaseConfigDTO
+    compare_sample: CompareSampleTestCaseConfigDTO
+
+    @classmethod
+    def from_dict(cls, config_as_dict: Dict[str, Any]) -> TestCasesConfigDTO:
+        return cls(
+            schema=config_as_dict["schema"],
+            compare_sample=config_as_dict["compare_sample"]
         )
 
 
@@ -43,16 +49,19 @@ class DomainConfigDTO:
     e.g., the testcase compare_sample requires a sample size definition.
     """
     domain: str
-    schema_testcase_config: SchemaTestCaseConfigDTO
-    compare_sample_testcase_config: CompareSampleTestCaseConfigDTO
+    instances: Dict[str, List[str]]  # stage: [instance1, instance2]
+    testreports_locations: List[str]
+    specifications_locations: List[str]
+    testcases: TestCasesConfigDTO
+    platform_specific: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def from_dict(cls, domain_config_dict: dict) -> DomainConfigDTO:
+    def from_dict(cls, config_as_dict: dict) -> DomainConfigDTO:
         return cls(
-            domain=domain_config_dict["domain"],
-            schema_testcase_config=SchemaTestCaseConfigDTO.from_dict(
-                domain_config_dict["schema_testcase_config"]),
-            compare_sample_testcase_config=CompareSampleTestCaseConfigDTO.from_dict(
-                domain_config_dict["compare_sample_testcase_config"]
-            )
+            domain=config_as_dict["domain"],
+            instances=config_as_dict["instances"],
+            testreports_locations=config_as_dict["testreports_locations"],
+            specifications_locations=config_as_dict["specifications_locations"],
+            testcases=TestCasesConfigDTO.from_dict(config_as_dict["testcases"]),
+            platform_specific=config_as_dict.get("platform_specific")
         )

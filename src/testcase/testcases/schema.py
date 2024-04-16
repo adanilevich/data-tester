@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict
 from dataclasses import dataclass, asdict, field
 
 from src.testcase.testcases import AbstractTestCase
@@ -39,72 +39,56 @@ class SchemaTestCase(AbstractTestCase):
 
     def _execute(self):
 
-        actual_schema: SchemaSpecificationDTO = self._get_actual_schema()
-        expected_schema: SchemaSpecificationDTO = self._get_spec(SchemaSpecificationDTO)
-        self.add_fact({"Specification": expected_schema.location})
+        self.column_comparison_result: Optional[bool] = None
+        self.partitioning_comparison_result: Optional[bool] = None
+        self.clustering_comparison_result: Optional[bool] = None
+        self.pk_comparison_result: Optional[bool] = None
+
+        expected = self.schema
+        actual = self._get_actual_schema()
+
+        self.add_fact({"Specification": expected.location})
 
         # we start by comparing columns and datatypes
-        columns_diff_dto, column_comparison_result = self._compare_columns(
-            expected=expected_schema,
-            actual=actual_schema,
-            compare_datatypes=self.domain_config.schema_testcase_config.compare_datatypes
-        )
+        columns_diff_dto = self._compare_columns(expected, actual)
         columns_diff_as_list = columns_diff_dto.dict()["diffs"]
         self.diff.update({"column_diff": columns_diff_as_list})
         self.add_detail({"Columns Comparison": str(columns_diff_as_list)})
 
         # next, we compare partitioning
-        if self.backend.supports_partitions:
-            partitioning_diff, partitioning_comparison_result = self._compare(
-                expected=expected_schema,
-                actual=actual_schema,
-                compare_what="partitioning"
-            )
+        partitioning_diff = self._compare_partitioning(expected, actual)
+        if partitioning_diff is not None:
             self.diff.update({"partitioning_diff": partitioning_diff})
             self.add_detail({"Partitioning Comparison": str(partitioning_diff)})
-        else:
-            partitioning_comparison_result = None
 
         # next, we compare clustering
-        if self.backend.supports_clustering:
-            clustering_diff, clustering_comparison_result = self._compare(
-                expected=expected_schema,
-                actual=actual_schema,
-                compare_what="clustering"
-            )
+        clustering_diff = self._compare_clustering(expected, actual)
+        if clustering_diff is not None:
             self.diff.update({"clustering_diff": clustering_diff})
             self.add_detail({"Clustering Comparison": str(clustering_diff)})
-        else:
-            clustering_comparison_result = None
 
         # then, primary keys are compared vs specification
-        if self.backend.supports_primary_keys:
-            pk_diff, pk_comparison_result = self._compare(
-                expected=expected_schema,
-                actual=actual_schema,
-                compare_what="primary_keys"
-            )
+        pk_diff = self._compare_primary_keys(expected, actual)
+        if pk_diff is not None:
             self.diff.update({"pk_diff": pk_diff})
             self.add_detail({"Primary Keys Comparison": str(pk_diff)})
-        else:
-            pk_comparison_result = None
 
         # finally, all results are evaluated to an overall test result
         self.result = self.result.OK
         self.summary = ""
-        for result, name in [
-            (column_comparison_result, "Column comparison"),
-            (partitioning_comparison_result, "Partitioning comparison"),
-            (clustering_comparison_result, "Clustering comparison"),
-            (pk_comparison_result, "Primary key comparison"),
+        for result, description in [
+            (self.column_comparison_result, "Column comparison"),
+            (self.partitioning_comparison_result, "Partitioning comparison"),
+            (self.clustering_comparison_result, "Clustering comparison"),
+            (self.pk_comparison_result, "Primary key comparison"),
         ]:
             if result is True:
-                self.summary += f" {name}: OK;"
+                self.summary += f" {description}: OK;"
             if result is False:
-                self.summary += f" {name}: NOK;"
+                self.summary += f" {description}: NOK;"
                 self.result = self.result.NOK
-            else:  # basically if result is None
-                pass  # do not write anythnig to summary if comparison not supported
+            else:  # basically if result is None, e.g. comparison not supported
+                pass
 
         if self.result == self.result.OK:
             self.summary = "Schema corresponds to specification:" + self.summary
@@ -115,15 +99,22 @@ class SchemaTestCase(AbstractTestCase):
 
         return None
 
+    @property
+    def schema(self) -> SchemaSpecificationDTO:
+        for spec in self.specs:
+            if isinstance(spec, SchemaSpecificationDTO):
+                return spec
+        raise ValueError("Schema specification not found")
+
     def _get_actual_schema(self) -> SchemaSpecificationDTO:
         self.notify(f"Getting data object schema for testobject {self.testobject.name}")
         result_schema_raw = self.backend.get_schema(self.testobject)
         result_schema = self.backend.harmonize_schema(result_schema_raw)
         return result_schema
 
-    @staticmethod
-    def _compare_columns(expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
-                         compare_datatypes: List[str]) -> Tuple[ColumnDiffDTO, bool]:
+    def _compare_columns(
+            self, expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
+    ) -> ColumnDiffDTO:
         """
         Returns the comparison result as a ComnDiffDTO object and overall OK/NOK result
         as boolean
@@ -131,6 +122,7 @@ class SchemaTestCase(AbstractTestCase):
 
         diff = ColumnDiffDTO(diffs=[])
         result = True
+        compare_datatypes = self.domain_config.testcases.schema.compare_datatypes
 
         for expected_col, expected_dtype in expected.columns.items():
             diff_entry = ColumnDiffEntryDTO()
@@ -171,49 +163,57 @@ class SchemaTestCase(AbstractTestCase):
             if diff_entry.result_all == "NOK":
                 result = False
 
-        return diff, result
+        self.column_comparison_result = result
+        return diff
 
-    @classmethod
-    def _compare(cls, expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
-                 compare_what: str) -> Tuple[Dict[str, List[str]], bool]:
-        """
-        Compares aspects between specified schema and actual schema.
+    def _compare_partitioning(
+            self, expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
+    ) -> Optional[Dict[str, List[str]]]:
 
-        Args:
-            expected: expected/specified schema object
-            actual: actual schema_object
-            compare_what: defines what to be compared. One of "partitioning",
-                "clustering", "primary_keys"
-
-        Returns:
-            diff: Dict with "expected_..." and "actual_..." as keys, and lists as
-                attributes, e.g. list of expected_primary_keys with column names
-        """
-
-        if compare_what == "partitioning":
+        if self.backend.supports_partitions:
             diff = {
                 "expected_partitioning": expected.partition_columns or [],
                 "actual_partitioning": actual.partition_columns or [],
             }
             l1, l2 = expected.partition_columns, actual.partition_columns
-        elif compare_what == "clustering":
+
+            self.partitioning_comparison_result = self._compare_lists(l1, l2)
+        else:
+            diff = None
+
+        return diff
+
+    def _compare_clustering(
+            self, expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
+    ) -> Optional[Dict[str, List[str]]]:
+
+        if self.backend.supports_clustering:
             diff = {
                 "expected_clustering": expected.clustering_columns or [],
                 "actual_clustering": actual.clustering_columns or [],
             }
             l1, l2 = expected.clustering_columns, actual.clustering_columns
-        elif compare_what == "primary_keys":
+            self.clustering_comparison_result = self._compare_lists(l1, l2)
+        else:
+            diff = None
+
+        return diff
+
+    def _compare_primary_keys(
+            self, expected: SchemaSpecificationDTO, actual: SchemaSpecificationDTO,
+    ) -> Optional[Dict[str, List[str]]]:
+
+        if self.backend.supports_primary_keys:
             diff = {
                 "expected_primary_keys": expected.primary_keys or [],
                 "actual_primary_keys": actual.primary_keys or [],
             }
             l1, l2 = expected.primary_keys, actual.primary_keys
+            self.pk_comparison_result = self._compare_lists(l1, l2)
         else:
-            raise ValueError(f"Comparison aspect {compare_what} unknown!")
+            diff = None
 
-        comparison_result = cls._compare_lists(l1, l2)
-
-        return diff, comparison_result
+        return diff
 
     @staticmethod
     def _compare_lists(list_1: Optional[List[str]], list_2: Optional[List[str]]) -> bool:

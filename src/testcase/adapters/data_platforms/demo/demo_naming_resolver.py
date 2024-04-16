@@ -66,7 +66,7 @@ class DemoDefaultResolver:
     ) -> List[str]:
         """
         Returns (relative) path in raw data layer of our dummy demo DWH.
-        Translates between  business coordinates and technical paths in local filesystem
+        Translates between  business coordinates and technical paths in demo filesystem
 
         Args:
             db: unanbiguous identification of database to be tested
@@ -74,7 +74,7 @@ class DemoDefaultResolver:
                 corresponds to given testobject is provided, else to parent folder
 
         Returns:
-            path: relative path in local filesystem which corresponds to specified
+            path: relative path in demo filesystem which corresponds to specified
                 business coordinates
         """
 

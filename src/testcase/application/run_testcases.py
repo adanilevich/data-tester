@@ -3,7 +3,7 @@ from uuid import uuid4
 from datetime import datetime
 
 from src.testcase.ports import IRunTestCasesCommandHandler, RunTestCaseCommand
-from src.testcase.ports import IBackendFactory, INotifier
+from src.testcase.ports import IDataPlatformFactory, INotifier
 from src.dtos.testcase import TestCaseResultDTO, TestResult, TestStatus
 from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
@@ -11,8 +11,8 @@ from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
     """Receives a command and executes testcases"""
 
-    def __init__(self, backend_factory: IBackendFactory, notifiers: List[INotifier]):
-        self.backend_factory: IBackendFactory = backend_factory
+    def __init__(self, backend_factory: IDataPlatformFactory, notifiers: List[INotifier]):
+        self.backend_factory: IDataPlatformFactory = backend_factory
         self.notifiers: List[INotifier] = notifiers
 
     def run(self, commands: List[RunTestCaseCommand]) -> List[TestCaseResultDTO]:

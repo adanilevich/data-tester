@@ -1,7 +1,7 @@
 from src.testcase.testcases import TestCaseFactory
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.testcase import TestObjectDTO
-from src.testcase.adapters.backends import LocalBackendFactory
+from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
 spec = SchemaSpecificationDTO(
@@ -21,7 +21,7 @@ def test_straight_through_execution(domain_config, prepare_local_data):
         specs=[spec],
         domain_config=domain_config,
         run_id="my_run_id",
-        backend=LocalBackendFactory().create(domain_config=domain_config),
+        backend=LocalDataPlatformFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier(), StdoutNotifier()]
     )
 

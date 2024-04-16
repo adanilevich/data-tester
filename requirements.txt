@@ -7,7 +7,7 @@ black  # code formatter
 pytest
 coverage
 
-# backends ad database access
+# data_platforms ad database access
 duckdb  # needed for demo and for e2e tests
 fsspec  # needed for demo, 2e2 tests and also for input finders and report storage
 gcsfs  # needed for input finders and report storage
