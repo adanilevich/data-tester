@@ -2,12 +2,12 @@ from typing import List, Optional, Tuple
 
 import polars as pl
 
-from src.testcase.ports.i_backend import IBackend
+from src.testcase.ports import IDataPlatform
 from src.dtos.specifications import SchemaSpecificationDTO
 from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
 
 
-class DummyBackend(IBackend):
+class DummyPlatform(IDataPlatform):
     """Dummy backend for test purpose only"""
 
     supports_db_comparison = False

@@ -1,25 +1,25 @@
 """
 This module provides a fixture containing a simple data warehouse which is based
-on local file storage (as raw layer) and duckdb databases.
+on demo file storage (as raw layer) and duckdb databases.
 
 DWH Layout:
     - dwh consists of two business domains 'payments' and 'sales'
     - each domain can have databases in stages 'test' and 'uat'
     - two business objects are loaded: 'customers' and 'transactions'
     - loading takes place into
-        raw layer (local filesystem)
+        raw layer (demo filesystem)
         staging layer (duckdb database with tables stage_customers and _transactions)
         core layer (duckdb database with table core_customer_transactions)
 Constants:
-    RAW_PATH: Path - path in local filesystem where DWH raw layer is stored
-    DB_PATH: Path - path in local filesystem where duckdb DWB files are stored
+    RAW_PATH: Path - path in demo filesystem where DWH raw layer is stored
+    DB_PATH: Path - path in demo filesystem where duckdb DWB files are stored
     files: XlsxFiles - list of user-defined excel files which contain business data
     load_config: LoadConfig - configures loading of all stages
 
 Methods:
     prepare_data: full data preparation from reading xlsx files to loading all DWH
         layers - raw, staging, core. Operates based in load_config
-    clean_up: removes all DWH layers and artefacts from local filesystem
+    clean_up: removes all DWH layers and artefacts from demo filesystem
 """
 
 from typing import List, Tuple, Union
@@ -33,9 +33,9 @@ from fsspec import AbstractFileSystem
 
 
 PATH = Path(__file__).parent
-RAW_PATH = PATH / "raw"  # path in local filesystem where raw layer of DWH is stored
-DB_PATH = PATH / "dbs"  # path in local filesystem where duckdb files are stored
-FS = LocalFileSystem()  # local filesystem handler
+RAW_PATH = PATH / "raw"  # path in demo filesystem where raw layer of DWH is stored
+DB_PATH = PATH / "dbs"  # path in demo filesystem where duckdb files are stored
+FS = LocalFileSystem()  # demo filesystem handler
 
 
 @dataclass
@@ -273,7 +273,7 @@ def get_csv_raw_path(xlsx_path: Path, conf: Union[RawConfig, StageConfig],
 
 
 def load_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH):
-    """Reads xslx files and loads them into raw layer - e.g. local folders"""
+    """Reads xslx files and loads them into raw layer - e.g. demo folders"""
     print("\nLOADING RAW LAYER:")
     loaded_files = []
     for file_config in conf.file_configs:

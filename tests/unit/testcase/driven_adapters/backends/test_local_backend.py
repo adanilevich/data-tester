@@ -1,13 +1,13 @@
 import pytest
 
-from src.testcase.adapters.backends import LocalBackendFactory
+from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
 from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
 
 
 class TestLocalBackendFactory:
 
     def test_backend_creation(self, domain_config, prepare_local_data):
-        factory = LocalBackendFactory()
+        factory = LocalDataPlatformFactory()
         backend = factory.create(domain_config=domain_config)
 
         assert backend.config == domain_config
@@ -28,7 +28,7 @@ class TestLocalBackend:
 
     @pytest.fixture
     def backend(self, domain_config, prepare_local_data):
-        return LocalBackendFactory().create(domain_config=domain_config)
+        return LocalDataPlatformFactory().create(domain_config=domain_config)
 
     @pytest.mark.parametrize("domain,stage,instance,testobjects_expected", [
         ("payments", "uat", "main", ["stage_customers", "raw_customers"]),

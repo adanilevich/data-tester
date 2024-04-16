@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from src.testcase.ports.i_backend import IBackend
+from src.testcase.ports.i_data_platform import IDataPlatform
 from src.dtos.testcase import TestObjectDTO
 from src.dtos.specifications import SpecificationDTO
 
@@ -14,7 +14,7 @@ class ICheckable(ABC):
     """
 
     testobject: TestObjectDTO  # checking testobject existence required testobject spec
-    backend: IBackend  # precondition checkers orchestrate backend methods
+    backend: IDataPlatform  # precondition checkers orchestrate backend methods
     required_specs: List[str] = []
     specs: List[SpecificationDTO] = []
     summary: str = ""

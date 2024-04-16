@@ -70,28 +70,33 @@ class CompareSampleTestCase(AbstractTestCase):
 
     @property
     def sample_size(self) -> int:
-        config = self.domain_config.compare_sample_testcase_config
-        sample_size_per_testobject = config.sample_size_per_object or {}
-        if self.testobject.name in sample_size_per_testobject:
-            sample_size_kind = "object-specific"
-            sample_size = sample_size_per_testobject[self.testobject.name]
-        else:
-            sample_size_kind = "default (not object-specific)"
+        config = self.domain_config.testcases.compare_sample
+        sample_size = config.sample_size_per_object.get(self.testobject.name)
+        if sample_size is None:
             sample_size = config.sample_size
+            self.notify("Using default sample size for comparison")
+        else:
+            self.notify("Using object specific sample size for comparison")
 
         detail = {"Specified sample size": sample_size}
         if detail not in self.details:
             self.add_detail(detail)
-            self.notify(f"Using {sample_size_kind} sample size {sample_size}.")
+
         return sample_size
 
     @property
     def sql(self) -> CompareSampleSqlDTO:
-        return self._get_spec(CompareSampleSqlDTO)  # type: ignore
+        for spec in self.specs:
+            if isinstance(spec, CompareSampleSqlDTO):
+                return spec
+        raise ValueError("Compare sample sql not found")
 
     @property
     def schema(self) -> SchemaSpecificationDTO:
-        return self._get_spec(SchemaSpecificationDTO)  # type: ignore
+        for spec in self.specs:
+            if isinstance(spec, SchemaSpecificationDTO):
+                return spec
+        raise ValueError("Schema spec not found")
 
     @time_it(step_name="getting schema of test query")
     def _get_schema_from_query(self) -> SchemaSpecificationDTO:

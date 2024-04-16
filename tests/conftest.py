@@ -11,20 +11,20 @@ from src.dtos.testcase import TestObjectDTO
 from src.dtos.configs import (
     SchemaTestCaseConfigDTO,
     CompareSampleTestCaseConfigDTO,
-    DomainConfigDTO
+    DomainConfigDTO, TestCasesConfigDTO
 )
 from src.dtos.specifications import SpecificationDTO
-from src.testcase.ports import IBackend
+from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
-from src.testcase.adapters.backends import DummyBackend
+from src.testcase.adapters.data_platforms import DummyPlatform
 from src.testcase.testcases import TestCaseFactory, AbstractTestCase
 from src.testcase.precondition_checks import ICheckable
 from tests.data.data.prepare_data import clean_up, prepare_data
 
 
 @pytest.fixture
-def dummy_backend() -> IBackend:
-    return DummyBackend()
+def dummy_backend() -> IDataPlatform:
+    return DummyPlatform()
 
 
 @pytest.fixture
@@ -41,9 +41,19 @@ def stdout_notifier() -> StdoutNotifier:
 def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
-        compare_sample_testcase_config=CompareSampleTestCaseConfigDTO(sample_size=100),
-        schema_testcase_config=SchemaTestCaseConfigDTO(
-            compare_datatypes=["int", "string", "bool"])
+        instances={
+            "test": ["alpha", "beta"],
+            "uat": ["main"]
+        },
+        testreports_locations=[],
+        specifications_locations=[],
+        testcases=TestCasesConfigDTO(
+            compare_sample=CompareSampleTestCaseConfigDTO(
+                sample_size=100,
+                sample_size_per_object={}
+            ),
+            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
+        )
     )
     return domain_config
 
@@ -61,7 +71,7 @@ def testobject() -> TestObjectDTO:
 
 class DummyCheckable(ICheckable):
 
-    def __init__(self, testobject: TestObjectDTO, backend: IBackend):
+    def __init__(self, testobject: TestObjectDTO, backend: IDataPlatform):
         self.testobject = testobject
         self.backend = backend
         self.summary = ""
@@ -122,7 +132,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 ],
                 domain_config=domain_config,
                 run_id="my_run_id",
-                backend=DummyBackend(),
+                backend=DummyPlatform(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()]
             )
             return testcase
