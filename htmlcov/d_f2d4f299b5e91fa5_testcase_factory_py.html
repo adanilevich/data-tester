@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-15 22:57 +0000
+            created at 2024-04-16 09:28 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"/>
@@ -85,7 +85,7 @@
     <p class="run"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">testcase</span> <span class="key">import</span> <span class="nam">TestObjectDTO</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">configs</span> <span class="key">import</span> <span class="nam">DomainConfigDTO</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">specifications</span> <span class="key">import</span> <span class="nam">SpecificationDTO</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">ports</span><span class="op">.</span><span class="nam">i_backend</span> <span class="key">import</span> <span class="nam">IBackend</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">ports</span><span class="op">.</span><span class="nam">i_data_platform</span> <span class="key">import</span> <span class="nam">IDataPlatform</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">ports</span><span class="op">.</span><span class="nam">i_notifier</span> <span class="key">import</span> <span class="nam">INotifier</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="com"># we need to import all subclasses of TestCase  such that they are registered</span>&nbsp;</span><span class="r"></span></p>
@@ -107,7 +107,7 @@
     <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="op">@</span><span class="nam">classmethod</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">    <span class="key">def</span> <span class="nam">create</span><span class="op">(</span><span class="nam">cls</span><span class="op">,</span> <span class="nam">ttype</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">testobject</span><span class="op">:</span> <span class="nam">TestObjectDTO</span><span class="op">,</span> <span class="nam">specs</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">SpecificationDTO</span><span class="op">]</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">               <span class="nam">domain_config</span><span class="op">:</span> <span class="nam">DomainConfigDTO</span><span class="op">,</span> <span class="nam">run_id</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">               <span class="nam">backend</span><span class="op">:</span> <span class="nam">IBackend</span><span class="op">,</span> <span class="nam">notifiers</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">INotifier</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">AbstractTestCase</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">               <span class="nam">backend</span><span class="op">:</span> <span class="nam">IDataPlatform</span><span class="op">,</span> <span class="nam">notifiers</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">INotifier</span><span class="op">]</span><span class="op">)</span> <span class="op">-></span> <span class="nam">AbstractTestCase</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t"><span class="str">        Creates a testcase object (subclass instance of TestCase) based on class attribute</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t"><span class="str">        'type' - the specified test type must be implemented as subclass of TestCase.</span>&nbsp;</span><span class="r"></span></p>
@@ -139,7 +139,7 @@
             <a id="nextFileLink" class="nav" href="index.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.4.4">coverage.py v7.4.4</a>,
-            created at 2024-04-15 22:57 +0000
+            created at 2024-04-16 09:28 +0000
         </p>
     </div>
 </footer>
