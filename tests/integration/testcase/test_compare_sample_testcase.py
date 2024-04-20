@@ -6,13 +6,14 @@ from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
 sql = CompareSampleSqlDTO(
     location="this_location",
+    testobject="core_customer_transactions",
     query="""
     WITH __expected__ AS (
-        SELECT 
-            customers.name AS customer_name, 
-            customers.id AS customer_id, 
-            transactions.id AS id, 
-            transactions.date AS transaction_date, 
+        SELECT
+            customers.name AS customer_name,
+            customers.id AS customer_id,
+            transactions.id AS id,
+            transactions.date AS transaction_date,
             transactions.amount AS amount
         FROM payments_test.alpha.stage_transactions AS transactions
         LEFT JOIN payments_test.alpha.stage_customers AS customers
@@ -25,6 +26,7 @@ sql = CompareSampleSqlDTO(
 
 schema = SchemaSpecificationDTO(
     location="that_location",
+    testobject="core_customer_transactions",
     columns={"customer_id": "int"},  # plays no role, but must be non-empty
     primary_keys=["customer_id", "transaction_date"]
 )

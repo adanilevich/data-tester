@@ -14,12 +14,14 @@ class TestCompareSampleTestCase:
     schema = SchemaSpecificationDTO(
         location="this_location",
         columns={"a": "int", "b": "string", "c": "bool"},
-        primary_keys=["a", "b"]
+        primary_keys=["a", "b"],
+        testobject="stage_customers",
     )
 
     sql = CompareSampleSqlDTO(
         location="this_location",
         query="this_will_be_changed",
+        testobject="stage_customers",
     )
 
     data = pl.DataFrame({

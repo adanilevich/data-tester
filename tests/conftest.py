@@ -124,8 +124,16 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 ttype=ttype,
                 testobject=testobject,
                 specs=[
-                    SpecificationDTO(type="spec", location="my_location"),
-                    SpecificationDTO(type="sql", location="my_location"),
+                    SpecificationDTO(
+                        type="spec",
+                        location="my_location",
+                        testobject=testobject.name,
+                    ),
+                    SpecificationDTO(
+                        type="sql",
+                        location="my_location",
+                        testobject=testobject.name,
+                    ),
                 ],
                 domain_config=domain_config,
                 run_id="my_run_id",
