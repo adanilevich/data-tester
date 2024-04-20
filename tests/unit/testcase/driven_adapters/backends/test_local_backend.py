@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
-from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
+from src.dtos import DBInstanceDTO, TestObjectDTO
 
 
 class TestLocalBackendFactory:

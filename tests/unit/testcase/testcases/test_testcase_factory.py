@@ -1,10 +1,6 @@
 import pytest
 
-from src.dtos.testcase import TestObjectDTO
-from src.dtos.configs import (
-    SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO, DomainConfigDTO
-)
-from src.dtos.specifications import SpecificationDTO
+from src.dtos import TestObjectDTO, SpecificationDTO
 from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 

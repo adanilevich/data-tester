@@ -1,13 +1,11 @@
 # flake8: noqa
 from typing import Dict, List, Callable
-from src.dtos.testcase import TestObjectDTO
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.specifications import SpecificationDTO
-from src.testcase.ports.i_data_platform import IDataPlatform
-from src.testcase.ports.i_notifier import INotifier
+from src.dtos import TestObjectDTO, DomainConfigDTO, SpecificationDTO
+from src.testcase.ports import IDataPlatform, INotifier
 
-# we need to import all subclasses of TestCase  such that they are registered
-# and can be created. This is done in testcase.__init__.py which is imported here
+# we need to import all subclasses of TestCase such that they are registered
+# and can be created via TestCaseFactory.create.
+# This is done in testcase.__init__.py which is imported here
 from src.testcase.testcases import *
 
 

@@ -1,5 +1,5 @@
 """
-This module provides a fixture containing a simple data warehouse which is based
+This module provides a fixture containing a simple fixtures warehouse which is based
 on demo file storage (as raw layer) and duckdb databases.
 
 DWH Layout:
@@ -13,11 +13,11 @@ DWH Layout:
 Constants:
     RAW_PATH: Path - path in demo filesystem where DWH raw layer is stored
     DB_PATH: Path - path in demo filesystem where duckdb DWB files are stored
-    files: XlsxFiles - list of user-defined excel files which contain business data
+    files: XlsxFiles - list of user-defined excel files which contain business fixtures
     load_config: LoadConfig - configures loading of all stages
 
 Methods:
-    prepare_data: full data preparation from reading xlsx files to loading all DWH
+    prepare_data: full fixtures preparation from reading xlsx files to loading all DWH
         layers - raw, staging, core. Operates based in load_config
     clean_up: removes all DWH layers and artefacts from demo filesystem
 """
@@ -60,7 +60,7 @@ class RawConfig:
 
 @dataclass
 class StageConfig:
-    """Defines loading of data into staging layer, e.g. first table layer in DWH"""
+    """Defines loading of fixtures into staging layer, e.g. first table layer in DWH"""
     domain: str
     stage: str
     instace: str
@@ -77,7 +77,7 @@ class FileConfig:
 
 @dataclass
 class CoreConfig:
-    """Defines if data is loaded to core layer, e.g. table customer_transactions"""
+    """Defines if fixtures is loaded to core layer, e.g. table customer_transactions"""
     domain: str
     stage: str
     instance: str
@@ -173,7 +173,7 @@ def setup_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH,
                 objects.append(obj)
     print("All folder objects to be created: ", objects)
 
-    # delete existing  data in base path
+    # delete existing  fixtures in base path
     if fs.exists(path=str(path)):
         fs.rm(path=str(path), recursive=True)
 

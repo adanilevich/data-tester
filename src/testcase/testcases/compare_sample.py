@@ -3,8 +3,7 @@ from typing import List, Tuple
 import polars as pl
 
 from src.testcase.testcases import AbstractTestCase, time_it
-from src.dtos.specifications import CompareSampleSqlDTO, SchemaSpecificationDTO
-from src.dtos.testcase import DBInstanceDTO
+from src.dtos import CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO
 
 
 class CompareSampleTestCase(AbstractTestCase):
@@ -39,14 +38,14 @@ class CompareSampleTestCase(AbstractTestCase):
             schema=schema_of_testquery
         )
 
-        # sample data which matches the pk sample from query
+        # sample fixtures which matches the pk sample from query
         expected = self._sample_data_from_query(
             sample_keys=sample_keys,
             schema=schema_of_testquery
         )
         self.add_fact({"Actual sample size": expected.shape[0]})
 
-        # sample data which matches the pk sample from testobject
+        # sample fixtures which matches the pk sample from testobject
         actual = self._sample_data_from_testobject(
             sample_keys=sample_keys,
             columns=expected.columns,
@@ -131,7 +130,7 @@ class CompareSampleTestCase(AbstractTestCase):
 
         return sample_keys
 
-    @time_it(step_name="sampling data from query")
+    @time_it(step_name="sampling fixtures from query")
     def _sample_data_from_query(
             self,
             sample_keys: List[str],
@@ -151,7 +150,7 @@ class CompareSampleTestCase(AbstractTestCase):
 
         return expected
 
-    @time_it(step_name="sampling data from testobject")
+    @time_it(step_name="sampling fixtures from testobject")
     def _sample_data_from_testobject(
             self,
             sample_keys: List[str],

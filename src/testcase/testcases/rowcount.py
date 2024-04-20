@@ -1,8 +1,7 @@
 from typing import List, Tuple, Any
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos.specifications import RowCountSqlDTO
-from src.dtos.testcase import DBInstanceDTO
+from src.dtos import RowCountSqlDTO, DBInstanceDTO
 
 
 class RowCountTestCase(AbstractTestCase):

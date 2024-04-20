@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 
-from src.testcase.ports.i_data_platform import IDataPlatform
-from src.dtos.testcase import TestObjectDTO
-from src.dtos.specifications import SpecificationDTO
+from src.testcase.ports import IDataPlatform
+from src.dtos import TestObjectDTO, SpecificationDTO
 
 
 class ICheckable(ABC):

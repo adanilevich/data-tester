@@ -1,14 +1,9 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from typing import List
 from abc import ABC, abstractmethod
 
-from src.dtos.testcase import (
-    TestObjectDTO, TestCaseResultDTO
-)
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.specifications import SpecificationDTO
+from src.dtos import TestObjectDTO, TestCaseResultDTO, DomainConfigDTO, SpecificationDTO
 
 
 @dataclass

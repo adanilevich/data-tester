@@ -1,10 +1,8 @@
 from __future__ import annotations
-
 from enum import Enum
 from typing import Optional, Tuple, List
 
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
+from src.dtos import DomainConfigDTO, DBInstanceDTO, TestObjectDTO
 
 
 class TestobjectType(Enum):
@@ -65,7 +63,7 @@ class DemoDefaultResolver:
             db: DBInstanceDTO, testobject_name: Optional[str] = None
     ) -> List[str]:
         """
-        Returns (relative) path in raw data layer of our dummy demo DWH.
+        Returns (relative) path in raw fixtures layer of our dummy demo DWH.
         Translates between  business coordinates and technical paths in demo filesystem
 
         Args:

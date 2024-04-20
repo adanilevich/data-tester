@@ -1,7 +1,7 @@
 from typing import List
 
 from src.testcase.precondition_checks import AbstractCheck, ICheckable
-from src.dtos.specifications import SchemaSpecificationDTO
+from src.dtos import SchemaSpecificationDTO
 
 
 class CheckPrimaryKeysAreSpecified(AbstractCheck):

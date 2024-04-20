@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.precondition_checks import CheckSpecsAreUnique, ICheckable
-from src.dtos.specifications import SpecificationDTO
+from src.dtos import SpecificationDTO
 
 
 class TestTestObjectNotEmptyChecker:

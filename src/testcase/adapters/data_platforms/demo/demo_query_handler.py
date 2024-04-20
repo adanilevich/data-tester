@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.testcase import DBInstanceDTO
+from src.dtos import DomainConfigDTO, DBInstanceDTO
 
 
 class DemoQueryHandler:

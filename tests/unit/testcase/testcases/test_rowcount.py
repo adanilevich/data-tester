@@ -4,7 +4,7 @@ import pytest
 import polars as pl
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos.specifications import RowCountSqlDTO
+from src.dtos import RowCountSqlDTO
 
 
 # noinspection PyUnusedLocal

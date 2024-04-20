@@ -6,7 +6,7 @@ from src.testcase.precondition_checks import ICheckable
 class IPreconditionChecker(ABC):
     """
     Interface which defines the usage of a precondition checker. This interface is used
-    by TestCase (and possibly other objects). A checker must be able to access data
+    by TestCase (and possibly other objects). A checker must be able to access fixtures
     from the TestCase (e.g. a 'testobject_exists' checker will require testobject
     information as well as the backend provided by TestCase). A Precon checker shouldn't
     know all details of a TestCase -- therefore, the testcase is abstracted via the

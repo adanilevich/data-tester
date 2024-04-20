@@ -1,5 +1,5 @@
 from src.testcase.precondition_checks import IPreconditionChecker, ICheckable
-from src.dtos.testcase import TestCaseResultDTO
+from src.dtos import TestCaseResultDTO
 
 
 class DummyChecker(IPreconditionChecker):

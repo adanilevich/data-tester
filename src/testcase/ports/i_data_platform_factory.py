@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from src.testcase.ports.i_data_platform import IDataPlatform
-from src.dtos.configs import DomainConfigDTO
+from src.dtos import DomainConfigDTO
 
 
 class IDataPlatformFactory(ABC):

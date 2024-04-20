@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from dataclasses import replace
 from typing import List, Tuple, Optional
 from random import randint
@@ -8,18 +7,14 @@ import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
-from src.testcase.adapters.data_platforms.demo import (
-    DemoNamingResolver, DemoQueryHandler
-)
+from src.testcase.adapters.data_platforms.demo import DemoNamingResolver, DemoQueryHandler
 from src.testcase.ports import IDataPlatform
-from src.dtos.specifications import SchemaSpecificationDTO
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.testcase import TestObjectDTO, DBInstanceDTO
+from src.dtos import SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO
 
 
 class LocalDataPlatform(IDataPlatform):
     """
-    Local backend: File storage is simply data stored on disks. Table storage is a
+    Local backend: File storage is simply fixtures stored on disks. Table storage is a
     duckdb-based DWH. This backend is implemented mainly for demo purpose and purpose
     of integration tests.
 
@@ -243,7 +238,7 @@ class LocalDataPlatform(IDataPlatform):
 
         Return:
             schema: corresponding (simplified and unified) schema which is
-                understood and refered to by data experts from business, e.g.
+                understood and refered to by fixtures experts from business, e.g.
                     -'DECIMAL', 'NUMERIC', are translated to 'decimal'
                     - 'TEXT', 'STRING', 'VARCHAR(n)' are translated to 'string'
         """

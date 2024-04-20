@@ -3,8 +3,7 @@ from typing import List, Optional, Tuple
 import polars as pl
 
 from src.testcase.ports import IDataPlatform
-from src.dtos.specifications import SchemaSpecificationDTO
-from src.dtos.testcase import DBInstanceDTO, TestObjectDTO
+from src.dtos import SchemaSpecificationDTO, DBInstanceDTO, TestObjectDTO
 
 
 class DummyPlatform(IDataPlatform):

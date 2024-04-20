@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Tuple
+
 import polars as pl
 
-from src.dtos.specifications import SchemaSpecificationDTO
-from src.dtos.testcase import TestObjectDTO, DBInstanceDTO
+from src.dtos import SchemaSpecificationDTO, TestObjectDTO, DBInstanceDTO
 
 
 class IDataPlatform(ABC):
@@ -83,7 +83,7 @@ class IDataPlatform(ABC):
         """
         Given a test sql (query), a list of column names (interpreted as primary keys),
         a corresponding list of sample values, obtains a random sample
-        of all columns from the query - e.g. samples data from a query based on
+        of all columns from the query - e.g. samples fixtures from a query based on
         provided examples of primary keys. If columns is provided, only these columns
         are selected.
             - Client must translate the query via translate_query() first
