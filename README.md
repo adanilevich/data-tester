@@ -6,7 +6,7 @@
 |-------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/dtos/\_\_init\_\_.py                                                  |        3 |        0 |    100% |           |
 | src/dtos/configs.py                                                       |       35 |        3 |     91% | 13, 23-25 |
-| src/dtos/specifications.py                                                |       45 |        2 |     96% |    54, 65 |
+| src/dtos/specifications.py                                                |       54 |        3 |     94% |58, 62, 73 |
 | src/dtos/testcase.py                                                      |       65 |        2 |     97% |    40, 51 |
 | src/testcase/adapters/data\_platforms/\_\_init\_\_.py                     |        2 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/\_\_init\_\_.py                |        4 |        0 |    100% |           |
@@ -41,14 +41,14 @@
 | src/testcase/precondition\_checks/precondition\_checker.py                |       15 |        0 |    100% |           |
 | src/testcase/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
 | src/testcase/testcases/abstract\_testcase.py                              |      102 |        1 |     99% |       106 |
-| src/testcase/testcases/compare\_sample.py                                 |      130 |       23 |     82% |91, 98, 104-106, 111-113, 147-149, 168-170, 184-192 |
+| src/testcase/testcases/compare\_sample.py                                 |      130 |       23 |     82% |93, 100, 106-108, 113-115, 149-151, 170-172, 186-194 |
 | src/testcase/testcases/dummy\_exception.py                                |       10 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      135 |        3 |     98% |98, 107, 142 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1176** |   **70** | **94%** |           |
+|                                                                 **TOTAL** | **1185** |   **71** | **94%** |           |
 
 6 empty files skipped.
 
