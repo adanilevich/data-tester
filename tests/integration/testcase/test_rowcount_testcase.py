@@ -1,6 +1,5 @@
 from src.testcase.testcases import TestCaseFactory
-from src.dtos.specifications import RowCountSqlDTO
-from src.dtos.testcase import TestObjectDTO
+from src.dtos import RowCountSqlDTO, TestObjectDTO
 from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 

@@ -44,7 +44,7 @@ class TestCasesConfigDTO:
 @dataclass
 class DomainConfigDTO:
     """
-    This serves as a generic data container for business-related configurations.
+    This serves as a generic fixtures container for business-related configurations.
     The required attributes are defined by configuration needs of implemented Testcases,
     e.g., the testcase compare_sample requires a sample size definition.
     """

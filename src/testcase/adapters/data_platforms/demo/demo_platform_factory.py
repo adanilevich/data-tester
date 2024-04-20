@@ -1,13 +1,15 @@
-from src.dtos.configs import DomainConfigDTO
+from pathlib import Path
+
+from src.dtos import DomainConfigDTO
 from src.testcase.adapters.data_platforms.demo import (
     LocalDataPlatform, DemoNamingResolver, DemoQueryHandler
 )
 from src.testcase.ports import IDataPlatformFactory
-from pathlib import Path
+
 
 PATH = Path(__file__).parent
-local_raw_data = PATH.parent.parent.parent.parent.parent / "tests/data/data/raw"
-local_db_data = PATH.parent.parent.parent.parent.parent / "tests/data/data/dbs"
+local_raw_data = PATH.parent.parent.parent.parent.parent / "tests/fixtures/demo/raw"
+local_db_data = PATH.parent.parent.parent.parent.parent / "tests/fixtures/demo/dbs"
 
 
 class LocalDataPlatformFactory(IDataPlatformFactory):

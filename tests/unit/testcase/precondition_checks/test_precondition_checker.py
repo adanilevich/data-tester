@@ -8,7 +8,7 @@ from src.testcase.precondition_checks import (
     CheckAlwaysOk,
     CheckAlwaysNok
 )
-from src.dtos.testcase import TestObjectDTO
+from src.dtos import TestObjectDTO
 
 
 class DummyCheckable(ICheckable):

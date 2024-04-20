@@ -6,11 +6,11 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union, Any
 import time
 
-from src.dtos.testcase import (
-    TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO
+from src.dtos import (
+    TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO, DomainConfigDTO,
+    SpecificationDTO
 )
-from src.dtos.configs import DomainConfigDTO
-from src.dtos.specifications import SpecificationDTO
+
 from src.testcase.ports import IDataPlatform, INotifier
 from src.testcase.precondition_checks import (
     ICheckable,

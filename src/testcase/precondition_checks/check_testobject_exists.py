@@ -1,5 +1,5 @@
 from src.testcase.precondition_checks import AbstractCheck, ICheckable
-from src.dtos.testcase import DBInstanceDTO
+from src.dtos import DBInstanceDTO
 
 
 class CheckTestObjectExists(AbstractCheck):

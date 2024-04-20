@@ -1,12 +1,11 @@
 from typing import List
 
 import pytest
-import random
 import time
 import polars as pl
 
 from src.testcase.testcases import CompareSampleTestCase
-from src.dtos.specifications import SchemaSpecificationDTO, CompareSampleSqlDTO
+from src.dtos import SchemaSpecificationDTO, CompareSampleSqlDTO
 
 
 # noinspection PyUnusedLocal
@@ -117,7 +116,7 @@ class TestCompareSampleTestCase:
         Test speed of diff comparison. Result expectations so far:
             - dataset of ca 12 Mio rows, 150 columns, compared with itself (one version
                 truncated and casted to string:
-                - data download and preparation: ca 45 s
+                - fixtures download and preparation: ca 45 s
                 - comparison duration if no casting required: 9 s (alsmost all for rowhash)
                 - comparison if dynamic casting required: 380 s (50/50 casting/rowhash)
                 - comparison duration if to-string casting: 330 s (50/50 casting/rowhash)

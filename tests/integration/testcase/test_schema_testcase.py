@@ -1,6 +1,5 @@
 from src.testcase.testcases import TestCaseFactory
-from src.dtos.specifications import SchemaSpecificationDTO
-from src.dtos.testcase import TestObjectDTO
+from src.dtos import SchemaSpecificationDTO, TestObjectDTO
 from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 

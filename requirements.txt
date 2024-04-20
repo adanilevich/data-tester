@@ -13,6 +13,6 @@ fsspec  # needed for demo, 2e2 tests and also for input finders and report stora
 gcsfs  # needed for input finders and report storage
 
 # calculation engine
-polars  # used for data crunching - esp. for testcase COMPARE_SAMPLE
+polars  # used for fixtures crunching - esp. for testcase COMPARE_SAMPLE
 xlsx2csv  # required for polars to read excel
 pyarrow  # required as backend for polars

@@ -1,6 +1,6 @@
 import pytest
 
-from src.dtos.specifications import SpecificationDTO, SchemaSpecificationDTO
+from src.dtos import SpecificationDTO, SchemaSpecificationDTO
 
 
 def test_creating_spec_without_location():

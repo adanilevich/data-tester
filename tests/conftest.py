@@ -7,19 +7,16 @@ import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 from urllib import request
 
-from src.dtos.testcase import TestObjectDTO
-from src.dtos.configs import (
-    SchemaTestCaseConfigDTO,
-    CompareSampleTestCaseConfigDTO,
-    DomainConfigDTO, TestCasesConfigDTO
+from src.dtos import (
+    SpecificationDTO, SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO,
+    DomainConfigDTO, TestCasesConfigDTO, TestObjectDTO
 )
-from src.dtos.specifications import SpecificationDTO
 from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 from src.testcase.adapters.data_platforms import DummyPlatform
 from src.testcase.testcases import TestCaseFactory, AbstractTestCase
 from src.testcase.precondition_checks import ICheckable
-from tests.data.data.prepare_data import clean_up, prepare_data
+from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
 @pytest.fixture
@@ -171,7 +168,7 @@ def performance_test_data() -> pl.DataFrame:
         df = df.hstack(df.rename(lambda x: x + "_copy"))
         df = df.hstack(df.rename(lambda x: x + "_again"))
         end = time.time()
-        print("Copying data 8-fold: ", (end - start), "s")
+        print("Copying fixtures 8-fold: ", (end - start), "s")
         print("Dataset shape:", df.shape)
 
         return df
@@ -191,7 +188,7 @@ def performance_test_data() -> pl.DataFrame:
     df_ = copy_data(df_)
     end_ = time.time()
 
-    print("Overall time for set up of data for performance test: ", (end_-start_), "s")
+    print("Overall time for set up of fixtures for performance test: ", (end_-start_), "s")
 
     yield df_
 

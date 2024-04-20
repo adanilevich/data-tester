@@ -2,7 +2,7 @@ from typing import List, Optional, Dict
 from dataclasses import dataclass, asdict, field
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos.specifications import SchemaSpecificationDTO
+from src.dtos import SchemaSpecificationDTO
 
 
 @dataclass

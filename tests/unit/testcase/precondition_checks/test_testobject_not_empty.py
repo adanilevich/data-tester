@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.precondition_checks import CheckTestObjectNotEmpty, ICheckable
-from src.dtos.testcase import TestObjectDTO
+from src.dtos import TestObjectDTO
 
 class TestTestObjectNotEmptyChecker:
 

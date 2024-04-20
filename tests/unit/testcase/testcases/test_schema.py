@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos.specifications import SchemaSpecificationDTO
+from src.dtos import SchemaSpecificationDTO
 
 
 class TestSchemaTestCase:

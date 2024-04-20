@@ -2,9 +2,10 @@ from typing import List
 from uuid import uuid4
 from datetime import datetime
 
-from src.testcase.ports import IRunTestCasesCommandHandler, RunTestCaseCommand
-from src.testcase.ports import IDataPlatformFactory, INotifier
-from src.dtos.testcase import TestCaseResultDTO, TestResult, TestStatus
+from src.testcase.ports import (
+    IRunTestCasesCommandHandler, RunTestCaseCommand, IDataPlatformFactory, INotifier,
+)
+from src.dtos import TestCaseResultDTO, TestResult, TestStatus
 from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
 
 
