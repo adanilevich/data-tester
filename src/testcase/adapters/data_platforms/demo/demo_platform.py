@@ -11,7 +11,7 @@ from src.testcase.ports import IDataPlatform
 from src.dtos import SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO
 
 
-class LocalDataPlatform(IDataPlatform):
+class DemoDataPlatform(IDataPlatform):
     """
     Local backend: File storage is simply fixtures stored on disks. Table storage is a
     duckdb-based DWH. This backend is implemented mainly for demo purpose and purpose

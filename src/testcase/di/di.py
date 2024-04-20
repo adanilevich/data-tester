@@ -5,7 +5,9 @@ This class will instantiate Backends, Notifiers, Handlers based on ENV vars.
 import os
 from typing import List
 
-from src.testcase.adapters.data_platforms import DummyPlatformFactory
+from src.testcase.adapters.data_platforms import (
+    DummyPlatformFactory, DemoDataPlatformFactory
+)
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 from src.testcase.application.run_testcases import RunTestCasesCommandHandler
 from src.testcase.ports import (
@@ -21,6 +23,8 @@ class DependencyInjector:
     def backend_factory(self) -> IDataPlatformFactory:
         if self.datatester_env == "DUMMY":
             return DummyPlatformFactory()
+        elif self.datatester_env == "DEMO":
+            return DemoDataPlatformFactory()
         else:
             raise NotImplementedError(f"Unknown DATATESTER_ENV: {self.datatester_env}")
 
