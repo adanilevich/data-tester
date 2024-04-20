@@ -4,14 +4,15 @@
 
 | Name                                                                      |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
-| src/dtos/\_\_init\_\_.py                                                  |        3 |        0 |    100% |           |
-| src/dtos/configs.py                                                       |       35 |        3 |     91% | 13, 23-25 |
-| src/dtos/specifications.py                                                |       54 |        3 |     94% |58, 62, 73 |
-| src/dtos/testcase.py                                                      |       65 |        2 |     97% |    40, 51 |
+| src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
+| src/dtos/configs.py                                                       |       32 |        0 |    100% |           |
+| src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
+| src/dtos/specifications.py                                                |       30 |        1 |     97% |        37 |
+| src/dtos/testcase.py                                                      |       58 |        1 |     98% |        29 |
 | src/testcase/adapters/data\_platforms/\_\_init\_\_.py                     |        2 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/\_\_init\_\_.py                |        4 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/demo\_naming\_resolver.py      |       48 |        5 |     90% | 22, 82-85 |
-| src/testcase/adapters/data\_platforms/demo/demo\_platform.py              |      168 |       16 |     90% |111, 128-130, 150, 254, 258, 260, 263-268, 360, 386, 390 |
+| src/testcase/adapters/data\_platforms/demo/demo\_platform.py              |      167 |       16 |     90% |110, 127-129, 149, 253, 257, 259, 262-267, 359, 385, 389 |
 | src/testcase/adapters/data\_platforms/demo/demo\_platform\_factory.py     |       16 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/demo\_query\_handler.py        |       22 |        2 |     91% |    22, 36 |
 | src/testcase/adapters/data\_platforms/dummy/\_\_init\_\_.py               |        2 |        0 |    100% |           |
@@ -46,9 +47,9 @@
 | src/testcase/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
-| src/testcase/testcases/schema.py                                          |      135 |        3 |     98% |98, 107, 142 |
+| src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1185** |   **71** | **94%** |           |
+|                                                                 **TOTAL** | **1160** |   **66** | **94%** |           |
 
 6 empty files skipped.
 
