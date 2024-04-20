@@ -1,4 +1,4 @@
-from typing import List, Optional, Self
+from typing import List, Self
 from abc import ABC, abstractmethod
 from uuid import uuid4
 
@@ -14,7 +14,7 @@ class RunTestCaseCommand(DTO):
     testobject: TestObjectDTO
     testtype: str
     specs: List[SpecificationDTO]
-    run_id: Optional[str] = Field(default_factory=lambda: str(uuid4())[:6])
+    run_id: str = Field(default_factory=lambda: str(uuid4())[:6])
     domain_config: DomainConfigDTO
 
     @classmethod
