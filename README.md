@@ -5,23 +5,23 @@
 | Name                                                                      |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
-| src/dtos/configs.py                                                       |       32 |        0 |    100% |           |
+| src/dtos/configs.py                                                       |       25 |        0 |    100% |           |
 | src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
-| src/dtos/specifications.py                                                |       30 |        1 |     97% |        37 |
-| src/dtos/testcase.py                                                      |       58 |        1 |     98% |        29 |
+| src/dtos/specifications.py                                                |       40 |        2 |     95% |    25, 62 |
+| src/dtos/testcase.py                                                      |       52 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/\_\_init\_\_.py                     |        2 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/\_\_init\_\_.py                |        4 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/demo\_naming\_resolver.py      |       48 |        5 |     90% | 22, 82-85 |
-| src/testcase/adapters/data\_platforms/demo/demo\_platform.py              |      167 |       16 |     90% |110, 127-129, 149, 253, 257, 259, 262-267, 359, 385, 389 |
+| src/testcase/adapters/data\_platforms/demo/demo\_platform.py              |      167 |       16 |     90% |110, 127-129, 149, 255, 259, 261, 264-269, 361, 387, 391 |
 | src/testcase/adapters/data\_platforms/demo/demo\_platform\_factory.py     |       16 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/demo\_query\_handler.py        |       22 |        2 |     91% |    22, 36 |
 | src/testcase/adapters/data\_platforms/dummy/\_\_init\_\_.py               |        2 |        0 |    100% |           |
-| src/testcase/adapters/data\_platforms/dummy/dummy\_platform.py            |       26 |        9 |     65% |15, 18, 22, 25, 31, 35, 41, 48, 55 |
+| src/testcase/adapters/data\_platforms/dummy/dummy\_platform.py            |       26 |        9 |     65% |15, 18, 26, 33, 39, 43, 49, 56, 63 |
 | src/testcase/adapters/data\_platforms/dummy/dummy\_platform\_factory.py   |        6 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/\_\_init\_\_.py                           |        2 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/in\_memory\_notifier.py                   |        7 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/stdout\_notifier.py                       |        4 |        0 |    100% |           |
-| src/testcase/application/run\_testcases.py                                |       22 |        0 |    100% |           |
+| src/testcase/application/run\_testcases.py                                |       20 |        0 |    100% |           |
 | src/testcase/di/di.py                                                     |       21 |        1 |     95% |        25 |
 | src/testcase/drivers/cli\_testcase\_runner.py                             |       13 |        0 |    100% |           |
 | src/testcase/ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
@@ -49,7 +49,7 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1160** |   **66** | **94%** |           |
+|                                                                 **TOTAL** | **1155** |   **66** | **94%** |           |
 
 6 empty files skipped.
 
