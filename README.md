@@ -4,6 +4,23 @@
 
 | Name                                                                      |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
+| src/domain\_config/\_\_init\_\_.py                                        |        1 |        1 |      0% |         2 |
+| src/domain\_config/adapters/\_\_init\_\_.py                               |        3 |        3 |      0% |       2-4 |
+| src/domain\_config/adapters/file\_storage.py                              |       40 |       40 |      0% |      1-58 |
+| src/domain\_config/adapters/yaml\_naming\_conventions.py                  |        6 |        6 |      0% |      1-11 |
+| src/domain\_config/adapters/yaml\_parser.py                               |        9 |        9 |      0% |      1-13 |
+| src/domain\_config/application/\_\_init\_\_.py                            |        2 |        2 |      0% |       2-3 |
+| src/domain\_config/application/find\_domain\_configs.py                   |       13 |       13 |      0% |      1-32 |
+| src/domain\_config/di/\_\_init\_\_.py                                     |        1 |        1 |      0% |         2 |
+| src/domain\_config/di/di.py                                               |        6 |        6 |      0% |      1-14 |
+| src/domain\_config/domain\_config\_manager.py                             |       29 |       29 |      0% |      1-45 |
+| src/domain\_config/drivers/\_\_init\_\_.py                                |        1 |        1 |      0% |         2 |
+| src/domain\_config/drivers/simple\_config\_finder.py                      |       26 |       26 |      0% |      1-44 |
+| src/domain\_config/ports/\_\_init\_\_.py                                  |        5 |        5 |      0% |       2-6 |
+| src/domain\_config/ports/i\_find\_domain\_configs.py                      |        8 |        8 |      0% |      1-14 |
+| src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        4 |      0% |       1-7 |
+| src/domain\_config/ports/i\_parser.py                                     |        4 |        4 |      0% |       1-7 |
+| src/domain\_config/ports/i\_storage.py                                    |        9 |        9 |      0% |      1-17 |
 | src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
 | src/dtos/configs.py                                                       |       25 |        0 |    100% |           |
 | src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
@@ -22,7 +39,7 @@
 | src/testcase/adapters/notifiers/in\_memory\_notifier.py                   |        7 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/stdout\_notifier.py                       |        4 |        0 |    100% |           |
 | src/testcase/application/run\_testcases.py                                |       20 |        0 |    100% |           |
-| src/testcase/di/di.py                                                     |       21 |        1 |     95% |        25 |
+| src/testcase/di/di.py                                                     |       23 |        3 |     87% |     26-29 |
 | src/testcase/drivers/cli\_testcase\_runner.py                             |       13 |        0 |    100% |           |
 | src/testcase/ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
 | src/testcase/ports/i\_data\_platform.py                                   |       29 |        0 |    100% |           |
@@ -49,9 +66,9 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1155** |   **66** | **94%** |           |
+|                                                                 **TOTAL** | **1324** |  **235** | **82%** |           |
 
-6 empty files skipped.
+8 empty files skipped.
 
 
 ## Setup coverage badge
