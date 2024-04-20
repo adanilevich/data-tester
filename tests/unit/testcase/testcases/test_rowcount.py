@@ -1,5 +1,3 @@
-from typing import Dict, Any
-
 import pytest
 import polars as pl
 
@@ -24,16 +22,18 @@ class TestRowCountTestCase:
                 return pl.DataFrame(
                     {"count": [10, 10], "__source__": ["expected", "actual"]}
                 )
-            if "strange" in query:  # backend should never return more than 2 counts
+            elif "strange" in query:  # backend should never return more than 2 counts
                 return pl.DataFrame(
                     {"count": [10, 5, 3], "__source__": ["expected", "actual", "df"]}
                 )
-            if "bad" in query:
+            elif "bad" in query:
                 return pl.DataFrame(
                     {"count": [10, 5], "__source__": ["expected", "actual"]}
                 )
-            if "exception" in query:
+            elif "exception" in query:
                 raise ValueError("This is a simulated exception.")
+            else:
+                return pl.DataFrame()
 
         testcase_.backend.run_query = run_query_
         testcase_.specs = [self.spec]

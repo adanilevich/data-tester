@@ -110,14 +110,14 @@ class TestCompareSampleTestCase:
         assert testcase.summary == "Testobject differs from SQL in 1 row(s)."
 
     # skip performance test, only execute if needed
-    @pytest.mark.skip_test
+    @pytest.mark.skipif(True, reason="Only run performance test on demand")
     def test_in_memory_comparison_performance(self, testcase, performance_test_data):
         """
         Test speed of diff comparison. Result expectations so far:
             - dataset of ca 12 Mio rows, 150 columns, compared with itself (one version
                 truncated and casted to string:
                 - fixtures download and preparation: ca 45 s
-                - comparison duration if no casting required: 9 s (alsmost all for rowhash)
+                - comparison duration if no casting required: 9 s (almost all for rowhash)
                 - comparison if dynamic casting required: 380 s (50/50 casting/rowhash)
                 - comparison duration if to-string casting: 330 s (50/50 casting/rowhash)
                 - comparison duration if only one col is casted: ca 70 s
@@ -139,8 +139,8 @@ class TestCompareSampleTestCase:
         this = performance_test_data.with_columns(pl.lit("value").alias("__concat_key__"))
         that = (
             this[:-10]
-            #.cast({this.columns[0]: pl.String})
-            #.reverse()
+            # .cast({this.columns[0]: pl.String})
+            # .reverse()
         )
 
         diff = compare_data(this, that)

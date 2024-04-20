@@ -1,3 +1,4 @@
+from typing import List
 import pytest
 
 from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
@@ -81,7 +82,7 @@ class TestLocalBackend:
 
     def test_getting_sample_keys_fails_without_defining_pks(self, backend, test_query):
 
-        primary_keys = []
+        primary_keys: List[str] = []
 
         with pytest.raises(ValueError) as err:
             _ = backend.get_sample_keys(
@@ -120,7 +121,10 @@ class TestLocalBackend:
         key_sample = ["Peter Lustig|1", "Big Company Ltd|5", "Big Company Ltd|1"]
 
         sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db)
+            query=test_query,
+            primary_keys=primary_keys,
+            key_sample=key_sample, db=self.db
+        )
 
         assert sample.select("amount").sum().to_series()[0] == 3010
 
@@ -130,7 +134,11 @@ class TestLocalBackend:
         key_sample = ["Peter Lustig"]
 
         sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db)
+            query=test_query,
+            primary_keys=primary_keys,
+            key_sample=key_sample,
+            db=self.db
+        )
 
         assert sample.select("amount").sum().to_series()[0] == 21
 

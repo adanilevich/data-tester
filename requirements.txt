@@ -14,5 +14,6 @@ gcsfs  # needed for input finders and report storage
 
 # calculation engine
 polars  # used for fixtures crunching - esp. for testcase COMPARE_SAMPLE
+xlsxwriter  # required for polars to write excel
 xlsx2csv  # required for polars to read excel
 pyarrow  # required as backend for polars
