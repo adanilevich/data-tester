@@ -13,7 +13,11 @@ class TestTestObjectNotEmptyChecker:
 
     @pytest.fixture
     def spec(self) -> SpecificationDTO:
-        return SpecificationDTO(location="", type="this")
+        return SpecificationDTO(
+            location="my_location",
+            type="this",
+            testobject="doesnt_matter",
+        )
 
     def test_check_fails_if_several_specs_provided(self, checkable, spec):
         checkable.required_specs = ["this"]
@@ -37,7 +41,7 @@ class TestTestObjectNotEmptyChecker:
 
     def test_check_is_ok_if_unique_spec_provided(self, checkable, spec):
         checkable.required_specs = ["this", "that"]
-        new_spec = SpecificationDTO.from_dict(spec_as_dict=spec.to_dict())
+        new_spec = SpecificationDTO.from_dict(spec.to_dict())
         new_spec.type = "that"
         checkable.specs = [spec, new_spec]
         checker = CheckSpecsAreUnique()

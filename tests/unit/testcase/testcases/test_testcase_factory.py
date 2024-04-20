@@ -8,8 +8,8 @@ class TestTestCaseFactory:
 
     testobject = TestObjectDTO(name="to", domain="dom", stage="proj", instance="inst")
     specifications = [
-        SpecificationDTO(type="schema", location="loc"),
-        SpecificationDTO(type="sql", location="loc"),
+        SpecificationDTO(type="schema", location="loc", testobject="to"),
+        SpecificationDTO(type="sql", location="loc", testobject="to"),
     ]
 
     def test_cant_create_unknown_testcase(

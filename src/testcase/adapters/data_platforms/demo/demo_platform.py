@@ -194,6 +194,7 @@ class LocalDataPlatform(IDataPlatform):
         result = SchemaSpecificationDTO(
             location=".".join(testobject.to_dict().values()),
             columns=schema_as_dict,
+            testobject=testobject.name,
         )
 
         return result
@@ -220,6 +221,7 @@ class LocalDataPlatform(IDataPlatform):
 
         result = SchemaSpecificationDTO(
             location="user query",
+            testobject="user query",
             columns=schema_as_dict,
         )
 

@@ -13,20 +13,12 @@ class TestObjectDTO(DTO):
     stage: str
     instance: str
 
-    @classmethod
-    def from_dict(cls, testobject_as_dict: dict) -> TestObjectDTO:
-        return super().from_dict(testobject_as_dict)
-
 
 class DBInstanceDTO(DTO):
     """Unambiguously identifies the database to be tested."""
     domain: str
     stage: str
     instance: str
-
-    @classmethod
-    def from_dict(cls, db_as_dict: dict) -> DBInstanceDTO:
-        return super().from_dict(db_as_dict)
 
     @classmethod
     def from_testobject(cls, testobject: TestObjectDTO) -> DBInstanceDTO:

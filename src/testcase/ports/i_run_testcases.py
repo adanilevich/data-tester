@@ -1,27 +1,33 @@
-from __future__ import annotations
-from dataclasses import dataclass
-from typing import List
+from typing import List, Self
 from abc import ABC, abstractmethod
+from uuid import uuid4
 
-from src.dtos import TestObjectDTO, TestCaseResultDTO, DomainConfigDTO, SpecificationDTO
+from pydantic import Field
+
+from src.dtos import (
+    TestObjectDTO, TestCaseResultDTO, DomainConfigDTO, SpecificationDTO, DTO,
+    SpecFactory
+)
 
 
-@dataclass
-class RunTestCaseCommand:
+class RunTestCaseCommand(DTO):
     testobject: TestObjectDTO
     testtype: str
     specs: List[SpecificationDTO]
+    run_id: str = Field(default_factory=lambda: str(uuid4())[:6])
     domain_config: DomainConfigDTO
 
     @classmethod
-    def from_dict(cls, command_as_dict: dict) -> RunTestCaseCommand:
-        command_as_dto = cls(
-            testobject=TestObjectDTO.from_dict(command_as_dict["testobject"]),
-            testtype=command_as_dict["testtype"],
-            specs=[SpecificationDTO.from_dict(spec) for spec in command_as_dict["specs"]],
-            domain_config=DomainConfigDTO.from_dict(command_as_dict["domain_config"])
+    def from_dict(cls, dict_: dict) -> Self:
+
+        command = cls(
+            testobject=TestObjectDTO.from_dict(dict_["testobject"]),
+            testtype=dict_["testtype"],
+            specs=[SpecFactory().create_from_dict(spec) for spec in dict_["specs"]],
+            domain_config=DomainConfigDTO.from_dict(dict_["domain_config"]),
+            run_id=dict_.get("run_id", str(uuid4())[:6]),
         )
-        return command_as_dto
+        return command
 
 
 class IRunTestCasesCommandHandler(ABC):

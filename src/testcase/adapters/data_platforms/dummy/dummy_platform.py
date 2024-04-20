@@ -15,11 +15,19 @@ class DummyPlatform(IDataPlatform):
         return ["testobject1", "testobject2"]
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
-        return SchemaSpecificationDTO(location="my_loc", columns={"my_col": "my_dtype"})
+        return SchemaSpecificationDTO(
+            location="my_loc",
+            testobject=testobject.name,
+            columns={"my_col": "my_dtype"}
+            )
 
     def get_schema_from_query(
             self, query: str, db: DBInstanceDTO) -> SchemaSpecificationDTO:
-        return SchemaSpecificationDTO(location="my_loc", columns={"my_col": "my_dtype"})
+        return SchemaSpecificationDTO(
+            location="my_loc",
+            testobject="user query",
+            columns={"my_col": "my_dtype"},
+        )
 
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
         return schema

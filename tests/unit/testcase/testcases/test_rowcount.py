@@ -9,7 +9,8 @@ from src.dtos import RowCountSqlDTO
 class TestRowCountTestCase:
     spec = RowCountSqlDTO(
         location="this_location",
-        query="to be replaced by test"
+        query="to be replaced by test",
+        testobject="stage_customers",
     )
 
     @pytest.fixture

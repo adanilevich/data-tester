@@ -6,6 +6,7 @@ from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
 spec = RowCountSqlDTO(
     location="this_location",
+    testobject="core_customer_transactions",
     query="""
     WITH __expected_count__ AS (
         SELECT COUNT(*)

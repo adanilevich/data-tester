@@ -1,5 +1,4 @@
 from typing import List
-from uuid import uuid4
 from datetime import datetime
 
 from src.testcase.ports import (
@@ -18,7 +17,6 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
 
     def run(self, commands: List[RunTestCaseCommand]) -> List[TestCaseResultDTO]:
 
-        run_id = str(uuid4())
         results = []
         for command in commands:
             backend_ = self.backend_factory.create(domain_config=command.domain_config)
@@ -28,7 +26,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     testobject=command.testobject,
                     specs=command.specs,
                     domain_config=command.domain_config,
-                    run_id=run_id,
+                    run_id=command.run_id,
                     backend=backend_,
                     notifiers=self.notifiers
                 )
@@ -43,7 +41,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     start_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     end_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     testobject=command.testobject,
-                    run_id=run_id,
+                    run_id=command.run_id,
                     diff=dict(),
                     testtype=command.testtype,
                     specifications=command.specs,

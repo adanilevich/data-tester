@@ -4,9 +4,12 @@ from src.testcase.adapters.data_platforms import LocalDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
 spec = SchemaSpecificationDTO(
-    location="this_location", columns={
+    location="this_location",
+    testobject="stage_customers",
+    columns={
         "date": "string", "id": "int", "region": "string", "name": "string",
-        "source_file": "string", "type": "string"}
+        "source_file": "string", "type": "string"
+    }
 )
 
 testobject = TestObjectDTO(

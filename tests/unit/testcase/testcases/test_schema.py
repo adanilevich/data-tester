@@ -11,7 +11,8 @@ class TestSchemaTestCase:
         columns={"a": "int", "b": "string", "c": "array"},
         partition_columns=["a"],
         clustering_columns=["b"],
-        primary_keys=["a", "b"]
+        primary_keys=["a", "b"],
+        testobject="stage_customers",
     )
 
     @pytest.fixture

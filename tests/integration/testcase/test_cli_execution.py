@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from src.testcase.di.di import DependencyInjector
 from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
@@ -28,14 +29,20 @@ domain_config = {
     }
 }
 
-specs = [
-    {"type": "schema", "location": "my_location"},
-    {"type": "sql", "location": "my_location"},
-]
+
+def specs(testobject: dict):
+    specs: List[dict] = [
+        {"type": "schema", "location": "my_location", "columns": {"a": "int"}},
+        {"type": "rowcount_sql", "location": "my_location", "query": "SELECT"},
+    ]
+
+    [spec.update({"testobject": testobject["name"]}) for spec in specs]
+    return specs
+
 
 testcases = [
-    {"testobject": testobject, "testtype": testtype, "specs": specs,
-     "domain_config": domain_config}
+    {"testobject": testobject, "testtype": testtype, "specs": specs(testobject),
+     "domain_config": domain_config, "run_id": "my_run_id"}
     for testobject, testtype in zip(testobjects, testtypes)
 ]
 
@@ -64,5 +71,7 @@ def test_dummy_cli_execution():
         testcase_status = result["status"]
         expected_result = testtype_to_result_mapper[testtype][0]
         expected_status = testtype_to_result_mapper[testtype][1]
+        run_id = result["run_id"]
         assert testcase_result == expected_result
         assert testcase_status == expected_status
+        assert run_id == "my_run_id"
