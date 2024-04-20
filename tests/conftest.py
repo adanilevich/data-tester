@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 import time
 
 import pytest
 import polars as pl
-from fsspec.implementations.local import LocalFileSystem
+from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from urllib import request
 
 from src.dtos import (
@@ -73,7 +73,7 @@ class DummyCheckable(ICheckable):
         self.backend = backend
         self.summary = ""
         self.details = []
-        self.notifications = []
+        self.notifications: List[str] = []
 
     def update_summary(self, summary: str):
         self.summary += summary
@@ -144,8 +144,8 @@ def prepare_local_data():
     clean_up()
 
 
-@pytest.fixture()
-def performance_test_data() -> pl.DataFrame:
+@pytest.fixture
+def performance_test_data() -> pl.DataFrame:  # type: ignore
 
     def download_performance_test_data(source_file: str, target_file: str):
         print("Starting download from", source_file)
@@ -179,7 +179,8 @@ def performance_test_data() -> pl.DataFrame:
             print("Deleting target file", target_file)
             fs.rm_file(target_file)
 
-    source_file_ = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2015-01.parquet"
+    source_file_ = "https://d37ci6vzurychx.cloudfront.net/trip-data/" \
+        "yellow_tripdata_2015-01.parquet"
     target_file_ = "yellow_tripdata_2015-01.parquet"
 
     start_ = time.time()
@@ -188,7 +189,7 @@ def performance_test_data() -> pl.DataFrame:
     df_ = copy_data(df_)
     end_ = time.time()
 
-    print("Overall time for set up of fixtures for performance test: ", (end_-start_), "s")
+    print("Overall time to set up fixture for performance test: ", (end_-start_), "s")
 
     yield df_
 

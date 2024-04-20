@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Dict, List, get_type_hints
+from typing import Any, Optional, Dict, List, get_type_hints
 
 
 @dataclass
@@ -10,7 +10,7 @@ class SpecificationDTO:
     type: str = "__no_default__"
 
     @classmethod
-    def from_dict(cls, spec_as_dict: dict) -> SpecificationDTO:
+    def from_dict(cls, spec_as_dict: dict) -> Any:  # 'Any' to not clash with subtypes
         # spec_as_dict may contain keys which are not required to construct a spec
         constructor_dict = {
             k: v for k, v in spec_as_dict.items() if k in get_type_hints(cls)
@@ -42,6 +42,10 @@ class SchemaSpecificationDTO(SpecificationDTO):
         if len(self.columns) == 0:
             raise ValueError("Schema specification must have non-empty columns.")
 
+    @classmethod
+    def from_dict(cls, *args, **kwargs) -> SchemaSpecificationDTO:
+        return super().from_dict(*args, **kwargs)
+
 
 @dataclass
 class RowCountSqlDTO(SpecificationDTO):
@@ -53,6 +57,10 @@ class RowCountSqlDTO(SpecificationDTO):
         if self.query == "":
             raise ValueError("Please provide a non-empty rowcount query.")
 
+    @classmethod
+    def from_dict(cls, *args, **kwargs) -> RowCountSqlDTO:
+        return super().from_dict(*args, **kwargs)
+
 
 @dataclass
 class CompareSampleSqlDTO(SpecificationDTO):
@@ -63,3 +71,7 @@ class CompareSampleSqlDTO(SpecificationDTO):
         super().__post_init__()
         if self.query == "":
             raise ValueError("Please provide a non-empty compare sample query.")
+
+    @classmethod
+    def from_dict(cls, *args, **kwargs) -> CompareSampleSqlDTO:
+        return super().from_dict(*args, **kwargs)

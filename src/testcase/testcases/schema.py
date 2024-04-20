@@ -2,7 +2,7 @@ from typing import List, Optional, Dict
 from dataclasses import dataclass, asdict, field
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO
+from src.dtos import SchemaSpecificationDTO, TestResult
 
 
 @dataclass
@@ -74,7 +74,7 @@ class SchemaTestCase(AbstractTestCase):
             self.add_detail({"Primary Keys Comparison": str(pk_diff)})
 
         # finally, all results are evaluated to an overall test result
-        self.result = self.result.OK
+        self.result = TestResult.OK
         self.summary = ""
         for result, description in [
             (self.column_comparison_result, "Column comparison"),

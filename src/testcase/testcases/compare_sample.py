@@ -3,7 +3,9 @@ from typing import List, Tuple
 import polars as pl
 
 from src.testcase.testcases import AbstractTestCase, time_it
-from src.dtos import CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO
+from src.dtos import (
+    CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO, TestResult
+)
 
 
 class CompareSampleTestCase(AbstractTestCase):
@@ -56,10 +58,10 @@ class CompareSampleTestCase(AbstractTestCase):
         diff = self._compare(expected, actual)
 
         if diff.shape[0] == 0:
-            self.result = self.result.OK
+            self.result = TestResult.OK
             self.summary = "Sample from testobject equals sample from test sql."
         else:
-            self.result = self.result.NOK
+            self.result = TestResult.NOK
             self.summary = f"Testobject differs from SQL in {diff.shape[0]} row(s)."
             # trimm diff to ca. 500 examples to not blow up Excel memory
             diff_example = diff.head(500).to_dict(as_series=False)

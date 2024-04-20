@@ -28,8 +28,8 @@ from dataclasses import dataclass
 
 import polars as pl
 import duckdb
-from fsspec.implementations.local import LocalFileSystem
-from fsspec import AbstractFileSystem
+from fsspec.implementations.local import LocalFileSystem  # type: ignore
+from fsspec import AbstractFileSystem  # type: ignore
 
 
 PATH = Path(__file__).parent
@@ -52,6 +52,7 @@ files = XlsxFiles()
 @dataclass
 class RawConfig:
     """Defines loading of raw layer, e.g. file storage layer"""
+
     domain: str
     stage: str
     instace: str
@@ -61,6 +62,7 @@ class RawConfig:
 @dataclass
 class StageConfig:
     """Defines loading of fixtures into staging layer, e.g. first table layer in DWH"""
+
     domain: str
     stage: str
     instace: str
@@ -70,14 +72,18 @@ class StageConfig:
 @dataclass
 class FileConfig:
     """Defines how a file is loaded e2e"""
+
     xlsx_file: Path  # path to original xlsx file
     raw: List[RawConfig]  # list of configs defining which raw layers to load file to
-    stage: List[StageConfig]  # list of configs defining which stage layers to load file to
+    stage: List[
+        StageConfig
+    ]  # list of configs defining which stage layers to load file to
 
 
 @dataclass
 class CoreConfig:
     """Defines if fixtures is loaded to core layer, e.g. table customer_transactions"""
+
     domain: str
     stage: str
     instance: str
@@ -91,16 +97,17 @@ class LoadConfig:
 
 """
 # Overall loading plan:
-In domain 'payments': 
+In domain 'payments':
     uat: only customers_1 will be loaded up to stage in instance main
     test:
         instance alpha will be loaded completely - all customer and transaction files
-        instance beta will be loaded with one business date e2e, e.g. customers_1 and transactions_1 
+        instance beta will be loaded with one business date e2e, e.g. customers_1
+        and transactions_1
 In domain 'sales':
     uat: not loaded
     test: only customers 2 are loaded to stage in instance main
 
-Important when loading customers 2, a loading error is simulating via truncating 
+Important when loading customers 2, a loading error is simulating via truncating
 the load to 4/6 rows -- see corresponding SQL
 """
 
@@ -109,63 +116,102 @@ file_configs: List[FileConfig] = [
     FileConfig(
         xlsx_file=files.customers_1,
         raw=[
-            RawConfig(domain="payments", stage="uat", instace="main", folder="customers"),
-            RawConfig(domain="payments", stage="test", instace="alpha", folder="customers"),
-            RawConfig(domain="payments", stage="test", instace="beta", folder="customers"),
+            RawConfig(
+                domain="payments", stage="uat", instace="main", folder="customers"
+            ),
+            RawConfig(
+                domain="payments", stage="test", instace="alpha", folder="customers"
+            ),
+            RawConfig(
+                domain="payments", stage="test", instace="beta", folder="customers"
+            ),
         ],
         stage=[
-            StageConfig(domain="payments", stage="uat", instace="main", table="customers"),
-            StageConfig(domain="payments", stage="test", instace="alpha", table="customers"),
-            StageConfig(domain="payments", stage="test", instace="beta", table="customers"),
-        ]
+            StageConfig(
+                domain="payments", stage="uat", instace="main", table="customers"
+            ),
+            StageConfig(
+                domain="payments", stage="test", instace="alpha", table="customers"
+            ),
+            StageConfig(
+                domain="payments", stage="test", instace="beta", table="customers"
+            ),
+        ],
     ),
     # configure loading for customers 2
     FileConfig(
         xlsx_file=files.customers_2,
         raw=[
-            RawConfig(domain="payments", stage="test", instace="alpha", folder="customers"),
+            RawConfig(
+                domain="payments", stage="test", instace="alpha", folder="customers"
+            ),
             RawConfig(domain="sales", stage="test", instace="main", folder="customers"),
         ],
         stage=[
-            StageConfig(domain="payments", stage="test", instace="alpha", table="customers"),
-            StageConfig(domain="sales", stage="test", instace="main", table="customers"),
-        ]
+            StageConfig(
+                domain="payments", stage="test", instace="alpha", table="customers"
+            ),
+            StageConfig(
+                domain="sales", stage="test", instace="main", table="customers"
+            ),
+        ],
     ),
     # configure loading for transactions 1
     FileConfig(
         xlsx_file=files.transactions_1,
         raw=[
-            RawConfig(domain="payments", stage="test", instace="alpha", folder="transactions"),
-            RawConfig(domain="payments", stage="test", instace="beta", folder="transactions"),
+            RawConfig(
+                domain="payments", stage="test", instace="alpha", folder="transactions"
+            ),
+            RawConfig(
+                domain="payments", stage="test", instace="beta", folder="transactions"
+            ),
         ],
         stage=[
-            StageConfig(domain="payments", stage="test", instace="alpha", table="transactions"),
-            StageConfig(domain="payments", stage="test", instace="beta", table="transactions"),
-        ]
+            StageConfig(
+                domain="payments", stage="test", instace="alpha", table="transactions"
+            ),
+            StageConfig(
+                domain="payments", stage="test", instace="beta", table="transactions"
+            ),
+        ],
     ),
     # configure loading for transactions 2
     FileConfig(
         xlsx_file=files.transactions_2,
-        raw=[RawConfig(domain="payments", stage="test", instace="alpha", folder="transactions")],
-        stage=[StageConfig(domain="payments", stage="test", instace="alpha", table="transactions")]
+        raw=[
+            RawConfig(
+                domain="payments", stage="test", instace="alpha", folder="transactions"
+            )
+        ],
+        stage=[
+            StageConfig(
+                domain="payments", stage="test", instace="alpha", table="transactions"
+            )
+        ],
     ),
 ]
 
 core_configs: List[CoreConfig] = [
     CoreConfig(domain="payments", stage="test", instance="alpha"),
-    CoreConfig(domain="payments", stage="test", instance="beta")
+    CoreConfig(domain="payments", stage="test", instance="beta"),
 ]
 
-load_config: LoadConfig = LoadConfig(file_configs=file_configs, core_configs=core_configs)
+load_config: LoadConfig = LoadConfig(
+    file_configs=file_configs, core_configs=core_configs
+)
 
 
-def setup_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH,
-                    fs: AbstractFileSystem = FS):
+def setup_raw_layer(
+    conf: LoadConfig = load_config, path: Path = RAW_PATH, fs: AbstractFileSystem = FS
+):
     """Set up raw layer in base path: all folders and subfolders will be created"""
 
     print("\nSETTING UP RAW LAYER:")
 
-    objects: List[Tuple[str, str, str, str]] = []  # list of required combos of domain/prject/folder
+    objects: List[Tuple[str, str, str, str]] = (
+        []
+    )  # list of required combos of domain/prject/folder
     for file_conf in conf.file_configs:
         for raw_conf in file_conf.raw:
             obj = (raw_conf.domain, raw_conf.stage, raw_conf.instace, raw_conf.folder)
@@ -180,15 +226,16 @@ def setup_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH,
     # create all folders and subfolders
     created_paths = []
     for obj in objects:
-        target_path = str(path/obj[0]/obj[1]/obj[2]/obj[3])
+        target_path = str(path / obj[0] / obj[1] / obj[2] / obj[3])
         fs.mkdir(target_path, create_parents=True)
         created_paths.append(target_path)
 
     print("Created folders: ", created_paths)
 
 
-def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
-                    fs: AbstractFileSystem = FS):
+def setup_databases(
+    conf: LoadConfig = load_config, path: Path = DB_PATH, fs: AbstractFileSystem = FS
+):
 
     print("\nSETTING UP DATABASES:")
 
@@ -196,15 +243,25 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
     # create unique list of domain-stage-instance-table-layer required for staging:
     for file_config in conf.file_configs:
         for stage_config in file_config.stage:
-            obj = (stage_config.domain, stage_config.stage, stage_config.instace,
-                   stage_config.table, "stage")
+            obj = (
+                stage_config.domain,
+                stage_config.stage,
+                stage_config.instace,
+                stage_config.table,
+                "stage",
+            )
             if obj not in objects:
                 objects.append(obj)
 
     # create same for core layer; table name is always the same here:
     for core_config in conf.core_configs:
-        obj = (core_config.domain, core_config.stage, core_config.instance,
-               "customer_transactions", "core")
+        obj = (
+            core_config.domain,
+            core_config.stage,
+            core_config.instance,
+            "customer_transactions",
+            "core",
+        )
         objects.append(obj)
 
     objects = list(set(objects))  # de-duplicate
@@ -218,9 +275,9 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
     # create databases and tables:
     for domain, stage, instance, objectname, layer in objects:
         # database files are <domain>_<stage>.db, e.g. payments_test.db
-        database = domain + '_' + stage
+        database = domain + "_" + stage
         schema = instance  # schema always corresponds to instance
-        table = layer + '_' + objectname  # table names are <layer>_<objectname>
+        table = layer + "_" + objectname  # table names are <layer>_<objectname>
 
         # create database: duckdb database files are created if not exist
         duckdb.execute(f"ATTACH IF NOT EXISTS '{str(path/database)}.db' AS {database}")
@@ -246,17 +303,23 @@ def setup_databases(conf: LoadConfig = load_config, path: Path = DB_PATH,
 
         duckdb.execute(f"CREATE SCHEMA IF NOT EXISTS {database}.{schema};")
         duckdb.execute(
-            f"CREATE TABLE IF NOT EXISTS {database}.{schema}.{table} {tableschema};")
+            f"CREATE TABLE IF NOT EXISTS {database}.{schema}.{table} {tableschema};"
+        )
 
-    created_tables = duckdb.sql("""
+    created_tables = duckdb.sql(
+        """
         SELECT * FROM INFORMATION_SCHEMA.TABLES
         ORDER BY table_catalog, table_schema, table_name
-    """).pl()
+    """
+    ).pl()
     print("Created tables: ", created_tables)
 
 
-def get_csv_raw_path(xlsx_path: Path, conf: Union[RawConfig, StageConfig],
-                     raw_layer_base_path: Path = RAW_PATH) -> str:
+def get_csv_raw_path(
+    xlsx_path: Path,
+    conf: Union[RawConfig, StageConfig],
+    raw_layer_base_path: Path = RAW_PATH,
+) -> str:
     """Based on path of xlsx file, base path of raw_layer and config,
     get target csv filepath in raw layer"""
     xlsx_filename = xlsx_path.name
@@ -267,8 +330,14 @@ def get_csv_raw_path(xlsx_path: Path, conf: Union[RawConfig, StageConfig],
     else:
         obj = conf.table
 
-    csv_path = (raw_layer_base_path / conf.domain / conf.stage / conf.instace /
-                obj / csv_filename)
+    csv_path = (
+        raw_layer_base_path
+        / conf.domain
+        / conf.stage
+        / conf.instace
+        / obj
+        / csv_filename
+    )
     return str(csv_path)
 
 
@@ -281,9 +350,7 @@ def load_raw_layer(conf: LoadConfig = load_config, path: Path = RAW_PATH):
         df = pl.read_excel(xlsx_filepath)
         for raw_config in file_config.raw:
             csv_filepath = get_csv_raw_path(
-                xlsx_path=xlsx_filepath,
-                conf=raw_config,
-                raw_layer_base_path=path
+                xlsx_path=xlsx_filepath, conf=raw_config, raw_layer_base_path=path
             )
             df.write_csv(csv_filepath)
             loaded_files.append(csv_filepath)
@@ -305,19 +372,21 @@ def load_staging_layer(conf: LoadConfig = load_config):
                 xlsx_path=xlsx_filepath,
                 conf=stage_config,
             )
-            database = stage_config.domain + '_' + stage_config.stage
+            database = stage_config.domain + "_" + stage_config.stage
             schema = stage_config.instace
             table = "stage_" + stage_config.table
-            filename = csv_filepath.split('/')[-1]
+            filename = csv_filepath.split("/")[-1]
 
             # truncate loading of customers 2 to 4/6 rows simulate load errors
             limit_clause = "LIMIT 4" if xlsx_filepath == files.customers_2 else ""
-            duckdb.execute(f"""
-                INSERT INTO {database}.{schema}.{table} 
-                SELECT *, '{filename}' AS source_file FROM '{csv_filepath}' 
+            duckdb.execute(
+                f"""
+                INSERT INTO {database}.{schema}.{table}
+                SELECT *, '{filename}' AS source_file FROM '{csv_filepath}'
                 {limit_clause};
-            """)
-            loaded_tables.append(database + '.' + schema + '.' + table)
+            """
+            )
+            loaded_tables.append(database + "." + schema + "." + table)
 
     loaded_tables = list(sorted(set(loaded_tables)))
     print("Loaded staging tables: ", loaded_tables)
@@ -329,20 +398,19 @@ def load_staging_layer(conf: LoadConfig = load_config):
     print(f"Loaded {customer_count} customers into paymets.alpha.stage_customers")
 
     # check that all 18 transactions are loaded into payments alpha
-    transactions = duckdb.sql("SELECT * FROM payments_test.alpha.stage_transactions").pl()
+    transactions = duckdb.sql(
+        "SELECT * FROM payments_test.alpha.stage_transactions"
+    ).pl()
     transactions_count = count_values(df=transactions, col="id")
     assert transactions_count == 18
-    print(f"Loaded {transactions_count} transactions into paymets.alpha.stage_transactions")
+    print(
+        f"Loaded {transactions_count} transactions into paymets.alpha.stage_transactions"
+    )
 
 
 def count_values(df: pl.DataFrame, col: str) -> int:
     """Count number of rows in a given column of a polars dataframe"""
-    count = (
-        df
-        .select(pl.col(col))
-        .count()
-        .to_dicts()[0][col]
-    )
+    count = df.select(pl.col(col)).count().to_dicts()[0][col]
     return count
 
 
@@ -350,10 +418,11 @@ def load_core_layer(conf: LoadConfig = load_config):
 
     print("\nLOADING CORE LAYER:")
     for core_config in conf.core_configs:
-        database = core_config.domain + '_' + core_config.stage
+        database = core_config.domain + "_" + core_config.stage
         schema = core_config.instance
 
-        duckdb.execute(f"""
+        duckdb.execute(
+            f"""
             INSERT INTO {database}.{schema}.core_customer_transactions
                 SELECT
                     transactions.id,
@@ -368,13 +437,15 @@ def load_core_layer(conf: LoadConfig = load_config):
                 LEFT JOIN {database}.{schema}.stage_customers AS customers
                     ON transactions.customer_id = customers.id
                     AND transactions.date = customers.date
-            
-                WHERE customer_region != 'africa' 
-        """)
+
+                WHERE customer_region != 'africa'
+        """
+        )
 
     # check that all 18 transactions are loaded into payments alpha
     customer_transactions = duckdb.sql(
-        "SELECT * FROM payments_test.alpha.core_customer_transactions").pl()
+        "SELECT * FROM payments_test.alpha.core_customer_transactions"
+    ).pl()
     count = count_values(df=customer_transactions, col="id")
     assert count == 12
     print(f"Loaded {count} transactions into paymets.alpha.core_customer_transactions")
@@ -388,8 +459,9 @@ def prepare_data():
     load_core_layer()
 
 
-def clean_up(db_path: Path = DB_PATH, raw_path: Path = RAW_PATH,
-             fs: AbstractFileSystem = FS):
+def clean_up(
+    db_path: Path = DB_PATH, raw_path: Path = RAW_PATH, fs: AbstractFileSystem = FS
+):
 
     print("\nDELETING RAW LAYER")
     if fs.exists(str(raw_path)):
@@ -404,7 +476,7 @@ def clean_up(db_path: Path = DB_PATH, raw_path: Path = RAW_PATH,
                 duck_db_files.append(file)
 
         for duck_db_file in duck_db_files:
-            db_name = duck_db_file.split('/')[-1].removesuffix('.db')
+            db_name = duck_db_file.split("/")[-1].removesuffix(".db")
             duckdb.execute(f"DETACH {db_name};")
 
     if fs.exists(str(db_path)):
