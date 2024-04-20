@@ -1,13 +1,11 @@
 from __future__ import annotations
 from enum import Enum
-from dataclasses import dataclass, asdict
 from typing import Union, List, Dict
-
+from src.dtos import DTO
 from src.dtos.specifications import SpecificationDTO
 
 
-@dataclass
-class TestObjectDTO:
+class TestObjectDTO(DTO):
     """Unambigiusly identifies the testobject (e.g. table) to be tested"""
     __test__ = False  # prevents pytest collection
     name: str
@@ -17,19 +15,10 @@ class TestObjectDTO:
 
     @classmethod
     def from_dict(cls, testobject_as_dict: dict) -> TestObjectDTO:
-        return cls(
-            name=testobject_as_dict["name"],
-            domain=testobject_as_dict["domain"],
-            stage=testobject_as_dict["stage"],
-            instance=testobject_as_dict["instance"]
-        )
-
-    def dict(self) -> dict:
-        return asdict(self)
+        return super().from_dict(testobject_as_dict)
 
 
-@dataclass
-class DBInstanceDTO:
+class DBInstanceDTO(DTO):
     """Unambiguously identifies the database to be tested."""
     domain: str
     stage: str
@@ -37,7 +26,7 @@ class DBInstanceDTO:
 
     @classmethod
     def from_dict(cls, db_as_dict: dict) -> DBInstanceDTO:
-        return cls(**db_as_dict)
+        return super().from_dict(db_as_dict)
 
     @classmethod
     def from_testobject(cls, testobject: TestObjectDTO) -> DBInstanceDTO:
@@ -46,9 +35,6 @@ class DBInstanceDTO:
             stage=testobject.stage,
             instance=testobject.instance
         )
-
-    def dict(self):
-        return asdict(self)
 
 
 class TestStatus(Enum):
@@ -61,7 +47,7 @@ class TestStatus(Enum):
     ERROR = "ERROR"
     FINISHED = "FINISHED"
 
-    def string(self) -> str:
+    def to_string(self) -> str:
         return str(self.value)
 
 
@@ -71,12 +57,11 @@ class TestResult(Enum):
     OK = "OK"
     NOK = "NOK"
 
-    def string(self) -> str:
+    def to_string(self) -> str:
         return str(self.value)
 
 
-@dataclass
-class TestCaseResultDTO:
+class TestCaseResultDTO(DTO):
     __test__ = False  # prevents pytest collection
     id: str
     run_id: str
@@ -86,22 +71,22 @@ class TestCaseResultDTO:
     result: TestResult
     diff: Dict[str, Union[List, Dict]]  # found diff as a table in record-oriented dict
     summary: str
-    details: List[Dict[str, str]]
+    details: List[Dict[str, Union[str, int, float]]]
     specifications: List[SpecificationDTO]
     start_ts: str
     end_ts: Union[str, None]
 
-    def dict(self) -> dict:
+    def to_dict(self) -> dict:
         return dict(
             id=self.id,
             run_id=self.run_id,
             testtype=self.testtype,
-            testobject=self.testobject.dict(),
-            status=self.status.string(),
+            testobject=self.testobject.to_dict(),
+            status=self.status.to_string(),
             summary=self.summary,
             details=self.details,
-            result=self.result.string(),
-            specifications=[spec.dict() for spec in self.specifications],
+            result=self.result.to_string(),
+            specifications=[spec.to_dict() for spec in self.specifications],
             start_ts=self.start_ts,
             end_ts=self.end_ts
         )

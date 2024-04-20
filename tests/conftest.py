@@ -78,7 +78,7 @@ class DummyCheckable(ICheckable):
     def update_summary(self, summary: str):
         self.summary += summary
 
-    def add_detail(self, detail: Dict[str, str]):
+    def add_detail(self, detail: Dict[str, str | int | float]):
         self.details.append(detail)
 
     def notify(self, message: str):

@@ -1,12 +1,11 @@
 clear
 
-echo ""
 echo "RUNNING TYPE CHECKS"
-mypy ../
+mypy src/
 
 echo ""
 echo "RUNNING LINTING AND STYLE CHECKS"
-flake8 ../ -v --max-line-length 90
+flake8 src/ -v --max-line-length 90
 
 echo ""
 echo "RUNNING TESTS"

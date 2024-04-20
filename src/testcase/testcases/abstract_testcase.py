@@ -49,7 +49,7 @@ class AbstractTestCase(ICheckable):
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         self.facts: List[Dict[str, str]] = []  # list of key facts about test execution
-        self.details: List[Dict[str, str]] = []  # list of in-depth details about execut.
+        self.details: List[Dict[str, str | int | float]] = []  # list of execution details
         self.diff: Dict[str, Union[List, Dict]] = dict()  # list of diffs
         self.status = TestStatus.INITIATED
 
@@ -84,7 +84,7 @@ class AbstractTestCase(ICheckable):
 
         return True
 
-    def _as_dto(self) -> TestCaseResultDTO:
+    def to_dto(self) -> TestCaseResultDTO:
         dto = TestCaseResultDTO(
             id=self.id,
             run_id=self.run_id,
@@ -112,7 +112,7 @@ class AbstractTestCase(ICheckable):
         checker = checker or PreConditionChecker()
         if not self._check_preconditions(checker=checker):
             self.end_ts = get_datetime()
-            return self._as_dto()
+            return self.to_dto()
 
         self.status = TestStatus.EXECUTING
         self.notify("Starting execution of core testlogic ...")
@@ -129,7 +129,7 @@ class AbstractTestCase(ICheckable):
             self.summary = msg
 
         self.end_ts = get_datetime()
-        return self._as_dto()
+        return self.to_dto()
 
 
 def time_it(step_name: str):

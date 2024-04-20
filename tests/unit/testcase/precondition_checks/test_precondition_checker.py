@@ -23,7 +23,7 @@ class DummyCheckable(ICheckable):
         )
         self.summary = ""
 
-    def add_detail(self, detail: Dict[str, str]):
+    def add_detail(self, detail: Dict[str, str | int | float]):
         pass
 
     def update_summary(self, summary: str):

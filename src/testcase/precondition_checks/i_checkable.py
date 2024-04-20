@@ -17,14 +17,14 @@ class ICheckable(ABC):
     required_specs: List[str] = []
     specs: List[SpecificationDTO] = []
     summary: str = ""
-    details: List[Dict[str, str]] = []
+    details: List[Dict[str, str | int | float]] = []
 
     @abstractmethod
     def update_summary(self, summary: str):
         """Precondition checkers can update summary of the testcase/checkable."""
 
     @abstractmethod
-    def add_detail(self, detail: Dict[str, str]):
+    def add_detail(self, detail: Dict[str, str | int | float]):
         """Checkers can add execution details to checkable to be printed in report"""
 
     @abstractmethod

@@ -1,12 +1,10 @@
 from typing import List, Optional, Dict
-from dataclasses import dataclass, asdict, field
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO, TestResult
+from src.dtos import SchemaSpecificationDTO, TestResult, DTO
 
 
-@dataclass
-class ColumnDiffEntryDTO:
+class ColumnDiffEntryDTO(DTO):
     expected_column: Optional[str] = None
     expected_dtype: Optional[str] = None
     actual_column: Optional[str] = None
@@ -16,12 +14,11 @@ class ColumnDiffEntryDTO:
     result_all: Optional[str] = None
 
 
-@dataclass
-class ColumnDiffDTO:
-    diffs: List[ColumnDiffEntryDTO] = field(default_factory=lambda: [])
+class ColumnDiffDTO(DTO):
+    diffs: List[ColumnDiffEntryDTO] = []
 
-    def dict(self) -> Dict[str, List[Dict[str, str]]]:
-        return {"diffs": [asdict(diff_entry) for diff_entry in self.diffs]}
+    def to_dict(self) -> Dict[str, List[Dict[str, str]]]:
+        return {"diffs": [diff_entry.to_dict() for diff_entry in self.diffs]}
 
 
 class SchemaTestCase(AbstractTestCase):
@@ -51,7 +48,7 @@ class SchemaTestCase(AbstractTestCase):
 
         # we start by comparing columns and datatypes
         columns_diff_dto = self._compare_columns(expected, actual)
-        columns_diff_as_list = columns_diff_dto.dict()["diffs"]
+        columns_diff_as_list = columns_diff_dto.to_dict()["diffs"]
         self.diff.update({"column_diff": columns_diff_as_list})
         self.add_detail({"Columns Comparison": str(columns_diff_as_list)})
 

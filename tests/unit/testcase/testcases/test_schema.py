@@ -35,7 +35,6 @@ class TestSchemaTestCase:
 
         return testcase_
 
-
     def test_that_result_is_ok_for_column_comparison(self, testcase):
 
         testcase._execute()
@@ -44,7 +43,7 @@ class TestSchemaTestCase:
         assert {"Specification": "this_location"} in testcase.facts
 
     def test_that_result_is_nok_if_pk_comparison_fails(self, testcase):
-        spec = SchemaSpecificationDTO(**self.spec.dict())
+        spec = SchemaSpecificationDTO(**self.spec.to_dict())
         spec.primary_keys = ["a"]  # this sould run in an error
         testcase.specs = [spec]
 
@@ -59,7 +58,7 @@ class TestSchemaTestCase:
         })} in testcase.details
 
     def test_that_result_is_nok_if_column_comparison_fails(self, testcase):
-        spec = SchemaSpecificationDTO(**self.spec.dict())
+        spec = SchemaSpecificationDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "bool"}  # this sould run in an error
         testcase.specs = [spec]
 
@@ -89,7 +88,7 @@ class TestSchemaTestCase:
         # first the expected schema deviates from actual schema in column 'c'
         # in a datatype which is not relevant for comparison - here 'unknown'
         # this deviation should be ignored
-        spec = SchemaSpecificationDTO(**self.spec.dict())
+        spec = SchemaSpecificationDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "string", "c": "unknown"}
         testcase.specs = [spec]
 
@@ -99,7 +98,7 @@ class TestSchemaTestCase:
 
         # next, the specified datatype for column 'c' is a known one
         # since it deviates from actual schema, the test fails
-        spec = SchemaSpecificationDTO(**self.spec.dict())
+        spec = SchemaSpecificationDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "string", "c": "int"}  # this should fail
         testcase.specs = [spec]
 

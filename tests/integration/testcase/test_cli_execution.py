@@ -24,7 +24,7 @@ domain_config = {
     "specifications_locations": [],
     "testcases": {
         "compare_sample": {"sample_size": 100},
-        "schema": {"compare_data_types": ["int", "str"]}
+        "schema": {"compare_datatypes": ["int", "str"]}
     }
 }
 
