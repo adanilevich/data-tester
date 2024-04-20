@@ -17,6 +17,6 @@ class CliTestCaseRunner:
             run_testcase_commands.append(command)
 
         results_as_dtos = self.handler.run(commands=run_testcase_commands)
-        results_as_dicts = [result.dict() for result in results_as_dtos]
+        results_as_dicts = [result.to_dict() for result in results_as_dtos]
 
         return results_as_dicts

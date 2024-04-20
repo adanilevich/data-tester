@@ -37,7 +37,7 @@ class TestTestObjectNotEmptyChecker:
 
     def test_check_is_ok_if_unique_spec_provided(self, checkable, spec):
         checkable.required_specs = ["this", "that"]
-        new_spec = SpecificationDTO.from_dict(spec_as_dict=spec.dict())
+        new_spec = SpecificationDTO.from_dict(spec_as_dict=spec.to_dict())
         new_spec.type = "that"
         checkable.specs = [spec, new_spec]
         checker = CheckSpecsAreUnique()

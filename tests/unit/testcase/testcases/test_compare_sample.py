@@ -81,7 +81,7 @@ class TestCompareSampleTestCase:
         assert testcase.sample_size == 100
 
     def test_key_sampling_exception_is_caught(self, testcase):
-        sql = CompareSampleSqlDTO.from_dict(self.sql.dict())
+        sql = CompareSampleSqlDTO.from_dict(self.sql.to_dict())
         sql.query = "exception"
         testcase.specs = [sql, self.schema]
 
@@ -99,7 +99,7 @@ class TestCompareSampleTestCase:
         assert "from testobject equals sample from test sql" in testcase.summary
 
     def test_that_diff_is_treated_correctly(self, testcase):
-        sql = CompareSampleSqlDTO.from_dict(self.sql.dict())
+        sql = CompareSampleSqlDTO.from_dict(self.sql.to_dict())
         sql.query = "bad"
         testcase.specs = [sql, self.schema]
 

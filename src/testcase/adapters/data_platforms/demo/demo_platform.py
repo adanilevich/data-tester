@@ -1,5 +1,4 @@
 from __future__ import annotations
-from dataclasses import replace
 from typing import List, Tuple, Optional
 from random import randint
 
@@ -120,7 +119,7 @@ class LocalDataPlatform(IDataPlatform):
     ) -> int:
 
         filters_: List[Tuple[str, str]] = filters or []
-        db = DBInstanceDTO(testobject.domain, testobject.stage, testobject.instance)
+        db = DBInstanceDTO.from_testobject(testobject)
         catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
 
         where_clause = "WHERE 1 = 1"
@@ -172,7 +171,7 @@ class LocalDataPlatform(IDataPlatform):
             raise ValueError("Getting schema for file-like testobjects (e.g. raw "
                              "layer) is not supported.")
 
-        db = DBInstanceDTO(testobject.domain, testobject.stage, testobject.instance)
+        db = DBInstanceDTO.from_testobject(testobject)
         catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
 
         schema_query = f"""
@@ -193,7 +192,7 @@ class LocalDataPlatform(IDataPlatform):
         )
 
         result = SchemaSpecificationDTO(
-            location=".".join(testobject.dict().values()),
+            location=".".join(testobject.to_dict().values()),
             columns=schema_as_dict,
         )
 
@@ -269,7 +268,7 @@ class LocalDataPlatform(IDataPlatform):
 
             harmonized_columns.update({column_name: harmonized_dtype})
 
-        harmonized_schema_dto = replace(schema)
+        harmonized_schema_dto = schema.create_copy()
         harmonized_schema_dto.columns = harmonized_columns
 
         return harmonized_schema_dto

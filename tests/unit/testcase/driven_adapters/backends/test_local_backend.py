@@ -16,7 +16,7 @@ class TestLocalBackendFactory:
 
 class TestLocalBackend:
 
-    db = DBInstanceDTO("payments", "test", "alpha")
+    db = DBInstanceDTO(domain="payments", stage="test", instance="alpha")
 
     @pytest.fixture
     def test_query(self):
@@ -41,14 +41,15 @@ class TestLocalBackend:
     ])
     def test_getting_testobjects(self, backend, domain, stage, instance,
                                  testobjects_expected):
-        db = DBInstanceDTO(domain, stage, instance)
+        db = DBInstanceDTO(domain=domain, stage=stage, instance=instance)
 
         testobjects_obtained = backend.get_testobjects(db)
 
         assert set(testobjects_obtained) == set(testobjects_expected)
 
     def test_getting_schema_of_file_objects_fails(self, backend):
-        testobject = TestObjectDTO("raw_customers", "payments", "uat", "main")
+        testobject = TestObjectDTO(
+            name="raw_customers", domain="payments", stage="uat", instance="main")
 
         with pytest.raises(ValueError) as err:
             _ = backend.get_schema(testobject)
@@ -56,7 +57,8 @@ class TestLocalBackend:
         assert "Getting schema for file-like testobjects" in str(err)
 
     def test_getting_schema_of_db_objects(self, backend):
-        testobject = TestObjectDTO("stage_customers", "payments", "test", "alpha")
+        testobject = TestObjectDTO(
+            name="stage_customers", domain="payments", stage="test", instance="alpha")
 
         schema = backend.get_schema(testobject)
 
@@ -69,7 +71,8 @@ class TestLocalBackend:
         assert schema.clustering_columns is None
 
     def test_getting_harmonized_schema_of_db_objects(self, backend):
-        testobject = TestObjectDTO("stage_customers", "payments", "test", "alpha")
+        testobject = TestObjectDTO(
+            name="stage_customers", domain="payments", stage="test", instance="alpha")
 
         schema = backend.get_schema(testobject)
         harmonized_schema = backend.harmonize_schema(schema)
@@ -144,7 +147,9 @@ class TestLocalBackend:
 
     def test_sampling_from_testobject_using_unique_keys(self, backend):
         testobject = TestObjectDTO(
-            "core_customer_transactions", "payments", "test", "alpha")
+            name="core_customer_transactions", domain="payments", stage="test",
+            instance="alpha"
+        )
         primary_keys = ["customer_name", "id"]
         key_sample = ["Peter Lustig|1", "Big Company Ltd|5", "Big Company Ltd|1"]
 
@@ -155,7 +160,9 @@ class TestLocalBackend:
 
     def test_sampling_from_testobject_using_non_unique_keys(self, backend):
         testobject = TestObjectDTO(
-            "core_customer_transactions", "payments", "test", "alpha")
+            name="core_customer_transactions", domain="payments", stage="test",
+            instance="alpha"
+        )
         primary_keys = ["customer_name"]
         key_sample = ["Peter Lustig"]
 
@@ -166,7 +173,9 @@ class TestLocalBackend:
 
     def test_sampling_from_testobject_using_column_filters(self, backend):
         testobject = TestObjectDTO(
-            "core_customer_transactions", "payments", "test", "alpha")
+            name="core_customer_transactions", domain="payments", stage="test",
+            instance="alpha"
+        )
         primary_keys = ["customer_name"]
         key_sample = ["Peter Lustig"]
         columns = ["customer_name", "customer_id"]

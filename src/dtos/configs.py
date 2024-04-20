@@ -1,55 +1,48 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from src.dtos import DTO
 from typing import List, Dict, Optional, Any
 
 
-@dataclass
-class SchemaTestCaseConfigDTO:
+class SchemaTestCaseConfigDTO(DTO):
     compare_datatypes: List[str]
 
     @classmethod
-    def from_dict(cls, config_as_dicf: Dict[str, List[str]]):
-        return cls(compare_datatypes=config_as_dicf["compare_data_types"])
+    def from_dict(cls, config_as_dict: Dict[str, List[str]]) -> SchemaTestCaseConfigDTO:
+        return super().from_dict(config_as_dict)
 
 
-@dataclass
-class CompareSampleTestCaseConfigDTO:
+class CompareSampleTestCaseConfigDTO(DTO):
     sample_size: int
-    sample_size_per_object: Dict[str, int]
+    sample_size_per_object: Dict[str, int] = dict()
 
     @classmethod
     def from_dict(cls, config_as_dict: Dict[str, Any]) -> CompareSampleTestCaseConfigDTO:
-        sample_size_per_object = config_as_dict.get(
-            "sample_size_per_object", dict())
-        return cls(
-            sample_size=config_as_dict["sample_size"],
-            sample_size_per_object=sample_size_per_object
-        )
+        return super().from_dict(config_as_dict)
 
 
-@dataclass
-class TestCasesConfigDTO:
-    schema: SchemaTestCaseConfigDTO
+class TestCasesConfigDTO(DTO):
+    schema: SchemaTestCaseConfigDTO  # type: ignore
     compare_sample: CompareSampleTestCaseConfigDTO
 
     @classmethod
     def from_dict(cls, config_as_dict: Dict[str, Any]) -> TestCasesConfigDTO:
+        schema = config_as_dict["schema"]
+        compare_sample = config_as_dict["compare_sample"]
         return cls(
-            schema=config_as_dict["schema"],
-            compare_sample=config_as_dict["compare_sample"]
+            schema=SchemaTestCaseConfigDTO.from_dict(schema),
+            compare_sample=CompareSampleTestCaseConfigDTO.from_dict(compare_sample)
         )
 
 
-@dataclass
-class DomainConfigDTO:
+class DomainConfigDTO(DTO):
     """
     This serves as a generic fixtures container for business-related configurations.
     The required attributes are defined by configuration needs of implemented Testcases,
     e.g., the testcase compare_sample requires a sample size definition.
     """
     domain: str
-    instances: Dict[str, List[str]]  # stage: [instance1, instance2]
+    instances: Dict[str, List[str]]  # dict {stage: [instance1, instance2], ...}
     testreports_locations: List[str]
     specifications_locations: List[str]
     testcases: TestCasesConfigDTO
