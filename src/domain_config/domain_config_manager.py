@@ -34,7 +34,7 @@ class DomainConfigManager:
 
         try:
             objects = self.storage.find(path=location)
-        except Exception:
+        except StorageError:
             objects = []
 
         candidates = list(filter(self.naming_conventions.match, objects))

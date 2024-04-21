@@ -31,7 +31,7 @@ class FileStorage(IStorage):
 
     def __init__(self):
 
-        self._gcp_project = os.environ.get("DATA_TESTER_GCP_PROJECT")
+        self._gcp_project = os.environ.get("DATATESTER_GCP_PROJECT")
 
         self.protocols = {
             "local:": LocalFileSystem(),

@@ -15,12 +15,13 @@ class SimpleConfigFinder:
     def _get_locations_from_envs(self) -> List[str]:
 
         locations: List[str]
-        locations_as_string: str | None = os.environ["DOMAIN_CONFIG_LOCATIONS"]
+        locations_as_string: str | None = os.environ[
+            "DATATESTER_DOMAIN_CONFIG_LOCATIONS"]
 
         if locations_as_string is None:
-            location: str | None = os.environ["DOMAIN_CONFIG_LOCATION"]
+            location: str | None = os.environ["DATATESTER_DOMAIN_CONFIG_LOCATION"]
             if location is None:
-                raise ValueError("Can't find DOMAIN_CONFIG_LOCATION in ENV")
+                raise ValueError("Can't find DATATESTER_DOMAIN_CONFIG_LOCATION in ENV")
             else:
                 locations = [location.strip()]
         else:
