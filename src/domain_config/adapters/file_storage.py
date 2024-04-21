@@ -47,8 +47,7 @@ class FileStorage(IStorage):
         raise StorageTypeUnknownError(f"Unknown location type: {path}")
 
     def _prefix_is_valid(self, path: str) -> bool:
-        valid_prefixes = ("local:", "gs://")
-        return path.startswith(valid_prefixes)
+        return path.startswith(tuple(self.protocols.keys()))
 
     def exists(self, path: str) -> bool:
 
@@ -65,12 +64,10 @@ class FileStorage(IStorage):
 
     def _prefix(self, fs: AbstractFileSystem) -> str:
 
-        if isinstance(fs, LocalFileSystem):
-            return "local:"
-        elif isinstance(fs, GCSFileSystem):
-            return "gs://"
-        else:
-            raise StorageTypeUnknownError(f"Unknown storage type: {str(fs)}")
+        for protocol, filesystem in self.protocols.items():
+            if isinstance(fs, filesystem.__class__):
+                return protocol
+        raise StorageTypeUnknownError(f"Unknown storage type: {str(fs)}")
 
     def find(self, path: str) -> List[str]:
 
