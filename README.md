@@ -4,25 +4,25 @@
 
 | Name                                                                      |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
-| src/domain\_config/\_\_init\_\_.py                                        |        1 |        1 |      0% |         2 |
-| src/domain\_config/adapters/\_\_init\_\_.py                               |        3 |        3 |      0% |       2-4 |
-| src/domain\_config/adapters/file\_storage.py                              |       40 |       40 |      0% |      1-58 |
-| src/domain\_config/adapters/yaml\_naming\_conventions.py                  |        6 |        6 |      0% |      1-11 |
-| src/domain\_config/adapters/yaml\_parser.py                               |        9 |        9 |      0% |      1-13 |
+| src/domain\_config/\_\_init\_\_.py                                        |        1 |        0 |    100% |           |
+| src/domain\_config/adapters/\_\_init\_\_.py                               |        3 |        0 |    100% |           |
+| src/domain\_config/adapters/file\_storage.py                              |       77 |       22 |     71% |55, 59-61, 67-70, 77, 80, 88-89, 99, 102, 109-111, 120, 123, 128-130 |
+| src/domain\_config/adapters/yaml\_naming\_conventions.py                  |        6 |        0 |    100% |           |
+| src/domain\_config/adapters/yaml\_serializer.py                           |       19 |        0 |    100% |           |
 | src/domain\_config/application/\_\_init\_\_.py                            |        2 |        2 |      0% |       2-3 |
-| src/domain\_config/application/find\_domain\_configs.py                   |       13 |       13 |      0% |      1-32 |
+| src/domain\_config/application/fetch\_domain\_configs.py                  |       13 |       13 |      0% |      1-33 |
 | src/domain\_config/di/\_\_init\_\_.py                                     |        1 |        1 |      0% |         2 |
-| src/domain\_config/di/di.py                                               |        6 |        6 |      0% |      1-14 |
-| src/domain\_config/domain\_config\_manager.py                             |       29 |       29 |      0% |      1-45 |
+| src/domain\_config/di/di.py                                               |        6 |        6 |      0% |      1-16 |
+| src/domain\_config/domain\_config\_manager.py                             |       42 |       35 |     17% |16-30, 35-42, 46-69 |
 | src/domain\_config/drivers/\_\_init\_\_.py                                |        1 |        1 |      0% |         2 |
 | src/domain\_config/drivers/simple\_config\_finder.py                      |       26 |       26 |      0% |      1-44 |
-| src/domain\_config/ports/\_\_init\_\_.py                                  |        5 |        5 |      0% |       2-6 |
-| src/domain\_config/ports/i\_find\_domain\_configs.py                      |        8 |        8 |      0% |      1-14 |
-| src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        4 |      0% |       1-7 |
-| src/domain\_config/ports/i\_parser.py                                     |        4 |        4 |      0% |       1-7 |
-| src/domain\_config/ports/i\_storage.py                                    |        9 |        9 |      0% |      1-17 |
+| src/domain\_config/ports/\_\_init\_\_.py                                  |        5 |        0 |    100% |           |
+| src/domain\_config/ports/i\_fetch\_domain\_configs.py                     |        8 |        0 |    100% |           |
+| src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        0 |    100% |           |
+| src/domain\_config/ports/i\_serializer.py                                 |       12 |        0 |    100% |           |
+| src/domain\_config/ports/i\_storage.py                                    |       10 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
-| src/dtos/configs.py                                                       |       25 |        0 |    100% |           |
+| src/dtos/configs.py                                                       |       26 |        0 |    100% |           |
 | src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
 | src/dtos/specifications.py                                                |       40 |        2 |     95% |    25, 62 |
 | src/dtos/testcase.py                                                      |       52 |        0 |    100% |           |
@@ -66,7 +66,7 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1324** |  **235** | **82%** |           |
+|                                                                 **TOTAL** | **1394** |  **174** | **88%** |           |
 
 8 empty files skipped.
 
