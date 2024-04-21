@@ -26,6 +26,7 @@ class TestCasesConfigDTO(DTO):
         )
 
 
+# TODO: specifications_locations should be a dict by stage and instance
 class DomainConfigDTO(DTO):
     """
     This serves as a generic fixtures container for business-related configurations.
