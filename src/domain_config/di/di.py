@@ -1,6 +1,8 @@
-from src.domain_config.application import FindDomainConfigsCommandHandler
-from src.domain_config.ports import IFindDomainConfigsCommandHandler
-from src.domain_config.adapters import BasicYamlNamingConventions, FileStorage, YamlParser
+from src.domain_config.application import FetchDomainConfigsCommandHandler
+from src.domain_config.ports import IFetchDomainConfigsCommandHandler
+from src.domain_config.adapters import (
+    BasicYamlNamingConventions, FileStorage, YamlSerializer
+)
 
 
 class DependencyInjector:
@@ -10,9 +12,9 @@ class DependencyInjector:
     cloud storage.
     """
 
-    def find_domain_configs_command_handler(self) -> IFindDomainConfigsCommandHandler:
-        return FindDomainConfigsCommandHandler(
+    def find_domain_configs_command_handler(self) -> IFetchDomainConfigsCommandHandler:
+        return FetchDomainConfigsCommandHandler(
             naming_conventions=BasicYamlNamingConventions(),
             storage=FileStorage(),
-            parser=YamlParser()
+            serializer=YamlSerializer()
         )

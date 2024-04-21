@@ -1,58 +1,135 @@
-from typing import List, Optional
+from typing import Dict, List
+import os
+
 from fsspec import AbstractFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from gcsfs import GCSFileSystem  # type: ignore
 
-from src.domain_config.ports import IStorage
+from src.domain_config.ports import IStorage, StorageError
+
+
+class FileStorageError(StorageError):
+    """"""
+
+
+class ObjectNotFoundError(FileStorageError):
+    """"""
+
+
+class ObjectIsNotAFileError(FileStorageError):
+    """"""
+
+
+class StorageTypeUnknownError(FileStorageError):
+    """"""
 
 
 class FileStorage(IStorage):
     """Handles files in Google Cloud Storage or local file system"""
 
+    protocols: Dict[str, AbstractFileSystem]
+
     def __init__(self):
-        self.gcs = GCSFileSystem()
-        self.fs = LocalFileSystem()
 
-    def is_valid_location(self, location: str) -> bool:
-        valid_prefixes = ("/", "gs://")
-        if location.startswith(valid_prefixes):
-            fs = self._fs(location)
-            return True if fs.exists(location) else False
+        self._gcp_project = os.environ.get("DATA_TESTER_GCP_PROJECT")
+
+        self.protocols = {
+            "local:": LocalFileSystem(),
+            "gs://": GCSFileSystem(project=self._gcp_project)
+        }
+
+    def _fs(self, path: str) -> AbstractFileSystem:
+
+        for protocol, fs in self.protocols.items():
+            if path.startswith(protocol):
+                return fs
+
+        raise StorageTypeUnknownError(f"Unknown location type: {path}")
+
+    def _prefix_is_valid(self, path: str) -> bool:
+        valid_prefixes = ("local:", "gs://")
+        return path.startswith(valid_prefixes)
+
+    def exists(self, path: str) -> bool:
+
+        if not self._prefix_is_valid(path):
+            raise StorageTypeUnknownError(f"Path type unknown: {path}")
+
+        try:
+            exists = self._fs(path).exists(path)
+        except Exception as err:
+            msg = err.__class__.__name__ + ": " + str(err)
+            raise FileStorageError(msg)
+
+        return exists
+
+    def _prefix(self, fs: AbstractFileSystem) -> str:
+
+        if isinstance(fs, LocalFileSystem):
+            return "local:"
+        elif isinstance(fs, GCSFileSystem):
+            return "gs://"
         else:
-            return False
+            raise StorageTypeUnknownError(f"Unknown storage type: {str(fs)}")
 
-    def _fs(self, location: str) -> AbstractFileSystem:
-        if location.startswith("gs://"):
-            return self.gcs
-        elif location.startswith("/"):
-            return self.fs
+    def find(self, path: str) -> List[str]:
+
+        fs = self._fs(path)
+
+        if not self.exists(path):
+            raise ObjectNotFoundError(f"Location doesn't exist: {path}")
+
+        if fs.isfile(path):
+            files = [path]
         else:
-            raise ValueError(f"Unknown location type: {location}")
+            files = []
+            objects = fs.ls(path)
+            for object in objects:
+                try:
+                    if fs.isfile(object):
+                        files.append(object)
+                except Exception:
+                    continue
 
-    def list_objects(self, location: str) -> List[str]:
-        fs = self._fs(location=location)
+        return files
 
-        if not fs.exists(location):
-            return []
+    def read_text(self, path: str, encoding: str | None = None,
+                  errors: str | None = None, newline: str | None = None) -> str:
 
-        if fs.isfile(location):
-            return [location]
-        elif fs.isdir(location):
-            files = [file for file in fs.ls(location) if fs.isfile(file)]
-            return files
-        else:  # this should never happen
-            raise ValueError(f"Location is neither dir nor file: {location}")
+        fs = self._fs(path=path)
 
-    def load_object(self, location: str) -> Optional[bytes | str]:
+        if not self.exists(path):
+            raise ObjectNotFoundError(f"Object not found: {path}")
 
-        fs = self._fs(location=location)
+        if fs.isdir(path):
+            raise ObjectIsNotAFileError(f"Object is a directory: {path}")
 
-        if not fs.exists(location):
-            return None
-
-        if fs.isdir(location):
-            return None
-        else:
-            with fs.open(location, "r") as file:
+        try:
+            with fs.open(
+                path, mode="r", encoding=encoding, errors=errors, newline=newline
+            ) as file:
                 content = file.read()
-            return content
+        except Exception as err:
+            msg = err.__class__.__name__ + ": " + str(err)
+            raise StorageError(msg)
+
+        return content
+
+    def read_bytes(self, path: str) -> bytes:
+
+        fs = self._fs(path=path)
+
+        if not self.exists(path):
+            raise ObjectNotFoundError(f"Object not found: {path}")
+
+        if fs.isdir(path):
+            raise ObjectIsNotAFileError(f"Object is a directory: {path}")
+
+        try:
+            with fs.open(path, mode="rb") as file:
+                content = file.read()
+        except Exception as err:
+            msg = err.__class__.__name__ + ": " + str(err)
+            raise StorageError(msg)
+
+        return content
