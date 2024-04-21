@@ -38,6 +38,7 @@ class DomainConfigDTO(DTO):
     specifications_locations: List[str]
     testcases: TestCasesConfigDTO
     platform_specific: Optional[Dict[str, Any]] = None
+    storage_location: Optional[str] = None  # location where config is (to be) stored
 
     @classmethod
     def from_dict(cls, dict_: dict) -> Self:
@@ -47,5 +48,6 @@ class DomainConfigDTO(DTO):
             testreports_locations=dict_["testreports_locations"],
             specifications_locations=dict_["specifications_locations"],
             testcases=TestCasesConfigDTO.from_dict(dict_["testcases"]),
-            platform_specific=dict_.get("platform_specific")
+            platform_specific=dict_.get("platform_specific"),
+            storage_location=dict_.get("storage_location"),
         )

@@ -1,15 +1,15 @@
-from typing import List, Optional
+from typing import List
 import os
 
 from src.domain_config.ports import (
-    IFindDomainConfigsCommandHandler, FindDomainConfigsCommand
+    IFetchDomainConfigsCommandHandler, FetchDomainConfigsCommand
 )
 from src.dtos import DomainConfigDTO
 
 
 class SimpleConfigFinder:
 
-    def __init__(self, handler: IFindDomainConfigsCommandHandler):
+    def __init__(self, handler: IFetchDomainConfigsCommandHandler):
         self.handler = handler
 
     def _get_locations_from_envs(self) -> List[str]:
@@ -29,15 +29,15 @@ class SimpleConfigFinder:
 
         return locations
 
-    def find(self, locations: Optional[List[str]] = None) -> List[DomainConfigDTO]:
+    def find(self, locations: List[str] | None = None) -> List[DomainConfigDTO]:
 
         if locations is None:
             locations = self._get_locations_from_envs()
 
-        command = FindDomainConfigsCommand(locations=locations)
+        command = FetchDomainConfigsCommand(locations=locations)
 
         try:
-            configs = self.handler.find(command=command)
+            configs = self.handler.fetch(command=command)
         except Exception:
             configs = []
 
