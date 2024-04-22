@@ -16,7 +16,7 @@ class FetchDomainConfigsCommandHandler(IFetchDomainConfigsCommandHandler):
         storage: IStorage,
         serializer: ISerializer
     ):
-        self. naming_conventions: INamingConventions = naming_conventions
+        self.naming_conventions: INamingConventions = naming_conventions
         self.storage: IStorage = storage
         self.serializer: ISerializer = serializer
 
