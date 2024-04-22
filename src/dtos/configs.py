@@ -35,8 +35,9 @@ class DomainConfigDTO(DTO):
     """
     domain: str
     instances: Dict[str, List[str]]  # dict {stage: [instance1, instance2], ...}
-    testreports_locations: List[str]
     specifications_locations: List[str]
+    # TODO: testmatrices_locations missing - make these a flexible structure
+    testreports_locations: List[str]
     testcases: TestCasesConfigDTO
     platform_specific: Optional[Dict[str, Any]] = None
     storage_location: Optional[str] = None  # location where config is (to be) stored
