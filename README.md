@@ -14,8 +14,8 @@
 | src/domain\_config/di/\_\_init\_\_.py                                     |        1 |        1 |      0% |         2 |
 | src/domain\_config/di/di.py                                               |        6 |        6 |      0% |      1-16 |
 | src/domain\_config/domain\_config\_manager.py                             |       42 |       11 |     74% |25-30, 37-38, 59-60, 66-67 |
-| src/domain\_config/drivers/\_\_init\_\_.py                                |        1 |        1 |      0% |         2 |
-| src/domain\_config/drivers/simple\_config\_finder.py                      |       26 |       26 |      0% |      1-45 |
+| src/domain\_config/drivers/\_\_init\_\_.py                                |        1 |        0 |    100% |           |
+| src/domain\_config/drivers/simple\_config\_finder.py                      |       26 |        0 |    100% |           |
 | src/domain\_config/ports/\_\_init\_\_.py                                  |        5 |        0 |    100% |           |
 | src/domain\_config/ports/i\_fetch\_domain\_configs.py                     |        8 |        0 |    100% |           |
 | src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        0 |    100% |           |
@@ -66,7 +66,7 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1394** |  **150** | **89%** |           |
+|                                                                 **TOTAL** | **1394** |  **123** | **91%** |           |
 
 8 empty files skipped.
 
