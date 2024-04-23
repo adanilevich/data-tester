@@ -13,16 +13,16 @@
 | src/domain\_config/application/fetch\_domain\_configs.py                  |       13 |       13 |      0% |      1-33 |
 | src/domain\_config/di/\_\_init\_\_.py                                     |        1 |        1 |      0% |         2 |
 | src/domain\_config/di/di.py                                               |        6 |        6 |      0% |      1-16 |
-| src/domain\_config/domain\_config\_manager.py                             |       42 |       11 |     74% |25-30, 37-38, 59-60, 66-67 |
+| src/domain\_config/domain\_config\_manager.py                             |       40 |        9 |     78% |25-30, 58-59, 64-65 |
 | src/domain\_config/drivers/\_\_init\_\_.py                                |        1 |        0 |    100% |           |
-| src/domain\_config/drivers/simple\_config\_finder.py                      |       26 |        0 |    100% |           |
+| src/domain\_config/drivers/simple\_config\_manager.py                     |       21 |        0 |    100% |           |
 | src/domain\_config/ports/\_\_init\_\_.py                                  |        5 |        0 |    100% |           |
 | src/domain\_config/ports/i\_fetch\_domain\_configs.py                     |        8 |        0 |    100% |           |
 | src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        0 |    100% |           |
 | src/domain\_config/ports/i\_serializer.py                                 |       12 |        0 |    100% |           |
 | src/domain\_config/ports/i\_storage.py                                    |       10 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
-| src/dtos/configs.py                                                       |       26 |        0 |    100% |           |
+| src/dtos/configs.py                                                       |       25 |        0 |    100% |           |
 | src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
 | src/dtos/specifications.py                                                |       40 |        2 |     95% |    25, 62 |
 | src/dtos/testcase.py                                                      |       52 |        0 |    100% |           |
@@ -66,7 +66,7 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1394** |  **123** | **91%** |           |
+|                                                                 **TOTAL** | **1386** |  **121** | **91%** |           |
 
 8 empty files skipped.
 
