@@ -28,6 +28,6 @@ class FetchDomainConfigsCommandHandler(IFetchDomainConfigsCommandHandler):
             serializer=self.serializer
         )
 
-        domain_configs = manager.fetch_configs(locations=command.locations)
+        domain_configs = manager.fetch_configs(location=command.location)
 
         return domain_configs

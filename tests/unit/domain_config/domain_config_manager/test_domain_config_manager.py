@@ -53,27 +53,28 @@ class TestDomainConfigManager:
             storage=DummyStorage(),  # type: ignore
         )
 
-    @pytest.mark.parametrize("locations", (
-        [["good", "bad", "good"]],
-        [["good", "exception", "good"]],
+    @pytest.mark.parametrize("location", (
+        "good",
+        "bad",
+        "exception",
     ))
-    def test_fetching_specs(self, setup, domain_config, locations):
-        domain_config_1 = DomainConfigDTO.from_dict(domain_config.to_dict())
-        domain_config_2 = DomainConfigDTO.from_dict(domain_config.to_dict())
-        domain_config_1.storage_location = "good_object_1"
-        domain_config_2.storage_location = "good_object_2"
+    def test_fetching_specs(self, setup, domain_config, location):
 
         result = set(
             str(conf.to_dict())  # convert to string for to make it hasheable
-            for conf in self.manager.fetch_configs(locations)
+            for conf in self.manager.fetch_configs(location)
         )
-        expected = set(
-            str(conf.to_dict())
-            for conf in [domain_config_1, domain_config_2]
-        )
+
+        if location == "good":
+            expected = set(
+                str(conf.to_dict())
+                for conf in [domain_config, domain_config]
+            )
+        else:
+            expected = set([])
 
         assert result == expected
 
-    def test_fetch_only_accepts_list_inputs(self, setup):
+    def test_fetch_only_accepts_string_inputs(self, setup):
         with pytest.raises(ValueError):
-            _ = self.manager.fetch_configs("safasdf")  # type: ignore
+            _ = self.manager.fetch_configs(["safasdf"])  # type: ignore

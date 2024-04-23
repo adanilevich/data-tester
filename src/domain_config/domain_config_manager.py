@@ -41,18 +41,17 @@ class DomainConfigManager:
 
         return candidates
 
-    def fetch_configs(self, locations: List[str]) -> List[DomainConfigDTO]:
+    def fetch_configs(self, location: str) -> List[DomainConfigDTO]:
 
-        if not isinstance(locations, list):
-            raise ValueError("Provide list of domain config locations")
+        if not isinstance(location, str):
+            raise ValueError("Provide a domain configs location")
 
         candidates: List[str] = []
         results: List[DomainConfigDTO] = []
 
-        for location in locations:
-            candidates += self._find_candidates(location)
+        candidates += self._find_candidates(location)
 
-        for candidate in set(candidates):
+        for candidate in candidates:
 
             try:
                 dict_ = self.deserialize(self.read(candidate))
@@ -61,7 +60,6 @@ class DomainConfigManager:
 
             try:
                 conf = DomainConfigDTO.from_dict(dict_)
-                conf.storage_location = candidate  # overwrite location by found location
                 results.append(conf)
             except Exception:
                 continue

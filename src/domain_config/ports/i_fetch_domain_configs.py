@@ -5,7 +5,7 @@ from src.dtos import DTO, DomainConfigDTO
 
 
 class FetchDomainConfigsCommand(DTO):
-    locations: List[str]
+    location: str
 
 
 class IFetchDomainConfigsCommandHandler(ABC):
