@@ -1,11 +1,12 @@
 from typing import Dict, List
-import os
 
 from fsspec import AbstractFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
+from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from gcsfs import GCSFileSystem  # type: ignore
 
 from src.domain_config.ports import IStorage, StorageError
+from src.config import Config
 
 
 class FileStorageError(StorageError):
@@ -31,11 +32,10 @@ class FileStorage(IStorage):
 
     def __init__(self):
 
-        self._gcp_project = os.environ.get("DATATESTER_GCP_PROJECT")
-
         self.protocols = {
-            "local:": LocalFileSystem(),
-            "gs://": GCSFileSystem(project=self._gcp_project)
+            "local://": LocalFileSystem(),
+            "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
+            "memory://": MemoryFileSystem(),  # for testing purpose
         }
 
     def _fs(self, path: str) -> AbstractFileSystem:
@@ -46,12 +46,19 @@ class FileStorage(IStorage):
 
         raise StorageTypeUnknownError(f"Unknown location type: {path}")
 
-    def _prefix_is_valid(self, path: str) -> bool:
+    def protocol(self, path: str) -> str:
+
+        if not self.protocol_is_valid(path):
+            raise StorageTypeUnknownError(f"Unknown storage type: {path}")
+
+        return path.split(":")[0]
+
+    def protocol_is_valid(self, path: str) -> bool:
         return path.startswith(tuple(self.protocols.keys()))
 
     def exists(self, path: str) -> bool:
 
-        if not self._prefix_is_valid(path):
+        if not self.protocol_is_valid(path):
             raise StorageTypeUnknownError(f"Path type unknown: {path}")
 
         try:
@@ -62,25 +69,18 @@ class FileStorage(IStorage):
 
         return exists
 
-    def _prefix(self, fs: AbstractFileSystem) -> str:
-
-        for protocol, filesystem in self.protocols.items():
-            if isinstance(fs, filesystem.__class__):
-                return protocol
-        raise StorageTypeUnknownError(f"Unknown storage type: {str(fs)}")
-
     def find(self, path: str) -> List[str]:
-
-        fs = self._fs(path)
+        """Returns all files in path, prefixed with the protocol"""
 
         if not self.exists(path):
             raise ObjectNotFoundError(f"Location doesn't exist: {path}")
 
+        fs = self._fs(path)
+        files = []
         if fs.isfile(path):
-            files = [path]
+            files.append(path)
         else:
-            files = []
-            objects = fs.ls(path)
+            objects = fs.ls(path, detail=False)
             for object in objects:
                 try:
                     if fs.isfile(object):
@@ -88,7 +88,7 @@ class FileStorage(IStorage):
                 except Exception:
                     continue
 
-        return files
+        return [self.protocol(path) + "://" + file.lstrip("/\\") for file in files]
 
     def read_text(self, path: str, encoding: str | None = None,
                   errors: str | None = None, newline: str | None = None) -> str:

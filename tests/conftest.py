@@ -42,8 +42,9 @@ def domain_config() -> DomainConfigDTO:
             "test": ["alpha", "beta"],
             "uat": ["main"]
         },
+        specifications_locations=["my_first_location", "my_second_location"],
+        testmatrices_locations="my_location",
         testreports_locations=[],
-        specifications_locations=[],
         testcases=TestCasesConfigDTO(
             compare_sample=CompareSampleTestCaseConfigDTO(
                 sample_size=100,

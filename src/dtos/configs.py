@@ -26,7 +26,6 @@ class TestCasesConfigDTO(DTO):
         )
 
 
-# TODO: specifications_locations should be a dict by stage and instance
 class DomainConfigDTO(DTO):
     """
     This serves as a generic fixtures container for business-related configurations.
@@ -35,9 +34,14 @@ class DomainConfigDTO(DTO):
     """
     domain: str
     instances: Dict[str, List[str]]  # dict {stage: [instance1, instance2], ...}
-    specifications_locations: List[str]
-    # TODO: testmatrices_locations missing - make these a flexible structure
-    testreports_locations: List[str]
+    # Specifications can be stored in one location or several locations,
+    # e.g. separated by type (sql, excel) or by layer of tested object in DWH.
+    # Alternatively, they are stored on one or several locations per stage and
+    # and instance - e.g. if different versions are relevant for TEST and UAT
+    specifications_locations: str | List[str] | Dict[str, str] | Dict[str, List[str]]
+    testmatrices_locations: str | Dict[str, str]  # testmatrix is stored in one location
+    # or one location per stage and instance, e.g. as dict(stage.instace: location)
+    testreports_locations: str | List[str]
     testcases: TestCasesConfigDTO
     platform_specific: Optional[Dict[str, Any]] = None
 
@@ -46,8 +50,47 @@ class DomainConfigDTO(DTO):
         return cls(
             domain=dict_["domain"],
             instances=dict_["instances"],
-            testreports_locations=dict_["testreports_locations"],
             specifications_locations=dict_["specifications_locations"],
+            testmatrices_locations=dict_["testmatrices_locations"],
+            testreports_locations=dict_["testreports_locations"],
             testcases=TestCasesConfigDTO.from_dict(dict_["testcases"]),
             platform_specific=dict_.get("platform_specific"),
         )
+
+    def _item_as_list(self, input: str | List[str]) -> List[str]:
+        if isinstance(input, str):
+            return [input]
+        elif isinstance(input, list):
+            return input
+        else:
+            raise ValueError("Input must be string or list of strings.")
+
+    def testmatrix_location_by_instance(self, stage: str, instance: str) -> str:
+        """
+        Returns testmatrix location relevant for given stage and instance. If only one
+        global testmatrix location is defined, that is returned.
+        """
+
+        if isinstance(self.testmatrices_locations, str):
+            return self.testmatrices_locations
+        else:
+            try:
+                return self.testmatrices_locations[f"{stage}.{instance}"]
+            except KeyError:
+                msg = "Testmatrices lolcations undefined " \
+                    f"for stage.instance={stage}.{instance}"
+                raise KeyError(msg)
+
+    def specifications_locations_by_instance(
+            self, stage: str, instance: str) -> List[str]:
+
+        if isinstance(self.specifications_locations, (str, list)):
+            return self._item_as_list(self.specifications_locations)
+        else:
+            try:
+                result = self.specifications_locations[f"{stage}.{instance}"]
+                return self._item_as_list(result)
+            except KeyError:
+                msg = "Specifications locations undefined for stage.instance=" \
+                    f"{stage}.{instance}"
+                raise KeyError(msg)

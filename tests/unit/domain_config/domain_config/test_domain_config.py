@@ -2,7 +2,7 @@ from typing import List
 import pytest
 from src.dtos import DomainConfigDTO
 from src.domain_config.ports import StorageError
-from src.domain_config import DomainConfigManager
+from src.domain_config import DomainConfig
 
 
 found_objects = ["good_object_1", "good_object_2", "bad_object_1"]
@@ -47,7 +47,7 @@ class TestDomainConfigManager:
     @pytest.fixture
     def setup(self, domain_config: DomainConfigDTO):
         self.serializer = DummySerializer(return_val=domain_config.to_dict())
-        self.manager = DomainConfigManager(
+        self.manager = DomainConfig(
             naming_conventions=DummyNamingConventions(),  # type: ignore
             serializer=self.serializer,  # type: ignore
             storage=DummyStorage(),  # type: ignore

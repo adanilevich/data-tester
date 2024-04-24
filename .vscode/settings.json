@@ -1,5 +1,8 @@
 {
-    "python.defaultInterpreterPath": "/usr/bin/python",
+    // fpr Ubuntu via WSL to use central python installation
+    //"python.defaultInterpreterPath": "/usr/bin/python",
+    // for Windows to use local .venv
+    "python.defaultInterpreterPath": "${workspaceFolder\\.venv\\Scripts\\python.exe}",
     "python.analysis.extraPaths": [
         "./src",
         "${workspaceFolder}",
@@ -14,6 +17,8 @@
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}:$PYTHONPATH",
     },
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
     "mypy-type-checker.importStrategy": "fromEnvironment",
     "mypy-type-checker.reportingScope": "workspace",
     "mypy-type-checker.preferDaemon": true,
