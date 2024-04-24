@@ -23,6 +23,7 @@ domain_config = {
     "instances": {},
     "testreports_locations": [],
     "specifications_locations": [],
+    "testmatrices_locations": "my_location",
     "testcases": {
         "compare_sample": {"sample_size": 100},
         "schema": {"compare_datatypes": ["int", "str"]}

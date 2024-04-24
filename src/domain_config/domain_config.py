@@ -5,7 +5,7 @@ from src.domain_config.ports import (
 from src.dtos import DomainConfigDTO
 
 
-class DomainConfigManager:
+class DomainConfig:
 
     def __init__(
         self,

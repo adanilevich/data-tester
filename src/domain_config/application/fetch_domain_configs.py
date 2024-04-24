@@ -4,7 +4,7 @@ from src.domain_config.ports import (
     FetchDomainConfigsCommand, IFetchDomainConfigsCommandHandler, INamingConventions,
     IStorage, ISerializer,
 )
-from src.domain_config import DomainConfigManager
+from src.domain_config import DomainConfig
 from src.dtos import DomainConfigDTO
 
 
@@ -22,7 +22,7 @@ class FetchDomainConfigsCommandHandler(IFetchDomainConfigsCommandHandler):
 
     def fetch(self, command: FetchDomainConfigsCommand) -> List[DomainConfigDTO]:
 
-        manager = DomainConfigManager(
+        manager = DomainConfig(
             naming_conventions=self.naming_conventions,
             storage=self.storage,
             serializer=self.serializer

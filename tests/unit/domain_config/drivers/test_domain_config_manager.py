@@ -1,7 +1,7 @@
 import os
 import pytest
-from src.domain_config.drivers import SimpleConfigManager
 from src.domain_config.ports import FetchDomainConfigsCommand
+from src.domain_config.drivers import DomainConfigManager
 
 
 class DummyFetchDomainConfigsCommandHandler:
@@ -13,17 +13,17 @@ class DummyFetchDomainConfigsCommandHandler:
         return command
 
 
-class TestSimpleConfigFinder:
+class TestSimpleDomainConfigManager:
 
     @pytest.fixture
-    def manager(self) -> SimpleConfigManager:
-        return SimpleConfigManager(
+    def manager(self) -> DomainConfigManager:
+        return DomainConfigManager(
             handler=DummyFetchDomainConfigsCommandHandler()  # type: ignore
         )
 
     @pytest.fixture
     def set_env(self):
-        os.environ["DATATESTER_DOMAIN_CONFIGS_LOCATION"] = "a "
+        os.environ["DATATESTER_DOMAIN_CONFIGS_LOCATION"] = "a"
         yield
         del os.environ["DATATESTER_DOMAIN_CONFIGS_LOCATION"]
 
