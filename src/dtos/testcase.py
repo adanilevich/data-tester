@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Union, List, Dict
+from typing import Self, Union, List, Dict
 from src.dtos import DTO
 from src.dtos.specifications import SpecificationDTO
 
@@ -82,3 +82,16 @@ class TestCaseResultDTO(DTO):
             start_ts=self.start_ts,
             end_ts=self.end_ts
         )
+
+
+class TestRunResultDTO(DTO):
+
+    testrun_id: str
+    start: str
+    end: str
+    result: str
+    testcase_results: List[TestCaseResultDTO]
+
+    @classmethod
+    def from_testcase_results(cls, testcase_results: List[TestCaseResultDTO]) -> Self:
+        raise NotImplementedError
