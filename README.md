@@ -23,11 +23,26 @@
 | src/domain\_config/ports/i\_naming\_conventions.py                        |        4 |        0 |    100% |           |
 | src/domain\_config/ports/i\_serializer.py                                 |       12 |        0 |    100% |           |
 | src/domain\_config/ports/i\_storage.py                                    |       10 |        0 |    100% |           |
-| src/dtos/\_\_init\_\_.py                                                  |        4 |        0 |    100% |           |
+| src/dtos/\_\_init\_\_.py                                                  |        5 |        0 |    100% |           |
 | src/dtos/configs.py                                                       |       49 |        1 |     98% |        66 |
 | src/dtos/dto.py                                                           |       12 |        1 |     92% |        15 |
+| src/dtos/reports.py                                                       |       61 |       13 |     79% |32-42, 46, 63, 78 |
 | src/dtos/specifications.py                                                |       40 |        2 |     95% |    25, 62 |
-| src/dtos/testcase.py                                                      |       52 |        0 |    100% |           |
+| src/dtos/testcase.py                                                      |       61 |        1 |     98% |        97 |
+| src/report/application/\_\_init\_\_.py                                    |        3 |        3 |      0% |       2-4 |
+| src/report/application/create\_testcase\_report.py                        |       11 |       11 |      0% |      1-23 |
+| src/report/application/create\_testrun\_report.py                         |       11 |       11 |      0% |      1-23 |
+| src/report/application/save\_report.py                                    |       13 |       13 |      0% |      1-21 |
+| src/report/drivers/\_\_init\_\_.py                                        |        1 |        1 |      0% |         2 |
+| src/report/drivers/simple\_report\_manager.py                             |       19 |       19 |      0% |      1-67 |
+| src/report/ports/\_\_init\_\_.py                                          |        5 |        5 |      0% |       2-6 |
+| src/report/ports/i\_create\_testcase\_report.py                           |        8 |        8 |      0% |      1-15 |
+| src/report/ports/i\_create\_testrun\_report.py                            |        8 |        8 |      0% |      1-15 |
+| src/report/ports/i\_report\_formatter.py                                  |        7 |        7 |      0% |      1-17 |
+| src/report/ports/i\_save\_report.py                                       |       11 |       11 |      0% |      1-20 |
+| src/report/ports/i\_storage.py                                            |        5 |        5 |      0% |       1-8 |
+| src/report/testcase\_report.py                                            |        8 |        8 |      0% |      1-14 |
+| src/report/testrun\_report.py                                             |        8 |        8 |      0% |      1-14 |
 | src/testcase/adapters/data\_platforms/\_\_init\_\_.py                     |        2 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/\_\_init\_\_.py                |        4 |        0 |    100% |           |
 | src/testcase/adapters/data\_platforms/demo/demo\_naming\_resolver.py      |       48 |        5 |     90% | 22, 82-85 |
@@ -68,9 +83,9 @@
 | src/testcase/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                          |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                               |       18 |        0 |    100% |           |
-|                                                                 **TOTAL** | **1415** |  **120** | **92%** |           |
+|                                                                 **TOTAL** | **1604** |  **252** | **84%** |           |
 
-8 empty files skipped.
+10 empty files skipped.
 
 
 ## Setup coverage badge
