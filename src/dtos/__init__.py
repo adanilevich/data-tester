@@ -3,3 +3,4 @@ from src.dtos.dto import *
 from src.dtos.configs import *
 from src.dtos.specifications import *
 from src.dtos.testcase import *
+from src.dtos.reports import *
