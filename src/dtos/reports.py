@@ -1,5 +1,5 @@
-from typing import Any, Dict, List, Self, Union
-from pydantic import model_validator, Field
+from typing import Any, Dict, List, Union
+from pydantic import Field
 
 from src.dtos import DTO, TestCaseResultDTO
 
@@ -20,30 +20,16 @@ class TestCaseReportDTO(DTO):
     result: str
     summary: str
     diff:  Dict[str, Union[List, Dict]]
-    facts: List[Dict[str, Any]]
+    facts: List[Dict[str, str | int]]
     details: List[Dict[str, Any]]
-    # format of content field, e.g. text, json, dict, xlsx
+    # Format of testcase report in business terms, e.g. 'xlsx' or 'text'
     format: str | None = Field(default=None)
-    # content after formatting, can be string, bytes, other formats
-    content: Any = Field(default=None)  # content of the formatted report
-
-    @model_validator(mode="after")
-    def set_description(self):
-        if self.description is None or self.description == "":
-            if self.testcase == "SCHEMA":
-                desc = "Check that schema of testobject corresponds to specification."
-                self.description = desc
-            elif self.testcase == "ROWCOUNT":
-                desc = "Check that rowcount in testobject mathces expectation."
-                self.description = desc
-            elif self.testcase == "COMPARE_SAMPLE":
-                desc = "Full comparison of test SQL and tesobject on a data sample."
-            else:
-                raise ValueError(f"Testcase unknown: {self.testcase}")
-
-    @classmethod
-    def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
-        raise NotImplementedError("constructing from testcase not yet implemented")
+    # Content/Mime type of report, e.g.
+    #   for excel 'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate'
+    #   for text file 'text/plain'
+    content_type: str | None = Field(default=None)
+    # content of the report - string content or dict or excel as bytes, etc.
+    content: Any = Field(default=None)
 
 
 class ShortTestCaseResultDTO(DTO):
@@ -58,10 +44,6 @@ class ShortTestCaseResultDTO(DTO):
     summary: str
     facts: str
 
-    @classmethod
-    def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
-        raise NotImplementedError()
-
 
 class TestRunReportDTO(DTO):
 
@@ -69,10 +51,12 @@ class TestRunReportDTO(DTO):
     start: str
     end: str
     result: str
-    testcase_results: List[ShortTestCaseResultDTO]
-    format: str
-    content: Any
-
-    @classmethod
-    def from_testcase_results(cls, testcase_results: List[TestCaseResultDTO]) -> Self:
-        raise NotImplementedError
+    testcase_results: List[TestCaseResultDTO]
+    # Format of testcase report in business terms, e.g. 'xlsx' or 'text'
+    format: str | None = Field(default=None)
+    # Content/Mime type of report, e.g.
+    #   for excel 'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate'
+    #   for text file 'text/plain'
+    content_type: str | None = Field(default=None)
+    # content of the report - string content or dict or excel as bytes, etc.
+    content: Any = Field(default=None)

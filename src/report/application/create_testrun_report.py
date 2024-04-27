@@ -14,10 +14,6 @@ class CreateTestRunReportCommandHandler(ICreateTestRunReportCommandHandler):
     def create(self, command: CreateTestRunReportCommand) -> TestRunReportDTO:
 
         report = TestRunReport.from_testrun_result(command.testrun_result)
-        report_as_dto = report.as_dto()
-        formatted = self.formatter.format_testrun_report(
-            report=report_as_dto,
-            format=command.format
-        )
+        report.format_report(format=command.format, formatter=self.formatter)
 
-        return formatted
+        return report.to_dto()

@@ -1,6 +1,9 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Self, Union, List, Dict
+
+from pydantic import Field
+
 from src.dtos import DTO
 from src.dtos.specifications import SpecificationDTO
 
@@ -59,10 +62,12 @@ class TestCaseResultDTO(DTO):
     run_id: str
     testobject: TestObjectDTO
     testtype: str
+    scenario: str = Field(default="")
     status: TestStatus
     result: TestResult
     diff: Dict[str, Union[List, Dict]]  # found diff as a table in record-oriented dict
     summary: str
+    facts: List[Dict[str, str | int]]
     details: List[Dict[str, Union[str, int, float]]]
     specifications: List[SpecificationDTO]
     start_ts: str
@@ -77,6 +82,7 @@ class TestCaseResultDTO(DTO):
             status=self.status.to_string(),
             summary=self.summary,
             details=self.details,
+            facts=self.facts,
             result=self.result.to_string(),
             specifications=[spec.to_dict() for spec in self.specifications],
             start_ts=self.start_ts,
@@ -94,4 +100,26 @@ class TestRunResultDTO(DTO):
 
     @classmethod
     def from_testcase_results(cls, testcase_results: List[TestCaseResultDTO]) -> Self:
-        raise NotImplementedError
+
+        result = "OK"
+        for testcase_result in testcase_results:
+            if testcase_result.result != "OK":
+                result = "NOK"
+
+        start = list(sorted([
+            r.start_ts for r in testcase_results if r.start_ts is not None
+        ]))[0]
+
+        end = list(sorted([
+            r.end_ts for r in testcase_results if r.end_ts is not None
+        ], reverse=True))[0]
+
+        testrun_id = "-".join([r.run_id for r in testcase_results])
+
+        return cls(
+            testrun_id=testrun_id,
+            start=start,
+            end=end,
+            result=result,
+            testcase_results=testcase_results,
+        )
