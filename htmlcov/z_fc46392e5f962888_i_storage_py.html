@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_4413333c35506550_testcase_report_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.0">coverage.py v7.5.0</a>,
-            created at 2024-04-25 20:40 +0000
+            created at 2024-04-27 22:41 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -87,8 +87,12 @@
     <p class="mis show_mis"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">class</span> <span class="nam">IStorage</span><span class="op">(</span><span class="nam">ABC</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">    <span class="op">@</span><span class="nam">abstractmethod</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">    <span class="key">def</span> <span class="nam">save</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">content</span><span class="op">:</span> <span class="nam">Any</span><span class="op">,</span> <span class="nam">format</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">location</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">        <span class="str">"""Save content to specified location"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">    <span class="key">def</span> <span class="nam">save</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">content</span><span class="op">:</span> <span class="nam">Any</span><span class="op">,</span> <span class="nam">content_type</span><span class="op">:</span> <span class="nam">str</span><span class="op">,</span> <span class="nam">location</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">        <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="str">        Save report (content) to specified location. Storage handler should understand</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="str">        and resolve 'content_type' and based on the content type know how to persist</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="str">        the data on abtracted storage (e.g. as bytes or as text).</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -98,7 +102,7 @@
             <a class="nav" href="z_4413333c35506550_testcase_report_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.0">coverage.py v7.5.0</a>,
-            created at 2024-04-25 20:40 +0000
+            created at 2024-04-27 22:41 +0000
         </p>
     </div>
 </footer>

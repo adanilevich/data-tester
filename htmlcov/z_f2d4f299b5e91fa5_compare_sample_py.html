@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_f2d4f299b5e91fa5_dummy_exception_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.0">coverage.py v7.5.0</a>,
-            created at 2024-04-25 20:40 +0000
+            created at 2024-04-27 22:41 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -108,7 +108,7 @@
     <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">db</span> <span class="op">=</span> <span class="nam">DBInstanceDTO</span><span class="op">.</span><span class="nam">from_testobject</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">testobject</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">translated_query</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">backend</span><span class="op">.</span><span class="nam">translate_query</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">sql</span><span class="op">.</span><span class="nam">query</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">db</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_fact</span><span class="op">(</span><span class="op">{</span><span class="str">"Primary keys"</span><span class="op">:</span> <span class="nam">self</span><span class="op">.</span><span class="nam">schema</span><span class="op">.</span><span class="nam">primary_keys</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_fact</span><span class="op">(</span><span class="op">{</span><span class="str">"Primary keys"</span><span class="op">:</span> <span class="str">","</span><span class="op">.</span><span class="nam">join</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">schema</span><span class="op">.</span><span class="nam">primary_keys</span> <span class="key">or</span> <span class="op">[</span><span class="op">]</span><span class="op">)</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_fact</span><span class="op">(</span><span class="op">{</span><span class="str">"Schema specification"</span><span class="op">:</span> <span class="nam">self</span><span class="op">.</span><span class="nam">schema</span><span class="op">.</span><span class="nam">location</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_fact</span><span class="op">(</span><span class="op">{</span><span class="str">"Compare sample SQL"</span><span class="op">:</span> <span class="nam">self</span><span class="op">.</span><span class="nam">sql</span><span class="op">.</span><span class="nam">location</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">add_detail</span><span class="op">(</span><span class="op">{</span><span class="str">"Original query"</span><span class="op">:</span> <span class="nam">self</span><span class="op">.</span><span class="nam">sql</span><span class="op">.</span><span class="nam">query</span><span class="op">}</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -340,7 +340,7 @@
             <a class="nav" href="z_f2d4f299b5e91fa5_dummy_exception_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.0">coverage.py v7.5.0</a>,
-            created at 2024-04-25 20:40 +0000
+            created at 2024-04-27 22:41 +0000
         </p>
     </div>
 </footer>
