@@ -1,8 +1,7 @@
 """
-A simple self-built replacement for a proper dependency injector.
+A simple self-built replacement for a dependency injector.
 This class will instantiate Backends, Notifiers, Handlers based on ENV vars.
 """
-import os
 from typing import List
 
 from src.testcase.adapters.data_platforms import (
@@ -13,20 +12,22 @@ from src.testcase.application.run_testcases import RunTestCasesCommandHandler
 from src.testcase.ports import (
     IRunTestCasesCommandHandler, IDataPlatformFactory, INotifier
 )
+from src.config import Config
 
 
 class DependencyInjector:
 
     def __init__(self):
-        self.datatester_env = os.environ.get("DATATESTER_ENV", None)
+        self.config = Config()
 
     def backend_factory(self) -> IDataPlatformFactory:
-        if self.datatester_env == "DUMMY":
+        if self.config.DATATESTER_ENV == "DUMMY":
             return DummyPlatformFactory()
-        elif self.datatester_env == "DEMO":
+        elif self.config.DATATESTER_ENV == "DEMO":
             return DemoDataPlatformFactory()
         else:
-            raise NotImplementedError(f"Unknown DATATESTER_ENV: {self.datatester_env}")
+            msg = f"Unknown DATATESTER_ENV: {self.config.DATATESTER_ENV}"
+            raise NotImplementedError(msg)
 
     @staticmethod
     def notifiers() -> List[INotifier]:

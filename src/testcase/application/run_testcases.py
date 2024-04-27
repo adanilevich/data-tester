@@ -36,6 +36,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     id="n/a",
                     result=TestResult.NA,
                     summary=f"Test type {command.testtype} unknown!",
+                    facts=[],
                     details=[],
                     status=TestStatus.ERROR,
                     start_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),

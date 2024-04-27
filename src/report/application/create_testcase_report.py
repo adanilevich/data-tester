@@ -14,10 +14,9 @@ class CreateTestCaseReportCommandHandler(ICreateTestCaseReportCommandHandler):
     def create(self, command: CreateTestCaseReportCommand) -> TestCaseReportDTO:
 
         report = TestCaseReport.from_testcase_result(command.testcase_result)
-        report_as_dto = report.as_dto()
-        formatted = self.formatter.format_testcase_report(
-            report=report_as_dto,
-            format=command.format
+        formatted_report = report.format_report(
+            format=command.format,
+            formatter=self.formatter
         )
 
-        return formatted
+        return formatted_report

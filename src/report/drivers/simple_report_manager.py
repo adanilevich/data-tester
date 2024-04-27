@@ -13,12 +13,12 @@ class SimpleReportManager:
 
     def __init__(
         self,
-        testcase_handler: ICreateTestCaseReportCommandHandler,
-        testrun_handler: ICreateTestRunReportCommandHandler,
+        create_testcase_report_handler: ICreateTestCaseReportCommandHandler,
+        create_testrun_report_handler: ICreateTestRunReportCommandHandler,
         storage_handler: ISaveReportCommandHandler,
     ):
-        self.testcase_handler = testcase_handler
-        self.testrun_handler = testrun_handler
+        self.create_testcase_report_handler = create_testcase_report_handler
+        self.create_testrun_report_handler = create_testrun_report_handler
         self.storage_handler = storage_handler
 
     def create_testcase_report(
@@ -32,7 +32,7 @@ class SimpleReportManager:
             format=format
         )
 
-        report = self.testcase_handler.create(command=command)
+        report = self.create_testcase_report_handler.create(command=command)
 
         return report
 
@@ -47,7 +47,7 @@ class SimpleReportManager:
             format=format
         )
 
-        report = self.testrun_handler.create(command=command)
+        report = self.create_testrun_report_handler.create(command=command)
 
         return report
 

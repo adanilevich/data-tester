@@ -1,25 +1,26 @@
-from src.report.ports import SaveReportCommand, ISaveReportCommandHandler, IStorage
+from src.report.ports import (
+    SaveReportCommand, ISaveReportCommandHandler, IStorage, IReportNamingConventions
+)
+from src.report import TestCaseReport, TestRunReport
+from src.dtos import TestCaseReportDTO
 
 
 class SaveReportCommandHandler(ISaveReportCommandHandler):
 
-    def __init__(self, storage: IStorage):
+    def __init__(self, storage: IStorage, naming_conventions: IReportNamingConventions):
         self.storage = storage
+        self.naming_conventions = naming_conventions
 
     def save(self, command: SaveReportCommand):
 
-        location = command.location
+        if isinstance(command.report, TestCaseReportDTO):
+            report = TestCaseReport.from_dto(command.report)
+        else:
+            report = TestRunReport.from_dto(command.report)
 
-        if command.group_by is not None:
-            for item in command.group_by:
-                if item in command.report.model_fields:
-                    location += item + "/"
-
-        if command.report.format is None:
-            raise ValueError("Report must be formatted and the applied format specified.")
-
-        self.storage.save(
-            content=command.report.content,
-            format=command.report.format,
-            location=location
+        report.save_report(
+            location=command.location,
+            group_by=command.group_by,
+            naming_conventions=self.naming_conventions,
+            storage=self.storage
         )

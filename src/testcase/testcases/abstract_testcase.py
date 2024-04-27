@@ -48,7 +48,8 @@ class AbstractTestCase(ICheckable):
         self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
-        self.facts: List[Dict[str, str]] = []  # list of key facts about test execution
+        # list of key facts about test execution
+        self.facts: List[Dict[str, str | int]] = []
         self.details: List[Dict[str, str | int | float]] = []  # list of execution details
         self.diff: Dict[str, Union[List, Dict]] = dict()  # list of diffs
         self.status = TestStatus.INITIATED
@@ -92,6 +93,7 @@ class AbstractTestCase(ICheckable):
             testobject=self.testobject,
             status=self.status,
             summary=self.summary,
+            facts=self.facts,
             details=self.details,
             result=self.result,
             diff=self.diff,  # must be set by specific implementation
