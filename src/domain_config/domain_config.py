@@ -1,6 +1,7 @@
 from typing import List
 from src.domain_config.ports import (
-    INamingConventions, ISerializer, IStorage, StorageError, SerializerError
+    INamingConventions, IDomainConfigFormatter, IStorage, StorageError,
+    DomainConfigFormatterError
 )
 from src.dtos import DomainConfigDTO
 
@@ -11,23 +12,11 @@ class DomainConfig:
         self,
         naming_conventions: INamingConventions,
         storage: IStorage,
-        serializer: ISerializer
+        formatter: IDomainConfigFormatter
     ):
         self.naming_conventions: INamingConventions = naming_conventions
         self.storage: IStorage = storage
-        self.serializer: ISerializer = serializer
-
-        # we translate serializer options based on serialization mode
-        # most of the times, domain configs are read and written as text files, e.g. yaml
-        if self.serializer.open_mode == "r":
-            self.read = self.storage.read_text
-            self.deserialize = self.serializer.from_string
-        elif self.serializer.open_mode == "b":
-            self.read = self.storage.read_bytes  # type: ignore
-            self.serialize = self.serializer.from_bytes
-        else:
-            msg = f"Unknown mode: {self.serializer.open_mode}. Known: r/b"
-            raise ValueError(msg)
+        self.formatter: IDomainConfigFormatter = formatter
 
     def _find_candidates(self, location: str) -> List[str]:
         """Gets valid, name-matching objects from location"""
@@ -42,9 +31,14 @@ class DomainConfig:
         return candidates
 
     def fetch_configs(self, location: str) -> List[DomainConfigDTO]:
+        """
+        Parses all files in location which match domain config naming conventions
+        and translated contents to a DomainConfigDTO. If parsing or translation to
+        DomainConfigDTO fails, file is ignored.
+        """
 
         if not isinstance(location, str):
-            raise ValueError("Provide a domain configs location")
+            raise ValueError("Provide a string-valued location of domain configs")
 
         candidates: List[str] = []
         results: List[DomainConfigDTO] = []
@@ -54,8 +48,16 @@ class DomainConfig:
         for candidate in candidates:
 
             try:
-                dict_ = self.deserialize(self.read(candidate))
-            except (StorageError, SerializerError):
+                content = self.storage.read(
+                    path=candidate,
+                    content_type=self.formatter.default_content_type,
+                    encoding=self.formatter.default_encoding,
+                )
+                dict_ = self.formatter.deserialize(content)
+            except (StorageError, DomainConfigFormatterError):
+                # since we are parsing all potential candidate files, there might be
+                # parsing errors e.g. if a deprecated or wrongly matched file is parsed
+                # therefore we ignore unparseable files
                 continue
 
             try:

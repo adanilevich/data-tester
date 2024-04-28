@@ -1,26 +1,30 @@
 from typing import Any, List
-from abc import ABC, abstractmethod
+from src.report.ports import (
+    IFormattable, IReportFormatter, IStorage, IReportNamingConventions
+)
 
-from src.report.ports import IReportFormatter, IStorage, IReportNamingConventions
 
+class AbstractReport(IFormattable):
 
-class AbstractReport(ABC):
-
-    def __init__(self, format: str | None = None, content_type: str | None = None,
+    def __init__(self, formatter: IReportFormatter, storage: IStorage,
+                 naming_conventions: IReportNamingConventions,
+                 format: str | None = None, content_type: str | None = None,
                  content: Any = None):
 
-        self.format = format
-        self.content_type = content_type
-        self.content = content
+        self.formatter: IReportFormatter = formatter
+        self.storage: IStorage = storage
+        self.format: str | None = format
+        self.content_type: str | None = content_type
+        self.content: Any = content
+        self.naming_conventions: IReportNamingConventions = naming_conventions
 
-    def format_report(self, format: str, formatter: IReportFormatter):
+    def format_report(self, format: str):
 
-        _ = formatter.format(report=self, format=format)
+        self.formatter.format(report=self, format=format)
 
         return self.to_dto()
 
-    def save_report(self, location, group_by: List[str],
-                    naming_conventions: IReportNamingConventions, storage: IStorage):
+    def save_report(self, location, group_by: List[str],):
 
         if self.format_report is None:
             raise ValueError("Report must be formatted and the applied format specified.")
@@ -33,14 +37,14 @@ class AbstractReport(ABC):
                 if item in self.to_dto().model_fields:
                     location += item + "/"
 
-        filename = location + "/" + naming_conventions.report_name(self.to_dto())
+        filename = location + "/" + self.naming_conventions.report_name(self.to_dto())
 
-        storage.save(
+        self.storage.write(
             content=self.content,
             content_type=self.content_type,
-            location=filename
+            path=filename
         )
 
-    @abstractmethod
     def to_dto(self):
-        """"""
+        """Subclasses TestRunReport and TestCaseReport must implement this method"""
+        raise NotImplementedError("to_dto must be implemented by Report subclasses.")

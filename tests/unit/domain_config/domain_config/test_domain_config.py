@@ -1,80 +1,124 @@
-from typing import List
+from typing import List, Any
 import pytest
 from src.dtos import DomainConfigDTO
 from src.domain_config.ports import StorageError
 from src.domain_config import DomainConfig
 
 
-found_objects = ["good_object_1", "good_object_2", "bad_object_1"]
-
-
 class DummyStorage:
 
-    def read_text(self, *args, **kwargs):
-        return "my_text"
+    empty_path: str = "empty"
+    non_existing_path: str = "non-existing"
+    found_objects: List[str] = []
 
-    def read_bytes(self, *args, **kwargs):
-        return b"my_text"
+    def read(self, *args, **kwargs):
+        return "any_value"  # value doesnt matter since serializer is mocked
 
     def find(self, path: str) -> List[str]:
-        if "good" in path:
-            return found_objects
-        elif "exception" in path:
+
+        if path == self.non_existing_path:
             raise StorageError("My Exception")
-        else:
+        elif path == self.empty_path:
             return []
+        else:
+            return self.found_objects
 
 
 class DummyNamingConventions:
 
+    matching_string: str = "match"
+
     def match(self, name: str) -> bool:
-        return True if "good" in name else False
+        return True if self.matching_string in name else False
 
 
-class DummySerializer:
+class DummyFormatter:
 
-    open_mode: str = "r"
+    return_value: Any = None
+    default_content_type: str = "doesnt matter"
+    default_format: str = "doesnt matter"
+    default_encoding: str = "doesnt matter"
 
-    def __init__(self, return_val):
-        self.return_val = return_val
-
-    def from_string(self, content: str) -> dict:
-        return self.return_val
+    def deserialize(self, *args, **kwargs) -> dict:
+        return self.return_value
 
 
 class TestDomainConfigManager:
 
     @pytest.fixture
-    def setup(self, domain_config: DomainConfigDTO):
-        self.serializer = DummySerializer(return_val=domain_config.to_dict())
-        self.manager = DomainConfig(
+    def manager(self, domain_config: DomainConfigDTO) -> DomainConfig:
+
+        formatter = DummyFormatter()
+        formatter.return_value = domain_config.to_dict()
+
+        manager = DomainConfig(
             naming_conventions=DummyNamingConventions(),  # type: ignore
-            serializer=self.serializer,  # type: ignore
+            formatter=formatter,  # type: ignore
             storage=DummyStorage(),  # type: ignore
         )
 
-    @pytest.mark.parametrize("location", (
-        "good",
-        "bad",
-        "exception",
-    ))
-    def test_fetching_specs(self, setup, domain_config, location):
+        return manager
 
+    def test_fetching_from_empy_path_returns_empty_list(
+            self, manager: DomainConfig):
+
+        # given an empty path is specified
+        path = "empty"
+        manager.storage.empty_path = path  # type: ignore
+
+        # when fetching domain configs from this path
         result = set(
             str(conf.to_dict())  # convert to string for to make it hasheable
-            for conf in self.manager.fetch_configs(location)
+            for conf in manager.fetch_configs(location=path)
         )
 
-        if location == "good":
-            expected = set(
-                str(conf.to_dict())
-                for conf in [domain_config, domain_config]
-            )
-        else:
-            expected = set([])
+        # then result set is empty
+        assert result == set([])
 
-        assert result == expected
+    def test_fetching_from_non_existing_path_returns_empty_list(
+            self, manager: DomainConfig):
 
-    def test_fetch_only_accepts_string_inputs(self, setup):
+        # given a non-existing path is defined
+        path = "non-existing"
+        manager.storage.non_existing_path = path  # type: ignore
+
+        # when fetching domain configs from this path
+        result = set(
+            str(conf.to_dict())  # convert to string for to make it hasheable
+            for conf in manager.fetch_configs(location=path)
+        )
+
+        # then result set is empty
+        assert result == set([])
+
+    def test_fetch_only_accepts_string_inputs(self, manager: DomainConfig):
+
+        # given a non-string-valued path is defined
+        path = 1
+
+        # then fetching domain configs from this path results in an error
         with pytest.raises(ValueError):
-            _ = self.manager.fetch_configs(["safasdf"])  # type: ignore
+            _ = manager.fetch_configs(location=path)  # type: ignore
+
+    def test_matching_objects_are_fetched(
+            self, manager: DomainConfig, domain_config: DomainConfigDTO):
+
+        # given a patch where matching and non-matching objects are stored
+        path = "good_path"
+        found_objects = ["match1", "match2", "bad"]
+        manager.storage.found_objects = found_objects  # type: ignore
+        manager.naming_conventions.matching_string = "match"  # type: ignore
+        manager.formatter.return_value = domain_config.to_dict()  # type: ignore
+
+        # when fetching domain configs from this path
+        result = set(
+            str(conf.to_dict())  # convert to string for to make it hasheable
+            for conf in manager.fetch_configs(location=path)
+        )
+
+        # then a domain config is returned for each object matching naming conventions
+        expected = set(
+            str(domain_config.to_dict())  # convert to string for to make it hasheable
+            for _ in range(2)
+        )
+        assert result == expected
