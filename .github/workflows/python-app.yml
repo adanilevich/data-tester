@@ -27,21 +27,21 @@ jobs:
         pip install -r requirements.txt
 
     - name: linting
+      # flake8 config is defined in .flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        flake8
 
     - name: typechecks
+      # mypy config is defined in pyproject.toml
       run: |
-        # stop if type checking fails
-        mypy src
+        mypy
 
     - name: tests
+      # coverage and pytest configuration are in pyproject.toml
       run: |
-        coverage run --rcfile=.coveragerc -m pytest -m "not skip_test and not infrastructure" tests/
-        coverage report -m --rcfile=.coveragerc
+        coverage run
+        coverage report
 
     - name: coverage report
       # see https://github.com/marketplace/actions/python-coverage-comment

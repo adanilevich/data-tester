@@ -1,0 +1,38 @@
+[project]
+name = "data-tester"
+
+
+[tool.pytest.ini_options]
+
+minversion = "8.1"
+testpaths = ["tests",]
+markers = [
+    "skip_test: explicitely skip tests",
+    "infrastructure: mark test as requiring infrastructure, e.g. a DataPlatform"
+]
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning:pydantic"
+]
+
+
+[tool.coverage.run]
+
+command_line = "-m pytest -m 'not skip_test and not infrastructure'"
+source = ["src/"]  # only analyze source code in src for coverage
+relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3
+
+
+[tool.coverage.report]
+
+skip_empty = true  # empty python files like __init__.py are not included in report
+show_missing = true
+exclude_also = [
+    "raise NotImplementedError",  # ignore abstract methods and not implemented methods
+    "@(abc\\.)?abstractmethod",
+]
+
+
+[tool.mypy]
+check_untyped_defs = true  # check bodies of functions for type hints
+packages = ["src", "tests"]
