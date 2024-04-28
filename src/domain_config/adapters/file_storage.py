@@ -1,132 +1,128 @@
-from typing import Dict, List
+# from typing import Any, Dict, List
 
-from fsspec import AbstractFileSystem  # type: ignore
-from fsspec.implementations.local import LocalFileSystem  # type: ignore
-from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
-from gcsfs import GCSFileSystem  # type: ignore
+# from fsspec import AbstractFileSystem  # type: ignore
+# from fsspec.implementations.local import LocalFileSystem  # type: ignore
+# from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
+# from gcsfs import GCSFileSystem  # type: ignore
 
-from src.domain_config.ports import IStorage, StorageError
-from src.config import Config
-
-
-class FileStorageError(StorageError):
-    """"""
+# from src.domain_config.ports import IStorage, StorageError, ContentTypeUnknownError
+# from src.config import Config
 
 
-class ObjectNotFoundError(FileStorageError):
-    """"""
+# class FileStorageError(StorageError):
+#     """"""
 
 
-class ObjectIsNotAFileError(FileStorageError):
-    """"""
+# class ObjectNotFoundError(FileStorageError):
+#     """"""
 
 
-class StorageTypeUnknownError(FileStorageError):
-    """"""
+# class ObjectIsNotAFileError(FileStorageError):
+#     """"""
 
 
-class FileStorage(IStorage):
-    """Handles files in Google Cloud Storage or local file system"""
+# class StorageTypeUnknownError(FileStorageError):
+#     """"""
 
-    protocols: Dict[str, AbstractFileSystem]
 
-    def __init__(self):
+# class FileStorage(IStorage):
+#     """Handles files in Google Cloud Storage or local file system"""
 
-        self.protocols = {
-            "local://": LocalFileSystem(),
-            "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
-            "memory://": MemoryFileSystem(),  # for testing purpose
-        }
+#     protocols: Dict[str, AbstractFileSystem]
+#     # list of known content types which are interpreted and read as text
+#     text_content_types: List[str] = ["application/yaml", "plain/text"]
+#     # list of known content types which are interpreted and read as bytes
+#     bytes_content_types: List[str] = [
+#             'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate',
+#             "application/octet-stream",
+#         ]
 
-    def _fs(self, path: str) -> AbstractFileSystem:
+#     def __init__(self):
 
-        for protocol, fs in self.protocols.items():
-            if path.startswith(protocol):
-                return fs
+#         self.protocols = {
+#             "local://": LocalFileSystem(),
+#             "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
+#             "memory://": MemoryFileSystem(),  # for testing purpose
+#         }
 
-        raise StorageTypeUnknownError(f"Unknown location type: {path}")
+#     def _fs(self, path: str) -> AbstractFileSystem:
 
-    def protocol(self, path: str) -> str:
+#         for protocol, fs in self.protocols.items():
+#             if path.startswith(protocol):
+#                 return fs
 
-        if not self.protocol_is_valid(path):
-            raise StorageTypeUnknownError(f"Unknown storage type: {path}")
+#         raise StorageTypeUnknownError(f"Unknown location type: {path}")
 
-        return path.split(":")[0]
+#     def _protocol(self, path: str) -> str:
 
-    def protocol_is_valid(self, path: str) -> bool:
-        return path.startswith(tuple(self.protocols.keys()))
+#         if not self._protocol_is_valid(path):
+#             raise StorageTypeUnknownError(f"Unknown storage type: {path}")
 
-    def exists(self, path: str) -> bool:
+#         return path.split(":")[0]
 
-        if not self.protocol_is_valid(path):
-            raise StorageTypeUnknownError(f"Path type unknown: {path}")
+#     def _protocol_is_valid(self, path: str) -> bool:
+#         return path.startswith(tuple(self.protocols.keys()))
 
-        try:
-            exists = self._fs(path).exists(path)
-        except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg)
+#     def _exists(self, path: str) -> bool:
 
-        return exists
+#         if not self._protocol_is_valid(path):
+#             raise StorageTypeUnknownError(f"Path type unknown: {path}")
 
-    def find(self, path: str) -> List[str]:
-        """Returns all files in path, prefixed with the protocol"""
+#         try:
+#             exists = self._fs(path).exists(path)
+#         except Exception as err:
+#             msg = err.__class__.__name__ + ": " + str(err)
+#             raise FileStorageError(msg)
 
-        if not self.exists(path):
-            raise ObjectNotFoundError(f"Location doesn't exist: {path}")
+#         return exists
 
-        fs = self._fs(path)
-        files = []
-        if fs.isfile(path):
-            files.append(path)
-        else:
-            objects = fs.ls(path, detail=False)
-            for object in objects:
-                try:
-                    if fs.isfile(object):
-                        files.append(object)
-                except Exception:
-                    continue
+#     def find(self, path: str) -> List[str]:
+#         """Returns all files in path, prefixed with the protocol"""
 
-        return [self.protocol(path) + "://" + file.lstrip("/\\") for file in files]
+#         if not self._exists(path):
+#             raise ObjectNotFoundError(f"Location doesn't exist: {path}")
 
-    def read_text(self, path: str, encoding: str | None = None,
-                  errors: str | None = None, newline: str | None = None) -> str:
+#         fs = self._fs(path)
+#         files = []
+#         if fs.isfile(path):
+#             files.append(path)
+#         else:
+#             objects = fs.ls(path, detail=False)
+#             for object in objects:
+#                 try:
+#                     if fs.isfile(object):
+#                         files.append(object)
+#                 except Exception:
+#                     continue
 
-        fs = self._fs(path=path)
+#         return [self._protocol(path) + "://" + file.lstrip("/\\") for file in files]
 
-        if not self.exists(path):
-            raise ObjectNotFoundError(f"Object not found: {path}")
+#     def read(self, path: str, content_type: str, encoding: str | None = None) -> Any:
 
-        if fs.isdir(path):
-            raise ObjectIsNotAFileError(f"Object is a directory: {path}")
+#         fs = self._fs(path=path)
 
-        try:
-            with fs.open(
-                path, mode="r", encoding=encoding, errors=errors, newline=newline
-            ) as file:
-                content = file.read()
-        except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise StorageError(msg)
+#         if not self._exists(path):
+#             raise ObjectNotFoundError(f"Object not found: {path}")
 
-        return content
+#         if fs.isdir(path):
+#             raise ObjectIsNotAFileError(f"Object is a directory: {path}")
 
-    def read_bytes(self, path: str) -> bytes:
+#         if content_type in self.text_content_types:
+#             read_mode = "r"
+#         elif content_type in self.bytes_content_types:
+#             read_mode = "rb"
+#         else:
+#             raise ContentTypeUnknownError(content_type)
 
-        fs = self._fs(path=path)
+#         try:
+#             with fs.open(path, mode=read_mode, encoding=encoding,) as file:
+#                 content = file.read()
+#         except Exception as err:
+#             msg = err.__class__.__name__ + ": " + str(err)
+#             raise StorageError(msg)
 
-        if not self.exists(path):
-            raise ObjectNotFoundError(f"Object not found: {path}")
+#         return content
 
-        if fs.isdir(path):
-            raise ObjectIsNotAFileError(f"Object is a directory: {path}")
-
-        try:
-            with fs.open(path, mode="rb") as file:
-                content = file.read()
-        except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise StorageError(msg)
-
-        return content
+#     def write(self, content: Any, path: str, content_type: str,
+#               enconding: str | None = None):
+#         raise NotImplementedError("Writing data not yet implemented for FileStorage")

@@ -1,8 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import Any, List
 
 
 class StorageError(Exception):
+    """"""
+
+
+class StorageContentTypeUnknownError(StorageError):
     """"""
 
 
@@ -20,14 +24,14 @@ class IStorage(ABC):
         """
 
     @abstractmethod
-    def read_text(self, path: str, encoding: str | None = None,
-                  errors: str | None = None, newline: str | None = None) -> str:
+    def read(self, path: str, content_type: str, encoding: str | None = None,) -> Any:
         """
         Loads object as text. enconding, erros, newline follow 'open' semantics.
         """
 
     @abstractmethod
-    def read_bytes(self, path: str) -> bytes:
+    def write(self, content: Any, path: str, content_type: str,
+              enconding: str | None = None):
         """
         Loads object as bytes.
         """

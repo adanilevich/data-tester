@@ -2,18 +2,27 @@ from src.report.testrun_report import TestRunReport
 from src.dtos import TestRunReportDTO
 from src.report.ports import (
     CreateTestRunReportCommand, ICreateTestRunReportCommandHandler,
-    IReportFormatter
+    IReportFormatter, IStorage, IReportNamingConventions
 )
 
 
 class CreateTestRunReportCommandHandler(ICreateTestRunReportCommandHandler):
 
-    def __init__(self, formatter: IReportFormatter):
+    def __init__(self, formatter: IReportFormatter, storage: IStorage,
+                 naming_conventions: IReportNamingConventions):
+
         self.formatter: IReportFormatter = formatter
+        self.storage: IStorage = storage
+        self.naming_conventions: IReportNamingConventions = naming_conventions
 
     def create(self, command: CreateTestRunReportCommand) -> TestRunReportDTO:
 
-        report = TestRunReport.from_testrun_result(command.testrun_result)
-        report.format_report(format=command.format, formatter=self.formatter)
+        report = TestRunReport.from_testrun_result(
+            testrun_result=command.testrun_result,
+            formatter=self.formatter,
+            storage=self.storage,
+            naming_conventions=self.naming_conventions,
+        )
+        report.format_report(format=command.format)
 
         return report.to_dto()

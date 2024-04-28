@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Self, Union
 
+from src.report.ports import IStorage, IReportFormatter, IReportNamingConventions
 from src.report import AbstractReport
 from src.dtos import TestCaseResultDTO, TestCaseReportDTO
 
@@ -7,7 +8,13 @@ from src.dtos import TestCaseResultDTO, TestCaseReportDTO
 class TestCaseReport(AbstractReport):
 
     @classmethod
-    def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
+    def from_testcase_result(
+        cls,
+        testcase_result: TestCaseResultDTO,
+        formatter: IReportFormatter,
+        storage: IStorage,
+        naming_conventions: IReportNamingConventions,
+    ) -> Self:
         """"""
         return cls(
             testcase_id=testcase_result.id,
@@ -25,10 +32,19 @@ class TestCaseReport(AbstractReport):
             facts=testcase_result.facts,
             details=testcase_result.details,
             scenario=testcase_result.scenario,
+            formatter=formatter,
+            storage=storage,
+            naming_conventions=naming_conventions,
         )
 
     @classmethod
-    def from_dto(cls, report_dto: TestCaseReportDTO):
+    def from_dto(
+        cls,
+        report_dto: TestCaseReportDTO,
+        formatter: IReportFormatter,
+        storage: IStorage,
+        naming_conventions: IReportNamingConventions,
+    ):
         return cls(
             testcase_id=report_dto.testcase_id,
             testrun_id=report_dto.testrun_id,
@@ -48,34 +64,43 @@ class TestCaseReport(AbstractReport):
             format=report_dto.format,
             content_type=report_dto.content_type,
             content=report_dto.content,
+            formatter=formatter,
+            storage=storage,
+            naming_conventions=naming_conventions,
         )
 
-    def __init__(self, testcase_id: str, testrun_id: str, start: str, end: str,
-                 domain: str, stage: str, instance: str, testobject: str, testcase: str,
-                 result: str, summary: str, diff:  Dict[str, Union[List, Dict]],
-                 facts: List[Dict[str, Any]], details: List[Dict[str, Any]],
+    def __init__(self, formatter: IReportFormatter, storage: IStorage,
+                 naming_conventions: IReportNamingConventions, testcase_id: str,
+                 testrun_id: str, start: str, end: str, domain: str, stage: str,
+                 instance: str, testobject: str, testcase: str, result: str,
+                 summary: str, diff:  Dict[str, Union[List, Dict]],
+                 facts: List[Dict[str, str | int]],
+                 details: List[Dict[str, Union[str, int, float]]],
                  scenario: str = "", format: str | None = None,
                  content_type: str | None = None, content: Any = None):
 
-        self.testcase_id = testcase_id
-        self.testrun_id = testrun_id
-        self.start = start
-        self.end = end
-        self.domain = domain
-        self.stage = stage
-        self.instance = instance
-        self.testobject = testobject
-        self.testcase = testcase
-        self.scenario = scenario
-        self.result = result
-        self.summary = summary
-        self.diff = diff
-        self.facts = facts
-        self.details = details
-        self.description = self.testcase_description
-        self.format = format
-        self.content_type = content_type
-        self.content = content
+        self.testcase_id: str = testcase_id
+        self.testrun_id: str = testrun_id
+        self.start: str = start
+        self.end: str = end
+        self.domain: str = domain
+        self.stage: str = stage
+        self.instance: str = instance
+        self.testobject: str = testobject
+        self.testcase: str = testcase
+        self.scenario: str = scenario
+        self.result: str = result
+        self.summary: str = summary
+        self.diff: Dict[str, Union[List, Dict]] = diff
+        self.facts: List[Dict[str, str | int]] = facts
+        self.details: List[Dict[str, Union[str, int, float]]] = details
+        self.description: str = self.testcase_description
+        self.format: str | None = format
+        self.content_type: str | None = content_type
+        self.content: Any = content
+        self.formatter: IReportFormatter = formatter
+        self.storage: IStorage = storage
+        self.naming_conventions: IReportNamingConventions = naming_conventions
 
     @property
     def testcase_description(self):

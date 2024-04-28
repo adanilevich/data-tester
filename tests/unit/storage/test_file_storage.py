@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from src.domain_config.adapters import FileStorageError, FileStorage
+from src.storage import FileStorageError, FileStorage
 from gcsfs import GCSFileSystem  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
@@ -57,7 +57,7 @@ class TestFileStorage:
         ("s3://", False)
     ))
     def test_only_valid_prefixes_are_valid(self, prefix, is_valid):
-        assert self.storage.protocol_is_valid(prefix) is is_valid
+        assert self.storage._protocol_is_valid(prefix) is is_valid
 
     def test_correct_prefix_is_returned_for_known_fs(self):
         assert isinstance(self.storage._fs("local://"), LocalFileSystem)
@@ -72,12 +72,28 @@ class TestFileStorage:
         assert self.datapath + "/first.txt" in found
         assert self.datapath + "/second.bytes" in found
 
-    def test_read_text(self, setup):
+    def test_that_text_files_are_read(self, setup):
 
-        content = self.storage.read_text(self.datapath + "/first.txt")
+        # given an initalized FileStorage
+        storage = self.storage
+
+        # when a an existing text file with default encoding is accessed
+        path = self.datapath + "/first.txt"
+        content_type = "plain/text"
+        content = storage.read(path=path, content_type=content_type)
+
+        # then the file content assert that content is read correctly
         assert content == "content"
 
-    def test_read_bytes(self, setup):
+    def test_that_byte_valued_files_are_read(self, setup):
 
-        content = self.storage.read_bytes(self.datapath + "/second.bytes")
+        # given an initalized FileStorage
+        storage = self.storage
+
+        # when a an existing byte-encoded (text) file with default encoding is accessed
+        path = self.datapath + "/second.bytes"
+        content_type = "application/octet-stream"
+        content = storage.read(path=path, content_type=content_type)
+
+        # then the file content is correctly read and returned as bytes
         assert int.from_bytes(content) == 1

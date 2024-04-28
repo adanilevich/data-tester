@@ -1,8 +1,7 @@
 from src.domain_config.application import FetchDomainConfigsCommandHandler
 from src.domain_config.ports import IFetchDomainConfigsCommandHandler
-from src.domain_config.adapters import (
-    BasicYamlNamingConventions, FileStorage, YamlSerializer
-)
+from src.domain_config.adapters import BasicYamlNamingConventions, YamlFormatter
+from src.storage import FileStorage
 
 
 class DependencyInjector:
@@ -16,5 +15,5 @@ class DependencyInjector:
         return FetchDomainConfigsCommandHandler(
             naming_conventions=BasicYamlNamingConventions(),
             storage=FileStorage(),
-            serializer=YamlSerializer()
+            serializer=YamlFormatter()
         )
