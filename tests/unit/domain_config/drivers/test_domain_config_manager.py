@@ -18,7 +18,7 @@ class TestSimpleDomainConfigManager:
     @pytest.fixture
     def manager(self) -> DomainConfigManager:
         return DomainConfigManager(
-            handler=DummyFetchDomainConfigsCommandHandler()  # type: ignore
+            fetch_command_handler=DummyFetchDomainConfigsCommandHandler()  # type: ignore
         )
 
     @pytest.fixture

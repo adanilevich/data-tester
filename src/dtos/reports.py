@@ -8,8 +8,8 @@ class TestCaseReportDTO(DTO):
 
     testcase_id: str
     testrun_id: str
-    start: str
-    end: str
+    start_ts: str
+    end_ts: str
     domain: str
     stage: str
     instance: str
@@ -32,24 +32,11 @@ class TestCaseReportDTO(DTO):
     content: Any = Field(default=None)
 
 
-class ShortTestCaseResultDTO(DTO):
-
-    domain: str
-    stage: str
-    instance: str
-    testobject: str
-    testcase: str
-    scenario: str = ""
-    result: str
-    summary: str
-    facts: str
-
-
 class TestRunReportDTO(DTO):
 
     testrun_id: str
-    start: str
-    end: str
+    start_ts: str
+    end_ts: str
     result: str
     testcase_results: List[TestCaseResultDTO]
     # Format of testcase report in business terms, e.g. 'xlsx' or 'text'

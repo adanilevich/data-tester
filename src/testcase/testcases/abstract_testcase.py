@@ -32,19 +32,19 @@ class AbstractTestCase(ICheckable):
     __test__ = False  # prevents pytest collection
 
     def __init__(self, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-                 domain_config: DomainConfigDTO, run_id: str,
+                 domain_config: DomainConfigDTO, testrun_id: str,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 
         self.notifiers: List[INotifier] = notifiers
         self.notify(f"Initiating testcase {self.ttype} for {testobject.name}")
-        self.id: str = str(uuid4())
+        self.testcase_id: str = str(uuid4())
         self.start_ts: str = get_datetime()
         self.end_ts: Union[str, None] = None
         self.status: TestStatus = TestStatus.NOT_STARTED
         self.testobject: TestObjectDTO = testobject
         self.specs: List[SpecificationDTO] = specs
         self.domain_config: DomainConfigDTO = domain_config
-        self.run_id: str = run_id
+        self.testrun_id: str = testrun_id
         self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
@@ -87,8 +87,8 @@ class AbstractTestCase(ICheckable):
 
     def to_dto(self) -> TestCaseResultDTO:
         dto = TestCaseResultDTO(
-            id=self.id,
-            run_id=self.run_id,
+            testcase_id=self.testcase_id,
+            testrun_id=self.testrun_id,
             testtype=self.ttype,
             testobject=self.testobject,
             status=self.status,

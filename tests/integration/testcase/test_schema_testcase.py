@@ -22,7 +22,7 @@ def test_straight_through_execution(domain_config, prepare_local_data):
         testobject=testobject,
         specs=[spec],
         domain_config=domain_config,
-        run_id="my_run_id",
+        testrun_id="my_run_id",
         backend=DemoDataPlatformFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier(), StdoutNotifier()]
     )

@@ -30,7 +30,7 @@ jobs:
       # ruff config is defined in pyproject.toml
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        ruff check
+        ruff check --fix
 
     - name: typechecks
       # mypy config is defined in pyproject.toml

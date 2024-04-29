@@ -21,7 +21,7 @@ class TestTestCaseFactory:
                 testobject=self.testobject,
                 specs=self.specifications,
                 domain_config=domain_config,
-                run_id="my_run_id",
+                testrun_id="my_run_id",
                 backend=dummy_backend,
                 notifiers=[in_memory_notifier]
             )
@@ -35,7 +35,7 @@ class TestTestCaseFactory:
             testobject=self.testobject,
             specs=self.specifications,
             domain_config=domain_config,
-            run_id="my_run_id",
+            testrun_id="my_run_id",
             backend=dummy_backend,
             notifiers=[in_memory_notifier, in_memory_notifier]
         )

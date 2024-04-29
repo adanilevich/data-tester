@@ -25,4 +25,4 @@ class CreateTestCaseReportCommandHandler(ICreateTestCaseReportCommandHandler):
         )
         formatted_report = report.format_report(format=command.format)
 
-        return formatted_report
+        return formatted_report.to_dto()

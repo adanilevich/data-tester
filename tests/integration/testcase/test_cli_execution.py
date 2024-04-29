@@ -43,7 +43,7 @@ def specs(testobject: dict):
 
 testcases = [
     {"testobject": testobject, "testtype": testtype, "specs": specs(testobject),
-     "domain_config": domain_config, "run_id": "my_run_id"}
+     "domain_config": domain_config, "testrun_id": "my_run_id"}
     for testobject, testtype in zip(testobjects, testtypes)
 ]
 
@@ -72,7 +72,7 @@ def test_dummy_cli_execution():
         testcase_status = result["status"]
         expected_result = testtype_to_result_mapper[testtype][0]
         expected_status = testtype_to_result_mapper[testtype][1]
-        run_id = result["run_id"]
+        testrun_id = result["testrun_id"]
         assert testcase_result == expected_result
         assert testcase_status == expected_status
-        assert run_id == "my_run_id"
+        assert testrun_id == "my_run_id"

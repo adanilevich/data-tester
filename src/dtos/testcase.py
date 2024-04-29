@@ -58,8 +58,8 @@ class TestResult(Enum):
 
 class TestCaseResultDTO(DTO):
     __test__ = False  # prevents pytest collection
-    id: str
-    run_id: str
+    testcase_id: str
+    testrun_id: str
     testobject: TestObjectDTO
     testtype: str
     scenario: str = Field(default="")
@@ -75,8 +75,8 @@ class TestCaseResultDTO(DTO):
 
     def to_dict(self) -> dict:
         return dict(
-            id=self.id,
-            run_id=self.run_id,
+            testcase_id=self.testcase_id,
+            testrun_id=self.testrun_id,
             testtype=self.testtype,
             testobject=self.testobject.to_dict(),
             status=self.status.to_string(),
@@ -93,8 +93,8 @@ class TestCaseResultDTO(DTO):
 class TestRunResultDTO(DTO):
 
     testrun_id: str
-    start: str
-    end: str
+    start_ts: str
+    end_ts: str
     result: str
     testcase_results: List[TestCaseResultDTO]
 
@@ -106,20 +106,20 @@ class TestRunResultDTO(DTO):
             if testcase_result.result != "OK":
                 result = "NOK"
 
-        start = list(sorted([
+        start_ts = list(sorted([
             r.start_ts for r in testcase_results if r.start_ts is not None
         ]))[0]
 
-        end = list(sorted([
+        end_ts = list(sorted([
             r.end_ts for r in testcase_results if r.end_ts is not None
         ], reverse=True))[0]
 
-        testrun_id = "-".join([r.run_id for r in testcase_results])
+        testrun_id = "-".join([r.testrun_id for r in testcase_results])
 
         return cls(
             testrun_id=testrun_id,
-            start=start,
-            end=end,
+            start_ts=start_ts,
+            end_ts=end_ts,
             result=result,
             testcase_results=testcase_results,
         )

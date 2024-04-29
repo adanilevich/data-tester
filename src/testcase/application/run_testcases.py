@@ -26,14 +26,14 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     testobject=command.testobject,
                     specs=command.specs,
                     domain_config=command.domain_config,
-                    run_id=command.run_id,
+                    testrun_id=command.testrun_id,
                     backend=backend_,
                     notifiers=self.notifiers
                 )
                 result = testcase.execute()
             except TestCaseUnknownError:
                 result = TestCaseResultDTO(
-                    id="n/a",
+                    testcase_id="n/a",
                     result=TestResult.NA,
                     summary=f"Test type {command.testtype} unknown!",
                     facts=[],
@@ -42,7 +42,7 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                     start_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     end_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
                     testobject=command.testobject,
-                    run_id=command.run_id,
+                    testrun_id=command.testrun_id,
                     diff=dict(),
                     testtype=command.testtype,
                     specifications=command.specs,

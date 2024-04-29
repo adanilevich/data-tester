@@ -17,10 +17,10 @@ class TestCaseReport(AbstractReport):
     ) -> Self:
         """"""
         return cls(
-            testcase_id=testcase_result.id,
-            testrun_id=testcase_result.run_id,
-            start=testcase_result.start_ts,
-            end=testcase_result.end_ts or "",
+            testcase_id=testcase_result.testcase_id,
+            testrun_id=testcase_result.testrun_id,
+            start_ts=testcase_result.start_ts,
+            end_ts=testcase_result.end_ts or "",
             domain=testcase_result.testobject.domain,
             stage=testcase_result.testobject.stage,
             instance=testcase_result.testobject.instance,
@@ -48,8 +48,8 @@ class TestCaseReport(AbstractReport):
         return cls(
             testcase_id=report_dto.testcase_id,
             testrun_id=report_dto.testrun_id,
-            start=report_dto.start,
-            end=report_dto.end or "",
+            start_ts=report_dto.start_ts,
+            end_ts=report_dto.end_ts or "",
             domain=report_dto.domain,
             stage=report_dto.stage,
             instance=report_dto.instance,
@@ -71,7 +71,7 @@ class TestCaseReport(AbstractReport):
 
     def __init__(self, formatter: IReportFormatter, storage: IStorage,
                  naming_conventions: IReportNamingConventions, testcase_id: str,
-                 testrun_id: str, start: str, end: str, domain: str, stage: str,
+                 testrun_id: str, start_ts: str, end_ts: str, domain: str, stage: str,
                  instance: str, testobject: str, testcase: str, result: str,
                  summary: str, diff:  Dict[str, Union[List, Dict]],
                  facts: List[Dict[str, str | int]],
@@ -81,8 +81,8 @@ class TestCaseReport(AbstractReport):
 
         self.testcase_id: str = testcase_id
         self.testrun_id: str = testrun_id
-        self.start: str = start
-        self.end: str = end
+        self.start_ts: str = start_ts
+        self.end_ts: str = end_ts
         self.domain: str = domain
         self.stage: str = stage
         self.instance: str = instance
@@ -104,26 +104,27 @@ class TestCaseReport(AbstractReport):
 
     @property
     def testcase_description(self):
-        if self.description is None or self.description == "":
-            if self.testcase == "SCHEMA":
-                desc = "Check that schema of testobject corresponds to specification."
-                self.description = desc
-            elif self.testcase == "ROWCOUNT":
-                desc = "Check that rowcount in testobject mathces expectation."
-                self.description = desc
-            elif self.testcase == "COMPARE_SAMPLE":
-                desc = "Full comparison of test SQL and tesobject on a data sample."
-                self.description = desc
-            else:
-                self.description = "Testcase description is missing."
+        if self.testcase == "SCHEMA":
+            desc = "Check that schema of testobject corresponds to specification."
+            description = desc
+        elif self.testcase == "ROWCOUNT":
+            desc = "Check that rowcount in testobject mathces expectation."
+            description = desc
+        elif self.testcase == "COMPARE_SAMPLE":
+            desc = "Full comparison of test SQL and tesobject on a data sample."
+            description = desc
+        else:
+            description = "Testcase description is missing."
+
+        return description
 
     def to_dto(self) -> TestCaseReportDTO:
         """"""
         return TestCaseReportDTO(
             testcase_id=self.testcase_id,
             testrun_id=self.testrun_id,
-            start=self.start,
-            end=self.end,
+            start_ts=self.start_ts,
+            end_ts=self.end_ts,
             domain=self.domain,
             stage=self.stage,
             instance=self.instance,
@@ -138,4 +139,5 @@ class TestCaseReport(AbstractReport):
             format=self.format,
             content_type=self.content_type,
             content=self.content,
+            description=self.description,
         )

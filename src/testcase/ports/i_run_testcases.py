@@ -14,7 +14,7 @@ class RunTestCaseCommand(DTO):
     testobject: TestObjectDTO
     testtype: str
     specs: List[SpecificationDTO]
-    run_id: str = Field(default_factory=lambda: str(uuid4())[:6])
+    testrun_id: str = Field(default_factory=lambda: str(uuid4())[:6])
     domain_config: DomainConfigDTO
 
     @classmethod
@@ -25,7 +25,7 @@ class RunTestCaseCommand(DTO):
             testtype=dict_["testtype"],
             specs=[SpecFactory().create_from_dict(spec) for spec in dict_["specs"]],
             domain_config=DomainConfigDTO.from_dict(dict_["domain_config"]),
-            run_id=dict_.get("run_id", str(uuid4())[:6]),
+            testrun_id=dict_.get("testrun_id", str(uuid4())[:6]),
         )
         return command
 

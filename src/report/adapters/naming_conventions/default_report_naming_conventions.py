@@ -10,9 +10,9 @@ class DefaultReportNamingConventions(IReportNamingConventions):
             format = report.format or ".file"
             report_name = report.testobject + "_" \
                 + report.testcase + "_" \
-                + report.start \
+                + report.start_ts \
                 + "." + format
         else:
-            report_name = "testrun_report_" + report.start + ".xlsx"
+            report_name = "testrun_report_" + report.start_ts + ".xlsx"
 
         return report_name

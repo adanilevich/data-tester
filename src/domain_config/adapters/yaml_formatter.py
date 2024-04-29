@@ -40,6 +40,10 @@ class YamlFormatter(IDomainConfigFormatter):
         # yaml.dump produces a byte-like object if encoding is specified. Should be
         # string for compatibility with FileStorage.write()
         result = yaml.safe_dump(
-            data=content, encoding=encoding, default_flow_style=False).decode(encoding)
+            data=content,
+            encoding=encoding,
+            default_flow_style=False,
+            indent=4
+        ).decode(encoding)
 
         return result
