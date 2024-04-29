@@ -8,7 +8,7 @@
 | src/config/config.py                                                            |        9 |        1 |     89% |         8 |
 | src/domain\_config/\_\_init\_\_.py                                              |        1 |        0 |    100% |           |
 | src/domain\_config/adapters/\_\_init\_\_.py                                     |        2 |        0 |    100% |           |
-| src/domain\_config/adapters/yaml\_formatter.py                                  |       22 |        4 |     82% |24-25, 36-37 |
+| src/domain\_config/adapters/yaml\_formatter.py                                  |       23 |        5 |     78% |24-26, 37-38 |
 | src/domain\_config/adapters/yaml\_naming\_conventions.py                        |        6 |        0 |    100% |           |
 | src/domain\_config/application/\_\_init\_\_.py                                  |        2 |        2 |      0% |       2-3 |
 | src/domain\_config/application/fetch\_domain\_configs.py                        |       13 |       13 |      0% |      1-33 |
@@ -23,7 +23,7 @@
 | src/domain\_config/ports/i\_naming\_conventions.py                              |        2 |        0 |    100% |           |
 | src/domain\_config/ports/i\_storage.py                                          |        5 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                        |        5 |        0 |    100% |           |
-| src/dtos/configs.py                                                             |       49 |        1 |     98% |        66 |
+| src/dtos/configs.py                                                             |       50 |        1 |     98% |        67 |
 | src/dtos/dto.py                                                                 |       12 |        1 |     92% |        15 |
 | src/dtos/reports.py                                                             |       42 |        0 |    100% |           |
 | src/dtos/specifications.py                                                      |       40 |        2 |     95% |    25, 62 |
@@ -89,7 +89,7 @@
 | src/testcase/testcases/rowcount.py                                              |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                                |      132 |        3 |     98% |95, 104, 139 |
 | src/testcase/testcases/testcase\_factory.py                                     |       18 |        0 |    100% |           |
-|                                                                       **TOTAL** | **1637** |  **260** | **84%** |           |
+|                                                                       **TOTAL** | **1639** |  **261** | **84%** |           |
 
 12 empty files skipped.
 
