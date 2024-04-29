@@ -5,7 +5,7 @@ mypy
 
 echo ""
 echo "RUNNING LINTING AND STYLE CHECKS"
-flake8
+ruff check
 
 echo ""
 echo "RUNNING TESTS"

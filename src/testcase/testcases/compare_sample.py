@@ -105,7 +105,7 @@ class CompareSampleTestCase(AbstractTestCase):
             schema = self.backend.get_schema_from_query(self.translated_query, self.db)
         except Exception as err:
             msg = "Error while obtaining schema from test query: " + str(err)
-            raise err.__class__(msg)
+            raise err.__class__(msg) from err
 
         pks = self.schema.primary_keys or []
         missing_pks = [pk for pk in pks if pk not in schema.columns]
@@ -128,7 +128,7 @@ class CompareSampleTestCase(AbstractTestCase):
             )
         except Exception as err:
             msg = "Error while sampling primary keys from test query: " + str(err)
-            raise err.__class__(msg)
+            raise err.__class__(msg) from err
 
         return sample_keys
 
@@ -148,7 +148,7 @@ class CompareSampleTestCase(AbstractTestCase):
             )
         except Exception as err:
             msg = "Error while sampling from test query: " + str(err)
-            raise err.__class__(msg)
+            raise err.__class__(msg) from err
 
         return expected
 
@@ -169,7 +169,7 @@ class CompareSampleTestCase(AbstractTestCase):
             )
         except Exception as err:
             msg = "Error while sampling from testobject: " + str(err)
-            raise err.__class__(msg)
+            raise err.__class__(msg) from err
 
         return actual
 

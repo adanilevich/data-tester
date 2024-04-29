@@ -1,7 +1,6 @@
 # DEVELOPMENT AND TESTING
-flake8  # code style (pycodestyle), error linter (pyflakes), complexity (mccabe)
+ruff  # linter / syntax checker and formatter - replaces flake8
 mypy  # type checker
-black  # code formatter
 pytest
 coverage
 
