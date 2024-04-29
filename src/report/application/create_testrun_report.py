@@ -23,6 +23,6 @@ class CreateTestRunReportCommandHandler(ICreateTestRunReportCommandHandler):
             storage=self.storage,
             naming_conventions=self.naming_conventions,
         )
-        report.format_report(format=command.format)
+        formatted_report = report.format_report(format=command.format)
 
-        return report.to_dto()
+        return formatted_report.to_dto()

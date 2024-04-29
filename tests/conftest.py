@@ -7,9 +7,12 @@ import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from urllib import request
 
+from src.report.testcase_report import TestCaseReport
+from src.report.testrun_report import TestRunReport
 from src.dtos import (
     SpecificationDTO, SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO,
-    DomainConfigDTO, TestCasesConfigDTO, TestObjectDTO
+    DomainConfigDTO, TestCasesConfigDTO, TestObjectDTO,
+    TestCaseResultDTO, TestRunResultDTO, TestStatus, TestResult
 )
 from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
@@ -137,7 +140,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                     ),
                 ],
                 domain_config=domain_config,
-                run_id="my_run_id",
+                testrun_id="my_run_id",
                 backend=DummyPlatform(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()]
             )
@@ -203,3 +206,99 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
     yield df_
 
     clean_up_performance_test_data(target_file_)
+
+
+# FIXTURES FOR DOMAIN CONFIG
+
+@pytest.fixture
+def testcase_result(testobject) -> TestCaseResultDTO:
+    return TestCaseResultDTO(
+        testcase_id="id",
+        testrun_id="my_testrun_id",
+        testobject=testobject,
+        testtype="SCHEMA",
+        status=TestStatus.FINISHED,
+        result=TestResult.OK,
+        diff={"a": [1, 2, 3], "b": {3: 5}},
+        summary="My Summary",
+        facts=[{"a": 5}, {"b": "2"}],
+        details=[{"a": 5}, {"b": "2"}],
+        specifications=[],
+        start_ts="asdf",
+        end_ts="gartw"
+    )
+
+
+@pytest.fixture
+def formatter():
+
+    class DummyFormatter:
+
+        def __init__(self):
+
+            self._format = None
+            self._content = None
+            self._content_type = None
+
+        def format(self, report: TestCaseReport, format: str):
+
+            self._format = format
+            report.format = format
+
+            self._content = format
+            report.content = format
+
+            self._content_type = format
+            report.content_type = format
+
+    return DummyFormatter()
+
+
+@pytest.fixture
+def storage():
+
+    class DummyStorage:
+
+        def __init__(self):
+            self.written: List[str] = []
+
+        def write(self, path: str, *args, **kwargs):
+            self.written.append(path)
+
+    return DummyStorage()
+
+
+@pytest.fixture
+def naming_conventions():
+
+    class DummyNamingConventions:
+
+        def report_name(self, *args, **kwargs) -> str:
+            return "report"
+
+    return DummyNamingConventions()
+
+
+@pytest.fixture
+def testcase_report(
+    testcase_result, formatter, storage, naming_conventions) -> TestCaseReport:
+
+    return TestCaseReport.from_testcase_result(
+        testcase_result=testcase_result,
+        formatter=formatter,
+        naming_conventions=naming_conventions,
+        storage=storage,
+    )
+
+@pytest.fixture
+def testrun_report(
+    testcase_result, formatter, storage, naming_conventions) -> TestRunReport:
+
+    return TestRunReport.from_testrun_result(
+        testrun_result=TestRunResultDTO.from_testcase_results(
+            testcase_results=[testcase_result, testcase_result]),
+        formatter=formatter,
+        storage=storage,
+        naming_conventions=naming_conventions,
+    )
+

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Self
 from src.report.ports import (
     IFormattable, IReportFormatter, IStorage, IReportNamingConventions
 )
@@ -18,24 +18,31 @@ class AbstractReport(IFormattable):
         self.content: Any = content
         self.naming_conventions: IReportNamingConventions = naming_conventions
 
-    def format_report(self, format: str):
+    def format_report(self, format: str) -> Self:
 
         self.formatter.format(report=self, format=format)
 
-        return self.to_dto()
+        return self
 
-    def save_report(self, location, group_by: List[str],):
+    def save_report(self, location, group_by: List[str] | None = None,):
 
-        if self.format_report is None:
+        group_by = group_by or []
+
+        if self.format is None:
             raise ValueError("Report must be formatted and the applied format specified.")
 
         if self.content_type is None:
-            raise ValueError("Content type of report to be saved must be defined!")
+            raise ValueError("Content type of report to be saved must be defined.")
+
+        if self.content is None:
+            raise ValueError("Content of report must be non-empty in order to save.")
 
         if group_by is not None:
             for item in group_by:
-                if item in self.to_dto().model_fields:
-                    location += item + "/"
+                dto_ = self.to_dto()
+                dict_ = dto_.to_dict()
+                if item in dto_.model_fields:
+                    location += "/" + str(dict_[item])
 
         filename = location + "/" + self.naming_conventions.report_name(self.to_dto())
 

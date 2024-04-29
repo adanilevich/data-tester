@@ -12,20 +12,16 @@ from src.dtos import (
 class SimpleReportManager:
 
     def __init__(
-        self,
-        create_testcase_report_handler: ICreateTestCaseReportCommandHandler,
+        self, create_testcase_report_handler: ICreateTestCaseReportCommandHandler,
         create_testrun_report_handler: ICreateTestRunReportCommandHandler,
-        storage_handler: ISaveReportCommandHandler,
-    ):
+        save_report_handler: ISaveReportCommandHandler,):
+
         self.create_testcase_report_handler = create_testcase_report_handler
         self.create_testrun_report_handler = create_testrun_report_handler
-        self.storage_handler = storage_handler
+        self.save_report_handler = save_report_handler
 
     def create_testcase_report(
-        self,
-        testcase_result: TestCaseResultDTO,
-        format: str,
-    ) -> TestCaseReportDTO:
+        self, testcase_result: TestCaseResultDTO, format: str,) -> TestCaseReportDTO:
 
         command = CreateTestCaseReportCommand(
             testcase_result=testcase_result,
@@ -37,10 +33,8 @@ class SimpleReportManager:
         return report
 
     def create_testrun_report(
-        self,
-        testcase_results: List[TestCaseResultDTO],
-        format: str,
-    ) -> TestRunReportDTO:
+        self, testcase_results: List[TestCaseResultDTO],
+        format: str,) -> TestRunReportDTO:
 
         command = CreateTestRunReportCommand(
             testrun_result=TestRunResultDTO.from_testcase_results(testcase_results),
@@ -52,11 +46,8 @@ class SimpleReportManager:
         return report
 
     def save_report(
-            self,
-            report: TestCaseReportDTO | TestRunReportDTO,
-            location: str,
-            group_by: List[str]
-    ):
+        self, report: TestCaseReportDTO | TestRunReportDTO, location: str,
+        group_by: List[str]):
 
         command = SaveReportCommand(
             report=report,
@@ -64,4 +55,4 @@ class SimpleReportManager:
             group_by=group_by,
         )
 
-        self.storage_handler.save(command=command)
+        self.save_report_handler.save(command=command)

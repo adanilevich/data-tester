@@ -10,8 +10,9 @@ from src.config import Config
 
 class DomainConfigManager:
 
-    def __init__(self, handler: IFetchDomainConfigsCommandHandler):
-        self.handler = handler
+    def __init__(self, fetch_command_handler: IFetchDomainConfigsCommandHandler):
+
+        self.fetch_command_handler = fetch_command_handler
 
     def find(self, location: str | None = None) -> List[DomainConfigDTO]:
 
@@ -23,7 +24,7 @@ class DomainConfigManager:
         command = FetchDomainConfigsCommand(location=location)
 
         try:
-            configs = self.handler.fetch(command=command)
+            configs = self.fetch_command_handler.fetch(command=command)
         except Exception:
             configs = []
 

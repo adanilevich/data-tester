@@ -25,7 +25,7 @@ class TestCaseFactory:
 
     @classmethod
     def create(cls, ttype: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-               domain_config: DomainConfigDTO, run_id: str,
+               domain_config: DomainConfigDTO, testrun_id: str,
                backend: IDataPlatform, notifiers: List[INotifier]) -> AbstractTestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on class attribute
@@ -44,7 +44,7 @@ class TestCaseFactory:
                 testobject=testobject,
                 specs=specs,
                 domain_config=domain_config,
-                run_id=run_id,
+                testrun_id=testrun_id,
                 backend=backend,
                 notifiers=notifiers,
             )
