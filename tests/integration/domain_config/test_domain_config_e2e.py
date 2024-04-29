@@ -1,11 +1,13 @@
 import pytest
 from pathlib import Path
+import yaml  # type: ignore
+from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from src.domain_config.di import DependencyInjector
 from src.dtos import DomainConfigDTO
-import yaml  # type: ignore
 
 
-PATH = Path(__file__).parent.absolute()
+PATH = "memory://my/path"
+fs = MemoryFileSystem()
 
 
 class TestDomainConfigIntegration:
@@ -13,19 +15,19 @@ class TestDomainConfigIntegration:
     @pytest.fixture
     def persist_domain_config(self, domain_config: DomainConfigDTO):
 
-        filepath = PATH / "domain_config.yaml"
+        filepath = PATH + "/domain_config.yaml"
 
         def persist_config():
 
             domain_config_as_dict = domain_config.to_dict()
 
-            with open(filepath, "w+") as file:
+            with fs.open(filepath, "w") as file:
                 yaml.safe_dump(domain_config_as_dict, file, indent=4,
                                default_flow_style=None)
 
         yield persist_config
 
-        filepath.unlink(missing_ok=True)
+        fs.rm_file(filepath)
 
 
     def test_fetching_config(self, persist_domain_config, domain_config: DomainConfigDTO):
@@ -34,7 +36,7 @@ class TestDomainConfigIntegration:
         manager = DependencyInjector().domain_config_manager()
 
         # when a valid yaml-based domain_config is stored in a given location
-        location = "local://" + str(PATH).replace("\\", "/")
+        location = PATH
         persist_domain_config()
 
         # and manager fetches from that location
