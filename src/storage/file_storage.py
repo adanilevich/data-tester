@@ -86,7 +86,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
             exists = self._fs(path).exists(path)
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg)
+            raise FileStorageError(msg) from err
 
         return exists
 
@@ -133,7 +133,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
                 content = file.read()
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg)
+            raise FileStorageError(msg) from err
 
         return content
 

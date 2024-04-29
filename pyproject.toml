@@ -36,3 +36,12 @@ exclude_also = [
 [tool.mypy]
 check_untyped_defs = true  # check bodies of functions for type hints
 packages = ["src", "tests"]
+
+
+[tool.ruff]
+line-length = 90
+src = ["src"]
+
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B"]

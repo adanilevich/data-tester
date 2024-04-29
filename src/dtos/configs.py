@@ -20,11 +20,12 @@ class TestCasesConfigDTO(DTO):
     def from_dict(cls, dict_: dict) -> Self:
         schema = dict_["schema"]
         compare_sample = dict_["compare_sample"]
+        print("SDFGdfDSFGdfgdfgdfgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfggggg")
+
         return cls(
             schema=SchemaTestCaseConfigDTO.from_dict(schema),
-            compare_sample=CompareSampleTestCaseConfigDTO.from_dict(compare_sample)
+            compare_sample=CompareSampleTestCaseConfigDTO.from_dict(compare_sample),
         )
-
 
 class DomainConfigDTO(DTO):
     """
@@ -76,10 +77,10 @@ class DomainConfigDTO(DTO):
         else:
             try:
                 return self.testmatrices_locations[f"{stage}.{instance}"]
-            except KeyError:
+            except KeyError as err:
                 msg = "Testmatrices lolcations undefined " \
                     f"for stage.instance={stage}.{instance}"
-                raise KeyError(msg)
+                raise KeyError(msg) from err
 
     def specifications_locations_by_instance(
             self, stage: str, instance: str) -> List[str]:
@@ -90,7 +91,7 @@ class DomainConfigDTO(DTO):
             try:
                 result = self.specifications_locations[f"{stage}.{instance}"]
                 return self._item_as_list(result)
-            except KeyError:
+            except KeyError as err:
                 msg = "Specifications locations undefined for stage.instance=" \
                     f"{stage}.{instance}"
-                raise KeyError(msg)
+                raise KeyError(msg) from err

@@ -22,7 +22,8 @@ class YamlFormatter(IDomainConfigFormatter):
         try:
             return yaml.safe_load(content)  # encoding is inferred by pyyaml
         except Exception as err:
-            raise DomainConfigFormatterError(err.__class__.__name__ + ": " + str(err))
+            msg = err.__class__.__name__ + ": " + str(err)
+            raise DomainConfigFormatterError(msg) from err
 
     def serialize(self, content: dict, format: str | None = None,
                   encoding: str | None = None) -> Any:
