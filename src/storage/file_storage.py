@@ -11,7 +11,7 @@ from src.domain_config.ports import (
 )
 from src.report.ports import (
     IStorage as IReportStorage,
-    StorageError as ReportStorageError
+    StorageError as ReportStorageError,
 )
 from src.config import Config
 
@@ -43,16 +43,17 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
     """
 
     protocols: Dict[str, AbstractFileSystem]
+
     # list of known content types which are interpreted and read as text
-    text_content_types: List[str] = ["application/yaml", "plain/text"]
+    text_content_types: List[str] = ["application/yaml", "plain/text", "application/json"]
+
     # list of known content types which are interpreted and read as bytes
     bytes_content_types: List[str] = [
-            'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate',
-            "application/octet-stream",
-        ]
+        "application/vnd.opnexmlformats-officedocument.spreadsheetml.template",
+        "application/octet-stream",
+    ]
 
     def __init__(self):
-
         self.protocols = {
             "local://": LocalFileSystem(),
             "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
@@ -60,7 +61,6 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         }
 
     def _fs(self, path: str) -> AbstractFileSystem:
-
         for protocol, fs in self.protocols.items():
             if path.startswith(protocol):
                 return fs
@@ -68,7 +68,6 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         raise StorageTypeUnknownError(f"Unknown location type: {path}")
 
     def _protocol(self, path: str) -> str:
-
         if not self._protocol_is_valid(path):
             raise StorageTypeUnknownError(f"Unknown storage type: {path}")
 
@@ -78,7 +77,6 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         return path.startswith(tuple(self.protocols.keys()))
 
     def _exists(self, path: str) -> bool:
-
         if not self._protocol_is_valid(path):
             raise StorageTypeUnknownError(f"Path type unknown: {path}")
 
@@ -112,7 +110,6 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         return [self._protocol(path) + "://" + file.lstrip("/\\") for file in files]
 
     def read(self, path: str, content_type: str, encoding: str | None = None) -> Any:
-
         fs = self._fs(path=path)
 
         if not self._exists(path):
@@ -129,7 +126,11 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
             raise ContentTypeUnknownError(content_type)
 
         try:
-            with fs.open(path, mode=read_mode, encoding=encoding,) as file:
+            with fs.open(
+                path,
+                mode=read_mode,
+                encoding=encoding,
+            ) as file:
                 content = file.read()
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
@@ -137,6 +138,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
 
         return content
 
-    def write(self, content: Any, path: str, content_type: str,
-              enconding: str | None = None):
+    def write(
+        self, content: Any, path: str, content_type: str, enconding: str | None = None
+    ):
         raise NotImplementedError("Writing data not yet implemented for FileStorage")

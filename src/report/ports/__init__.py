@@ -1,5 +1,4 @@
-# flake8: noqa
-from src.report.ports.i_formattable import *
+# ruff: noqa
 from src.report.ports.i_create_testcase_report import *
 from src.report.ports.i_create_testrun_report import *
 from src.report.ports.i_report_formatter import *

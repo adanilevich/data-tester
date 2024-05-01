@@ -5,7 +5,6 @@ from src.dtos import DTO, TestCaseResultDTO
 
 
 class TestCaseReportDTO(DTO):
-
     testcase_id: str
     testrun_id: str
     start_ts: str
@@ -19,11 +18,11 @@ class TestCaseReportDTO(DTO):
     description: str | None = None
     result: str
     summary: str
-    diff:  Dict[str, Union[List, Dict]]
+    diff: Dict[str, Union[List, Dict]]
     facts: List[Dict[str, str | int]]
     details: List[Dict[str, Any]]
     # Format of testcase report in business terms, e.g. 'xlsx' or 'text'
-    format: str | None = Field(default=None)
+    report_format: str | None = Field(default=None)
     # Content/Mime type of report, e.g.
     #   for excel 'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate'
     #   for text file 'text/plain'
@@ -33,14 +32,13 @@ class TestCaseReportDTO(DTO):
 
 
 class TestRunReportDTO(DTO):
-
     testrun_id: str
     start_ts: str
     end_ts: str
     result: str
     testcase_results: List[TestCaseResultDTO]
     # Format of testcase report in business terms, e.g. 'xlsx' or 'text'
-    format: str | None = Field(default=None)
+    report_format: str | None = Field(default=None)
     # Content/Mime type of report, e.g.
     #   for excel 'application/vnd.opnexmlformats-officedocument.spreadsheetml.tmeplate'
     #   for text file 'text/plain'

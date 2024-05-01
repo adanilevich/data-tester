@@ -7,18 +7,26 @@ import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from urllib import request
 
-from src.report.testcase_report import TestCaseReport
-from src.report.testrun_report import TestRunReport
 from src.dtos import (
-    SpecificationDTO, SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO,
-    DomainConfigDTO, TestCasesConfigDTO, TestObjectDTO,
-    TestCaseResultDTO, TestRunResultDTO, TestStatus, TestResult
+    SpecificationDTO,
+    SchemaTestCaseConfigDTO,
+    CompareSampleTestCaseConfigDTO,
+    DomainConfigDTO,
+    TestCasesConfigDTO,
+    TestObjectDTO,
+    TestCaseReportDTO,
+    TestRunReportDTO,
+    TestCaseResultDTO,
+    TestRunResultDTO,
+    TestResult,
+    TestStatus,
 )
 from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 from src.testcase.adapters.data_platforms import DummyPlatform
 from src.testcase.testcases import TestCaseFactory, AbstractTestCase
 from src.testcase.precondition_checks import ICheckable
+from src.report import TestCaseReport, TestRunReport
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
@@ -41,20 +49,16 @@ def stdout_notifier() -> StdoutNotifier:
 def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
-        instances={
-            "test": ["alpha", "beta"],
-            "uat": ["main"]
-        },
+        instances={"test": ["alpha", "beta"], "uat": ["main"]},
         specifications_locations=["my_first_location", "my_second_location"],
         testmatrices_locations="my_location",
         testreports_locations=[],
         testcases=TestCasesConfigDTO(
             compare_sample=CompareSampleTestCaseConfigDTO(
-                sample_size=100,
-                sample_size_per_object={}
+                sample_size=100, sample_size_per_object={}
             ),
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
-        )
+        ),
     )
     return domain_config
 
@@ -71,7 +75,6 @@ def testobject() -> TestObjectDTO:
 
 
 class DummyCheckable(ICheckable):
-
     def __init__(self, testobject: TestObjectDTO, backend: IDataPlatform):
         self.testobject = testobject
         self.backend = backend
@@ -90,7 +93,6 @@ class DummyCheckable(ICheckable):
 
 
 class ICheckableCreator(ABC):
-
     @abstractmethod
     def create(self) -> ICheckable:
         """Creates a checkable"""
@@ -98,9 +100,7 @@ class ICheckableCreator(ABC):
 
 @pytest.fixture
 def checkable_creator(testobject, dummy_backend) -> ICheckableCreator:
-
     class CheckableCreator(ICheckableCreator):
-
         def create(self) -> ICheckable:
             checkable = DummyCheckable(backend=dummy_backend, testobject=testobject)
             return checkable
@@ -111,7 +111,6 @@ def checkable_creator(testobject, dummy_backend) -> ICheckableCreator:
 
 
 class ITestCaseCreator(ABC):
-
     @abstractmethod
     def create(self, ttype: str) -> AbstractTestCase:
         """creates testcase of required type"""
@@ -119,11 +118,8 @@ class ITestCaseCreator(ABC):
 
 @pytest.fixture
 def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
-
     class TestCaseCreator(ITestCaseCreator):
-
         def create(self, ttype: str) -> AbstractTestCase:
-
             testcase = TestCaseFactory.create(
                 ttype=ttype,
                 testobject=testobject,
@@ -142,7 +138,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 domain_config=domain_config,
                 testrun_id="my_run_id",
                 backend=DummyPlatform(),
-                notifiers=[InMemoryNotifier(), StdoutNotifier()]
+                notifiers=[InMemoryNotifier(), StdoutNotifier()],
             )
             return testcase
 
@@ -158,7 +154,6 @@ def prepare_local_data():
 
 @pytest.fixture
 def performance_test_data() -> pl.DataFrame:  # type: ignore
-
     def download_performance_test_data(source_file: str, target_file: str):
         print("Starting download from", source_file)
         start = time.time()
@@ -191,8 +186,10 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
             print("Deleting target file", target_file)
             fs.rm_file(target_file)
 
-    source_file_ = "https://d37ci6vzurychx.cloudfront.net/trip-data/" \
+    source_file_ = (
+        "https://d37ci6vzurychx.cloudfront.net/trip-data/"
         "yellow_tripdata_2015-01.parquet"
+    )
     target_file_ = "yellow_tripdata_2015-01.parquet"
 
     start_ = time.time()
@@ -201,14 +198,12 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
     df_ = copy_data(df_)
     end_ = time.time()
 
-    print("Overall time to set up fixture for performance test: ", (end_-start_), "s")
+    print("Overall time to set up fixture for performance test: ", (end_ - start_), "s")
 
     yield df_
 
     clean_up_performance_test_data(target_file_)
 
-
-# FIXTURES FOR DOMAIN CONFIG
 
 @pytest.fixture
 def testcase_result(testobject) -> TestCaseResultDTO:
@@ -225,80 +220,22 @@ def testcase_result(testobject) -> TestCaseResultDTO:
         details=[{"a": 5}, {"b": "2"}],
         specifications=[],
         start_ts="asdf",
-        end_ts="gartw"
+        end_ts="gartw",
     )
 
 
 @pytest.fixture
-def formatter():
-
-    class DummyFormatter:
-
-        def __init__(self):
-
-            self._format = None
-            self._content = None
-            self._content_type = None
-
-        def format(self, report: TestCaseReport, format: str):
-
-            self._format = format
-            report.format = format
-
-            self._content = format
-            report.content = format
-
-            self._content_type = format
-            report.content_type = format
-
-    return DummyFormatter()
-
-
-@pytest.fixture
-def storage():
-
-    class DummyStorage:
-
-        def __init__(self):
-            self.written: List[str] = []
-
-        def write(self, path: str, *args, **kwargs):
-            self.written.append(path)
-
-    return DummyStorage()
-
-
-@pytest.fixture
-def naming_conventions():
-
-    class DummyNamingConventions:
-
-        def report_name(self, *args, **kwargs) -> str:
-            return "report"
-
-    return DummyNamingConventions()
-
-
-@pytest.fixture
-def testcase_report(
-    testcase_result, formatter, storage, naming_conventions) -> TestCaseReport:
-
-    return TestCaseReport.from_testcase_result(
-        testcase_result=testcase_result,
-        formatter=formatter,
-        naming_conventions=naming_conventions,
-        storage=storage,
+def testrun_result(testcase_result) -> TestRunResultDTO:
+    return TestRunResultDTO.from_testcase_results(
+        testcase_results=[testcase_result, testcase_result]
     )
 
+
 @pytest.fixture
-def testrun_report(
-    testcase_result, formatter, storage, naming_conventions) -> TestRunReport:
+def testcase_report(testcase_result) -> TestCaseReportDTO:
+    return TestCaseReport.from_testcase_result(testcase_result=testcase_result).to_dto()
 
-    return TestRunReport.from_testrun_result(
-        testrun_result=TestRunResultDTO.from_testcase_results(
-            testcase_results=[testcase_result, testcase_result]),
-        formatter=formatter,
-        storage=storage,
-        naming_conventions=naming_conventions,
-    )
 
+@pytest.fixture
+def testrun_report(testrun_result) -> TestRunReportDTO:
+    return TestRunReport.from_testrun_result(testrun_result=testrun_result).to_dto()

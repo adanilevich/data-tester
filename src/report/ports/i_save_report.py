@@ -7,7 +7,6 @@ from src.dtos import TestCaseReportDTO, TestRunReportDTO, DTO
 
 
 class SaveReportCommand(DTO):
-
     report: TestRunReportDTO | TestCaseReportDTO
     location: str
     #  groub_by will store reports in subfolders of location, e.b. by date, testrun_id
@@ -15,7 +14,6 @@ class SaveReportCommand(DTO):
 
 
 class ISaveReportCommandHandler(ABC):
-
     @abstractmethod
     def save(self, command: SaveReportCommand):
         """Saves report to specified location"""
