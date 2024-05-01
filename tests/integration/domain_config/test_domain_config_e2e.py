@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 import yaml  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from src.domain_config.di import DependencyInjector
