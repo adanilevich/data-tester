@@ -1,12 +1,12 @@
 from src.dtos.reports import ReportArtifactDTO
-from src.report.ports import IReportNamingConventions
+from src.report.plugins import IReportNamingConventions
 from src.dtos import ArtifactType, TestCaseReportArtifactDTO
 
 
 timeformat = "%Y-%m-%d_%H:%M:%S"
 
 
-class SimpleReportNamingConventions(IReportNamingConventions):
+class DefaultReportNamingConventions(IReportNamingConventions):
     """
     Sets testrun report filename by testrun_id and start_ts.
     Sets testcase report filename by testobject, testcase and start_ts.

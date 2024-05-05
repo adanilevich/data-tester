@@ -1,12 +1,10 @@
 from io import BytesIO
-
 import polars as pl
-
-from src.report.adapters.formatters import AbstractArtifactFormatter
+from src.report.plugins import IReportArtifact
 from src.dtos import TestResultDTO, TestCaseReportArtifactDTO, TestCaseResultDTO
 
 
-class XlsxTestCaseDiffFormatter(AbstractArtifactFormatter):
+class XlsxTestCaseDiffFormatter(IReportArtifact):
     artifact_type = "xlsx-testcase-diff"
     content_type = "application/vnd.opnexmlformats-officedocument.spreadsheetml.template"
 

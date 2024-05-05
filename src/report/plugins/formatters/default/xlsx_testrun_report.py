@@ -1,12 +1,10 @@
 from io import BytesIO
-
 import polars as pl
-
-from src.report.adapters.formatters import AbstractArtifactFormatter
+from src.report.plugins import IReportArtifact
 from src.dtos import TestResultDTO, TestRunReportArtifactDTO, TestRunResultDTO
 
 
-class XlsxTestRunReportFormatter(AbstractArtifactFormatter):
+class XlsxTestRunReportFormatter(IReportArtifact):
 
     artifact_type = "xlsx-testrun-report"
     content_type = "application/vnd.opnexmlformats-officedocument.spreadsheetml.template"
