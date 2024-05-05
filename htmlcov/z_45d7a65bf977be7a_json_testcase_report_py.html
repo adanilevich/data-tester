@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/report/adapters/formatters/plugins/json_testcase_report.py: 0%</title>
+    <title>Coverage for src/report/plugins/formatters/default/json_testcase_report.py: 0%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_8e611ae1.css" type="text/css">
     <script src="coverage_html_cb_da166b87.js" defer></script>
@@ -11,7 +11,7 @@
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>src/report/adapters/formatters/plugins/json_testcase_report.py</b>:
+            <span class="text">Coverage for </span><b>src/report/plugins/formatters/default/json_testcase_report.py</b>:
             <span class="pc_cov">0%</span>
         </h1>
         <aside id="help_panel_wrapper">
@@ -60,12 +60,12 @@
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">1<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_6b64ab1d78bc76a3___init___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_45d7a65bf977be7a_i_report_naming_conventions_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a id="nextFileLink" class="nav" href="z_6b64ab1d78bc76a3_txt_testcase_report_py.html">&#xbb; next</a>
+            <a id="nextFileLink" class="nav" href="z_45d7a65bf977be7a_txt_testcase_report_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.1">coverage.py v7.5.1</a>,
-            created at 2024-05-05 01:15 +0000
+            created at 2024-05-05 10:06 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -80,11 +80,11 @@
     </div>
 </header>
 <main id="source">
-    <p class="mis show_mis"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">report</span><span class="op">.</span><span class="nam">adapters</span><span class="op">.</span><span class="nam">formatters</span> <span class="key">import</span> <span class="nam">AbstractArtifactFormatter</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">report</span><span class="op">.</span><span class="nam">plugins</span> <span class="key">import</span> <span class="nam">IReportArtifact</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span> <span class="key">import</span> <span class="nam">TestResultDTO</span><span class="op">,</span> <span class="nam">TestCaseResultDTO</span><span class="op">,</span> <span class="nam">ReportArtifactDTO</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">class</span> <span class="nam">JsonTestCaseReportFormatter</span><span class="op">(</span><span class="nam">AbstractArtifactFormatter</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis show_mis"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">class</span> <span class="nam">JsonTestCaseReportFormatter</span><span class="op">(</span><span class="nam">IReportArtifact</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">    <span class="nam">artifact_type</span> <span class="op">=</span> <span class="str">"json-testcase-report"</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">    <span class="nam">content_type</span> <span class="op">=</span> <span class="str">"application/json"</span>&nbsp;</span><span class="r"></span></p>
@@ -100,12 +100,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_6b64ab1d78bc76a3___init___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_45d7a65bf977be7a_i_report_naming_conventions_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a class="nav" href="z_6b64ab1d78bc76a3_txt_testcase_report_py.html">&#xbb; next</a>
+            <a class="nav" href="z_45d7a65bf977be7a_txt_testcase_report_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.5.1">coverage.py v7.5.1</a>,
-            created at 2024-05-05 01:15 +0000
+            created at 2024-05-05 10:06 +0000
         </p>
     </div>
 </footer>
