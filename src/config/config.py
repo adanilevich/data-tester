@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
@@ -12,3 +13,5 @@ class Config(BaseSettings):
     DATATESTER_GCP_PROJECT: str | None = Field(default=None)
     DATATESTER_DOMAIN_CONFIGS_LOCATION: str | None = Field(default=None)
     DATATESTER_ENV: str | None = Field(default=None)
+    GROUP_TESTREPORTS_BY: List[str] = Field(default=["date", "testrun_id"])
+    """When stored, testreports will be stored in folders defined here"""

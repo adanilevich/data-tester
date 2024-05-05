@@ -1,14 +1,14 @@
 from __future__ import annotations
 from abc import abstractmethod
 from functools import wraps
-from uuid import uuid4
+from uuid import uuid4, UUID
 from datetime import datetime
-from typing import Dict, List, Optional, Union, Any
+from typing import Dict, List, Optional, Any
 import time
 
 from src.dtos import (
     TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO, DomainConfigDTO,
-    SpecificationDTO
+    SpecificationDTO, TestType
 )
 
 from src.testcase.ports import IDataPlatform, INotifier
@@ -19,39 +19,34 @@ from src.testcase.precondition_checks import (
 )
 
 
-def get_datetime() -> str:
-    """Helper function to get datetime as formatted string"""
-    return datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
-
-
 class AbstractTestCase(ICheckable):
 
-    ttype: str = "ABSTRACT"
+    ttype: TestType = TestType.ABSTRACT
     preconditions: List[str] = []
     required_specs: List[str] = []
     __test__ = False  # prevents pytest collection
 
     def __init__(self, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-                 domain_config: DomainConfigDTO, testrun_id: str,
+                 domain_config: DomainConfigDTO, testrun_id: UUID,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 
         self.notifiers: List[INotifier] = notifiers
         self.notify(f"Initiating testcase {self.ttype} for {testobject.name}")
-        self.testcase_id: str = str(uuid4())
-        self.start_ts: str = get_datetime()
-        self.end_ts: Union[str, None] = None
+        self.testcase_id: UUID = uuid4()
+        self.start_ts: datetime = datetime.now()
+        self.end_ts: datetime | None = None
         self.status: TestStatus = TestStatus.NOT_STARTED
         self.testobject: TestObjectDTO = testobject
         self.specs: List[SpecificationDTO] = specs
         self.domain_config: DomainConfigDTO = domain_config
-        self.testrun_id: str = testrun_id
+        self.testrun_id: UUID = testrun_id
         self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         # list of key facts about test execution
         self.facts: List[Dict[str, str | int]] = []
         self.details: List[Dict[str, str | int | float]] = []  # list of execution details
-        self.diff: Dict[str, Union[List, Dict]] = dict()  # list of diffs
+        self.diff: Dict[str, List | Dict] = dict()  # list of diffs
         self.status = TestStatus.INITIATED
 
     def notify(self, message: str):
@@ -99,7 +94,7 @@ class AbstractTestCase(ICheckable):
             diff=self.diff,  # must be set by specific implementation
             specifications=self.specs,
             start_ts=self.start_ts,
-            end_ts=self.end_ts,
+            end_ts=self.end_ts or datetime.now(),
         )
         return dto
 
@@ -113,7 +108,7 @@ class AbstractTestCase(ICheckable):
         self.notify(f"Starting execution of {self.ttype} for {self.testobject}")
         checker = checker or PreConditionChecker()
         if not self._check_preconditions(checker=checker):
-            self.end_ts = get_datetime()
+            self.end_ts = datetime.now()
             return self.to_dto()
 
         self.status = TestStatus.EXECUTING
@@ -130,7 +125,7 @@ class AbstractTestCase(ICheckable):
             self.notify(msg)
             self.summary = msg
 
-        self.end_ts = get_datetime()
+        self.end_ts = datetime.now()
         return self.to_dto()
 
 

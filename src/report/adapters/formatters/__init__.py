@@ -1,2 +1,2 @@
 # ruff: noqa
-from src.report.adapters.formatters.simple_report_formatter import SimpleReportFormatter
+from src.report.adapters.formatters.simple_report_formatter import *

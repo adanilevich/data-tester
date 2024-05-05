@@ -1,8 +1,10 @@
 import os
 from typing import List
+from uuid import uuid4
 
 from src.testcase.di.di import DependencyInjector
 from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
+from src.dtos import TestType, TestResult, TestStatus
 
 
 testobjects = [
@@ -40,15 +42,16 @@ def specs(testobject: dict):
     [spec.update({"testobject": testobject["name"]}) for spec in specs]
     return specs
 
+MY_UUID = uuid4()
 
 testcases = [
     {"testobject": testobject, "testtype": testtype, "specs": specs(testobject),
-     "domain_config": domain_config, "testrun_id": "my_run_id"}
+     "domain_config": domain_config, "testrun_id": MY_UUID}
     for testobject, testtype in zip(testobjects, testtypes)
 ]
 
 
-def test_dummy_cli_execution():
+def test_cli_execution_with_dummy_testcases():
     os.environ["DATATESTER_ENV"] = "DUMMY"
     command_handler = DependencyInjector().run_testcases_command_handler()
     runner = CliTestCaseRunner(handler=command_handler)
@@ -60,10 +63,10 @@ def test_dummy_cli_execution():
 
     # assume that results are mapped correctly
     testtype_to_result_mapper = {
-        "DUMMY_OK": ("OK", "FINISHED"),
-        "DUMMY_NOK": ("NOK", "FINISHED"),
-        "DUMMY_EXCEPTION": ("N/A", "ERROR"),
-        "UNKNOWN": ("N/A", "ERROR")
+        TestType.DUMMY_OK: (TestResult.OK, TestStatus.FINISHED),
+        TestType.DUMMY_NOK: (TestResult.NOK, TestStatus.FINISHED),
+        TestType.DUMMY_EXCEPTION: (TestResult.NA, TestStatus.ERROR),
+        TestType.UNKNOWN: (TestResult.NA, TestStatus.ERROR)
     }
 
     for result in results:
@@ -75,4 +78,4 @@ def test_dummy_cli_execution():
         testrun_id = result["testrun_id"]
         assert testcase_result == expected_result
         assert testcase_status == expected_status
-        assert testrun_id == "my_run_id"
+        assert testrun_id == MY_UUID

@@ -4,7 +4,7 @@ import polars as pl
 
 from src.testcase.testcases import AbstractTestCase, time_it
 from src.dtos import (
-    CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO, TestResult
+    CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO, TestResult, TestType
 )
 
 
@@ -14,7 +14,7 @@ class CompareSampleTestCase(AbstractTestCase):
     object. All rows and columns which are defined in the test sql are compared.
     If provided backend supports execution pushdown, comparison is pushed to backend.
     """
-    ttype = "COMPARE_SAMPLE"
+    ttype = TestType.COMPARE_SAMPLE
     required_specs = ["compare_sample_sql", "schema"]
     preconditions = [
         "specs_are_unique", "primary_keys_are_specified", "testobject_exists",

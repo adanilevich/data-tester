@@ -1,5 +1,6 @@
+from uuid import uuid4
 from src.testcase.testcases import TestCaseFactory
-from src.dtos import RowCountSqlDTO, TestObjectDTO
+from src.dtos import RowCountSqlDTO, TestObjectDTO, TestType
 from src.testcase.adapters.data_platforms import DemoDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 
@@ -33,11 +34,11 @@ testobject = TestObjectDTO(
 
 def test_straight_through_execution(domain_config, prepare_local_data):
     testcase = TestCaseFactory.create(
-        ttype="ROWCOUNT",
+        ttype=TestType.ROWCOUNT,
         testobject=testobject,
         specs=[spec],
         domain_config=domain_config,
-        testrun_id="my_run_id",
+        testrun_id=uuid4(),
         backend=DemoDataPlatformFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier(), StdoutNotifier()]
     )

@@ -1,14 +1,69 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Tuple
-from io import BytesIO
+from typing import Dict, List, Type
 
-import polars as pl
-import yaml  # type: ignore
+from pydantic import BaseModel
 
-from src.dtos import TestCaseReportDTO, TestRunReportDTO
-from src.report.ports import IReportFormatter
+from src.dtos import (
+    TestResultDTO, TestCaseResultDTO, TestRunResultDTO, ReportArtifactDTO, ArtifactTag,
+    TestType
+)
+from src.report.ports import IReportFormatter, IReportNamingConventions
+from src.report.adapters.formatters.plugins import (
+    JsonTestCaseReportFormatter, XlsxTestCaseDiffFormatter, XlsxTestRunReportFormatter,
+    TxtTestCaseReportFormatter
+)
 
+
+class AbstractArtifactFormatter(ABC):
+
+    artifact_type: str
+    content_type: str
+    naming_conventions: IReportNamingConventions
+
+    def __init__(self, naming_conventions: IReportNamingConventions):
+        self.naming_conventions: IReportNamingConventions = naming_conventions
+
+    @abstractmethod
+    def format(self, result: TestResultDTO) -> ReportArtifactDTO:
+        """Abstract class for format-specific formatters"""
+
+
+class ArtifactConfig(BaseModel):
+        tags: List[ArtifactTag]
+        supported_result_type: Type[TestResultDTO]
+        formatter: Type[AbstractArtifactFormatter]
+
+
+class FormatterConfig(BaseModel):
+
+    artifact_types: Dict[str, ArtifactConfig]
+
+
+default_config = FormatterConfig(
+    artifact_types={
+        "xlsx-testcase-diff": ArtifactConfig(
+            tags=[ArtifactTag.storage],
+            supported_result_type=TestCaseResultDTO,
+            formatter=XlsxTestCaseDiffFormatter,
+        ),
+        "xlsx-testrun-report": ArtifactConfig(
+            tags=[ArtifactTag.storage],
+            supported_result_type=TestRunResultDTO,
+            formatter=XlsxTestRunReportFormatter,
+        ),
+        "json-testcase-report": ArtifactConfig(
+            tags=[ArtifactTag.ui],
+            supported_result_type=TestCaseResultDTO,
+            formatter=JsonTestCaseReportFormatter,
+        ),
+        "txt-testcase-report": ArtifactConfig(
+            tags=[ArtifactTag.storage],
+            supported_result_type=TestCaseResultDTO,
+            formatter=TxtTestCaseReportFormatter,
+        ),
+    }
+)
 
 class SimpleReportFormatter(IReportFormatter):
     """
@@ -17,65 +72,79 @@ class SimpleReportFormatter(IReportFormatter):
     supported for both TestRun and TestCase reports. See specific formatters below.
     """
 
-    content_types: Dict[str, str] = {
-        "xlsx": "application/vnd.opnexmlformats-officedocument.spreadsheetml.template",
-        "txt": "text/plain",
-        "dict": "application/json",
-    }
+    config: FormatterConfig
 
-    def _get_formatter(
-        self, format: str, report: TestRunReportDTO | TestCaseReportDTO
-    ) -> AbstractFormatter:
-        formatter: AbstractFormatter
+    def __init__(
+        self,
+        naming_conventions: IReportNamingConventions,
+        config: FormatterConfig = default_config,
+    ):
 
-        if format == "xlsx":
-            formatter = XlsxTestRunReportFormatter()
-        elif format == "dict":
-            formatter = DictReportFormatter()
-        elif format == "txt":
-            formatter = TxtTestCaseReportFormatter()
+        self.config: FormatterConfig = config
+        self.naming_conventions: IReportNamingConventions = naming_conventions
 
-        return formatter
 
     def format(
-        self, report: TestRunReportDTO | TestCaseReportDTO, format: str
-    ) -> Tuple[str, str, Any]:
-        if format not in self.content_types.keys():
-            raise ValueError(f"Report format not supported: {format}")
+        self,
+        result: TestResultDTO,
+        tags: List[ArtifactTag]
+    ) -> List[ReportArtifactDTO]:
 
-        formatter = self._get_formatter(format=format, report=report)
-        content = formatter.format(report=report)
+        artifacts: List[ReportArtifactDTO] = []
 
-        return format, self.content_types[format], content
+        for artifact_type, artifact_config in self.config.artifact_types.items():
 
+            if all([
+                self._artifact_type_is_supported_for_result_type(artifact_config, result),
+                self._requested_tags_match_artifact_tags(tags, artifact_config),
+                self._result_is_testcase_result_for_compare_sample(result, artifact_type)
+            ]):
 
-class AbstractFormatter(ABC):
-    @abstractmethod
-    def format(self, report: TestCaseReportDTO | TestRunReportDTO) -> Any:
-        """Abstract class for format-specific formatters"""
+                formatter = self._formatter(artifact_type=artifact_type)
+                artifact = formatter.format(result=result)
+                artifacts.append(artifact)
 
+        return artifacts
 
-class DictReportFormatter(AbstractFormatter):
-    def format(self, report: TestRunReportDTO | TestCaseReportDTO) -> Any:
-        return report.to_dict()
+    def _formatter(self, artifact_type: str) -> AbstractArtifactFormatter:
 
+        if artifact_type not in self.config.artifact_types:
+            raise ValueError("Unknown artifact type")
 
-class XlsxTestRunReportFormatter(AbstractFormatter):
-    def format(self, report: TestRunReportDTO | TestCaseReportDTO) -> bytes:
-        if not isinstance(report, TestRunReportDTO):
-            raise ValueError("xlsx formatting only supported for testrun reports")
+        artifact_config = self.config.artifact_types[artifact_type]
+        return artifact_config.formatter(naming_conventions=self.naming_conventions)
 
-        results = [result.to_dict() for result in report.testcase_results]
-        df = pl.DataFrame(results)
-        io = BytesIO()
-        df.write_excel(io)
+    def _artifact_type_is_supported_for_result_type(
+        self, artifact_config: ArtifactConfig, result: TestResultDTO) -> bool:
 
-        return io.getbuffer().tobytes()
+        if isinstance(result, artifact_config.supported_result_type):
+            return True
+        else:
+            return False
 
+    def _requested_tags_match_artifact_tags(
+        self, tags: List[ArtifactTag], artifact_config: ArtifactConfig) -> bool:
 
-class TxtTestCaseReportFormatter(AbstractFormatter):
-    def format(self, report: TestCaseReportDTO | TestRunReportDTO) -> str:
-        if not isinstance(report, TestCaseReportDTO):
-            raise ValueError("txt formatting only supported for testcase reports.")
+        if len(list(set(tags) & set(artifact_config.tags))) > 0:
+            return True
+        else:
+            return False
 
-        return yaml.safe_dump(data=report.to_dict(), default_flow_style=None, indent=4)
+    def _result_is_testcase_result_for_compare_sample(
+        self, result: TestResultDTO, artifact_type) -> bool:
+
+        # xlsx-testcasediff is only supported for COMPARE_SAMPLE testcases with NOK result
+
+        if not artifact_type == "xlsx-testcase-diff":
+            return True
+
+        if not isinstance(result, TestCaseResultDTO):
+            return False
+
+        if not result.testtype == TestType.COMPARE_SAMPLE:
+            return False
+
+        if not result.result == result.result.NOK:
+            return False
+        else:
+            return True

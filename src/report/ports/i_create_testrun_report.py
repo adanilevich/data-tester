@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
+from typing import List
 
-from src.dtos import DTO, TestRunReportDTO, TestRunResultDTO
+from src.dtos import DTO, TestRunReportDTO, TestRunResultDTO, ArtifactTag
 
 
 class CreateTestRunReportCommand(DTO):
     testrun_result: TestRunResultDTO
-    format: str
+    tags: List[ArtifactTag]
 
 
 class ICreateTestRunReportCommandHandler(ABC):

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, Tuple
+from typing import List
 
-from src.dtos import TestCaseReportDTO, TestRunReportDTO
+from src.dtos import TestResultDTO, ArtifactTag, ReportArtifactDTO
 
 
 class IReportFormatter(ABC):
@@ -13,21 +13,16 @@ class IReportFormatter(ABC):
 
     @abstractmethod
     def format(
-        self, report: TestRunReportDTO | TestCaseReportDTO, format: str
-    ) -> Tuple[str, str, Any]:
+        self, result: TestResultDTO, tags: List[ArtifactTag]
+    ) -> List[ReportArtifactDTO]:
         """
-        Formats provided report into the requested format and updates the report object
-        attributes 'format', 'content', 'content_type'.
+        From given testcase or testrun result, creates a list of report artifacts which
+        match at least one of the requested tags.
 
         Args:
-            report: report to be formatted as DTO
-            format: report will be formatted to this format (e.g. 'xlsx').
-                Formatter must know requested format and implement formatting logic.
+            result: TestCaseResultDTO or TestRunResultDTO
+            tags: list of tags (ArtifactTagDTO) requested by the client
 
         Returns:
-            format: str requested format
-            content_type: content type of report
-            content: content of report, e.g. as bytes or string or dict - depending
-                on the requested format. Based on the content_type report is written
-                as string or bytes (or other)
+            List[artifact]: List of matching report artifacts
         """

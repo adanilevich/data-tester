@@ -2,19 +2,19 @@ from typing import List, Self
 from abc import ABC, abstractmethod
 from uuid import uuid4
 
-from pydantic import Field
+from pydantic import Field, UUID4
 
 from src.dtos import (
     TestObjectDTO, TestCaseResultDTO, DomainConfigDTO, SpecificationDTO, DTO,
-    SpecFactory
+    SpecFactory, TestType
 )
 
 
 class RunTestCaseCommand(DTO):
     testobject: TestObjectDTO
-    testtype: str
+    testtype: TestType
     specs: List[SpecificationDTO]
-    testrun_id: str = Field(default_factory=lambda: str(uuid4())[:6])
+    testrun_id: UUID4 = Field(default_factory=uuid4)
     domain_config: DomainConfigDTO
 
     @classmethod

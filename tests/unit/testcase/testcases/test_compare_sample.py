@@ -5,7 +5,7 @@ import time
 import polars as pl
 
 from src.testcase.testcases import CompareSampleTestCase
-from src.dtos import SchemaSpecificationDTO, CompareSampleSqlDTO
+from src.dtos import SchemaSpecificationDTO, CompareSampleSqlDTO, TestType
 
 
 # noinspection PyUnusedLocal
@@ -34,7 +34,7 @@ class TestCompareSampleTestCase:
     @pytest.fixture
     def testcase(self, testcase_creator) -> CompareSampleTestCase:
 
-        testcase_ = testcase_creator.create(ttype="COMPARE_SAMPLE")
+        testcase_ = testcase_creator.create(ttype=TestType.COMPARE_SAMPLE)
 
         def get_schema_from_query(*args, **kwargs) -> SchemaSpecificationDTO:
             return self.schema

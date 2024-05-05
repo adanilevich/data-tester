@@ -1,8 +1,10 @@
 from __future__ import annotations
 from enum import Enum
 from typing import Self, Union, List, Dict
+from uuid import uuid4
+from datetime import datetime
 
-from pydantic import Field
+from pydantic import Field, UUID4
 
 from src.dtos import DTO
 from src.dtos.specifications import SpecificationDTO
@@ -56,66 +58,55 @@ class TestResult(Enum):
         return str(self.value)
 
 
-class TestCaseResultDTO(DTO):
+class TestType(Enum):
+    __test__ = False
+    ABSTRACT = "ABSTRACT"
+    SCHEMA = "SCHEMA"
+    COMPARE_SAMPLE = "COMPARE_SAMPLE"
+    ROWCOUNT = "ROWCOUNT"
+    DUMMY_OK = "DUMMY_OK"
+    DUMMY_NOK = "DUMMY_NOK"
+    DUMMY_EXCEPTION = "DUMMY_EXCEPTION"
+    UNKNOWN = "UNKNOWN"
+
+
+class TestResultDTO(DTO):
     __test__ = False  # prevents pytest collection
-    testcase_id: str
-    testrun_id: str
+    testrun_id: UUID4 = Field(default_factory=uuid4)
+    start_ts: datetime
+    end_ts: datetime
+    result: TestResult
+
+
+class TestCaseResultDTO(TestResultDTO):
+    __test__ = False  # prevents pytest collection
+    testcase_id: UUID4 = Field(default_factory=uuid4)
     testobject: TestObjectDTO
-    testtype: str
+    testtype: TestType
     scenario: str = Field(default="")
     status: TestStatus
-    result: TestResult
-    diff: Dict[str, Union[List, Dict]]  # found diff as a table in record-oriented dict
+    diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
     summary: str
     facts: List[Dict[str, str | int]]
     details: List[Dict[str, Union[str, int, float]]]
     specifications: List[SpecificationDTO]
-    start_ts: str
-    end_ts: Union[str, None]
-
-    def to_dict(self) -> dict:
-        return dict(
-            testcase_id=self.testcase_id,
-            testrun_id=self.testrun_id,
-            testtype=self.testtype,
-            testobject=self.testobject.to_dict(),
-            status=self.status.to_string(),
-            summary=self.summary,
-            details=self.details,
-            facts=self.facts,
-            result=self.result.to_string(),
-            specifications=[spec.to_dict() for spec in self.specifications],
-            start_ts=self.start_ts,
-            end_ts=self.end_ts
-        )
 
 
-class TestRunResultDTO(DTO):
-
-    testrun_id: str
-    start_ts: str
-    end_ts: str
-    result: str
+class TestRunResultDTO(TestResultDTO):
+    __test__ = False  # prevents pytest collection
     testcase_results: List[TestCaseResultDTO]
 
     @classmethod
     def from_testcase_results(cls, testcase_results: List[TestCaseResultDTO]) -> Self:
 
-        result = "OK"
+        result = TestResult.OK
         for testcase_result in testcase_results:
-            if testcase_result.result != "OK":
-                result = "NOK"
+            if testcase_result.result != TestResult.OK:
+                result = TestResult.NOK
 
-        start_ts = list(sorted([
-            r.start_ts for r in testcase_results if r.start_ts is not None
-        ]))[0]
-
-        end_ts = list(sorted([
-            r.end_ts for r in testcase_results if r.end_ts is not None
-        ], reverse=True))[0]
-
-        testrun_id = "-".join([r.testrun_id for r in testcase_results])
-
+        start_ts = min([res.start_ts for res in testcase_results])
+        end_ts = max([res.end_ts for res in testcase_results])
+        testrun_id = cls._get_testrun_id([res.testrun_id for res in testcase_results])
         return cls(
             testrun_id=testrun_id,
             start_ts=start_ts,
@@ -123,3 +114,14 @@ class TestRunResultDTO(DTO):
             result=result,
             testcase_results=testcase_results,
         )
+
+    @staticmethod
+    def _get_testrun_id(testrun_ids: List[UUID4]) -> UUID4:
+
+        if not len(set(testrun_ids)) == 1:
+            raise ValueError("All testcases must belong to same testrun_id!")
+
+        if len(testrun_ids) == 0:
+            raise ValueError("At least one testcase must be provided!")
+
+        return testrun_ids[0]

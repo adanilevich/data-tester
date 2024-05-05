@@ -1,31 +1,19 @@
-from src.report.ports import (
-    SaveReportCommand, ISaveReportCommandHandler, IStorage, IReportNamingConventions,
-)
-from src.report import TestCaseReport, TestRunReport
-from src.dtos import TestCaseReportDTO, TestRunReportDTO
+from src.report.ports import SaveReportCommand, ISaveReportCommandHandler, IStorage
+from src.report import Report
 
 
 class SaveReportCommandHandler(ISaveReportCommandHandler):
 
-    def __init__(self, storage: IStorage, naming_conventions: IReportNamingConventions,):
+    def __init__(self, storage: IStorage):
 
         self.storage: IStorage = storage
-        self.naming_conventions: IReportNamingConventions = naming_conventions
 
     def save(self, command: SaveReportCommand):
 
-        report: TestCaseReport | TestRunReport
-
-        if isinstance(command.report, TestCaseReportDTO):
-            report = TestCaseReport.from_dto(report_dto=command.report,)
-        elif isinstance(command.report, TestRunReportDTO):
-            report = TestRunReport.from_dto(report_dto=command.report)
-        else:
-            raise ValueError(f"Unknows report class {command.report.__class_}")
-
-        report.save(
+        Report.save_artifacts(
+            artifacts=list(command.report.artifacts.values()),
             location=command.location,
-            group_by=command.group_by,
+            tags=command.tags,
+            save_only_artifact_content=command.save_only_artifact_content,
             storage=self.storage,
-            naming_conventions=self.naming_conventions
         )
