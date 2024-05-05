@@ -17,9 +17,6 @@ class ColumnDiffEntryDTO(DTO):
 class ColumnDiffDTO(DTO):
     diffs: List[ColumnDiffEntryDTO] = []
 
-    def to_dict(self) -> Dict[str, List[Dict[str, str]]]:
-        return {"diffs": [diff_entry.to_dict() for diff_entry in self.diffs]}
-
 
 class SchemaTestCase(AbstractTestCase):
     """

@@ -13,7 +13,6 @@ class SaveReportCommandHandler(ISaveReportCommandHandler):
         Report.save_artifacts(
             artifacts=list(command.report.artifacts.values()),
             location=command.location,
-            tags=command.tags,
             save_only_artifact_content=command.save_only_artifact_content,
             storage=self.storage,
         )

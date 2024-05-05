@@ -1,147 +1,184 @@
-# from typing import Any, List, Tuple
-# import pytest
-# from src.report import TestCaseReport, TestRunReport
-# from src.dtos import (
-#     TestCaseResultDTO,
-#     TestCaseReportDTO,
-#     TestRunResultDTO,
-#     TestRunReportDTO,
-# )
-# from src.report.ports import IReportFormatter, IStorage, IReportNamingConventions
+import json
+from typing import Dict, List
+from uuid import uuid4
+import base64
+from datetime import datetime
+import pytest
+from src.report import Report, TestCaseReport, TestRunReport
+from src.dtos import (
+    ReportArtifactDTO, ArtifactType, TestResult, TestResultDTO,
+    TestCaseResultDTO, TestRunResultDTO, TestCaseReportDTO, TestRunReportDTO
+)
+from src.report.ports import IReportFormatter, IStorage
 
 
-# class DummyFormatter(IReportFormatter):
-#     def __init__(self):
-#         self.report_format = None
-#         self.content = None
-#         self.content_type = None
+class DictStorage(IStorage):
 
-#     def format(
-#         self, report: TestCaseReportDTO | TestRunReportDTO, format: str
-#     ) -> Tuple[str, str, str]:
-#         self.report_format = format
-#         self.content = format
-#         self.content_type = format
+    store: Dict[str, bytes] = {}
 
-#         return self.report_format, self.content_type, self.content
+    def read(self, path: str) -> bytes:
+        return self.store[path]
+
+    def write(self, content: bytes, path: str):
+        self.store[path] = content
 
 
-# class DummyStorage(IStorage):
-#     def __init__(self):
-#         self.written: List[str] = []
+def string_2_b64string(input: str) -> str:
+    as_bytes = input.encode()
+    as_b64_bytes = base64.b64encode(as_bytes)
+    as_b64_string = as_b64_bytes.decode()
+    return as_b64_string
 
-#     def write(
-#         self, content: Any, path: str, content_type: str, encoding: str | None = None
-#     ):
-#         self.written.append(path)
+artifact = ReportArtifactDTO(
+            id=uuid4(),
+            artifact_type=ArtifactType.TXT_TESTCASE_REPORT,
+            sensitive=False,
+            content_type="plain/text",
+            content_b64_str=string_2_b64string("my_content"),
+            filename="dummy_report.txt",
+            testrun_id=uuid4(),
+            start_ts=datetime.now(),
+            result=TestResult.OK,
+        )
 
+class DummyFormatter(IReportFormatter):
 
-# class DummyNamingConventions(IReportNamingConventions):
-#     def report_name(self, *args, **kwargs) -> str:
-#         return "report"
+    artifacts: List[ReportArtifactDTO]
 
+    def __init__(self, artifacts: List[ReportArtifactDTO] | None = None):
+        self.artifacts = artifacts or []
 
-# @pytest.fixture
-# def testcase_report(testcase_result) -> TestCaseReport:
-#     return TestCaseReport.from_testcase_result(
-#         testcase_result=testcase_result,
-#     )
-
-
-# @pytest.fixture
-# def testrun_report(testcase_result) -> TestRunReport:
-#     return TestRunReport.from_testrun_result(
-#         testrun_result=TestRunResultDTO.from_testcase_results(
-#             testcase_results=[testcase_result, testcase_result]
-#         ),
-#     )
-
-
-# class TestTestCaseReport:
-#     def test_initializing_report_from_testcase_result(
-#         self, testcase_result: TestCaseResultDTO
-#     ):
-#         # given a valid testcase result
-#         testcase_result = testcase_result
-
-#         # when a report from this result is created
-#         report = TestCaseReport.from_testcase_result(testcase_result=testcase_result)
-
-#         # then the report a valid, unformatted TestCaseReport
-#         assert isinstance(report, TestCaseReport)
-#         assert report.report_format is None
-#         assert report.content_type is None
-#         assert report.content is None
-#         assert isinstance(report.to_dto(), TestCaseReportDTO)
-
-#     def test_that_report_is_correctly_formatted(self, testcase_report: TestCaseReport):
-#         # given an initialized testcase report
-#         report = testcase_report
-
-#         # when report is formatted in a specified format
-#         format = "my_format"
-#         formatter = DummyFormatter()
-#         #formatted = report.create_artifacts(format=format, formatter=formatter)
-
-#         # then format, content and content_type are set correctly
-#         assert isinstance(formatted, TestCaseReport)
-#         assert formatted.report_format == formatter.report_format  # type: ignore
-#         assert formatted.content == formatter.content  # type: ignore
-#         assert formatted.content_type == formatter.content_type  # type: ignore
+    def create_artifacts(
+        self,
+        result: TestResultDTO,
+        artifact_types: List[ArtifactType]
+    ) -> List[ReportArtifactDTO]:
+        self.result = result
+        self.artifact_types = artifact_types
+        return [art for art in self.artifacts if art.artifact_type in artifact_types]
 
 
-#     def test_that_formatted_report_is_saved(self, testcase_report: TestCaseReport):
-#         # given an initialized testcase report, a storage handler and naming conventions
-#         report = testcase_report
-#         formatter = DummyFormatter()
-#         storage = DummyStorage()
-#         naming_conventions = DummyNamingConventions()
+class TestReport:
 
-#         # when report is formatted in a specified format
-#         format = "my_format"
-#         #_ = report.create_artifacts(format=format, formatter=formatter)
+    @pytest.fixture
+    def report(self, testcase_result) -> Report:
+        return Report(result=testcase_result)
 
-#         # and report is saved by testrun_id and start_ts
-#         #report.save_artifacts(
-#             location="any_location",
-#             group_by=["testrun_id", "start_ts"],
-#             storage=storage,
-#             naming_conventions=naming_conventions,
-#         )
+    def test_creating_artifacts(self, report: Report):
+        # given a Report and a ReportFormatter
+        report = report
+        formatter = DummyFormatter()
 
-#         # then it is written to specified location
-#         written_locations = storage.written  # type: ignore
-#         testrun_id = report.testrun_id
-#         start_ts = report.start_ts
-#         assert f"any_location/{testrun_id}/{start_ts}/report" in written_locations
+        # when formatter returns two different report artifacts
+        artifact_1 = artifact.create_copy()
+        artifact_1.artifact_type = ArtifactType.TXT_TESTCASE_REPORT
+        artifact_2 = artifact.create_copy()
+        artifact_2.artifact_type = ArtifactType.JSON_TESTCASE_REPORT
+        formatter.artifacts = [artifact_1, artifact_2]
 
-#     def test_converting_testcase_report_to_dto(self, testcase_report):
-#         # given a testcase report
-#         testcase_report = testcase_report
+        # and both artifact types are requested
+        requested_artifact_types = [
+            ArtifactType.JSON_TESTCASE_REPORT, ArtifactType.TXT_TESTCASE_REPORT
+        ]
 
-#         # then converting report to dto results in a valid dto
-#         assert isinstance(testcase_report.to_dto(), TestCaseReportDTO)
+        # then creating artifacts updates report.artifacts with both artifacts
+        report.create_artifacts(
+            artifact_types=requested_artifact_types,
+            formatter=formatter
+        )  # type: ignore
+        assert report.artifacts == {
+            "txt-testcase-report": artifact_1,
+            "json-testcase-report": artifact_2
+        }
+
+    def test_only_requested_artifact_types_are_created(self, report: Report):
+        # given a Report and a Storage
+        report = report
+        formatter = DummyFormatter()
+
+        # when formatter returns two different report artifacts
+        artifact_1 = artifact.create_copy()
+        artifact_1.artifact_type = ArtifactType.TXT_TESTCASE_REPORT
+        artifact_2 = artifact.create_copy()
+        artifact_2.artifact_type = ArtifactType.JSON_TESTCASE_REPORT
+        formatter.artifacts = [artifact_1, artifact_2]
+
+        # and only one artifact type is requested
+        requested_artifact_types = [ArtifactType.JSON_TESTCASE_REPORT]
+
+        # then creating artifacts updates report.artifacts with both artifacts
+        report.create_artifacts(
+            artifact_types=requested_artifact_types,
+            formatter=formatter
+        )  # type: ignore
+        assert report.artifacts == {"json-testcase-report": artifact_2}
+
+    def test_saving_whole_artifact_objects_works(self, report: Report):
+        # given a Report and a Storage
+        report = report
+        storage = DictStorage()
+
+        # when an artifact is to be saved as whole object
+        artifact_1 = artifact.create_copy()
+        store_only_artifact_content = False
+
+        # then whole artifact object is saved as "artifact_id.json"
+        report.save_artifacts(
+            artifacts=[artifact_1],
+            location="artifacts/",
+            save_only_artifact_content=store_only_artifact_content,
+            storage=storage
+        )
+        artifact_as_bytes = storage.store[f"artifacts/{artifact_1.id}.json"]
+        artifact_as_string = artifact_as_bytes.decode()
+        artifact_as_dict= json.loads(artifact_as_string)
+        artifact_as_object = ReportArtifactDTO.from_dict(artifact_as_dict)
+        assert artifact_as_object == artifact_1
+
+    def test_that_retrieving_artifacts_works(self, report: Report):
+        # given a Report and a Storage
+        report = report
+        storage = DictStorage()
+
+        # when an artifact is saved
+        artifact_1 = artifact.create_copy()
+        store_only_artifact_content = False
+        report.save_artifacts(
+            artifacts=[artifact_1],
+            location="artifacts/",
+            save_only_artifact_content=store_only_artifact_content,
+            storage=storage
+        )
+
+        # then this artifact can be retrieved by its artifact_id
+        result = report.retrieve_artifact(
+            artifact_id=str(artifact_1.id),
+            location="artifacts/",
+            storage=storage,
+        )
+        assert result == artifact_1
 
 
-# class TestTestRunReport:
-#     def test_creating_from_testrun_result(self, testcase_result):
-#         # given a valid testrun result
-#         testcase_results = [testcase_result, testcase_result]
-#         testrun_result = TestRunResultDTO.from_testcase_results(
-#             testcase_results=testcase_results
-#         )
+class TestTestCaseReport:
 
-#         # when a testrun report is created from results
-#         report = TestRunReport.from_testrun_result(testrun_result=testrun_result)
+    def test_converting_to_dto(self, testcase_result: TestCaseResultDTO):
+        # given a testcase report incl. artifacts
+        report = TestCaseReport(result=testcase_result)
+        report.artifacts = {artifact.artifact_type.value: artifact}
 
-#         # then a valid report is created which contains all provided results
-#         assert isinstance(report, TestRunReport)
-#         assert report.testcase_results == testcase_results
+        # then it is successfully transformed to a DTO
+        report_dto = report.to_dto()
+        assert isinstance(report_dto, TestCaseReportDTO)
+        assert report_dto.artifacts == report.artifacts
 
-#     def test_converting_to_dto(self, testrun_report):
-#         # given a testrun report
-#         report = testrun_report
 
-#         # then conversion to dto results in valid testrun dto
-#         assert isinstance(report.to_dto(), TestRunReportDTO)
-#         assert report.testcase_results == report.to_dto().testcase_results
+class TestTestRunReport:
+    def test_converting_to_dto(self, testrun_result: TestRunResultDTO):
+        # given a testcase report incl. artifacts
+        report = TestRunReport(result=testrun_result)
+        report.artifacts = {artifact.artifact_type.value: artifact}
+
+        # then it is successfully transformed to a DTO
+        report_dto = report.to_dto()
+        assert isinstance(report_dto, TestRunReportDTO)
+        assert report_dto.artifacts == report.artifacts

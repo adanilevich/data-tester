@@ -15,7 +15,6 @@ from src.dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,
     ReportDTO,
-    ArtifactTag,
 )
 
 
@@ -25,7 +24,9 @@ class CliReportManager:
         create_testcase_report_handler: ICreateTestCaseReportCommandHandler,
         create_testrun_report_handler: ICreateTestRunReportCommandHandler,
         save_report_handler: ISaveReportCommandHandler,
+        config: Config | None = None,
     ):
+        self.config = config or Config()
         self.create_testcase_report_handler = create_testcase_report_handler
         self.create_testrun_report_handler = create_testrun_report_handler
         self.save_report_handler = save_report_handler
@@ -33,9 +34,11 @@ class CliReportManager:
     def create_testcase_report(self, result: TestCaseResultDTO) -> TestCaseReportDTO:
         """Creates testcase report and populates report artifacts relevant for storage"""
 
+        artifact_types = self.config.TESTCASE_REPORT_ARTIFACTS
+
         command = CreateTestCaseReportCommand(
             testcase_result=result,
-            tags=[ArtifactTag.storage]
+            artifact_types=artifact_types
         )
 
         report = self.create_testcase_report_handler.create(command=command)
@@ -45,9 +48,11 @@ class CliReportManager:
     def create_testrun_report(self, results: List[TestCaseResultDTO]) -> TestRunReportDTO:
         """Creates testrun report and populates report artifacts relevant for storage"""
 
+        artifact_types = self.config.TESTRUN_REPORT_ARTIFACTS
+
         command = CreateTestRunReportCommand(
             testrun_result=TestRunResultDTO.from_testcase_results(results),
-            tags=[ArtifactTag.storage],
+            artifact_types=artifact_types
         )
 
         report = self.create_testrun_report_handler.create(command=command)
@@ -70,8 +75,6 @@ class CliReportManager:
             if item in report.model_fields:
                 location += "/" + report.to_dict()[item]
 
-        command = SaveReportCommand(
-            report=report, location=location, tags=[ArtifactTag.storage]
-        )
+        command = SaveReportCommand(report=report, location=location,)
 
         self.save_report_handler.save(command=command)

@@ -1,18 +1,21 @@
-from typing import Any, Dict, Self
+from typing import Any, Dict, Literal, Self
 from pydantic import BaseModel
 
 
 class DTO(BaseModel):
-
     @classmethod
     def from_dict(cls, dict_: dict) -> Self:  # mytype: ignore-error
         return cls(**dict_)
 
-    def to_dict(self) -> Dict[str, Any]:
-        return self.model_dump()
+    def to_dict(
+        self,
+        exclude: set | None = None,
+        mode: Literal["json", "python"] = "python",
+    ) -> Dict[str, Any]:
+        return self.model_dump(exclude=exclude, mode=mode)
 
-    def to_json(self) -> str:
-        return self.model_dump_json()
+    def to_json(self, exclude: set | None = None) -> str:
+        return self.model_dump_json(exclude=exclude)
 
     def create_copy(self) -> Self:
         return self.model_copy()
