@@ -43,16 +43,12 @@ class DomainConfig:
         candidates: List[str] = []
         results: List[DomainConfigDTO] = []
 
-        candidates += self._find_candidates(location)
+        candidates = self._find_candidates(location)
 
         for candidate in candidates:
 
             try:
-                content = self.storage.read(
-                    path=candidate,
-                    content_type=self.formatter.default_content_type,
-                    encoding=self.formatter.default_encoding,
-                )
+                content = self.storage.read(path=candidate)
                 dict_ = self.formatter.deserialize(content)
             except (StorageError, DomainConfigFormatterError):
                 # since we are parsing all potential candidate files, there might be

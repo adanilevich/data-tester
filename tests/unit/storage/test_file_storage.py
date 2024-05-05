@@ -1,6 +1,8 @@
 import pytest
 from pathlib import Path
-from src.storage import FileStorageError, FileStorage
+from src.storage import (
+    FileStorage, StorageTypeUnknownError, ObjectNotFoundError, ObjectIsNotAFileError
+)
 from gcsfs import GCSFileSystem  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
@@ -12,10 +14,9 @@ int_ = 1
 
 class TestFileStorage:
 
-    datapath = "memory://data"
-    fs = MemoryFileSystem()
-    storage = FileStorage()
+    datapath = "memory://storage"
     files = [
+        #  filepath, filecontent, content_type
         ("first.txt", "content", "string"),
         ("second.bytes", int_.to_bytes(), "bytes"),
         ("/subfolder/third.txt", "new content", "string"),
@@ -24,76 +25,110 @@ class TestFileStorage:
     @pytest.fixture(scope="session")
     def setup(self):
 
-        self.fs.mkdir(self.datapath + "/subfolder/")
+        fs = MemoryFileSystem()
+        fs.mkdir(self.datapath + "/subfolder/")
 
         for filepath, content, content_type in self.files:
             filepath = self.datapath + "/" + filepath
             if content_type == "bytes":
-                self.fs.write_bytes(filepath, content)
+                fs.write_bytes(filepath, content)
             else:
-                self.fs.write_text(filepath, content)
+                fs.write_text(filepath, content)
 
         yield
 
-    def test_correctly_setting_file_systems(self):
+    @pytest.fixture
+    def storage(self) -> FileStorage:
+        return FileStorage()
 
-        assert isinstance(self.storage.protocols["local://"], LocalFileSystem)
-        assert isinstance(self.storage.protocols["gs://"], GCSFileSystem)
+    def test_correctly_setting_file_systems(self, storage: FileStorage):
 
-    @pytest.mark.parametrize("protocol,error", (
-        ("local://", False),
-        ("http://", True)
-    ))
-    def test_unknown_protocols_lead_to_errors(self, protocol, error):
-        if error:
-            with pytest.raises(FileStorageError):
-                _ = self.storage._fs(protocol)
-        else:
-            assert isinstance(self.storage._fs(protocol), LocalFileSystem | GCSFileSystem)
+        assert isinstance(storage.protocols["local://"], LocalFileSystem)
+        assert isinstance(storage.protocols["gs://"], GCSFileSystem)
 
-    @pytest.mark.parametrize("prefix,is_valid", (
-        ("local://", True),
-        ("gs://", True),
-        ("s3://", False)
-    ))
-    def test_only_valid_prefixes_are_valid(self, prefix, is_valid):
-        assert self.storage._protocol_is_valid(prefix) is is_valid
+    def test_unknown_protocols_lead_to_errors(self, storage: FileStorage):
+        # given a file storage
+        storage = storage
 
-    def test_correct_prefix_is_returned_for_known_fs(self):
-        assert isinstance(self.storage._fs("local://"), LocalFileSystem)
-        assert isinstance(self.storage._fs("gs://"), GCSFileSystem)
-        with pytest.raises(FileStorageError):
-            self.storage._fs("sadf")
+        # when a path with unknown protocol is specified
+        path = "https://any/path"
 
-    def test_only_top_level_files_are_found(self, setup):
+        # then trying to find, read or writy objects raises StorageTypeUnknownError
+        with pytest.raises(StorageTypeUnknownError):
+            storage.find(path=path)
+        with pytest.raises(StorageTypeUnknownError):
+            storage.read(path=path)
+        with pytest.raises(StorageTypeUnknownError):
+            storage.write(content=b"sdf", path=path)
 
-        found = self.storage.find(self.datapath)
+    def test_reading_non_existing_files_raises_error(self, setup, storage: FileStorage):
+        # given a FileStorage
+        storage = storage
+
+        # when a non-existing file is specifeid for reading
+        filepath = self.datapath + "/doesntexist.txt"
+
+        # then trying to read this file results in ObjectNotFoundError
+        with pytest.raises(ObjectNotFoundError):
+            _ = storage.read(path=filepath)
+
+    def test_reading_folders_raises_error(self, setup, storage: FileStorage):
+        # given a File Storage
+        storage = storage
+
+        # when a folder is specified as path to be read
+        path = self.datapath + "/subfolder"
+
+        # then trying to read from this path raises ObjectIsNotAFileError
+        with pytest.raises(ObjectIsNotAFileError):
+            _ = storage.read(path=path)
+
+    def test_only_top_level_files_are_found(self, setup, storage: FileStorage):
+        # given a FileStorage
+        storage = storage
+
+        # when a top-level path which contains subfolders is specified
+        path = self.datapath
+
+        # only top-level objects are returned when searching in this path
+        found = storage.find(path=path)
         assert len(found) == 2
         assert self.datapath + "/first.txt" in found
         assert self.datapath + "/second.bytes" in found
 
-    def test_that_text_files_are_read(self, setup):
+    def test_that_text_files_are_read(self, setup, storage: FileStorage):
 
-        # given an initalized FileStorage
-        storage = self.storage
+        # given an FileStorage
+        storage = storage
 
-        # when a an existing text file with default encoding is accessed
+        # when a an existing text file is read
         path = self.datapath + "/first.txt"
-        content_type = "plain/text"
-        content = storage.read(path=path, content_type=content_type)
+        content = storage.read(path=path)
 
         # then the file content assert that content is read correctly
-        assert content == "content"
+        assert content == b"content"
 
-    def test_that_byte_valued_files_are_read(self, setup):
+    def test_that_byte_valued_files_are_read(self, setup, storage: FileStorage):
 
-        # given an initalized FileStorage
-        storage = self.storage
+        # given a FileStorage
+        storage = storage
 
-        # when a an existing byte-encoded (text) file with default encoding is accessed
+        # when a an existing bytefile with is read
         path = self.datapath + "/second.bytes"
-        content_type = "application/octet-stream"
-        content = storage.read(path=path, content_type=content_type)
+        content = storage.read(path=path)
 
         # then the file content is correctly read and returned as bytes
         assert int.from_bytes(content) == 1
+
+    def test_writing_to_subfolders(self, setup, storage: FileStorage):
+
+        # given a FileStorage
+        storage = storage
+
+        # when a non-existing file in a non-existing subfolder is specified
+        filepath = self.datapath + "/ne/file.txt"
+        content = b"any content"
+
+        # then writing to this path succeeds
+        storage.write(content=content, path=filepath)
+        assert storage.read(filepath) == content

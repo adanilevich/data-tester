@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 
 from fsspec import AbstractFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
@@ -32,10 +32,6 @@ class StorageTypeUnknownError(FileStorageError):
     """"""
 
 
-class ContentTypeUnknownError(FileStorageError):
-    """"""
-
-
 class FileStorage(IDomainConfigStorage, IReportStorage):
     """
     Handles files in Google Cloud Storage or local file system. Must conform to
@@ -43,19 +39,11 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
     """
 
     protocols: Dict[str, AbstractFileSystem]
-
-    # list of known content types which are interpreted and read as text
-    text_content_types: List[str] = ["application/yaml", "plain/text", "application/json"]
-
-    # list of known content types which are interpreted and read as bytes
-    bytes_content_types: List[str] = [
-        "application/vnd.opnexmlformats-officedocument.spreadsheetml.template",
-        "application/octet-stream",
-    ]
+    default_encoding: str = "utf-8"
 
     def __init__(self):
         self.protocols = {
-            "local://": LocalFileSystem(),
+            "local://": LocalFileSystem(auto_mkdir=True),
             "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
             "memory://": MemoryFileSystem(),  # for testing purpose
         }
@@ -65,23 +53,23 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
             if path.startswith(protocol):
                 return fs
 
-        raise StorageTypeUnknownError(f"Unknown location type: {path}")
+        raise StorageTypeUnknownError(str(path))
 
-    def _protocol(self, path: str) -> str:
-        if not self._protocol_is_valid(path):
-            raise StorageTypeUnknownError(f"Unknown storage type: {path}")
-
-        return path.split(":")[0]
-
-    def _protocol_is_valid(self, path: str) -> bool:
-        return path.startswith(tuple(self.protocols.keys()))
+    def _protocol(self, fs: AbstractFileSystem) -> str:
+        if isinstance(fs, MemoryFileSystem):
+            return "memory"
+        elif isinstance(fs, LocalFileSystem):
+            return "local"
+        elif isinstance(fs, GCSFileSystem):
+            return "gs"
+        else:
+            raise StorageTypeUnknownError(str(fs))
 
     def _exists(self, path: str) -> bool:
-        if not self._protocol_is_valid(path):
-            raise StorageTypeUnknownError(f"Path type unknown: {path}")
+        fs = self._fs(path=path)
 
         try:
-            exists = self._fs(path).exists(path)
+            exists = fs.exists(path)
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
             raise FileStorageError(msg) from err
@@ -92,7 +80,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         """Returns all files in path, prefixed with the protocol"""
 
         if not self._exists(path):
-            raise ObjectNotFoundError(f"Location doesn't exist: {path}")
+            raise ObjectNotFoundError(str(path))
 
         fs = self._fs(path)
         files = []
@@ -107,30 +95,21 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
                 except Exception:
                     continue
 
-        return [self._protocol(path) + "://" + file.lstrip("/\\") for file in files]
+        return [self._protocol(fs) + "://" + file.lstrip("/\\") for file in files]
 
-    def read(self, path: str, content_type: str, encoding: str | None = None) -> Any:
+    def read(self, path: str) -> bytes:
+        """See interface definition."""
+
         fs = self._fs(path=path)
 
         if not self._exists(path):
-            raise ObjectNotFoundError(f"Object not found: {path}")
+            raise ObjectNotFoundError(str(path))
 
         if fs.isdir(path):
-            raise ObjectIsNotAFileError(f"Object is a directory: {path}")
-
-        if content_type in self.text_content_types:
-            read_mode = "r"
-        elif content_type in self.bytes_content_types:
-            read_mode = "rb"
-        else:
-            raise ContentTypeUnknownError(content_type)
+            raise ObjectIsNotAFileError(str(path))
 
         try:
-            with fs.open(
-                path,
-                mode=read_mode,
-                encoding=encoding,
-            ) as file:
+            with fs.open(path, mode="rb", encoding=self.default_encoding) as file:
                 content = file.read()
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
@@ -138,7 +117,17 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
 
         return content
 
-    def write(
-        self, content: Any, path: str, content_type: str, enconding: str | None = None
-    ):
-        raise NotImplementedError("Writing data not yet implemented for FileStorage")
+    def write(self, content: bytes, path: str):
+        """
+        Writes bytecontent to specified path on local or gcs filesystem. Parent folders
+        of specified path/file are auto-created if they don't exist.
+        """
+
+        fs = self._fs(path=path)
+
+        try:
+            with fs.open(path, mode="wb") as file:
+                file.write(content)
+        except Exception as err:
+            msg = err.__class__.__name__ + ": " + str(err)
+            raise FileStorageError(msg) from err

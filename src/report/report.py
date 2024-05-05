@@ -78,9 +78,7 @@ class Report(ABC):
                 full_path = location + str(artifact.id) + ".json"
                 content = artifact.to_json().encode()  # always store bytecontent
 
-            storage.write(
-                content=content, content_type="application/octet-stream", path=full_path
-            )
+            storage.write(content=content, path=full_path)
 
     @staticmethod
     def retrieve_artifact(
@@ -92,10 +90,7 @@ class Report(ABC):
 
         location = location + "/" if not location.endswith("/") else location
 
-        as_bytes: bytes = storage.read(
-            path=location + artifact_id + ".json",
-            content_type="application/octet-stream",  # always read as bytes
-        )
+        as_bytes: bytes = storage.read(path=location + artifact_id + ".json",)
         as_json = as_bytes.decode()
 
         artifact = ReportArtifactDTO.from_dict(json.loads(as_json))

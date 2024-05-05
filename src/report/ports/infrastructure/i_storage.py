@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 
 class StorageError(Exception):
@@ -12,20 +11,16 @@ class IStorage(ABC):
     """
 
     @abstractmethod
-    def write(
-        self, content: Any, path: str, content_type: str, enconding: str | None = None
-    ):
+    def write(self, content: bytes, path: str):
         """
-        Stores content (typicall bytes or string) to disk. How data is stored is defined
-        by the provided content_type. Implementations must know and be able to handle
-        requested content_types (see IReportFormatter)
+        Stores content to disk under speficied path.
 
         Raises:
             StorageError
         """
 
     @abstractmethod
-    def read(self, path: str, content_type: str, encoding: str | None = None,) -> Any:
+    def read(self, path: str) -> bytes:
         """
-        Loads object as text. enconding, erros, newline follow 'open' semantics.
+        Loads object from specified path as bytes.
         """
