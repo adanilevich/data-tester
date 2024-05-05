@@ -5,7 +5,7 @@
 | Name                                                                           |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/config/\_\_init\_\_.py                                                     |        1 |        0 |    100% |           |
-| src/config/config.py                                                           |        9 |        1 |     89% |         8 |
+| src/config/config.py                                                           |       12 |        1 |     92% |         9 |
 | src/domain\_config/\_\_init\_\_.py                                             |        1 |        0 |    100% |           |
 | src/domain\_config/adapters/\_\_init\_\_.py                                    |        2 |        0 |    100% |           |
 | src/domain\_config/adapters/yaml\_formatter.py                                 |       23 |        5 |     78% |24-26, 37-38 |
@@ -25,31 +25,36 @@
 | src/dtos/\_\_init\_\_.py                                                       |        5 |        0 |    100% |           |
 | src/dtos/configs.py                                                            |       50 |        1 |     98% |        67 |
 | src/dtos/dto.py                                                                |       12 |        1 |     92% |        15 |
-| src/dtos/reports.py                                                            |       32 |        0 |    100% |           |
-| src/dtos/specifications.py                                                     |       40 |        2 |     95% |    25, 62 |
-| src/dtos/testcase.py                                                           |       71 |        0 |    100% |           |
+| src/dtos/reports.py                                                            |       62 |        2 |     97% |   91, 123 |
+| src/dtos/specifications.py                                                     |       40 |        2 |     95% |    25, 60 |
+| src/dtos/testcase.py                                                           |       87 |       15 |     83% |48, 58, 102-110, 121-127 |
 | src/report/\_\_init\_\_.py                                                     |        3 |        0 |    100% |           |
-| src/report/abstract\_report.py                                                 |       31 |        5 |     84% |19-21, 64, 67 |
-| src/report/adapters/\_\_init\_\_.py                                            |        2 |        0 |    100% |           |
-| src/report/adapters/formatters/\_\_init\_\_.py                                 |        1 |        0 |    100% |           |
-| src/report/adapters/formatters/simple\_report\_formatter.py                    |       42 |        0 |    100% |           |
-| src/report/adapters/naming\_conventions/\_\_init\_\_.py                        |        1 |        0 |    100% |           |
-| src/report/adapters/naming\_conventions/simple\_report\_naming\_conventions.py |        9 |        5 |     44% |     12-27 |
+| src/report/adapters/\_\_init\_\_.py                                            |        2 |        2 |      0% |       2-3 |
+| src/report/adapters/formatters/\_\_init\_\_.py                                 |        1 |        1 |      0% |         2 |
+| src/report/adapters/formatters/plugins/\_\_init\_\_.py                         |        4 |        4 |      0% |       2-5 |
+| src/report/adapters/formatters/plugins/json\_testcase\_report.py               |        8 |        8 |      0% |      1-13 |
+| src/report/adapters/formatters/plugins/txt\_testcase\_report.py                |       10 |       10 |      0% |      1-16 |
+| src/report/adapters/formatters/plugins/xlsx\_testcase\_diff.py                 |       14 |       14 |      0% |      1-21 |
+| src/report/adapters/formatters/plugins/xlsx\_testrun\_report.py                |       14 |       14 |      0% |      1-22 |
+| src/report/adapters/formatters/simple\_report\_formatter.py                    |       56 |       56 |      0% |     1-150 |
+| src/report/adapters/naming\_conventions/\_\_init\_\_.py                        |        1 |        1 |      0% |         2 |
+| src/report/adapters/naming\_conventions/simple\_report\_naming\_conventions.py |       23 |       23 |      0% |      1-48 |
 | src/report/application/\_\_init\_\_.py                                         |        3 |        3 |      0% |       2-4 |
-| src/report/application/create\_testcase\_report.py                             |       10 |       10 |      0% |      1-24 |
-| src/report/application/create\_testrun\_report.py                              |       10 |       10 |      0% |      1-24 |
-| src/report/application/save\_report.py                                         |       14 |       14 |      0% |      1-26 |
+| src/report/application/create\_testcase\_report.py                             |       10 |       10 |      0% |      1-21 |
+| src/report/application/create\_testrun\_report.py                              |       10 |       10 |      0% |      1-20 |
+| src/report/application/save\_report.py                                         |        7 |        7 |      0% |      1-13 |
 | src/report/drivers/\_\_init\_\_.py                                             |        1 |        1 |      0% |         2 |
-| src/report/drivers/simple\_report\_manager.py                                  |       19 |       19 |      0% |      1-58 |
+| src/report/drivers/cli\_report\_manager.py                                     |       27 |       27 |      0% |      1-77 |
 | src/report/ports/\_\_init\_\_.py                                               |        6 |        0 |    100% |           |
-| src/report/ports/i\_create\_testcase\_report.py                                |        6 |        0 |    100% |           |
-| src/report/ports/i\_create\_testrun\_report.py                                 |        6 |        0 |    100% |           |
+| src/report/ports/i\_create\_testcase\_report.py                                |        7 |        0 |    100% |           |
+| src/report/ports/i\_create\_testrun\_report.py                                 |        7 |        0 |    100% |           |
 | src/report/ports/i\_report\_formatter.py                                       |        4 |        0 |    100% |           |
 | src/report/ports/i\_report\_naming\_conventions.py                             |        3 |        0 |    100% |           |
-| src/report/ports/i\_save\_report.py                                            |        9 |        0 |    100% |           |
+| src/report/ports/i\_save\_report.py                                            |       10 |        0 |    100% |           |
 | src/report/ports/i\_storage.py                                                 |        4 |        0 |    100% |           |
-| src/report/testcase\_report.py                                                 |       45 |        8 |     82% |54-61, 114 |
-| src/report/testrun\_report.py                                                  |       21 |        1 |     95% |        52 |
+| src/report/report.py                                                           |       46 |       29 |     37% |17-18, 32-33, 58-82, 91-101, 105-107, 114 |
+| src/report/testcase\_report.py                                                 |        9 |        2 |     78% |    10, 14 |
+| src/report/testrun\_report.py                                                  |        9 |        2 |     78% |    11, 14 |
 | src/storage/\_\_init\_\_.py                                                    |        1 |        0 |    100% |           |
 | src/storage/file\_storage.py                                                   |       73 |       15 |     79% |72, 81, 85-87, 95, 100, 107-108, 116, 119, 126, 135-137 |
 | src/testcase/adapters/data\_platforms/\_\_init\_\_.py                          |        2 |        0 |    100% |           |
@@ -64,7 +69,7 @@
 | src/testcase/adapters/notifiers/\_\_init\_\_.py                                |        2 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/in\_memory\_notifier.py                        |        7 |        0 |    100% |           |
 | src/testcase/adapters/notifiers/stdout\_notifier.py                            |        4 |        0 |    100% |           |
-| src/testcase/application/run\_testcases.py                                     |       20 |        0 |    100% |           |
+| src/testcase/application/run\_testcases.py                                     |       21 |        0 |    100% |           |
 | src/testcase/di/di.py                                                          |       23 |        3 |     87% |     26-29 |
 | src/testcase/drivers/cli\_testcase\_runner.py                                  |       13 |        0 |    100% |           |
 | src/testcase/ports/\_\_init\_\_.py                                             |        4 |        0 |    100% |           |
@@ -84,15 +89,15 @@
 | src/testcase/precondition\_checks/i\_precondition\_checker.py                  |        3 |        0 |    100% |           |
 | src/testcase/precondition\_checks/precondition\_checker.py                     |       14 |        0 |    100% |           |
 | src/testcase/testcases/\_\_init\_\_.py                                         |        8 |        0 |    100% |           |
-| src/testcase/testcases/abstract\_testcase.py                                   |       99 |        0 |    100% |           |
+| src/testcase/testcases/abstract\_testcase.py                                   |       97 |        0 |    100% |           |
 | src/testcase/testcases/compare\_sample.py                                      |      130 |       23 |     82% |93, 100, 106-108, 113-115, 149-151, 170-172, 186-194 |
-| src/testcase/testcases/dummy\_exception.py                                     |       10 |        0 |    100% |           |
+| src/testcase/testcases/dummy\_exception.py                                     |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_nok.py                                           |       11 |        0 |    100% |           |
 | src/testcase/testcases/dummy\_ok.py                                            |       11 |        0 |    100% |           |
 | src/testcase/testcases/rowcount.py                                             |       56 |        1 |     98% |        70 |
 | src/testcase/testcases/schema.py                                               |      132 |        3 |     98% |95, 104, 139 |
-| src/testcase/testcases/testcase\_factory.py                                    |       18 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1664** |  **167** | **90%** |           |
+| src/testcase/testcases/testcase\_factory.py                                    |       19 |        0 |    100% |           |
+|                                                                      **TOTAL** | **1763** |  **332** | **81%** |           |
 
 8 empty files skipped.
 
