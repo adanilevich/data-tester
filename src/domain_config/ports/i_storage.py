@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, List
+from typing import List
 
 
 class StorageError(Exception):
@@ -24,14 +24,13 @@ class IStorage(ABC):
         """
 
     @abstractmethod
-    def read(self, path: str, content_type: str, encoding: str | None = None,) -> Any:
+    def read(self, path: str) -> bytes:
         """
-        Loads object as text. enconding, erros, newline follow 'open' semantics.
+        Loads object from specified path (e.g. on local storage) as bytes.
         """
 
     @abstractmethod
-    def write(self, content: Any, path: str, content_type: str,
-              enconding: str | None = None):
+    def write(self, content: bytes, path: str):
         """
-        Loads object as bytes.
+        Write bytecontent to speficied path.
         """
