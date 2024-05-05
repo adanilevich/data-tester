@@ -1,4 +1,4 @@
-from typing import Dict, List, Self
+from typing import Dict, Self
 from uuid import uuid4
 from enum import Enum
 from datetime import datetime
@@ -13,11 +13,6 @@ from src.dtos import (
     TestCaseResultDTO,
     TestRunResultDTO,
 )
-
-
-class ArtifactTag(Enum):
-    storage = "storage"
-    ui = "ui"
 
 
 class ArtifactType(Enum):
@@ -57,15 +52,6 @@ class ReportArtifactDTO(DTO):
     """Start timestamp of test run or test case which produced the artifact"""
     result: TestResult
     """Result of test run or test case which produced the artifact"""
-    tags: List[ArtifactTag]
-    """
-    List of tags - used to request artifact creation, storage or retrieval by clients:
-        'ui': Artifacts exposed to web clients and UIs, e.g. json-based reports.
-        'storage': Artifacts created for storage (e.g. on disc, database, etc.). Excel-
-            based diffs which are used by users are one example; These can be exposed
-            to UIs, e.g. via UI 'download' functions
-    """
-    # TODO: implement validations between 'store' tags, location, filename and url
 
 
 class TestCaseReportArtifactDTO(ReportArtifactDTO):
@@ -86,7 +72,6 @@ class TestCaseReportArtifactDTO(ReportArtifactDTO):
         sensitive: bool,
         content_b64_str: Base64Str,
         filename: str,
-        tags: List[ArtifactTag],
     ) -> Self:
         return cls(
             artifact_type=artifact_type,
@@ -94,7 +79,6 @@ class TestCaseReportArtifactDTO(ReportArtifactDTO):
             sensitive=sensitive,
             content_b64_str=content_b64_str,
             filename=filename,
-            tags=tags,
             testrun_id=result.testrun_id,
             testcase_id=result.testcase_id,
             result=result.result,
@@ -118,7 +102,6 @@ class TestRunReportArtifactDTO(ReportArtifactDTO):
         sensitive: bool,
         content_b64_str: Base64Str,
         filename: str,
-        tags: List[ArtifactTag],
     ) -> Self:
         return cls(
             artifact_type=artifact_type,
@@ -126,7 +109,6 @@ class TestRunReportArtifactDTO(ReportArtifactDTO):
             sensitive=sensitive,
             content_b64_str=content_b64_str,
             filename=filename,
-            tags=tags,
             testrun_id=result.testrun_id,
             result=result.result,
             start_ts=result.start_ts,

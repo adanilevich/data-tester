@@ -1,5 +1,5 @@
 from src.dtos.reports import ReportArtifactDTO
-from src.report.plugins import IReportNamingConventions
+from src.report.plugins.formatters.default import IReportNamingConventions
 from src.dtos import ArtifactType, TestCaseReportArtifactDTO
 
 

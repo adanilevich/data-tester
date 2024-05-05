@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import List
+from src.dtos import TestResultDTO, ReportArtifactDTO, ArtifactType
 
-from src.dtos import TestResultDTO, ArtifactTag, ReportArtifactDTO
+
+class ReportFormatterError(Exception):
+    """"""
 
 
 class IReportFormatter(ABC):
@@ -12,17 +15,22 @@ class IReportFormatter(ABC):
     """
 
     @abstractmethod
-    def format(
-        self, result: TestResultDTO, tags: List[ArtifactTag]
+    def create_artifacts(
+        self,
+        result: TestResultDTO,
+        artifact_types: List[ArtifactType],
     ) -> List[ReportArtifactDTO]:
         """
-        From given testcase or testrun result, creates a list of report artifacts which
-        match at least one of the requested tags.
+        From given testcase or testrun result, creates a list of requestd report
+        artifacts.
 
         Args:
             result: TestCaseResultDTO or TestRunResultDTO
-            tags: list of tags (ArtifactTagDTO) requested by the client
+            artifact_types: list of requested artifact types to be created
 
         Returns:
             List[artifact]: List of matching report artifacts
+
+        Raises:
+            ReportFormatterError
         """

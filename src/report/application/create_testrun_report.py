@@ -14,7 +14,11 @@ class CreateTestRunReportCommandHandler(ICreateTestRunReportCommandHandler):
         self.formatter: IReportFormatter = formatter
 
     def create(self, command: CreateTestRunReportCommand) -> TestRunReportDTO:
+
         report = TestRunReport(result=command.testrun_result)
-        report.create_artifacts(tags=command.tags, formatter=self.formatter)
+        report.create_artifacts(
+            artifact_types=command.artifact_types,
+            formatter=self.formatter,
+        )
 
         return report.to_dto()

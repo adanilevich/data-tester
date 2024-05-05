@@ -16,6 +16,9 @@ class CreateTestCaseReportCommandHandler(ICreateTestCaseReportCommandHandler):
     def create(self, command: CreateTestCaseReportCommand) -> TestCaseReportDTO:
 
         report = TestCaseReport(result=command.testcase_result)
-        report.create_artifacts(tags=command.tags, formatter=self.formatter)
+        report.create_artifacts(
+            artifact_types=command.artifact_types,
+            formatter=self.formatter
+        )
 
         return report.to_dto()

@@ -1,13 +1,10 @@
 import json
 from typing import Dict, List
-from abc import ABC, abstractmethod
-import base64
-
 from src.report.ports import IReportFormatter, IStorage
-from src.dtos import ArtifactTag, ReportArtifactDTO, TestResultDTO
+from src.dtos import ReportArtifactDTO, TestResultDTO, ArtifactType
 
 
-class Report(ABC):
+class Report:
     """
     Abstact report class from which TestRunReport and TestCaseReport inherit.
     Bundles common functions like creating and saving artifacts.
@@ -17,28 +14,35 @@ class Report(ABC):
         self.result: TestResultDTO = result
         self.artifacts: Dict[str, ReportArtifactDTO] = {}
 
-    def create_artifacts(self, tags: List[ArtifactTag], formatter: IReportFormatter):
+    def create_artifacts(
+        self,
+        formatter: IReportFormatter,
+        artifact_types: List[ArtifactType],
+    ):
         """
-        Using provided formatter, creates a list of report artifacts matching defined
-        tags and sets self.artifacts.
+        Using provided formatter, creates a list of requested report artifacts.
 
         Args:
-            tags: list of artifact types/tags to be created. Only artifacts which match
-                one of specified tags will be created by formatter.
             formatter: formatter object responsible for creation of report artifacts from
                 report data.
+            artifact_types: List of requested artifact types
         """
 
-        for artifact in formatter.format(result=self.result, tags=tags):
-            self.artifacts[artifact.artifact_type.value] = artifact
+        artifacts = formatter.create_artifacts(
+            result=self.result,
+            artifact_types=artifact_types,
+        )
+
+        for artifact in artifacts:
+            if artifact is not None:
+                self.artifacts[artifact.artifact_type.value] = artifact
 
     @staticmethod
     def save_artifacts(
         artifacts: List[ReportArtifactDTO],
         location: str,
         storage: IStorage,
-        tags: List[ArtifactTag],
-        save_only_artifact_content: bool = False,
+        save_only_artifact_content: bool = True,
     ):
         """
         Uses storage object to save report to report storage.
@@ -46,8 +50,6 @@ class Report(ABC):
         Args:
             artifacts: list of artifacts to save
             location: path (e.g. folder) where to save report to
-            tags: list of artifact tags. Only artifacts which match at least one tag
-                are stored
             storage: storage adapter which stores the report, e.g. to disk or S3
             save_only_artifact_content: if True, only artifact_content will be saved
                 using artifact.filename. This is typically for access by end-users,
@@ -55,25 +57,18 @@ class Report(ABC):
                 be serialized and saved as json - typically for caching purpose.
         """
 
-        if len(artifacts) == 0:
-            raise ValueError("Create report artifacs by formatting before storing.")
-
         for artifact in artifacts:
-            if not Report._requested_tags_match_artifact_tags(tags, artifact.tags):
-                continue
-
+            # if only artifact content to be save, artifact filename must be defined
             if save_only_artifact_content and artifact.filename is None:
                 continue
 
             location = location + "/" if not location.endswith("/") else location
 
             if save_only_artifact_content:
-                # if only artifact content to be save, artifact filename must be defined
-                if artifact.filename is not None:
-                    full_path = location + artifact.filename
-                    content = Report._b64_string_to_bytes(artifact.content_b64_str)
-                else:
-                    continue
+                full_path = location + artifact.filename  # type: ignore
+                # pydantic Base64String returns actual, unencoded string when accessing!
+                content_as_str = artifact.content_b64_str
+                content = content_as_str.encode()
             else:
                 full_path = location + str(artifact.id) + ".json"
                 content = artifact.to_json().encode()  # always store bytecontent
@@ -90,25 +85,15 @@ class Report(ABC):
 
         location = location + "/" if not location.endswith("/") else location
 
-        as_bytes: bytes = storage.read(path=location + artifact_id + ".json",)
+        as_bytes: bytes = storage.read(
+            path=location + artifact_id + ".json",
+        )
         as_json = as_bytes.decode()
 
         artifact = ReportArtifactDTO.from_dict(json.loads(as_json))
 
         return artifact
 
-    @staticmethod
-    def _b64_string_to_bytes(b64_string: str) -> bytes:
-        as_b64_bytes = b64_string.encode(encoding="utf-8")
-        as_bytes = base64.b64decode(as_b64_bytes)
-        return as_bytes
-
-    @staticmethod
-    def _requested_tags_match_artifact_tags(
-        requested_tags: List[ArtifactTag], artifact_tags: List[ArtifactTag]
-    ) -> bool:
-        return any([tag in requested_tags for tag in artifact_tags])
-
-    @abstractmethod
     def to_dto(self):
         """Subclasses TestRunReport and TestCaseReport must implement this method"""
+        raise NotImplementedError()

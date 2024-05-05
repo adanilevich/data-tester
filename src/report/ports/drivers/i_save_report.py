@@ -1,15 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List
-
 from pydantic import Field
-
-from src.dtos import ReportDTO, DTO, ArtifactTag
+from src.dtos import ReportDTO, DTO
 
 
 class SaveReportCommand(DTO):
     report: ReportDTO
     location: str
-    tags: List[ArtifactTag]
     save_only_artifact_content: bool = Field(default=True)
 
 
