@@ -1,14 +1,20 @@
 # flake8: noqa
 from typing import Dict, List, Callable
-from src.dtos import TestObjectDTO, DomainConfigDTO, SpecificationDTO
+from uuid import UUID
+from src.dtos import TestObjectDTO, DomainConfigDTO, SpecificationDTO, TestType
 from src.testcase.ports import IDataPlatform, INotifier
 
 # we need to import all subclasses of TestCase such that they are registered
 # and can be created via TestCaseFactory.create.
 # This is done in testcase.__init__.py which is imported here
 from src.testcase.testcases import (
-    AbstractTestCase, SchemaTestCase, DummyExceptionTestCase, DummyNokTestCase,
-    DummyOkTestCase, CompareSampleTestCase, RowCountTestCase
+    AbstractTestCase,
+    SchemaTestCase,
+    DummyExceptionTestCase,
+    DummyNokTestCase,
+    DummyOkTestCase,
+    CompareSampleTestCase,
+    RowCountTestCase,
 )
 
 
@@ -21,15 +27,22 @@ class TestCaseFactory:
     """Registers and creates subclasses of TestCase based on requested ttype"""
 
     # type: ignore
-    known_testtypes: Dict[str, Callable] = dict()
+    known_testtypes: Dict[TestType, Callable] = dict()
 
     @classmethod
-    def create(cls, ttype: str, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-               domain_config: DomainConfigDTO, testrun_id: str,
-               backend: IDataPlatform, notifiers: List[INotifier]) -> AbstractTestCase:
+    def create(
+        cls,
+        ttype: TestType,
+        testobject: TestObjectDTO,
+        specs: List[SpecificationDTO],
+        domain_config: DomainConfigDTO,
+        testrun_id: UUID,
+        backend: IDataPlatform,
+        notifiers: List[INotifier],
+    ) -> AbstractTestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on class attribute
-        'type' - the specified test type must be implemented as subclass of TestCase.
+        'ttype' - the specified test type must be implemented as subclass of TestCase.
         """
 
         # populate known_testtypes with subclasses of TestCase

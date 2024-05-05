@@ -1,24 +1,21 @@
 from src.report.testcase_report import TestCaseReport
 from src.dtos import TestCaseReportDTO
 from src.report.ports import (
-    ICreateTestCaseReportCommandHandler, CreateTestCaseReportCommand, IReportFormatter
+    ICreateTestCaseReportCommandHandler,
+    CreateTestCaseReportCommand,
+    IReportFormatter,
 )
 
 
 class CreateTestCaseReportCommandHandler(ICreateTestCaseReportCommandHandler):
+    """Creates testcase report, populates artifacts and returns as dto"""
 
     def __init__(self, formatter: IReportFormatter):
-
         self.formatter: IReportFormatter = formatter
 
     def create(self, command: CreateTestCaseReportCommand) -> TestCaseReportDTO:
 
-        report = TestCaseReport.from_testcase_result(
-            testcase_result=command.testcase_result,
-        )
-        formatted_report = report.format(
-            format=command.format,
-            formatter=self.formatter
-        )
+        report = TestCaseReport(result=command.testcase_result)
+        report.create_artifacts(tags=command.tags, formatter=self.formatter)
 
-        return formatted_report.to_dto()
+        return report.to_dto()

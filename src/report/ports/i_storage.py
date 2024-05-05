@@ -23,3 +23,9 @@ class IStorage(ABC):
         Raises:
             StorageError
         """
+
+    @abstractmethod
+    def read(self, path: str, content_type: str, encoding: str | None = None,) -> Any:
+        """
+        Loads object as text. enconding, erros, newline follow 'open' semantics.
+        """

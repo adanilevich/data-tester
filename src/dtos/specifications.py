@@ -47,9 +47,7 @@ class CompareSampleSqlDTO(SpecificationDTO):
 
 
 class SpecFactory:
-
     def create_from_dict(self, spec_as_dict: dict) -> SpecificationDTO:
-
         requested_spec_type = spec_as_dict["type"]
         known_spec_types = {
             cls_.model_fields["type"].default: cls_

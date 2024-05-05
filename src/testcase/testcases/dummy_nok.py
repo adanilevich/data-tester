@@ -1,10 +1,10 @@
 from src.testcase.testcases.abstract_testcase import AbstractTestCase
-from src.dtos import TestResult
+from src.dtos import TestResult, TestType
 
 
 class DummyNokTestCase(AbstractTestCase):
     """This testcase always returns ok -- test purpose only."""
-    ttype = "DUMMY_NOK"
+    ttype = TestType.DUMMY_NOK
     required_specs = []
     preconditions = []
 

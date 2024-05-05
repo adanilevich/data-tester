@@ -1,9 +1,10 @@
 from src.testcase.testcases.abstract_testcase import AbstractTestCase
+from src.dtos import TestType
 
 
 class DummyExceptionTestCase(AbstractTestCase):
     """This testcase always returns ok -- test purpose only."""
-    ttype = "DUMMY_EXCEPTION"
+    ttype = TestType.DUMMY_EXCEPTION
     required_specs = []
     preconditions = []
 

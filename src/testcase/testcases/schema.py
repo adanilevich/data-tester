@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO, TestResult, DTO
+from src.dtos import SchemaSpecificationDTO, TestResult, DTO, TestType
 
 
 class ColumnDiffEntryDTO(DTO):
@@ -30,7 +30,7 @@ class SchemaTestCase(AbstractTestCase):
         - partitioning columns are compared if supported by backend (and specified)
         - clustering columnsa are compared if supported by backend (and specified)
     """
-    ttype = "SCHEMA"
+    ttype = TestType.SCHEMA
     required_specs = ["schema"]
     preconditions = ["specs_are_unique", "testobject_exists"]
 

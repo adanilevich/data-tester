@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
 import time
+from uuid import uuid4
+from datetime import datetime
 
 import pytest
 import polars as pl
@@ -20,6 +22,7 @@ from src.dtos import (
     TestRunResultDTO,
     TestResult,
     TestStatus,
+    TestType,
 )
 from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
@@ -112,14 +115,14 @@ def checkable_creator(testobject, dummy_backend) -> ICheckableCreator:
 
 class ITestCaseCreator(ABC):
     @abstractmethod
-    def create(self, ttype: str) -> AbstractTestCase:
+    def create(self, ttype: TestType) -> AbstractTestCase:
         """creates testcase of required type"""
 
 
 @pytest.fixture
 def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
     class TestCaseCreator(ITestCaseCreator):
-        def create(self, ttype: str) -> AbstractTestCase:
+        def create(self, ttype: TestType) -> AbstractTestCase:
             testcase = TestCaseFactory.create(
                 ttype=ttype,
                 testobject=testobject,
@@ -136,7 +139,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                     ),
                 ],
                 domain_config=domain_config,
-                testrun_id="my_run_id",
+                testrun_id=uuid4(),
                 backend=DummyPlatform(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()],
             )
@@ -208,10 +211,10 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
 @pytest.fixture
 def testcase_result(testobject) -> TestCaseResultDTO:
     return TestCaseResultDTO(
-        testcase_id="id",
-        testrun_id="my_testrun_id",
+        testcase_id=uuid4(),
+        testrun_id=uuid4(),
         testobject=testobject,
-        testtype="SCHEMA",
+        testtype=TestType.SCHEMA,
         status=TestStatus.FINISHED,
         result=TestResult.OK,
         diff={"a": [1, 2, 3], "b": {3: 5}},
@@ -219,8 +222,8 @@ def testcase_result(testobject) -> TestCaseResultDTO:
         facts=[{"a": 5}, {"b": "2"}],
         details=[{"a": 5}, {"b": "2"}],
         specifications=[],
-        start_ts="asdf",
-        end_ts="gartw",
+        start_ts=datetime.now(),
+        end_ts=datetime.now(),
     )
 
 
@@ -233,9 +236,9 @@ def testrun_result(testcase_result) -> TestRunResultDTO:
 
 @pytest.fixture
 def testcase_report(testcase_result) -> TestCaseReportDTO:
-    return TestCaseReport.from_testcase_result(testcase_result=testcase_result).to_dto()
+    return TestCaseReport(result=testcase_result).to_dto()
 
 
 @pytest.fixture
 def testrun_report(testrun_result) -> TestRunReportDTO:
-    return TestRunReport.from_testrun_result(testrun_result=testrun_result).to_dto()
+    return TestRunReport(result=testrun_result).to_dto()

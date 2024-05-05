@@ -2,7 +2,7 @@ import pytest
 import polars as pl
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import RowCountSqlDTO
+from src.dtos import RowCountSqlDTO, TestType
 
 
 # noinspection PyUnusedLocal
@@ -16,7 +16,7 @@ class TestRowCountTestCase:
     @pytest.fixture
     def testcase(self, testcase_creator) -> AbstractTestCase:
 
-        testcase_ = testcase_creator.create(ttype="ROWCOUNT")
+        testcase_ = testcase_creator.create(ttype=TestType.ROWCOUNT)
 
         def run_query_(query, *args, **kwargs) -> pl.DataFrame:
             if "good" in query:

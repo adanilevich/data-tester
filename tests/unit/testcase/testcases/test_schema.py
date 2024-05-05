@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO
+from src.dtos import SchemaSpecificationDTO, TestType
 
 
 class TestSchemaTestCase:
@@ -18,7 +18,7 @@ class TestSchemaTestCase:
     @pytest.fixture
     def testcase(self, testcase_creator) -> AbstractTestCase:
 
-        testcase_ = testcase_creator.create(ttype="SCHEMA")
+        testcase_ = testcase_creator.create(ttype=TestType.SCHEMA)
 
         # patch backend to return required resuls
         def get_schema_(*args, **kwargs) -> SchemaSpecificationDTO:

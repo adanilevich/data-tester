@@ -1,7 +1,7 @@
 from typing import List, Tuple, Any
 
 from src.testcase.testcases import AbstractTestCase
-from src.dtos import RowCountSqlDTO, DBInstanceDTO
+from src.dtos import RowCountSqlDTO, DBInstanceDTO, TestType
 
 
 class RowCountTestCase(AbstractTestCase):
@@ -13,7 +13,7 @@ class RowCountTestCase(AbstractTestCase):
         - partitioning columns are compared if supported by backend (and specified)
         - clustering columnsa are compared if supported by backend (and specified)
     """
-    ttype = "ROWCOUNT"
+    ttype = TestType.ROWCOUNT
     required_specs = ["rowcount_sql"]
     preconditions = ["specs_are_unique", "testobject_exists", "testobject_not_empty"]
 

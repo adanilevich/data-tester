@@ -1,5 +1,6 @@
 from typing import List
 from datetime import datetime
+from uuid import uuid4
 
 from src.testcase.ports import (
     IRunTestCasesCommandHandler, RunTestCaseCommand, IDataPlatformFactory, INotifier,
@@ -33,14 +34,14 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                 result = testcase.execute()
             except TestCaseUnknownError:
                 result = TestCaseResultDTO(
-                    testcase_id="n/a",
+                    testcase_id=uuid4(),
                     result=TestResult.NA,
                     summary=f"Test type {command.testtype} unknown!",
                     facts=[],
                     details=[],
                     status=TestStatus.ERROR,
-                    start_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
-                    end_ts=datetime.now().strftime("%Y-%m-%d_%H:%M:%S"),
+                    start_ts=datetime.now(),
+                    end_ts=datetime.now(),
                     testobject=command.testobject,
                     testrun_id=command.testrun_id,
                     diff=dict(),

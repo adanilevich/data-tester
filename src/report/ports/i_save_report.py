@@ -3,14 +3,14 @@ from typing import List
 
 from pydantic import Field
 
-from src.dtos import TestCaseReportDTO, TestRunReportDTO, DTO
+from src.dtos import ReportDTO, DTO, ArtifactTag
 
 
 class SaveReportCommand(DTO):
-    report: TestRunReportDTO | TestCaseReportDTO
+    report: ReportDTO
     location: str
-    #  groub_by will store reports in subfolders of location, e.b. by date, testrun_id
-    group_by: List[str] | None = Field(default=None)
+    tags: List[ArtifactTag]
+    save_only_artifact_content: bool = Field(default=True)
 
 
 class ISaveReportCommandHandler(ABC):

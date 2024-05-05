@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.dtos.reports import TestCaseReportDTO, TestRunReportDTO
+from src.dtos.reports import ReportArtifactDTO
 
 
 class IReportNamingConventions(ABC):
@@ -10,7 +10,7 @@ class IReportNamingConventions(ABC):
     """
 
     @abstractmethod
-    def report_name(self, report: TestCaseReportDTO | TestRunReportDTO) -> str:
+    def filename(self, artifact: ReportArtifactDTO) -> str:
         """
         Retuns expected report name based on testreport contents.
         """
