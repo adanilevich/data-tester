@@ -20,10 +20,6 @@
     "mypy-type-checker.reportingScope": "workspace",
     "mypy-type-checker.preferDaemon": true,
     "mypy-type-checker.args": ["--check-untyped-defs"],
-    "python.testing.cwd": "${workspaceFolder}/tests",
-    "python.testing.pytestArgs": [
-        "."
-    ],
     "ruff.format.args": [
         "--config=${workspaceFolder}/pyproject.toml"
     ],
@@ -34,8 +30,9 @@
         "--select=B",
         "--select=W",
     ],
-    "ruff.interpreter": [
-        ".venv/Scripts/python.exe"
-    ],
+    "ruff.interpreter": [".venv/Scripts/python.exe"],
     "editor.defaultFormatter": "charliermarsh.ruff",
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests"],
 }

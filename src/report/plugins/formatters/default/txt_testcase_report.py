@@ -1,10 +1,9 @@
 import yaml  # type: ignore
-
-from src.report.adapters.formatters import AbstractArtifactFormatter
+from src.report.plugins import IReportArtifact
 from src.dtos import TestResultDTO, TestCaseResultDTO, ReportArtifactDTO
 
 
-class TxtTestCaseReportFormatter(AbstractArtifactFormatter):
+class TxtTestCaseReportFormatter(IReportArtifact):
 
     artifact_type = "txt-testcase-report"
     content_type = "text/plain"

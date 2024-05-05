@@ -15,7 +15,7 @@ class Report(ABC):
 
     def __init__(self, result: TestResultDTO):
         self.result: TestResultDTO = result
-        self.artifacts: Dict[str, ReportArtifactDTO]  = {}
+        self.artifacts: Dict[str, ReportArtifactDTO] = {}
 
     def create_artifacts(self, tags: List[ArtifactTag], formatter: IReportFormatter):
         """
@@ -59,8 +59,7 @@ class Report(ABC):
             raise ValueError("Create report artifacs by formatting before storing.")
 
         for artifact in artifacts:
-
-            if not Report._requested_tags_match_artifact_tags(artifact, tags):
+            if not Report._requested_tags_match_artifact_tags(tags, artifact.tags):
                 continue
 
             if save_only_artifact_content and artifact.filename is None:
@@ -85,7 +84,10 @@ class Report(ABC):
 
     @staticmethod
     def retrieve_artifact(
-        location: str, artifact_id: str, storage: IStorage) -> ReportArtifactDTO:
+        location: str,
+        artifact_id: str,
+        storage: IStorage,
+    ) -> ReportArtifactDTO:
         """Retrieves artifact object from specified location"""
 
         location = location + "/" if not location.endswith("/") else location
@@ -108,10 +110,9 @@ class Report(ABC):
 
     @staticmethod
     def _requested_tags_match_artifact_tags(
-        artifact: ReportArtifactDTO,
-        tags: List[ArtifactTag]
+        requested_tags: List[ArtifactTag], artifact_tags: List[ArtifactTag]
     ) -> bool:
-        return any([tag in tags for tag in artifact.tags])
+        return any([tag in requested_tags for tag in artifact_tags])
 
     @abstractmethod
     def to_dto(self):

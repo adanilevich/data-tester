@@ -1,8 +1,8 @@
-from src.report.adapters.formatters import AbstractArtifactFormatter
+from src.report.plugins import IReportArtifact
 from src.dtos import TestResultDTO, TestCaseResultDTO, ReportArtifactDTO
 
 
-class JsonTestCaseReportFormatter(AbstractArtifactFormatter):
+class JsonTestCaseReportFormatter(IReportArtifact):
 
     artifact_type = "json-testcase-report"
     content_type = "application/json"
