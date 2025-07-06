@@ -33,12 +33,12 @@
 | src/report/adapters/plugins/\_\_init\_\_.py                                      |        1 |        0 |    100% |           |
 | src/report/adapters/plugins/formatters/\_\_init\_\_.py                           |        1 |        0 |    100% |           |
 | src/report/adapters/plugins/formatters/default/\_\_init\_\_.py                   |        8 |        0 |    100% |           |
-| src/report/adapters/plugins/formatters/default/default\_formatter.py             |       33 |        1 |     97% |        92 |
+| src/report/adapters/plugins/formatters/default/default\_formatter.py             |       36 |        5 |     86% |    98-105 |
 | src/report/adapters/plugins/formatters/default/default\_naming\_conventions.py   |       23 |        7 |     70% |20, 35-38, 43-46 |
-| src/report/adapters/plugins/formatters/default/i\_report\_artifact.py            |       16 |        0 |    100% |           |
+| src/report/adapters/plugins/formatters/default/i\_report\_artifact.py            |       17 |        0 |    100% |           |
 | src/report/adapters/plugins/formatters/default/i\_report\_naming\_conventions.py |        3 |        0 |    100% |           |
-| src/report/adapters/plugins/formatters/default/json\_testcase\_report.py         |       15 |        1 |     93% |        26 |
-| src/report/adapters/plugins/formatters/default/txt\_testcase\_report.py          |       16 |        1 |     94% |        27 |
+| src/report/adapters/plugins/formatters/default/json\_testcase\_report.py         |       15 |        1 |     93% |        29 |
+| src/report/adapters/plugins/formatters/default/txt\_testcase\_report.py          |       19 |        1 |     95% |        30 |
 | src/report/adapters/plugins/formatters/default/xlsx\_testcase\_diff.py           |       27 |       18 |     33% |     30-66 |
 | src/report/adapters/plugins/formatters/default/xlsx\_testrun\_report.py          |       20 |       11 |     45% |     26-60 |
 | src/report/application/\_\_init\_\_.py                                           |        3 |        3 |      0% |       2-4 |
@@ -102,9 +102,7 @@
 | src/testcase/ports/i\_data\_platform\_factory.py                                 |        4 |        0 |    100% |           |
 | src/testcase/ports/i\_notifier.py                                                |        2 |        0 |    100% |           |
 | src/testcase/ports/i\_run\_testcases.py                                          |       16 |        0 |    100% |           |
-| src/testcase/precondition\_checks/\_\_init\_\_.py                                |        1 |        1 |      0% |         2 |
-| src/testcase/testcases/\_\_init\_\_.py                                           |        1 |        1 |      0% |         2 |
-|                                                                        **TOTAL** | **1772** |  **204** | **88%** |           |
+|                                                                        **TOTAL** | **1777** |  **206** | **88%** |           |
 
 8 empty files skipped.
 
