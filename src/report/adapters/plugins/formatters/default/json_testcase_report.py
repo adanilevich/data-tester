@@ -20,7 +20,10 @@ class JsonTestCaseReportFormatter(IReportArtifact):
     sensitive = False
 
     def create_artifact(self, result: TestResultDTO) -> TestCaseReportArtifactDTO:
-        """Creates a json-based testcaser report artifact without diff and details"""
+        """
+        Creates a json-based testcase report artifact without diff, details
+        and specifications
+        """
 
         if not isinstance(result, TestCaseResultDTO):
             raise ResultTypeNotSupportedError(f"Json format not supported for {result}")

@@ -65,7 +65,7 @@ class CompareSampleTestCase(AbstractTestCase):
             self.summary = f"Testobject differs from SQL in {diff.shape[0]} row(s)."
             # trimm diff to ca. 500 examples to not blow up Excel memory
             diff_example = diff.head(500).to_dict(as_series=False)
-            self.diff.update({"compare_sample_diff_example": diff_example})
+            self.diff.update({"compare_sample_diff": diff_example})
 
         return None
 
