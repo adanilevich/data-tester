@@ -1,2 +1,2 @@
 # flake8: noqa
-from src.domain_config.domain_config import DomainConfig
+from src.domain_config.core import DomainConfig

@@ -1,4 +1,4 @@
-from src.report.testcase_report import TestCaseReport
+from src.report.core.testcase_report import TestCaseReport
 from src.dtos import TestCaseReportDTO
 from src.report.ports import (
     ICreateTestCaseReportCommandHandler,

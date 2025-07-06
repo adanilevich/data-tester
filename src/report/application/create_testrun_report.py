@@ -1,4 +1,4 @@
-from src.report.testrun_report import TestRunReport
+from src.report.core.testrun_report import TestRunReport
 from src.dtos import TestRunReportDTO
 from src.report.ports import (
     CreateTestRunReportCommand,

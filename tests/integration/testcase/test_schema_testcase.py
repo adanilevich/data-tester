@@ -1,5 +1,5 @@
 from uuid import uuid4
-from src.testcase.testcases import TestCaseFactory
+from src.testcase.core.testcases import TestCaseFactory
 from src.dtos import SchemaSpecificationDTO, TestObjectDTO, TestType
 from src.testcase.adapters.data_platforms import DemoDataPlatformFactory
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier

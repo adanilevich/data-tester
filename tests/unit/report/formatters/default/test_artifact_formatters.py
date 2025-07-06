@@ -1,5 +1,5 @@
 import json
-from src.report.plugins.formatters.default import (
+from src.report.adapters.plugins.formatters.default import (
     JsonTestCaseReportFormatter,
     TxtTestCaseReportFormatter,
     DefaultReportNamingConventions

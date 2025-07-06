@@ -1,7 +1,7 @@
 from typing import Dict
 import pytest
 
-from src.testcase.precondition_checks import (
+from src.testcase.core.precondition_checks import (
     ICheckable,
     PreConditionChecker,
     CheckTestObjectExists,

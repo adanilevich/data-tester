@@ -6,7 +6,7 @@ from src.testcase.ports import (
     IRunTestCasesCommandHandler, RunTestCaseCommand, IDataPlatformFactory, INotifier,
 )
 from src.dtos import TestCaseResultDTO, TestResult, TestStatus
-from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
+from src.testcase.core.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):

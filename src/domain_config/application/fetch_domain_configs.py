@@ -4,7 +4,7 @@ from src.domain_config.ports import (
     FetchDomainConfigsCommand, IFetchDomainConfigsCommandHandler, INamingConventions,
     IStorage, IDomainConfigFormatter,
 )
-from src.domain_config import DomainConfig
+from src.domain_config.core import DomainConfig
 from src.dtos import DomainConfigDTO
 
 
