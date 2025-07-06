@@ -10,7 +10,8 @@ pydantic  # DTOs and data validation
 pydantic-settings  # for reading from ENV vars
 polars  # used for fixtures crunching - esp. for testcase COMPARE_SAMPLE
 xlsxwriter  # required for polars to write excel
-xlsx2csv  # required for polars to read excel
+#xlsx2csv  # required for polars to read excel
+fastexcel  # required for polars to read excel
 pyarrow  # required as backend for polars
 
 

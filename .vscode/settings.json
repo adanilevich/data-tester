@@ -1,13 +1,5 @@
 {
-    // fpr Ubuntu via WSL to use central python installation
-    //"python.defaultInterpreterPath": "/usr/bin/python",
-    // for Windows to use local .venv
-    "python.defaultInterpreterPath": "${workspaceFolder\\.venv\\Scripts\\python.exe}",
-    "python.analysis.extraPaths": [
-        "./src",
-        "${workspaceFolder}",
-    ],
-    "python.analysis.autoSearchPaths": true,
+
     // Add workspace folder to PYTHONPATH here. This will be used by all terminal
     // processes (not necessarily the case when adding via .env)
     // see https://code.visualstudio.com/docs/python/environments#_environment-variable-definitions-file
@@ -20,17 +12,8 @@
     "mypy-type-checker.reportingScope": "workspace",
     "mypy-type-checker.preferDaemon": true,
     "mypy-type-checker.args": ["--check-untyped-defs"],
-    "ruff.format.args": [
-        "--config=${workspaceFolder}/pyproject.toml"
-    ],
-    "ruff.lint.args": [
-        "--config=${workspaceFolder}/pyproject.toml",
-        "--select=E",
-        "--select=F",
-        "--select=B",
-        "--select=W",
-    ],
-    "ruff.interpreter": [".venv/Scripts/python.exe"],
+    "ruff.organizeImports": true,
+    "ruff.fixAll": true,
     "editor.defaultFormatter": "charliermarsh.ruff",
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
