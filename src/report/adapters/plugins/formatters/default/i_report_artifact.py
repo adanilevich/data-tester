@@ -29,4 +29,5 @@ class IReportArtifact(ABC):
 
     @staticmethod
     def bytes_to_b64_string(content: bytes) -> str:
-        return b64encode(content).decode()
+        b64_str = b64encode(content).decode()
+        return b64_str

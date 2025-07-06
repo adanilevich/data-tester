@@ -13,7 +13,7 @@ from src.dtos import (
 
 class TxtTestCaseReportFormatter(IReportArtifact):
     """
-    Txt-based testcase report with diff, details but without
+    Txt-based testcase report with diff, details but without specifications
     """
 
     artifact_type = ArtifactType.TXT_TESTCASE_REPORT
@@ -21,12 +21,21 @@ class TxtTestCaseReportFormatter(IReportArtifact):
     sensitive = False
 
     def create_artifact(self, result: TestResultDTO) -> TestCaseReportArtifactDTO:
-        """Creates a json-based testcaser report artifact without diff and details"""
+        """
+        Creates a json-based testcaser report artifact without specifications.
+        In case of a compare_sample testcase, diff is also excluded.
+        """
 
         if not isinstance(result, TestCaseResultDTO):
             raise ResultTypeNotSupportedError(f"Json format not supported for {result}")
 
-        content_dict = result.to_dict(exclude={"specifications"}, mode="json")
+        if result.testtype == result.testtype.COMPARE_SAMPLE:
+            exclude = {"specifications", "diff"}
+        else:
+            exclude = {"specifications"}
+
+        # exclude specifications to avoid yaml formatting issue
+        content_dict = result.to_dict(exclude=exclude, mode="json")
 
         content_bytes = yaml.safe_dump(
             data=content_dict,

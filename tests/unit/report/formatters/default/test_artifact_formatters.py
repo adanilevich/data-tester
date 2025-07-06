@@ -2,14 +2,18 @@ import json
 from src.report.adapters.plugins.formatters.default import (
     JsonTestCaseReportFormatter,
     TxtTestCaseReportFormatter,
-    DefaultReportNamingConventions
+    #XlsxTestCaseDiffFormatter,
+    DefaultReportNamingConventions,
 )
-from src.dtos import TestCaseResultDTO
+from src.dtos import TestCaseResultDTO, TestType #, TestResult
 
 
 class TestJsonTestCaseReportFormatter:
-
     def test_that_artefact_is_parseable(self, testcase_result: TestCaseResultDTO):
+        """
+        Test that the artifact is successfully serialized and formatted to a
+        ReportArtifactDTO and that diff and specifications are excluded.
+        """
         # given a json formatter with default naming conventions
         naming_conventions = DefaultReportNamingConventions()
         formatter = JsonTestCaseReportFormatter(naming_conventions=naming_conventions)
@@ -22,13 +26,24 @@ class TestJsonTestCaseReportFormatter:
         assert artifact.filename is not None
         assert len(artifact.filename) > 5
         content_as_dict = json.loads(artifact.content_b64_str)
+
+        # and diff is excluded
         assert "diff" not in content_as_dict
+
+        # and specifications are excluded
+        assert "specifications" not in content_as_dict
+
+        # and result is correctly set
         assert content_as_dict["result"] == result.result.value
 
 
 class TestTxtTestCaseReportFormatter:
-
     def test_that_artefact_is_parseable(self, testcase_result: TestCaseResultDTO):
+        """
+        Test that the artifact is successfully serialized and formatted to a
+        ReportArtifactDTO and that diff is included for non-compare_sample testcases
+        and that specifications are excluded.
+        """
         # given a json formatter with default naming conventions
         naming_conventions = DefaultReportNamingConventions()
         formatter = TxtTestCaseReportFormatter(naming_conventions=naming_conventions)
@@ -36,13 +51,50 @@ class TestTxtTestCaseReportFormatter:
         # when a testcase result is provided
         result = testcase_result
 
+        # and the testcase is not a compare_sample testcase
+        for testtype in [TestType.SCHEMA, TestType.ROWCOUNT]:
+            result.testtype = testtype
+
+            # then it is successfully serialized and formatted to a ReportArtifactDTO
+            artifact = formatter.create_artifact(result=result)
+            assert artifact.filename is not None
+            assert len(artifact.filename) > 5
+
+            # and diff is included for non-compare_sample testcases
+            assert "diff" in artifact.content_b64_str
+
+            # and specifications are excluded
+            assert "specifications" not in artifact.content_b64_str
+
+    def test_that_diff_is_excluded_for_compare_sample_testcases(
+        self, testcase_result: TestCaseResultDTO
+    ):
+        """
+        Test that the artifact is successfully serialized and formatted to a
+        ReportArtifactDTO and that diff is excluded for compare_sample testcases.
+        """
+        # given a json formatter with default naming conventions
+        naming_conventions = DefaultReportNamingConventions()
+        formatter = TxtTestCaseReportFormatter(naming_conventions=naming_conventions)
+
+        # when a testcase result is provided
+        result = testcase_result
+
+        # and the testcase is a compare_sample testcase
+        result.testtype = TestType.COMPARE_SAMPLE
+
         # then it is successfully serialized and formatted to a ReportArtifactDTO
         artifact = formatter.create_artifact(result=result)
         assert artifact.filename is not None
         assert len(artifact.filename) > 5
-        assert "diff" in artifact.content_b64_str
 
+        # and specifications are excluded
+        assert "specifications" not in artifact.content_b64_str
 
+        # and diff is excluded
+        assert "diff" not in artifact.content_b64_str
+
+# TODO: fix this test
 # class TestExcelTestCaseDiffFormatter:
 
 #     def test_that_artefact_is_parseable(self, testcase_result: TestCaseResultDTO):

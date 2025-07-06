@@ -61,7 +61,7 @@ class TestDefaultReportFormatter:
         # when formatter doesnt support one artifact type, e.g. TXT_REPORT
         assert ArtifactType.TXT_TESTCASE_REPORT not in formatter.config
 
-        # the unsupported artifact type is requested
+        # and the unsupported artifact type is requested
         requested_artifact_types = [
             ArtifactType.JSON_TESTCASE_REPORT,
             ArtifactType.TXT_TESTCASE_REPORT,

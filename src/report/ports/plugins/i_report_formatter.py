@@ -21,7 +21,7 @@ class IReportFormatter(ABC):
         artifact_types: List[ArtifactType],
     ) -> List[ReportArtifactDTO]:
         """
-        From given testcase or testrun result, creates a list of requestd report
+        From given testcase or testrun result, creates a list of requested report
         artifacts.
 
         Args:

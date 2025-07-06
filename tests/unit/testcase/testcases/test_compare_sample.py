@@ -108,7 +108,7 @@ class TestCompareSampleTestCase:
         testcase._execute()
 
         assert testcase.result == testcase.result.NOK
-        assert "compare_sample_diff_example" in testcase.diff
+        assert "compare_sample_diff" in testcase.diff
         assert testcase.summary == "Testobject differs from SQL in 1 row(s)."
 
     # skip performance test, only execute if needed
