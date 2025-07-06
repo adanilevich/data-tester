@@ -3,7 +3,7 @@ import pytest
 from base64 import b64encode
 from uuid import uuid4
 from datetime import datetime
-from src.report.plugins.formatters.default import (
+from src.report.adapters.plugins.formatters.default import (
     DefaultReportFormatter,
     IReportArtifact,
     DefaultReportNamingConventions,

@@ -1,5 +1,5 @@
 from src.report.ports import SaveReportCommand, ISaveReportCommandHandler, IStorage
-from src.report import Report
+from src.report.core.report import Report
 
 
 class SaveReportCommandHandler(ISaveReportCommandHandler):

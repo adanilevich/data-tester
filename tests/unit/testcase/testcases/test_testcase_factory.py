@@ -2,7 +2,7 @@ import pytest
 from uuid import uuid4
 
 from src.dtos import TestObjectDTO, SpecificationDTO, TestType
-from src.testcase.testcases import TestCaseFactory, TestCaseUnknownError
+from src.testcase.core.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class TestTestCaseFactory:

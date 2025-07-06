@@ -27,8 +27,8 @@ from src.dtos import (
 from src.testcase.ports import IDataPlatform
 from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
 from src.testcase.adapters.data_platforms import DummyPlatform
-from src.testcase.testcases import TestCaseFactory, AbstractTestCase
-from src.testcase.precondition_checks import ICheckable
+from src.testcase.core.testcases import TestCaseFactory, AbstractTestCase
+from src.testcase.core.precondition_checks import ICheckable
 from src.report import TestCaseReport, TestRunReport
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 

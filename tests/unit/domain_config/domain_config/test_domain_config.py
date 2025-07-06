@@ -2,7 +2,7 @@ from typing import List, Any
 import pytest
 from src.dtos import DomainConfigDTO
 from src.domain_config.ports import StorageError
-from src.domain_config import DomainConfig
+from src.domain_config.core import DomainConfig
 
 
 class DummyStorage:
