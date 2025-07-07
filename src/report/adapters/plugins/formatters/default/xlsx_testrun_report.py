@@ -12,7 +12,7 @@ from src.dtos import (
 
 class XlsxTestRunReportFormatter(IReportArtifact):
     """
-    Excel-based testrun report with only most important info
+    Excel-based testrun report with only most important info included
     """
 
     artifact_type = ArtifactType.XLSX_TESTRUN_REPORT
