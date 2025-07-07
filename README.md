@@ -23,7 +23,7 @@
 | src/domain\_config/application/\_\_init\_\_.py                                   |        2 |        0 |    100% |           |
 | src/domain\_config/application/fetch\_domain\_configs.py                         |       13 |        0 |    100% |           |
 | src/domain\_config/core/\_\_init\_\_.py                                          |        1 |        0 |    100% |           |
-| src/domain\_config/core/domain\_config.py                                        |       33 |        4 |     88% |53-57, 62-63 |
+| src/domain\_config/core/domain\_config.py                                        |       33 |        4 |     88% |58-62, 67-68 |
 | src/domain\_config/dependency\_injection.py                                      |       10 |        0 |    100% |           |
 | src/domain\_config/drivers/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/domain\_config/drivers/domain\_config\_manager.py                            |       18 |        0 |    100% |           |
@@ -33,7 +33,7 @@
 | src/domain\_config/ports/i\_naming\_conventions.py                               |        2 |        0 |    100% |           |
 | src/domain\_config/ports/i\_storage.py                                           |        5 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                         |        5 |        0 |    100% |           |
-| src/dtos/configs.py                                                              |       50 |        1 |     98% |        67 |
+| src/dtos/configs.py                                                              |       49 |        1 |     98% |        66 |
 | src/dtos/dto.py                                                                  |       12 |        0 |    100% |           |
 | src/dtos/reports.py                                                              |       66 |        4 |     94% |65-66, 89, 119 |
 | src/dtos/specifications.py                                                       |       40 |        2 |     95% |    25, 60 |
@@ -101,7 +101,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py            |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py   |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                        |        2 |        0 |    100% |           |
-|                                                                        **TOTAL** | **1822** |  **178** | **90%** |           |
+|                                                                        **TOTAL** | **1821** |  **178** | **90%** |           |
 
 9 empty files skipped.
 
