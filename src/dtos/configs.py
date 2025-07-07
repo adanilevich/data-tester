@@ -20,7 +20,6 @@ class TestCasesConfigDTO(DTO):
     def from_dict(cls, dict_: dict) -> Self:
         schema = dict_["schema"]
         compare_sample = dict_["compare_sample"]
-        print("SDFGdfDSFGdfgdfgdfgggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfggggg")
 
         return cls(
             schema=SchemaTestCaseConfigDTO.from_dict(schema),

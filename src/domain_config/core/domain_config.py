@@ -5,7 +5,12 @@ from src.domain_config.ports import (
 )
 from src.dtos import DomainConfigDTO
 
-
+# TODO: simplify this module:
+# 1. get all relevant domains from application config.
+# 2. get domain config location from application config. "LOCAL" would mean that
+# domain configs are stored in the local file system.
+# 3. load all domain configs from the location.
+# 4. implement load and save interfaces and implementations for the domain configs.
 class DomainConfig:
 
     def __init__(
