@@ -1,7 +1,4 @@
 import pytest
-import base64
-import polars as pl
-import yaml  # type: ignore
 import json
 from src.report.adapters.plugins.formatters.default.i_report_artifact import (
     IReportArtifact, ReportArtifactError
@@ -45,28 +42,28 @@ def test_json_bytes_to_dict():
     result = IReportArtifact.json_bytes_to_dict(json_bytes)
     assert result == data
 
-def test_dict_to_excel_bytes_error(monkeypatch):
-    def bad_write_excel(self, io):
-        raise Exception("fail")
-    monkeypatch.setattr(pl.DataFrame, "write_excel", bad_write_excel)
+def test_dict_to_excel_bytes_error():
+    # Pass a dict with lists of different lengths to trigger polars error
     with pytest.raises(ReportArtifactError):
-        IReportArtifact.dict_to_excel_bytes({"a": [1]})
+        IReportArtifact.dict_to_excel_bytes({"a": [1, 2], "b": [3]})
 
-def test_excel_bytes_to_dict_error(monkeypatch):
-    monkeypatch.setattr(pl, "read_excel", lambda x: (_ for _ in ()).throw(Exception("fail")))
+def test_excel_bytes_to_dict_error():
+    # Pass invalid bytes that are not a valid Excel file
     with pytest.raises(ReportArtifactError):
-        IReportArtifact.excel_bytes_to_dict(b"bad bytes")
+        IReportArtifact.excel_bytes_to_dict(b"not an excel file")
 
-def test_dict_to_yaml_bytes_error(monkeypatch):
-    monkeypatch.setattr(yaml, "safe_dump", lambda *a, **k: (_ for _ in ()).throw(Exception("fail")))
+def test_dict_to_yaml_bytes_error():
+    # Pass a dict with an unserializable object to trigger yaml error
+    class Unserializable:
+        pass
     with pytest.raises(ReportArtifactError):
-        IReportArtifact.dict_to_yaml_bytes({"a": 1})
+        IReportArtifact.dict_to_yaml_bytes({"a": Unserializable()})
 
-def test_yaml_bytes_to_dict_error(monkeypatch):
-    monkeypatch.setattr(yaml, "safe_load", lambda *a, **k: (_ for _ in ()).throw(Exception("fail")))
+def test_yaml_bytes_to_dict_error():
+    # Pass invalid YAML bytes
     with pytest.raises(ReportArtifactError):
-        IReportArtifact.yaml_bytes_to_dict(b"bad")
+        IReportArtifact.yaml_bytes_to_dict(b"not: [valid, yaml: }")
 
 def test_json_bytes_to_dict_error():
     with pytest.raises(ReportArtifactError):
-        IReportArtifact.json_bytes_to_dict(b"not json") 
+        IReportArtifact.json_bytes_to_dict(b"not json")
