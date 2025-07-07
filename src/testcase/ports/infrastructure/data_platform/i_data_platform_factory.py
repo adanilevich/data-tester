@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from src.testcase.ports.i_data_platform import IDataPlatform
+from src.testcase.ports.infrastructure.data_platform.i_data_platform import IDataPlatform
 from src.dtos import DomainConfigDTO
 
 

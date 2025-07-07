@@ -25,8 +25,8 @@ from src.dtos import (
     TestType,
 )
 from src.testcase.ports import IDataPlatform
-from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
-from src.testcase.adapters.data_platforms import DummyPlatform
+from src.notifier import InMemoryNotifier, StdoutNotifier
+from src.data_platform import DummyPlatform
 from src.testcase.core.testcases import TestCaseFactory, AbstractTestCase
 from src.testcase.core.precondition_checks import ICheckable
 from src.report import TestCaseReport, TestRunReport

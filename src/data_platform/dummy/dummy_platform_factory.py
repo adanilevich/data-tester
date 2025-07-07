@@ -1,6 +1,6 @@
 from src.testcase.ports import IDataPlatformFactory
 from src.dtos import DomainConfigDTO
-from src.testcase.adapters.data_platforms.dummy import DummyPlatform
+from src.data_platform.dummy import DummyPlatform
 
 
 class DummyPlatformFactory(IDataPlatformFactory):

@@ -1,4 +1,4 @@
-from src.testcase.ports.i_notifier import INotifier
+from src.testcase.ports import INotifier
 
 
 class StdoutNotifier(INotifier):

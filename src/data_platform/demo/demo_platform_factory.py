@@ -1,15 +1,14 @@
 from pathlib import Path
 
 from src.dtos import DomainConfigDTO
-from src.testcase.adapters.data_platforms.demo import (
+from src.data_platform.demo import (
     DemoDataPlatform, DemoNamingResolver, DemoQueryHandler
 )
 from src.testcase.ports import IDataPlatformFactory
 
-
-PATH = Path(__file__).parent
-local_raw_data = PATH.parent.parent.parent.parent.parent / "tests/fixtures/demo/raw"
-local_db_data = PATH.parent.parent.parent.parent.parent / "tests/fixtures/demo/dbs"
+# Use project-root-relative paths for test fixtures
+local_raw_data = Path("tests/fixtures/demo/raw")
+local_db_data = Path("tests/fixtures/demo/dbs")
 
 
 class DemoDataPlatformFactory(IDataPlatformFactory):

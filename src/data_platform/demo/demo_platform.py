@@ -6,7 +6,7 @@ import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
-from src.testcase.adapters.data_platforms.demo import DemoNamingResolver, DemoQueryHandler
+from src.data_platform.demo import DemoNamingResolver, DemoQueryHandler
 from src.testcase.ports import IDataPlatform
 from src.dtos import SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO
 

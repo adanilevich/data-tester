@@ -5,7 +5,7 @@ from src.domain_config.drivers import DomainConfigManager
 from src.storage import FileStorage
 
 
-class DependencyInjector:
+class DomainConfigDependencyInjector:
     """
     Simple dependency injector which returns finders and getters which operate
     with naive naming conventions based on yaml-based domain configs in local or

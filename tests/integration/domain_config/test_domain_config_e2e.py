@@ -1,7 +1,7 @@
 import pytest
 import yaml  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
-from src.domain_config.di import DependencyInjector
+from src.domain_config.dependency_injection import DomainConfigDependencyInjector
 from src.dtos import DomainConfigDTO
 
 
@@ -32,7 +32,7 @@ class TestDomainConfigIntegration:
     def test_fetching_config(self, persist_domain_config, domain_config: DomainConfigDTO):
 
         # given an intialized domain config manager
-        manager = DependencyInjector().domain_config_manager()
+        manager = DomainConfigDependencyInjector().domain_config_manager()
 
         # when a valid yaml-based domain_config is stored in a given location
         location = PATH
