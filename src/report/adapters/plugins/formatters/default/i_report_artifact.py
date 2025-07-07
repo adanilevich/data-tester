@@ -4,6 +4,7 @@ from io import BytesIO
 import polars as pl
 import yaml #type: ignore
 import json
+from typing import List, Dict, Any
 
 from src.report.adapters.plugins.formatters.default import IReportNamingConventions
 from src.dtos import TestResultDTO, ReportArtifactDTO, ArtifactType
@@ -40,7 +41,7 @@ class IReportArtifact(ABC):
         return base64.b64decode(b64_str)
 
     @classmethod
-    def dict_to_excel_bytes(cls, data: dict) -> bytes:
+    def dict_to_excel_bytes(cls, data: List[Dict[str, Any]] | Dict[str, Any]) -> bytes:
         try:
             df = pl.DataFrame(data)
             excel_io = BytesIO()
