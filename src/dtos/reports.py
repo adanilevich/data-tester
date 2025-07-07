@@ -2,8 +2,9 @@ from typing import Dict, Self
 from uuid import uuid4
 from enum import Enum
 from datetime import datetime
+import base64
 
-from pydantic import Field, UUID4, Base64Str
+from pydantic import Field, UUID4, field_validator
 
 from src.dtos import (
     DTO,
@@ -42,8 +43,10 @@ class ReportArtifactDTO(DTO):
     """Artifact location, interpretable by IStorage. E.g. s3://my-bucket/file.txt"""
     content_type: str
     """Https content type of content in 'content_b64', e.g. 'text/plain'"""
-    content_b64_str: Base64Str
-    """Content of the artifact, enconded as Base64 string """
+    content_b64_str: str
+    """Content of the artifact, enconded as Base64 string. A dedicated validator
+    is used to ensure that the string is a valid base64 string since pydantic Base64Str
+    is too strict."""
     filename: str | None = Field(default=None)
     """Filename of artifact, if storeable (see tags 'store')"""
     testrun_id: UUID4
@@ -52,6 +55,16 @@ class ReportArtifactDTO(DTO):
     """Start timestamp of test run or test case which produced the artifact"""
     result: TestResult
     """Result of test run or test case which produced the artifact"""
+
+    @field_validator('content_b64_str')
+    @classmethod
+    def validate_base64(cls, v):
+        try:
+            # Try to decode to ensure it's valid base64
+            base64.b64decode(v)
+        except Exception as e:
+            raise ValueError("content_b64 is not valid base64") from e
+        return v
 
 
 class TestCaseReportArtifactDTO(ReportArtifactDTO):
@@ -70,7 +83,7 @@ class TestCaseReportArtifactDTO(ReportArtifactDTO):
         artifact_type: ArtifactType,
         content_type: str,
         sensitive: bool,
-        content_b64_str: Base64Str,
+        content_b64_str: str,
         filename: str,
     ) -> Self:
         return cls(
@@ -100,7 +113,7 @@ class TestRunReportArtifactDTO(ReportArtifactDTO):
         artifact_type: ArtifactType,
         content_type: str,
         sensitive: bool,
-        content_b64_str: Base64Str,
+        content_b64_str: str,
         filename: str,
     ) -> Self:
         return cls(

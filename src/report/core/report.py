@@ -66,7 +66,7 @@ class Report:
 
             if save_only_artifact_content:
                 full_path = location + artifact.filename  # type: ignore
-                # pydantic Base64String returns actual, unencoded string when accessing!
+                # b64 string returns actual, unencoded string when accessing!
                 content_as_str = artifact.content_b64_str
                 content = content_as_str.encode()
             else:

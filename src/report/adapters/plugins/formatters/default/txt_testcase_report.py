@@ -29,6 +29,8 @@ class TxtTestCaseReportFormatter(IReportArtifact):
         if not isinstance(result, TestCaseResultDTO):
             raise ResultTypeNotSupportedError(f"Json format not supported for {result}")
 
+        # exclude specifications to avoid yaml formatting issue
+        # exclude diff to avoid overloading txt report with too much data
         if result.testtype == result.testtype.COMPARE_SAMPLE:
             exclude = {"specifications", "diff"}
         else:
@@ -36,13 +38,7 @@ class TxtTestCaseReportFormatter(IReportArtifact):
 
         # exclude specifications to avoid yaml formatting issue
         content_dict = result.to_dict(exclude=exclude, mode="json")
-
-        content_bytes = yaml.safe_dump(
-            data=content_dict,
-            default_flow_style=False,
-            indent=4,
-            encoding="utf-8"
-        )
+        content_bytes = self.dict_to_yaml_bytes(content_dict)
         content_b64_str = self.bytes_to_b64_string(content_bytes)
 
         artifact = TestCaseReportArtifactDTO(
