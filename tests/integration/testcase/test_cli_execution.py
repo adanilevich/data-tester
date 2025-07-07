@@ -2,7 +2,7 @@ import os
 from typing import List
 from uuid import uuid4
 
-from src.testcase.di.di import DependencyInjector
+from src.data_platform.dependency_injection import DataPlatformDependencyInjector
 from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
 from src.dtos import TestType, TestResult, TestStatus
 
@@ -53,7 +53,7 @@ testcases = [
 
 def test_cli_execution_with_dummy_testcases():
     os.environ["DATATESTER_ENV"] = "DUMMY"
-    command_handler = DependencyInjector().run_testcases_command_handler()
+    command_handler = DataPlatformDependencyInjector().run_testcases_command_handler()
     runner = CliTestCaseRunner(handler=command_handler)
 
     results = runner.run_testcases(testcases=testcases)

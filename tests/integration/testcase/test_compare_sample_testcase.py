@@ -1,8 +1,8 @@
 from uuid import uuid4
 from src.testcase.core.testcases import TestCaseFactory
 from src.dtos import CompareSampleSqlDTO, SchemaSpecificationDTO, TestObjectDTO, TestType
-from src.testcase.adapters.data_platforms import DemoDataPlatformFactory
-from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
+from src.data_platform import DemoDataPlatformFactory
+from src.notifier import InMemoryNotifier, StdoutNotifier
 
 
 sql = CompareSampleSqlDTO(

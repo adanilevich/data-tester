@@ -1,7 +1,7 @@
 from typing import List
 import pytest
 
-from src.testcase.adapters.data_platforms import DemoDataPlatformFactory
+from src.data_platform import DemoDataPlatformFactory
 from src.dtos import DBInstanceDTO, TestObjectDTO
 
 

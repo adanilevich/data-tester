@@ -4,10 +4,10 @@ This class will instantiate Backends, Notifiers, Handlers based on ENV vars.
 """
 from typing import List
 
-from src.testcase.adapters.data_platforms import (
+from src.data_platform import (
     DummyPlatformFactory, DemoDataPlatformFactory
 )
-from src.testcase.adapters.notifiers import InMemoryNotifier, StdoutNotifier
+from src.notifier import InMemoryNotifier, StdoutNotifier
 from src.testcase.application.run_testcases import RunTestCasesCommandHandler
 from src.testcase.ports import (
     IRunTestCasesCommandHandler, IDataPlatformFactory, INotifier
@@ -15,7 +15,7 @@ from src.testcase.ports import (
 from src.config import Config
 
 
-class DependencyInjector:
+class DataPlatformDependencyInjector:
 
     def __init__(self):
         self.config = Config()
