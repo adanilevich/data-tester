@@ -1,5 +1,3 @@
-from io import BytesIO
-import polars as pl
 from src.report.adapters.plugins.formatters.default import (
     IReportArtifact,
     ResultTypeNotSupportedError,
@@ -14,7 +12,7 @@ from src.dtos import (
 
 class XlsxTestRunReportFormatter(IReportArtifact):
     """
-    Excel-based testrun report with only most important info
+    Excel-based testrun report with only most important info included
     """
 
     artifact_type = ArtifactType.XLSX_TESTRUN_REPORT
@@ -39,11 +37,9 @@ class XlsxTestRunReportFormatter(IReportArtifact):
               "Summary": result.summary
             } for result in result.testcase_results
         ]
-        df = pl.DataFrame(results)
-        io = BytesIO()
-        df.write_excel(io)
-        content_bytes = io.getbuffer().tobytes()
-        content_b64_str = self.bytes_to_b64_string(content_bytes)
+
+        content_excel_bytes = self.dict_to_excel_bytes(results)
+        content_b64_str = self.bytes_to_b64_string(content_excel_bytes)
 
         artifact = TestRunReportArtifactDTO(
             artifact_type=self.artifact_type,
