@@ -1,5 +1,5 @@
 # project-specific
-scribble.py
+scribble/
 .vscode/
 
 # Byte-compiled / optimized / DLL files

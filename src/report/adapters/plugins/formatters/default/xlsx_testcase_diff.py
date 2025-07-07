@@ -40,19 +40,17 @@ class XlsxTestCaseDiffFormatter(IReportArtifact):
         if result.diff.get("compare_sample_diff") is None:
             raise ReportArtifactError("Compare sample diff is not provided")
 
-        diff = result.diff["compare_sample_diff"]
-        df = pl.DataFrame(diff)
-        io = BytesIO()
-        df.write_excel(io)
-
-        content_bytes = io.getbuffer().tobytes()
-        content_b64_str = self.bytes_to_b64_string(content_bytes)
+        # apply dict() to avoid type hint issue with polars since diff entry is declared
+        # as dict[Any, Any] or list[Any]
+        diff_as_dict = dict(result.diff["compare_sample_diff"])
+        diff_as_excel_bytes = self.dict_to_excel_bytes(diff_as_dict)
+        diff_as_b64_str = self.bytes_to_b64_string(diff_as_excel_bytes)
 
         artifact = TestCaseReportArtifactDTO(
             artifact_type=self.artifact_type,
             sensitive=self.sensitive,
             content_type=self.content_type,
-            content_b64_str=content_b64_str,
+            content_b64_str=diff_as_b64_str,
             testrun_id=result.testrun_id,
             start_ts=result.start_ts,
             result=result.result,
