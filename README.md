@@ -17,22 +17,18 @@
 | src/data\_platform/dummy/dummy\_platform.py                                      |       26 |        9 |     65% |15, 18, 26, 33, 39, 43, 49, 56, 63 |
 | src/data\_platform/dummy/dummy\_platform\_factory.py                             |        6 |        0 |    100% |           |
 | src/domain\_config/\_\_init\_\_.py                                               |        1 |        0 |    100% |           |
-| src/domain\_config/adapters/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
-| src/domain\_config/adapters/plugins/yaml\_formatter.py                           |       13 |        4 |     69% |10-11, 16-17 |
-| src/domain\_config/adapters/plugins/yaml\_naming\_conventions.py                 |        6 |        0 |    100% |           |
 | src/domain\_config/application/\_\_init\_\_.py                                   |        2 |        0 |    100% |           |
-| src/domain\_config/application/fetch\_domain\_configs.py                         |       13 |        0 |    100% |           |
+| src/domain\_config/application/fetch\_domain\_configs.py                         |       11 |        0 |    100% |           |
+| src/domain\_config/application/save\_domain\_config.py                           |        8 |        0 |    100% |           |
 | src/domain\_config/core/\_\_init\_\_.py                                          |        1 |        0 |    100% |           |
-| src/domain\_config/core/domain\_config.py                                        |       40 |        4 |     90% |80-81, 84-85 |
-| src/domain\_config/dependency\_injection.py                                      |       13 |        0 |    100% |           |
+| src/domain\_config/core/domain\_config.py                                        |       65 |       11 |     83% |65-67, 70-72, 80-82, 120-122 |
+| src/domain\_config/dependency\_injection.py                                      |       12 |        0 |    100% |           |
 | src/domain\_config/drivers/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
-| src/domain\_config/drivers/domain\_config\_manager.py                            |       19 |        0 |    100% |           |
-| src/domain\_config/ports/\_\_init\_\_.py                                         |        5 |        0 |    100% |           |
+| src/domain\_config/drivers/cli\_domain\_config\_manager.py                       |       22 |        0 |    100% |           |
+| src/domain\_config/ports/\_\_init\_\_.py                                         |        3 |        0 |    100% |           |
 | src/domain\_config/ports/drivers/i\_fetch\_domain\_configs.py                    |        9 |        0 |    100% |           |
-| src/domain\_config/ports/drivers/i\_save\_domain\_config.py                      |        7 |        2 |     71% |       6-7 |
+| src/domain\_config/ports/drivers/i\_save\_domain\_config.py                      |        7 |        0 |    100% |           |
 | src/domain\_config/ports/infrastructure/i\_storage.py                            |        4 |        0 |    100% |           |
-| src/domain\_config/ports/plugins/i\_domain\_config\_formatter.py                 |        3 |        0 |    100% |           |
-| src/domain\_config/ports/plugins/i\_naming\_conventions.py                       |        2 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                         |        5 |        0 |    100% |           |
 | src/dtos/configs.py                                                              |       49 |        1 |     98% |        66 |
 | src/dtos/dto.py                                                                  |       12 |        0 |    100% |           |
@@ -102,9 +98,9 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py            |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py   |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                        |        2 |        0 |    100% |           |
-|                                                                        **TOTAL** | **1844** |  **182** | **90%** |           |
+|                                                                        **TOTAL** | **1849** |  **183** | **90%** |           |
 
-8 empty files skipped.
+7 empty files skipped.
 
 
 ## Setup coverage badge
