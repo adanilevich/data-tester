@@ -6,9 +6,12 @@ class FetchDomainConfigsCommand:
     def __init__(self, location: str):
         self.location = location
     def __eq__(self, other):
-        return isinstance(other, FetchDomainConfigsCommand) and self.location == other.location
+        return all([
+            isinstance(other, FetchDomainConfigsCommand),
+            self.location == other.location
+        ])
 
 class IFetchDomainConfigsCommandHandler(ABC):
     @abstractmethod
     def fetch(self, command: FetchDomainConfigsCommand) -> Dict[str, DomainConfigDTO]:
-        pass 
+        pass

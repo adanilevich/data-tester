@@ -18,4 +18,4 @@ class IDomainConfigFormatter(ABC):
         Serializes a domain config (or any dictionary) to bytes.
         Raises:
             DomainConfigFormatterError
-        """ 
+        """

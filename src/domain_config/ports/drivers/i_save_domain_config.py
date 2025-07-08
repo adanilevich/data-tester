@@ -9,4 +9,4 @@ class SaveDomainConfigCommand:
 class ISaveDomainConfigCommandHandler(ABC):
     @abstractmethod
     def save(self, command: SaveDomainConfigCommand) -> None:
-        pass 
+        pass

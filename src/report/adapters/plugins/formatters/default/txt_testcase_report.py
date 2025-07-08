@@ -1,4 +1,3 @@
-import yaml  # type: ignore
 from src.report.adapters.plugins.formatters.default import (
     IReportArtifact,
     ResultTypeNotSupportedError,

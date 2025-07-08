@@ -1,5 +1,3 @@
-from io import BytesIO
-import polars as pl
 from src.report.adapters.plugins.formatters.default import (
     IReportArtifact,
     ResultTypeNotSupportedError,
