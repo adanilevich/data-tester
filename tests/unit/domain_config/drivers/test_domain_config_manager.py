@@ -3,7 +3,7 @@ import pytest
 from src.domain_config.ports import FetchDomainConfigsCommand
 from src.domain_config.drivers.cli_domain_config_manager import CLIDomainConfigManager
 from src.config import Config
-from src.domain_config.ports.drivers.i_save_domain_config import ISaveDomainConfigCommandHandler
+from src.domain_config.ports import ISaveDomainConfigCommandHandler
 
 
 class DummyFetchDomainConfigsCommandHandler:
