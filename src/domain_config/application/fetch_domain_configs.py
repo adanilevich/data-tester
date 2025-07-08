@@ -1,4 +1,4 @@
-from typing import List
+from typing import Dict
 
 from src.domain_config.ports import (
     FetchDomainConfigsCommand, IFetchDomainConfigsCommandHandler, INamingConventions,
@@ -20,7 +20,7 @@ class FetchDomainConfigsCommandHandler(IFetchDomainConfigsCommandHandler):
         self.storage: IStorage = storage
         self.serializer: IDomainConfigFormatter = serializer
 
-    def fetch(self, command: FetchDomainConfigsCommand) -> List[DomainConfigDTO]:
+    def fetch(self, command: FetchDomainConfigsCommand) -> Dict[str, DomainConfigDTO]:
 
         manager = DomainConfig(
             naming_conventions=self.naming_conventions,

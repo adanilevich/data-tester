@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 
-
 class INamingConventions(ABC):
-
     @abstractmethod
     def match(self, name: str) -> bool:
         """

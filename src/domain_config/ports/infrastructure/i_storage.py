@@ -1,14 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-
 class StorageError(Exception):
     """"""
-
-
-class StorageContentTypeUnknownError(StorageError):
-    """"""
-
 
 class IStorage(ABC):
     """

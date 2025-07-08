@@ -12,6 +12,7 @@ def env(name: str) -> str | None:
 
 class Config(BaseSettings):
     DATATESTER_GCP_PROJECT: str | None = Field(default=None)
+    DATATESTER_USE_GCS_STORAGE: bool = Field(default=False)
     DATATESTER_DOMAIN_CONFIGS_LOCATION: str | None = Field(default=None)
     DATATESTER_ENV: str | None = Field(default=None)
     """When stored, testreports will be stored in folders defined here"""

@@ -2,6 +2,7 @@ import os
 import pytest
 from src.domain_config.ports import FetchDomainConfigsCommand
 from src.domain_config.drivers import DomainConfigManager
+from src.config import Config
 
 
 class DummyFetchDomainConfigsCommandHandler:
@@ -18,7 +19,8 @@ class TestSimpleDomainConfigManager:
     @pytest.fixture
     def manager(self) -> DomainConfigManager:
         return DomainConfigManager(
-            fetch_command_handler=DummyFetchDomainConfigsCommandHandler()  # type: ignore
+            fetch_command_handler=DummyFetchDomainConfigsCommandHandler(),  # type: ignore
+            config=Config()
         )
 
     @pytest.fixture
@@ -37,10 +39,17 @@ class TestSimpleDomainConfigManager:
 
         result = manager.find("exception")
 
-        assert result == []
+        assert result == {}
 
-    def test_fallback_to_location_from_envs(self, manager, set_env):
+    def test_fallback_to_location_from_envs(self, set_env):
 
+        # have to explicitely instantiate a config such that it reads from envs which
+        # are set by the fixture set_env
+        config = Config()
+        manager = DomainConfigManager(
+            fetch_command_handler=DummyFetchDomainConfigsCommandHandler(),  # type: ignore
+            config=config
+        )
         result = manager.find()
 
         assert result == FetchDomainConfigsCommand(location="a")
