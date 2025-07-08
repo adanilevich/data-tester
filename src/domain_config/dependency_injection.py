@@ -1,6 +1,5 @@
-from src.domain_config.application import FetchDomainConfigsCommandHandler
-from src.domain_config.ports import IFetchDomainConfigsCommandHandler
-from src.domain_config.adapters import BasicYamlNamingConventions, YamlFormatter
+from src.domain_config.application import (
+    FetchDomainConfigsCommandHandler, SaveDomainConfigCommandHandler)
 from src.domain_config.drivers import DomainConfigManager
 from src.storage import FileStorage
 from src.config import Config
@@ -16,15 +15,14 @@ class DomainConfigDependencyInjector:
     def __init__(self, config: Config | None = None):
         self.config = config or Config()
 
-    def find_domain_configs_command_handler(self) -> IFetchDomainConfigsCommandHandler:
-        return FetchDomainConfigsCommandHandler(
-            naming_conventions=BasicYamlNamingConventions(),
-            storage=FileStorage(),
-            serializer=YamlFormatter()
-        )
 
     def domain_config_manager(self) -> DomainConfigManager:
+        storage = FileStorage(config=self.config)
+        fetch_command_handler = FetchDomainConfigsCommandHandler(storage=storage)
+        save_command_handler = SaveDomainConfigCommandHandler(storage=storage)
+
         return DomainConfigManager(
-            fetch_command_handler=self.find_domain_configs_command_handler(),
+            fetch_command_handler=fetch_command_handler,
+            save_command_handler=save_command_handler,
             config=self.config
         )

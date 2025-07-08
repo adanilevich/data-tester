@@ -53,7 +53,7 @@ class TestDomainConfigIntegration:
         persist_domain_config()
 
         # and manager fetches from that location
-        found_domain_configs = manager.find(location=location)
+        found_domain_configs = manager.fetch_domain_configs(location=location)
 
         # then two domain configs should be found
         assert len(found_domain_configs) == 2
