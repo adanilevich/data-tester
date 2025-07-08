@@ -42,7 +42,8 @@ class TestDomainConfigIntegration:
             fs.rm_file(filepath)
 
 
-    def test_fetching_config(self, persist_domain_config, domain_config: DomainConfigDTO):
+    def test_saving_and_fetching_config(
+        self, persist_domain_config, domain_config: DomainConfigDTO):
 
         # given an intialized domain config manager
         di = DomainConfigDependencyInjector(config=Config())
@@ -66,3 +67,14 @@ class TestDomainConfigIntegration:
         dict_keys = found_domain_configs.keys()
         assert "domain_1" in dict_keys
         assert "domain_2" in dict_keys
+
+        # and when a third domain config is saved
+        domain_config_3: DomainConfigDTO = domain_config.model_copy()
+        domain_config_3.domain = "domain_3"
+        manager.save_domain_config(location=location, config=domain_config_3)
+
+        # and domain configs are searched again
+        found_domain_configs = manager.fetch_domain_configs(location=location)
+
+        # then 3 domain configs should be found
+        assert len(found_domain_configs) == 3

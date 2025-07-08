@@ -1,2 +1,2 @@
 # flake8: noqa
-from src.domain_config.drivers.domain_config_manager import *
+from src.domain_config.drivers.cli_domain_config_manager import *

@@ -8,7 +8,7 @@ from src.dtos import DomainConfigDTO
 from src.config import Config
 
 
-class DomainConfigManager:
+class CLIDomainConfigManager:
 
     def __init__(
         self,

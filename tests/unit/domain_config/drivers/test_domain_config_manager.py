@@ -1,8 +1,9 @@
 import os
 import pytest
 from src.domain_config.ports import FetchDomainConfigsCommand
-from src.domain_config.drivers import DomainConfigManager
+from src.domain_config.drivers.cli_domain_config_manager import CLIDomainConfigManager
 from src.config import Config
+from src.domain_config.ports.drivers.i_save_domain_config import ISaveDomainConfigCommandHandler
 
 
 class DummyFetchDomainConfigsCommandHandler:
@@ -14,10 +15,16 @@ class DummyFetchDomainConfigsCommandHandler:
         return command
 
 
-class TestSimpleDomainConfigManager:
+class DummySaveDomainConfigCommandHandler(ISaveDomainConfigCommandHandler):
+    def save(self, command):
+        pass
 
-    manager = DomainConfigManager(
+
+class TestSimpleCLIDomainConfigManager:
+
+    manager = CLIDomainConfigManager(
         fetch_command_handler=DummyFetchDomainConfigsCommandHandler(),  # type: ignore
+        save_command_handler=DummySaveDomainConfigCommandHandler(),  # type: ignore
         config=Config()
     )
 
@@ -39,8 +46,9 @@ class TestSimpleDomainConfigManager:
         # have to explicitely instantiate a config such that it reads from envs which
         # are set by the fixture set_env
         config = Config()
-        manager = DomainConfigManager(
+        manager = CLIDomainConfigManager(
             fetch_command_handler=DummyFetchDomainConfigsCommandHandler(),  # type: ignore
+            save_command_handler=DummySaveDomainConfigCommandHandler(),  # type: ignore
             config=config
         )
         result = manager.fetch_domain_configs()
