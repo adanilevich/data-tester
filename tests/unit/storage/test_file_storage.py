@@ -3,7 +3,6 @@ from pathlib import Path
 from src.storage import (
     FileStorage, StorageTypeUnknownError, ObjectNotFoundError, ObjectIsNotAFileError
 )
-from gcsfs import GCSFileSystem  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
@@ -44,7 +43,7 @@ class TestFileStorage:
     def test_correctly_setting_file_systems(self, storage: FileStorage):
 
         assert isinstance(storage.protocols["local://"], LocalFileSystem)
-        assert isinstance(storage.protocols["gs://"], GCSFileSystem)
+        assert isinstance(storage.protocols["memory://"], MemoryFileSystem)
 
     def test_unknown_protocols_lead_to_errors(self, storage: FileStorage):
         # given a file storage

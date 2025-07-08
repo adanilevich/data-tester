@@ -1,9 +1,14 @@
-from typing import List
+from typing import List, Dict, Any
 from src.domain_config.ports import (
     INamingConventions, IDomainConfigFormatter, IStorage, StorageError,
     DomainConfigFormatterError
 )
 from src.dtos import DomainConfigDTO
+
+
+class DomainConfigAlreadyExistsError(Exception):
+    """"""
+
 
 # TODO: simplify this module:
 # 1. get all relevant domains from application config.
@@ -35,36 +40,55 @@ class DomainConfig:
 
         return candidates
 
-    def fetch_configs(self, location: str) -> List[DomainConfigDTO]:
+    def fetch_configs(self, location: str) -> Dict[str, DomainConfigDTO]:
         """
-        Parses all files in location which match domain config naming conventions
-        and translated contents to a DomainConfigDTO. If parsing or translation to
-        DomainConfigDTO fails, file is ignored.
+        Parses all files in the given location that match the domain config naming
+        conventions, deserializes their contents, and converts them into DomainConfigDTO
+        objects. Since we are potentially reading from user-managed locations, unparseable
+        files and files which don't correspond to the domain config naming conventions
+        are ignored.
+
+        Args:
+            location (str): The path or location where domain config files are stored.
+
+        Returns:
+            Dict[str, DomainConfigDTO]: A dictionary domain names
+            to their corresponding DomainConfigDTO objects. Files that cannot be
+            parsed or do not match the conventions are ignored.
+
+        Raises:
+            ValueError: If the provided location is not a string.
+            DomainConfigAlreadyExistsError: If a domain config for the same domain
+            already exists.
         """
 
         if not isinstance(location, str):
             raise ValueError("Provide a string-valued location of domain configs")
 
         candidates: List[str] = []
-        results: List[DomainConfigDTO] = []
+        found_domain_configs: Dict[str, DomainConfigDTO] = {}
 
         candidates = self._find_candidates(location)
 
         for candidate in candidates:
+            config_as_dict: Dict[str, Any] | None = None
+            config: DomainConfigDTO | None = None
 
             try:
-                content = self.storage.read(path=candidate)
-                dict_ = self.formatter.deserialize(content)
+                config_as_bytes = self.storage.read(path=candidate)
+                config_as_dict = self.formatter.deserialize(config_as_bytes)
             except (StorageError, DomainConfigFormatterError):
-                # since we are parsing all potential candidate files, there might be
-                # parsing errors e.g. if a deprecated or wrongly matched file is parsed
-                # therefore we ignore unparseable files
                 continue
-
             try:
-                conf = DomainConfigDTO.from_dict(dict_)
-                results.append(conf)
+                config = DomainConfigDTO.from_dict(config_as_dict)
             except Exception:
                 continue
 
-        return results
+            if config is not None:
+                if config.domain in found_domain_configs:
+                    msg = f"Domain config for {config.domain} already exists"
+                    raise DomainConfigAlreadyExistsError(msg)
+                else:
+                    found_domain_configs[config.domain] = config
+
+        return found_domain_configs

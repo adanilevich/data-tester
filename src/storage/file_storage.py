@@ -41,12 +41,15 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
     protocols: Dict[str, AbstractFileSystem]
     default_encoding: str = "utf-8"
 
-    def __init__(self):
+    def __init__(self, config: Config | None = None):
+        self.config: Config = config or Config()
         self.protocols = {
             "local://": LocalFileSystem(auto_mkdir=True),
-            "gs://": GCSFileSystem(project=Config().DATATESTER_GCP_PROJECT),
             "memory://": MemoryFileSystem(),  # for testing purpose
         }
+        if self.config.DATATESTER_USE_GCS_STORAGE:
+            self.protocols["gs://"] = GCSFileSystem(
+                project=self.config.DATATESTER_GCP_PROJECT)
 
     def _fs(self, path: str) -> AbstractFileSystem:
         for protocol, fs in self.protocols.items():

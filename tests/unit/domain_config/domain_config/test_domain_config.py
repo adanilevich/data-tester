@@ -1,8 +1,10 @@
 from typing import List, Any
 import pytest
+import random
+import string
 from src.dtos import DomainConfigDTO
 from src.domain_config.ports import StorageError
-from src.domain_config.core import DomainConfig
+from src.domain_config.core import DomainConfig, DomainConfigAlreadyExistsError
 
 
 class DummyStorage:
@@ -38,9 +40,16 @@ class DummyFormatter:
     default_content_type: str = "doesnt matter"
     default_format: str = "doesnt matter"
     default_encoding: str = "doesnt matter"
+    randomize_domain_name: bool = False
 
     def deserialize(self, *args, **kwargs) -> dict:
-        return self.return_value
+        if self.randomize_domain_name:
+            result = self.return_value.copy()
+            result["domain"] = ''.join(random.choices(string.ascii_letters, k=5))
+        else:
+            result = self.return_value
+
+        return result
 
 
 class TestDomainConfigManager:
@@ -67,13 +76,10 @@ class TestDomainConfigManager:
         manager.storage.empty_path = path  # type: ignore
 
         # when fetching domain configs from this path
-        result = set(
-            str(conf.to_dict())  # convert to string for to make it hasheable
-            for conf in manager.fetch_configs(location=path)
-        )
+        result =  manager.fetch_configs(location=path)
 
         # then result set is empty
-        assert result == set([])
+        assert len(result) == 0
 
     def test_fetching_from_non_existing_path_returns_empty_list(
             self, manager: DomainConfig):
@@ -83,13 +89,10 @@ class TestDomainConfigManager:
         manager.storage.non_existing_path = path  # type: ignore
 
         # when fetching domain configs from this path
-        result = set(
-            str(conf.to_dict())  # convert to string for to make it hasheable
-            for conf in manager.fetch_configs(location=path)
-        )
+        result = manager.fetch_configs(location=path)
 
         # then result set is empty
-        assert result == set([])
+        assert len(result) == 0
 
     def test_fetch_only_accepts_string_inputs(self, manager: DomainConfig):
 
@@ -109,16 +112,29 @@ class TestDomainConfigManager:
         manager.storage.found_objects = found_objects  # type: ignore
         manager.naming_conventions.matching_string = "match"  # type: ignore
         manager.formatter.return_value = domain_config.to_dict()  # type: ignore
+        manager.formatter.randomize_domain_name = True  # type: ignore
 
         # when fetching domain configs from this path
-        result = set(
-            str(conf.to_dict())  # convert to string for to make it hasheable
-            for conf in manager.fetch_configs(location=path)
-        )
+        result =  manager.fetch_configs(location=path)
 
-        # then a domain config is returned for each object matching naming conventions
-        expected = set(
-            str(domain_config.to_dict())  # convert to string for to make it hasheable
-            for _ in range(2)
-        )
-        assert result == expected
+        # then two domain configs are returned
+        assert len(result) == 2
+
+        # and domain names are different
+        found_configs = list(result.values())
+        assert found_configs[0].domain != found_configs[1].domain
+
+    def test_exception_if_domain_config_already_exists(
+            self, manager: DomainConfig, domain_config: DomainConfigDTO):
+
+        # given a patch where matching and non-matching objects are stored
+        path = "good_path"
+        found_objects = ["match1", "match2", "bad"]
+        manager.storage.found_objects = found_objects  # type: ignore
+        manager.naming_conventions.matching_string = "match"  # type: ignore
+        manager.formatter.return_value = domain_config.to_dict()  # type: ignore
+        manager.formatter.randomize_domain_name = False  # type: ignore
+
+        # then fetching domain configs raises DomainConfigAlreadyExistsError
+        with pytest.raises(DomainConfigAlreadyExistsError):
+            _ = manager.fetch_configs(location=path)
