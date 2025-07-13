@@ -1,6 +1,4 @@
 import json
-import os
-from typing import Dict, List
 from unittest.mock import Mock
 
 import pytest
@@ -11,7 +9,7 @@ from src.report.core.report import (
     ReportArtifactNotSpecifiedError,
     WrongReportTypeError,
 )
-from src.report.ports.infrastructure import IStorage, StorageTypeUnknownError
+from src.report.ports.infrastructure import StorageTypeUnknownError
 from src.report.adapters.plugins import (
     JsonTestCaseReportFormatter,
     JsonTestRunReportFormatter,
@@ -25,23 +23,8 @@ from src.dtos import (
     ReportArtifact,
     ReportArtifactFormat,
 )
+from src.storage.dict_storage import DictStorage
 
-
-class DictStorage(IStorage):
-    """Mock storage implementation for testing"""
-
-    def __init__(self):
-        self.store: Dict[str, bytes] = {}
-
-    def read(self, path: str) -> bytes:
-        return self.store[path]
-
-    def write(self, content: bytes, path: str):
-        self.store[path] = content
-
-    @property
-    def supported_storage_types(self) -> List[str]:
-        return ["dict"]
 
 @pytest.fixture
 def formatters():

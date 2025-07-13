@@ -45,6 +45,9 @@ class ReportCommandHandler(IReportCommandHandler):
         self.report = Report(formatters=formatters, storages=storages)
 
     def create_report(self, command: CreateReportCommand) -> TestReportDTO:
+        """
+        Creates a report from a test case result provided by the command.
+        """
         return self.report.create_report(command.result)
 
     def save_report(self, command: SaveReportCommand) -> None:
@@ -148,13 +151,15 @@ class ReportCommandHandler(IReportCommandHandler):
     def _get_artifact_filename(
         self, report: TestReportDTO, artifact: ReportArtifact
     ) -> str:
-        """Returns the filename to be stored under for the artifact"""
+        """Returns the filename under which the artifact is to be stored"""
+
+        datetime_str = report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
 
         if isinstance(report, TestRunReportDTO):
             artifact_format = self.config.TESTRUN_REPORT_ARTIFACT_FORMAT
             filename = (
                 "testrun_report_"
-                + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                + datetime_str
                 + "."
                 + artifact_format.value.lower()
             )
@@ -233,7 +238,7 @@ class ReportCommandHandler(IReportCommandHandler):
                 + str(testrun_id)
                 + "_"
                 + str(testcase_id)
-                + artifact_format.value.lower()
+                + "." + artifact_format.value.lower()
             )
         elif isinstance(report, TestRunReportDTO):
             new_location += (
@@ -255,7 +260,7 @@ class ReportCommandHandler(IReportCommandHandler):
                 + str(testrun_id)
                 + "_"
                 + str(testcase_id)
-                + self.config.INTERNAL_TESTREPORT_FORMAT.value.lower()
+                + "." + self.config.INTERNAL_TESTREPORT_FORMAT.value.lower()
             )
         else:
             new_location += (
