@@ -45,10 +45,10 @@
 | src/report/adapters/plugins/txt\_testcase\_report.py                           |       24 |        3 |     88% |     47-49 |
 | src/report/adapters/plugins/xlsx\_testcase\_diff.py                            |       28 |        0 |    100% |           |
 | src/report/adapters/plugins/xlsx\_testrun\_report.py                           |       27 |        3 |     89% |     43-45 |
-| src/report/application/\_\_init\_\_.py                                         |        1 |        1 |      0% |         2 |
-| src/report/application/handle\_reports.py                                      |      103 |      103 |      0% |     1-267 |
+| src/report/application/\_\_init\_\_.py                                         |        1 |        0 |    100% |           |
+| src/report/application/handle\_reports.py                                      |      104 |        9 |     91% |87, 111, 174, 186, 200-205, 226 |
 | src/report/core/\_\_init\_\_.py                                                |        1 |        0 |    100% |           |
-| src/report/core/report.py                                                      |       73 |        8 |     89% |85-86, 93-94, 126-127, 141-143 |
+| src/report/core/report.py                                                      |       73 |        2 |     97% |     93-94 |
 | src/report/drivers/\_\_init\_\_.py                                             |        1 |        1 |      0% |         2 |
 | src/report/drivers/cli\_report\_manager.py                                     |       34 |       34 |      0% |      1-75 |
 | src/report/ports/\_\_init\_\_.py                                               |        3 |        0 |    100% |           |
@@ -58,7 +58,8 @@
 | src/report/ports/infrastructure/i\_storage.py                                  |        6 |        0 |    100% |           |
 | src/report/ports/plugins/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
-| src/storage/\_\_init\_\_.py                                                    |        1 |        0 |    100% |           |
+| src/storage/\_\_init\_\_.py                                                    |        2 |        0 |    100% |           |
+| src/storage/dict\_storage.py                                                   |       30 |        7 |     77% | 36, 52-57 |
 | src/storage/file\_storage.py                                                   |       80 |       20 |     75% |54, 67-72, 79-81, 89, 94, 101-102, 120-122, 137-139, 146 |
 | src/testcase/application/run\_testcases.py                                     |       21 |        0 |    100% |           |
 | src/testcase/core/precondition\_checks/\_\_init\_\_.py                         |       10 |        0 |    100% |           |
@@ -87,7 +88,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py          |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1856** |  **262** | **86%** |           |
+|                                                                      **TOTAL** | **1888** |  **168** | **91%** |           |
 
 7 empty files skipped.
 
