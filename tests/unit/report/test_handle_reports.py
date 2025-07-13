@@ -199,8 +199,10 @@ class TestReportCommandHandler:
             artifact_format=ReportArtifactFormat.TXT,
         )
 
-        # Then: an InvalidReportTypeError should be raised because we can't create testcase artifacts from testrun reports
-        with pytest.raises(InvalidReportTypeError, match="Can't create testcase artifacts from testrun"):
+        # Then: an InvalidReportTypeError should be raised because we can't create
+        # testcase artifacts from testrun reports
+        match = "Can't create testcase artifacts from testrun"
+        with pytest.raises(InvalidReportTypeError, match=match):
             report_handler.get_report_artifact(get_command)
 
     def test_get_testrun_artifact(self, report_handler, testrun_report):
@@ -223,7 +225,8 @@ class TestReportCommandHandler:
             artifact_format=ReportArtifactFormat.XLSX,
         )
 
-        # Then: an InvalidReportTypeError should be raised because only testcase reports are supported
+        # Then: an InvalidReportTypeError should be raised because only testcase reports
+        # are supported
         # The current implementation only supports testcase reports for artifact creation
         with pytest.raises(
             InvalidReportTypeError,

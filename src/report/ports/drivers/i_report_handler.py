@@ -30,7 +30,7 @@ class SaveReportArtifactsForUsersCommand(DTO):
     location: str  # base location of user-managed report storage
     testcase_report_format: ReportArtifactFormat  # user-managed tc report storage format
     testcase_diff_format: ReportArtifactFormat  # user-managed tc diff storage format
-    testrun_report_format: ReportArtifactFormat  # user-managed tr report storage forma    t
+    testrun_report_format: ReportArtifactFormat  # user-managed tr report storage format
 
 
 class IReportCommandHandler(ABC):
