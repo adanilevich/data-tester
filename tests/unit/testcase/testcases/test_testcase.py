@@ -1,5 +1,5 @@
 from src.testcase.core.precondition_checks import IPreconditionChecker, ICheckable
-from src.dtos import TestCaseResultDTO, TestType
+from src.dtos import TestCaseResultDTO, TestType, SpecificationType
 
 
 class DummyChecker(IPreconditionChecker):
@@ -43,9 +43,9 @@ class TestExecutingTestcases:
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)
         for index, spec in enumerate(testcase.specs):
             if index == 0:
-                spec.type = "sql"
+                spec.spec_type = SpecificationType.SCHEMA
             else:
-                spec.type = "schema"
+                spec.spec_type = SpecificationType.SCHEMA
 
         testcase.required_specs = ["sql", "schema"]
         testcase.preconditions = []

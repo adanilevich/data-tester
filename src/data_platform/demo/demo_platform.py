@@ -8,7 +8,10 @@ from fsspec.implementations.local import LocalFileSystem  # type: ignore
 
 from src.data_platform.demo import DemoNamingResolver, DemoQueryHandler
 from src.testcase.ports import IDataPlatform
-from src.dtos import SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO
+from src.dtos import (
+    SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO,
+    SpecificationType
+)
 
 
 class DemoDataPlatform(IDataPlatform):
@@ -195,6 +198,7 @@ class DemoDataPlatform(IDataPlatform):
             location=".".join(testobject.to_dict().values()),
             columns=schema_as_dict,
             testobject=testobject.name,
+            spec_type=SpecificationType.SCHEMA,
         )
 
         return result
@@ -223,6 +227,7 @@ class DemoDataPlatform(IDataPlatform):
             location="user query",
             testobject="user query",
             columns=schema_as_dict,
+            spec_type=SpecificationType.SCHEMA,
         )
 
         return result

@@ -1,12 +1,15 @@
 from uuid import uuid4
 from src.testcase.core.testcases import TestCaseFactory
-from src.dtos import SchemaSpecificationDTO, TestObjectDTO, TestType
+from src.dtos import (
+    SchemaSpecificationDTO, TestObjectDTO, TestType, SpecificationType
+)
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
 spec = SchemaSpecificationDTO(
     location="this_location",
     testobject="stage_customers",
+    spec_type=SpecificationType.SCHEMA,
     columns={
         "date": "string", "id": "int", "region": "string", "name": "string",
         "source_file": "string", "type": "string"

@@ -7,7 +7,7 @@ from datetime import datetime
 from pydantic import Field, UUID4
 
 from src.dtos import DTO
-from src.dtos.specifications import SpecificationDTO
+from src.dtos.specification import SpecificationDTO
 
 
 class TestObjectDTO(DTO):

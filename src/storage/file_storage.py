@@ -12,7 +12,10 @@ from src.domain_config.ports import (
 from src.report.ports import (
     IStorage as IReportStorage,
     StorageError as ReportStorageError,
+    ObjectNotFoundError as ReportStorageObjectNotFoundError,
+    StorageTypeUnknownError as ReportStorageTypeUnknownError,
 )
+
 from src.config import Config
 
 
@@ -20,7 +23,7 @@ class FileStorageError(DomainConfigStorageError, ReportStorageError):
     """"""
 
 
-class ObjectNotFoundError(FileStorageError):
+class ObjectNotFoundError(ReportStorageObjectNotFoundError):
     """"""
 
 
@@ -28,7 +31,7 @@ class ObjectIsNotAFileError(FileStorageError):
     """"""
 
 
-class StorageTypeUnknownError(FileStorageError):
+class StorageTypeUnknownError(ReportStorageTypeUnknownError):
     """"""
 
 
@@ -134,3 +137,10 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         except Exception as err:
             msg = err.__class__.__name__ + ": " + str(err)
             raise FileStorageError(msg) from err
+
+    @property
+    def supported_storage_types(self) -> List[str]:
+        """See interface definition."""
+
+
+        return [protocol.split(":")[0] for protocol in self.protocols]

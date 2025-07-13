@@ -1,36 +1,46 @@
 from abc import ABC, abstractmethod
-from typing import List
-from src.dtos import TestResultDTO, ReportArtifactDTO, ArtifactType
+from src.dtos import TestReportDTO, ReportArtifactFormat, ReportArtifact, ReportType
 
 
 class ReportFormatterError(Exception):
     """"""
 
+class ReportTypeNotSupportedError(ReportFormatterError):
+    """
+    Raised when a report type is not supported by the formatter.
+    """
+
 
 class IReportFormatter(ABC):
     """
     Interface definition for a report formatter. Report formatters operate on Report DTOs
-    and serialize the provided report to given format such that IStorage implementations
-    can save the serialized version to storage.
+    and serialize the provided report to given format, e.g. JSON, TXT, XLSX.
+    Reports artifacts can be both created for testruns and testcases; for testcases
+    artifacts can be created for both the report itself and the diff.
     """
 
     @abstractmethod
-    def create_artifacts(
-        self,
-        result: TestResultDTO,
-        artifact_types: List[ArtifactType],
-    ) -> List[ReportArtifactDTO]:
+    def create_artifact(self, report: TestReportDTO) -> bytes:
         """
-        From given testcase or testrun result, creates a list of requested report
-        artifacts.
+        Creates a formatted report artifact for a given report.
+        """
 
-        Args:
-            result: TestCaseResultDTO or TestRunResultDTO
-            artifact_types: list of requested artifact types to be created
+    @property
+    @abstractmethod
+    def artifact_format(self) -> ReportArtifactFormat:
+        """
+        Returns supported artifact format.
+        """
 
-        Returns:
-            List[artifact]: List of matching report artifacts
-
-        Raises:
-            ReportFormatterError
+    @property
+    @abstractmethod
+    def report_artifact(self) -> ReportArtifact:
+        """
+        Returns supported report artifact type, e.g. 'report' or 'diff'.
+        """
+    @property
+    @abstractmethod
+    def report_type(self) -> ReportType:
+        """
+        Returns supported report type, e.g. 'testcase' or 'testrun'.
         """
