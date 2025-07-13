@@ -20,6 +20,8 @@ class Config(BaseSettings):
     DATATESTER_ENV: str | None = Field(default=None)
 
     # CONFIGURATION OF INTERNAL TESTREPORT STORAGE
+    # based on this, implementations or src.storage will be injected
+    INTERNAL_STORAGE_ENGINE: str = Field(default="DICT")  # GCS, LOCAL or other
     INTERNAL_TESTREPORT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.JSON
     # define application-internal location for testreports
     INTERNAL_TESTREPORT_LOCATION: str | None = Field(default=None)
