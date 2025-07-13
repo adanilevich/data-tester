@@ -230,7 +230,7 @@ def testcase_result(testobject) -> TestCaseResultDTO:
         testtype=TestType.SCHEMA,
         status=TestStatus.FINISHED,
         result=TestResult.OK,
-        diff={"a": [1, 2, 3], "b": {3: 5}},
+        diff={"my_diff": {"a": [1, 2, 3], "b": ["c", "d", "e"]}},
         summary="My Summary",
         facts=[{"a": 5}, {"b": "2"}],
         details=[{"a": 5}, {"b": "2"}],

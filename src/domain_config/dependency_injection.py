@@ -12,9 +12,8 @@ class DomainConfigDependencyInjector:
     cloud blob storage (S3, GCS, Azure Blobs).
     """
 
-    def __init__(self, config: Config | None = None):
-        self.config = config or Config()
-
+    def __init__(self, config: Config):
+        self.config = config
 
     def domain_config_manager(self) -> CLIDomainConfigManager:
         storage = FileStorage(config=self.config)

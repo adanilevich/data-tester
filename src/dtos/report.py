@@ -2,6 +2,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, Union, List, Self
 from datetime import datetime
+from uuid import uuid4
 
 from pydantic import UUID4
 
@@ -26,6 +27,7 @@ class ReportType(Enum):
 
 class TestReportDTO(DTO):
     __test__ = False  # prevents pytest collection
+    report_id: UUID4
     testrun_id: UUID4
     result: str
     start_ts: datetime
@@ -47,6 +49,7 @@ class TestCaseReportDTO(TestReportDTO):
     @classmethod
     def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
         return cls(
+            report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
@@ -72,6 +75,7 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
     @classmethod
     def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
         return cls(
+            report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
@@ -89,6 +93,7 @@ class TestRunReportDTO(TestReportDTO):
     @classmethod
     def from_testrun_result(cls, testrun_result: TestRunResultDTO) -> Self:
         return cls(
+            report_id = uuid4(),
             testrun_id=testrun_result.testrun_id,
             result=testrun_result.result.value,
             start_ts=testrun_result.start_ts,

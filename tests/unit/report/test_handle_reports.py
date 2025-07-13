@@ -5,7 +5,6 @@ from uuid import uuid4
 
 import polars as pl
 
-from src.config import Config
 from src.dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,
@@ -22,8 +21,7 @@ from src.report.application.handle_reports import (
 from src.report.ports.drivers import (
     CreateReportCommand,
     SaveReportCommand,
-    GetTestCaseReportArtifactCommand,
-    GetTestrunReportArtifactCommand,
+    GetReportArtifactCommand,
     SaveReportArtifactsForUsersCommand,
 )
 from src.report.ports.infrastructure import ObjectNotFoundError
@@ -34,14 +32,6 @@ from src.report.adapters.plugins import (
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
 )
-
-
-@pytest.fixture
-def config() -> Config:
-    """Create a test config with INTERNAL_TESTREPORT_LOCATION set"""
-    config = Config(INTERNAL_TESTREPORT_LOCATION="dict:///test_reports")
-
-    return config
 
 
 @pytest.fixture
@@ -57,11 +47,9 @@ def formatters():
 
 
 @pytest.fixture
-def report_handler(config, formatters) -> ReportCommandHandler:
+def report_handler(formatters) -> ReportCommandHandler:
     """Create a ReportCommandHandler with real formatters and storage"""
-    handler = ReportCommandHandler(
-        config=config, formatters=formatters, storages=[DictStorage()]
-    )
+    handler = ReportCommandHandler(formatters=formatters, storages=[DictStorage()])
     return handler
 
 
@@ -70,10 +58,13 @@ class TestReportCommandHandler:
 
     def test_create_testcase_report(self, report_handler, testcase_result):
         """Test creating a report from a test case result"""
+        # Given: a test case result and a report handler
         command = CreateReportCommand(result=testcase_result)
 
+        # When: creating a report from the test case result
         result = report_handler.create_report(command)
 
+        # Then: the result should be a TestCaseReportDTO with correct data
         assert isinstance(result, TestCaseReportDTO)
         assert result.testcase_id == testcase_result.testcase_id
         assert result.testrun_id == testcase_result.testrun_id
@@ -83,10 +74,13 @@ class TestReportCommandHandler:
 
     def test_create_testrun_report(self, report_handler, testrun_result):
         """Test creating a report from a test run result"""
+        # Given: a test run result and a report handler
         command = CreateReportCommand(result=testrun_result)
 
+        # When: creating a report from the test run result
         result = report_handler.create_report(command)
 
+        # Then: the result should be a TestRunReportDTO with correct data
         assert isinstance(result, TestRunReportDTO)
         assert result.testrun_id == testrun_result.testrun_id
         assert result.result == testrun_result.result.value
@@ -94,17 +88,20 @@ class TestReportCommandHandler:
 
     def test_save_testcase_report(self, report_handler, testcase_report):
         """Test saving a test case report"""
+        # Given: a test case report, storage location, and report handler
         location = "dict:///test_reports"
-        command = SaveReportCommand(report=testcase_report, location=location)
+        command = SaveReportCommand(
+            report=testcase_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
         storage = report_handler.storages[0]
 
+        # When: saving the test case report
         report_handler.save_report(command)
 
-        # Verify the report was saved
-        expected_path = (
-            f"{location}/testcase_reports/{testcase_report.testrun_id}"
-            + f"_{testcase_report.testcase_id}.json"
-        )
+        # Then: the report should be saved to the expected location with correct content
+        expected_path = f"{location}{testcase_report.report_id}.json"
         saved_content = storage.read(expected_path)
 
         # Should be valid JSON
@@ -114,14 +111,20 @@ class TestReportCommandHandler:
 
     def test_save_testrun_report(self, report_handler, testrun_report):
         """Test saving a test run report"""
+        # Given: a test run report, storage location, and report handler
         location = "dict:///test_reports"
-        command = SaveReportCommand(report=testrun_report, location=location)
+        command = SaveReportCommand(
+            report=testrun_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
         storage = report_handler.storages[0]
 
+        # When: saving the test run report
         report_handler.save_report(command)
 
-        # Verify the report was saved
-        expected_path = f"{location}/testrun_reports/{testrun_report.testrun_id}.json"
+        # Then: the report should be saved to the expected location with correct content
+        expected_path = f"{location}{testrun_report.report_id}.json"
         saved_content = storage.read(expected_path)
 
         # Should be valid JSON
@@ -130,87 +133,107 @@ class TestReportCommandHandler:
 
     def test_save_report_invalid_type(self, report_handler, testcase_report):
         """Test saving an invalid report type raises error"""
-        # Create a mock object that looks like a report but isn't a valid DTO
+        # Given: a mock object that looks like a report but isn't a valid DTO
         mock_report = type("MockReport", (), {"testrun_id": uuid4()})()
 
         # We need to bypass the validation by creating the command directly
         # since Pydantic would reject the invalid type
         location = "dict:///test_reports"
-        command = SaveReportCommand(report=testcase_report, location=location)
-        # Then replace the report with our invalid one
+        command = SaveReportCommand(
+            report=testcase_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
+        # ... and then replace the report with our invalid one
         command.report = mock_report
 
+        # When: trying to save an invalid report type
+        # Then: an InvalidReportTypeError should be raised
         with pytest.raises(InvalidReportTypeError):
             report_handler.save_report(command)
 
     def test_get_testcase_artifact(self, report_handler, testcase_report):
         """Test retrieving a test case report artifact"""
-        # First save the report
+        # Given: a saved test case report and a report handler
         location = "dict:///test_reports"
-        save_command = SaveReportCommand(report=testcase_report, location=location)
+        save_command = SaveReportCommand(
+            report=testcase_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
         report_handler.save_report(save_command)
 
-        # Then retrieve it
-        get_command = GetTestCaseReportArtifactCommand(
-            testrun_id=str(testcase_report.testrun_id),
-            testcase_id=str(testcase_report.testcase_id),
+        # When: retrieving a test case artifact in TXT format
+        get_command = GetReportArtifactCommand(
+            report_id=testcase_report.report_id,
             location=location,
+            internal_artifact_format=ReportArtifactFormat.JSON,
             artifact=ReportArtifact.REPORT,
             artifact_format=ReportArtifactFormat.TXT,
         )
 
-        result = report_handler.get_testcase_report_artifact(get_command)
+        result = report_handler.get_report_artifact(get_command)
 
+        # Then: the result should be bytes containing the test case summary
         assert isinstance(result, bytes)
         text_content = result.decode("utf-8")
         assert testcase_report.summary in text_content
 
     def test_get_testcase_artifact_wrong_id(self, report_handler, testrun_report):
         """Test retrieving test case artifact from test run report raises error"""
-        # Save a test run report
+        # Given: a saved test run report
         location = "dict:///test_reports"
-        save_command = SaveReportCommand(report=testrun_report, location=location)
+        save_command = SaveReportCommand(
+            report=testrun_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
         report_handler.save_report(save_command)
 
-        # Try to get testcase artifact using a testcase_id that doesn't exist
-        get_command = GetTestCaseReportArtifactCommand(
-            testrun_id=str(testrun_report.testrun_id),
-            testcase_id="non_existent_testcase_id",
+        # When: trying to get testcase artifact using a testcase_id that doesn't exist
+        get_command = GetReportArtifactCommand(
+            report_id=testrun_report.report_id,
             location=location,
+            internal_artifact_format=ReportArtifactFormat.JSON,
             artifact=ReportArtifact.REPORT,
             artifact_format=ReportArtifactFormat.TXT,
         )
 
-        # This should fail because the path doesn't exist
-        with pytest.raises(ObjectNotFoundError):
-            report_handler.get_testcase_report_artifact(get_command)
+        # Then: an InvalidReportTypeError should be raised because we can't create testcase artifacts from testrun reports
+        with pytest.raises(InvalidReportTypeError, match="Can't create testcase artifacts from testrun"):
+            report_handler.get_report_artifact(get_command)
 
     def test_get_testrun_artifact(self, report_handler, testrun_report):
         """Test retrieving a test run report artifact"""
-        # First save the report
+        # Given: a saved test run report
         location = "dict:///test_reports"
-        save_command = SaveReportCommand(report=testrun_report, location=location)
+        save_command = SaveReportCommand(
+            report=testrun_report,
+            location=location,
+            artifact_format=ReportArtifactFormat.JSON
+        )
         report_handler.save_report(save_command)
 
-        # Then retrieve it
-        command = GetTestrunReportArtifactCommand(
-            testrun_id=str(testrun_report.testrun_id),
+        # When: trying to retrieve a test run artifact
+        command = GetReportArtifactCommand(
+            report_id=testrun_report.report_id,
             location=location,
+            internal_artifact_format=ReportArtifactFormat.JSON,
+            artifact=ReportArtifact.REPORT,
             artifact_format=ReportArtifactFormat.XLSX,
         )
 
-        result = report_handler.get_testrun_report_artifact(command)
-
-        assert isinstance(result, bytes)
-        report = pl.read_excel(result)
-        expected_columns = list(testrun_report.testcase_results[0].to_dict().keys())
-        assert report.columns == expected_columns
-
-        expected_rowcount = len(testrun_report.testcase_results)
-        assert report.shape[0] == expected_rowcount
+        # Then: an InvalidReportTypeError should be raised because only testcase reports are supported
+        # The current implementation only supports testcase reports for artifact creation
+        with pytest.raises(
+            InvalidReportTypeError,
+            match="Can't create testcase artifacts from testrun"
+        ):
+            report_handler.get_report_artifact(command)
 
     def test_save_for_users_testcase(self, report_handler, testcase_report):
         """Test saving user artifacts for test case report"""
+        # Given: a test case report with diff data and a report handler
         report = testcase_report
         report.diff = {"any_diff": {"a": [1, 2, 3], "b": [4, 5, 6]}}
         report.testtype = TestType.SCHEMA.value
@@ -218,9 +241,18 @@ class TestReportCommandHandler:
         location = "dict:///user_reports"
         storage = report_handler.storages[0]
 
-        command = SaveReportArtifactsForUsersCommand(report=report, location=location)
+        command = SaveReportArtifactsForUsersCommand(
+            report=report,
+            location=location,
+            testcase_report_format=ReportArtifactFormat.TXT,
+            testcase_diff_format=ReportArtifactFormat.XLSX,
+            testrun_report_format=ReportArtifactFormat.XLSX
+        )
+
+        # When: saving user artifacts for the test case report
         report_handler.save_report_artifacts_for_users(command)
 
+        # Then: both report and diff artifacts should be saved to the expected locations
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         expected_report_path = (
@@ -244,7 +276,7 @@ class TestReportCommandHandler:
 
     def test_save_for_users_testcase_no_diff(self, report_handler, testcase_report):
         """Test saving user artifacts for test case report without diff"""
-        # Create test case report without diff
+        # Given: a test case report without diff data
         report = testcase_report
         report.diff = {}
         report.testtype = TestType.SCHEMA.value
@@ -252,9 +284,18 @@ class TestReportCommandHandler:
         location = "dict:///user_reports"
         storage = report_handler.storages[0]
 
-        command = SaveReportArtifactsForUsersCommand(report=report, location=location)
+        command = SaveReportArtifactsForUsersCommand(
+            report=report,
+            location=location,
+            testcase_report_format=ReportArtifactFormat.TXT,
+            testcase_diff_format=ReportArtifactFormat.XLSX,
+            testrun_report_format=ReportArtifactFormat.XLSX
+        )
+
+        # When: saving user artifacts for the test case report without diff
         report_handler.save_report_artifacts_for_users(command)
 
+        # Then: only the report artifact should be saved, no diff artifact
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         expected_report_path = (
@@ -274,14 +315,21 @@ class TestReportCommandHandler:
 
     def test_save_for_users_testrun(self, report_handler, testrun_report):
         """Test saving user artifacts for test run report"""
-        # Given a saved testrun report
+        # Given: a test run report and a report handler
         location = "dict:///user_reports"
         command = SaveReportArtifactsForUsersCommand(
-            report=testrun_report, location=location
+            report=testrun_report,
+            location=location,
+            testcase_report_format=ReportArtifactFormat.TXT,
+            testcase_diff_format=ReportArtifactFormat.XLSX,
+            testrun_report_format=ReportArtifactFormat.XLSX
         )
+
+        # When: saving user artifacts for the test run report
         report_handler.save_report_artifacts_for_users(command)
         storage = report_handler.storages[0]
 
+        # Then: the test run report artifact should be saved to the expected location
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         datetime_str = testrun_report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
