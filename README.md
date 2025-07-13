@@ -5,7 +5,7 @@
 | Name                                                                           |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/config/\_\_init\_\_.py                                                     |        1 |        0 |    100% |           |
-| src/config/config.py                                                           |       16 |        1 |     94% |         9 |
+| src/config/config.py                                                           |       17 |        1 |     94% |         9 |
 | src/data\_platform/\_\_init\_\_.py                                             |        2 |        0 |    100% |           |
 | src/data\_platform/demo/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
 | src/data\_platform/demo/demo\_naming\_resolver.py                              |       47 |        4 |     91% |     82-85 |
@@ -32,7 +32,7 @@
 | src/dtos/\_\_init\_\_.py                                                       |        5 |        0 |    100% |           |
 | src/dtos/domain\_config.py                                                     |       49 |        1 |     98% |        66 |
 | src/dtos/dto.py                                                                |       12 |        1 |     92% |        18 |
-| src/dtos/report.py                                                             |       50 |        0 |    100% |           |
+| src/dtos/report.py                                                             |       52 |        0 |    100% |           |
 | src/dtos/specification.py                                                      |       45 |        2 |     96% |    31, 69 |
 | src/dtos/testcase.py                                                           |       87 |        5 |     94% |48, 58, 105, 122, 125 |
 | src/notifier/\_\_init\_\_.py                                                   |        2 |        0 |    100% |           |
@@ -46,11 +46,12 @@
 | src/report/adapters/plugins/xlsx\_testcase\_diff.py                            |       28 |        0 |    100% |           |
 | src/report/adapters/plugins/xlsx\_testrun\_report.py                           |       27 |        3 |     89% |     43-45 |
 | src/report/application/\_\_init\_\_.py                                         |        1 |        0 |    100% |           |
-| src/report/application/handle\_reports.py                                      |      104 |        9 |     91% |87, 111, 174, 186, 200-205, 226 |
+| src/report/application/handle\_reports.py                                      |       59 |        1 |     98% |       142 |
 | src/report/core/\_\_init\_\_.py                                                |        1 |        0 |    100% |           |
 | src/report/core/report.py                                                      |       73 |        2 |     97% |     93-94 |
-| src/report/drivers/\_\_init\_\_.py                                             |        1 |        1 |      0% |         2 |
-| src/report/drivers/cli\_report\_manager.py                                     |       34 |       34 |      0% |      1-75 |
+| src/report/dependency\_injection.py                                            |       44 |       33 |     25% | 20, 23-68 |
+| src/report/drivers/\_\_init\_\_.py                                             |        1 |        0 |    100% |           |
+| src/report/drivers/cli\_report\_manager.py                                     |       45 |       36 |     20% |23-25, 30-33, 42-73, 79-92 |
 | src/report/ports/\_\_init\_\_.py                                               |        3 |        0 |    100% |           |
 | src/report/ports/drivers/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/report/ports/drivers/i\_report\_handler.py                                 |       24 |        0 |    100% |           |
@@ -88,7 +89,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py          |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1888** |  **168** | **91%** |           |
+|                                                                      **TOTAL** | **1901** |  **194** | **90%** |           |
 
 7 empty files skipped.
 
