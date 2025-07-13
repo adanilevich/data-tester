@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import List
 
 from src.domain_config.ports import (
     IStorage as IDomainConfigStorage,

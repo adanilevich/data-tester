@@ -102,8 +102,8 @@ class TestReportCommandHandler:
 
         # Verify the report was saved
         expected_path = (
-            f"{location}/testcase_reports/{testcase_report.testrun_id}" +
-            f"_{testcase_report.testcase_id}.json"
+            f"{location}/testcase_reports/{testcase_report.testrun_id}"
+            + f"_{testcase_report.testcase_id}.json"
         )
         saved_content = storage.read(expected_path)
 
@@ -224,16 +224,16 @@ class TestReportCommandHandler:
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         expected_report_path = (
-            f"dict:///user_reports/{date_str}/{report.testrun_id}/" +
-            f"{report.testobject}_{report.testtype}_report.txt"
+            f"dict:///user_reports/{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_report.txt"
         )
         report_content = storage.read(expected_report_path)
         assert isinstance(report_content, bytes)
 
         # Should save diff artifact since testcase has diff
         expected_diff_path = (
-            f"dict:///user_reports/{date_str}/{report.testrun_id}/" +
-            f"{report.testobject}_{report.testtype}_diff.xlsx"
+            f"dict:///user_reports/{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_diff.xlsx"
         )
         diff_content = storage.read(expected_diff_path)
 
@@ -258,16 +258,16 @@ class TestReportCommandHandler:
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         expected_report_path = (
-            f"{location}/{date_str}/{report.testrun_id}/" +
-            f"{report.testobject}_{report.testtype}_report.txt"
+            f"{location}/{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_report.txt"
         )
         report_content = storage.read(expected_report_path)
         assert isinstance(report_content, bytes)
 
         # Should NOT save diff artifact since no diff
         expected_diff_path = (
-            f"{location}/{date_str}/{report.testrun_id}/" +
-            f"{report.testobject}_{report.testtype}_diff.xlsx"
+            f"{location}/{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_diff.xlsx"
         )
         with pytest.raises(ObjectNotFoundError):
             storage.read(expected_diff_path)
@@ -276,16 +276,18 @@ class TestReportCommandHandler:
         """Test saving user artifacts for test run report"""
         # Given a saved testrun report
         location = "dict:///user_reports"
-        command = SaveReportArtifactsForUsersCommand(report=testrun_report, location=location)
+        command = SaveReportArtifactsForUsersCommand(
+            report=testrun_report, location=location
+        )
         report_handler.save_report_artifacts_for_users(command)
         storage = report_handler.storages[0]
 
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
-        datetime_str = testrun_report.start_ts.strftime('%Y-%m-%d_%H-%M-%S')
+        datetime_str = testrun_report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
         expected_report_path = (
-            f"{location}/{date_str}/{testrun_report.testrun_id}/" +
-            f"testrun_report_{datetime_str}.xlsx"
+            f"{location}/{date_str}/{testrun_report.testrun_id}/"
+            + f"testrun_report_{datetime_str}.xlsx"
         )
 
         report_content = storage.read(expected_report_path)
