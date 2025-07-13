@@ -5,7 +5,9 @@ import time
 import polars as pl
 
 from src.testcase.core.testcases import CompareSampleTestCase
-from src.dtos import SchemaSpecificationDTO, CompareSampleSqlDTO, TestType
+from src.dtos import (
+    SchemaSpecificationDTO, CompareSampleSqlDTO, TestType, SpecificationType
+)
 
 
 # noinspection PyUnusedLocal
@@ -16,12 +18,14 @@ class TestCompareSampleTestCase:
         columns={"a": "int", "b": "string", "c": "bool"},
         primary_keys=["a", "b"],
         testobject="stage_customers",
+        spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
     )
 
     sql = CompareSampleSqlDTO(
         location="this_location",
         query="this_will_be_changed",
         testobject="stage_customers",
+        spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
     )
 
     data = pl.DataFrame({

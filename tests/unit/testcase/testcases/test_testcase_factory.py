@@ -1,15 +1,17 @@
 import pytest
 from uuid import uuid4
 
-from src.dtos import TestObjectDTO, SpecificationDTO, TestType
+from src.dtos import TestObjectDTO, SpecificationDTO, TestType, SpecificationType
 from src.testcase.core.testcases import TestCaseFactory, TestCaseUnknownError
 
 
 class TestTestCaseFactory:
     testobject = TestObjectDTO(name="to", domain="dom", stage="proj", instance="inst")
     specifications = [
-        SpecificationDTO(type="schema", location="loc", testobject="to"),
-        SpecificationDTO(type="sql", location="loc", testobject="to"),
+        SpecificationDTO(
+            spec_type=SpecificationType.SCHEMA, location="loc", testobject="to"),
+        SpecificationDTO(
+            spec_type=SpecificationType.ROWCOUNT_SQL, location="loc", testobject="to"),
     ]
 
     def test_cant_create_unknown_testcase(

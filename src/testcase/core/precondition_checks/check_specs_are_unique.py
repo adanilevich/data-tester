@@ -15,10 +15,11 @@ class CheckSpecsAreUnique(AbstractCheck):
         provided_specs = checkable.specs
         provided_spec_type_counts: Dict[str, int] = {}
         for spec in provided_specs:
-            if spec.type not in provided_spec_type_counts:
-                provided_spec_type_counts[spec.type] = 1
+            spec_type = spec.spec_type.value
+            if spec_type not in provided_spec_type_counts:
+                provided_spec_type_counts[spec_type] = 1
             else:
-                provided_spec_type_counts[spec.type] += 1
+                provided_spec_type_counts[spec_type] += 1
 
         result = True
 

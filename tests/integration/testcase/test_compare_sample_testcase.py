@@ -1,6 +1,12 @@
 from uuid import uuid4
 from src.testcase.core.testcases import TestCaseFactory
-from src.dtos import CompareSampleSqlDTO, SchemaSpecificationDTO, TestObjectDTO, TestType
+from src.dtos import (
+    CompareSampleSqlDTO,
+    SchemaSpecificationDTO,
+    TestObjectDTO,
+    TestType,
+    SpecificationType,
+)
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
@@ -8,6 +14,7 @@ from src.notifier import InMemoryNotifier, StdoutNotifier
 sql = CompareSampleSqlDTO(
     location="this_location",
     testobject="core_customer_transactions",
+    spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
     query="""
     WITH __expected__ AS (
         SELECT
@@ -28,6 +35,7 @@ sql = CompareSampleSqlDTO(
 schema = SchemaSpecificationDTO(
     location="that_location",
     testobject="core_customer_transactions",
+    spec_type=SpecificationType.SCHEMA,
     columns={"customer_id": "int"},  # plays no role, but must be non-empty
     primary_keys=["customer_id", "transaction_date"]
 )

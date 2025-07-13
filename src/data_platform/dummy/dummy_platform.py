@@ -3,7 +3,9 @@ from typing import List, Optional, Tuple
 import polars as pl
 
 from src.testcase.ports import IDataPlatform
-from src.dtos import SchemaSpecificationDTO, DBInstanceDTO, TestObjectDTO
+from src.dtos import (
+    SchemaSpecificationDTO, DBInstanceDTO, TestObjectDTO, SpecificationType
+)
 
 
 class DummyPlatform(IDataPlatform):
@@ -18,7 +20,8 @@ class DummyPlatform(IDataPlatform):
         return SchemaSpecificationDTO(
             location="my_loc",
             testobject=testobject.name,
-            columns={"my_col": "my_dtype"}
+            columns={"my_col": "my_dtype"},
+            spec_type=SpecificationType.SCHEMA,
             )
 
     def get_schema_from_query(
@@ -27,6 +30,7 @@ class DummyPlatform(IDataPlatform):
             location="my_loc",
             testobject="user query",
             columns={"my_col": "my_dtype"},
+            spec_type=SpecificationType.SCHEMA,
         )
 
     def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:

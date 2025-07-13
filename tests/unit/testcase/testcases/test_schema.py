@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.core.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO, TestType
+from src.dtos import SchemaSpecificationDTO, TestType, SpecificationType
 
 
 class TestSchemaTestCase:
@@ -13,6 +13,7 @@ class TestSchemaTestCase:
         clustering_columns=["b"],
         primary_keys=["a", "b"],
         testobject="stage_customers",
+        spec_type=SpecificationType.SCHEMA,
     )
 
     @pytest.fixture

@@ -1,6 +1,6 @@
 from uuid import uuid4
 from src.testcase.core.testcases import TestCaseFactory
-from src.dtos import RowCountSqlDTO, TestObjectDTO, TestType
+from src.dtos import RowCountSqlDTO, TestObjectDTO, TestType, SpecificationType
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
@@ -8,6 +8,7 @@ from src.notifier import InMemoryNotifier, StdoutNotifier
 spec = RowCountSqlDTO(
     location="this_location",
     testobject="core_customer_transactions",
+    spec_type=SpecificationType.ROWCOUNT_SQL,
     query="""
     WITH __expected_count__ AS (
         SELECT COUNT(*)

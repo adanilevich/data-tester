@@ -23,13 +23,13 @@ from src.dtos import (
     TestResult,
     TestStatus,
     TestType,
+    SpecificationType,
 )
 from src.testcase.ports import IDataPlatform
 from src.notifier import InMemoryNotifier, StdoutNotifier
 from src.data_platform import DummyPlatform
 from src.testcase.core.testcases import TestCaseFactory, AbstractTestCase
 from src.testcase.core.precondition_checks import ICheckable
-from src.report import TestCaseReport, TestRunReport
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
@@ -123,17 +123,30 @@ class ITestCaseCreator(ABC):
 def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
     class TestCaseCreator(ITestCaseCreator):
         def create(self, ttype: TestType) -> AbstractTestCase:
+            if ttype == TestType.SCHEMA:
+                spec_type = SpecificationType.SCHEMA
+            elif ttype == TestType.ROWCOUNT:
+                spec_type = SpecificationType.ROWCOUNT_SQL
+            elif ttype == TestType.COMPARE_SAMPLE:
+                spec_type = SpecificationType.COMPARE_SAMPLE_SQL
+            elif ttype in [
+                TestType.DUMMY_OK, TestType.DUMMY_NOK, TestType.DUMMY_EXCEPTION
+            ]:
+                spec_type = SpecificationType.SCHEMA
+            else:
+                raise ValueError(f"Invalid test type: {ttype}")
+
             testcase = TestCaseFactory.create(
                 ttype=ttype,
                 testobject=testobject,
                 specs=[
                     SpecificationDTO(
-                        type="spec",
+                        spec_type=spec_type,
                         location="my_location",
                         testobject=testobject.name,
                     ),
                     SpecificationDTO(
-                        type="sql",
+                        spec_type=spec_type,
                         location="my_location",
                         testobject=testobject.name,
                     ),
@@ -236,9 +249,9 @@ def testrun_result(testcase_result) -> TestRunResultDTO:
 
 @pytest.fixture
 def testcase_report(testcase_result) -> TestCaseReportDTO:
-    return TestCaseReport(result=testcase_result).to_dto()
+    return TestCaseReportDTO.from_testcase_result(testcase_result)
 
 
 @pytest.fixture
 def testrun_report(testrun_result) -> TestRunReportDTO:
-    return TestRunReport(result=testrun_result).to_dto()
+    return TestRunReportDTO.from_testrun_result(testrun_result)

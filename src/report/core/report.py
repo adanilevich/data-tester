@@ -1,7 +1,30 @@
+from typing import List, Dict, Tuple
 import json
-from typing import Dict, List
-from src.report.ports import IReportFormatter, IStorage
-from src.dtos import ReportArtifactDTO, TestResultDTO, ArtifactType
+
+from src.report.ports import IReportFormatter, IStorage, StorageTypeUnknownError
+from src.dtos import (
+    TestCaseReportDTO,
+    TestRunReportDTO,
+    TestCaseResultDTO,
+    TestRunResultDTO,
+    TestResultDTO,
+    ReportArtifact,
+    ReportArtifactFormat,
+    ReportType,
+    TestReportDTO,
+)
+
+
+class NoFormatterFoundError(Exception):
+    """Raised when no formatter is found for a given report type, artifact and format"""
+
+
+class ReportArtifactNotSpecifiedError(Exception):
+    """Raised when artifact is not specified for TestCaseReportDTO"""
+
+
+class WrongReportTypeError(Exception):
+    """Raised when a report is not of the expected type"""
 
 
 class Report:
@@ -10,90 +33,123 @@ class Report:
     Bundles common functions like creating and saving artifacts.
     """
 
-    def __init__(self, result: TestResultDTO):
-        self.result: TestResultDTO = result
-        self.artifacts: Dict[str, ReportArtifactDTO] = {}
+    def __init__(self, formatters: List[IReportFormatter], storages: List[IStorage]):
+        self.formatters = formatters
+        self.storages = storages
+        self.storages_by_type: Dict[str, IStorage] = {}
+        self.formatters_by_type_artifact_and_format: Dict[
+            Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
+        ] = {}
 
-    def create_artifacts(
+        for formatter in self.formatters:
+            key = (
+                formatter.report_type,
+                formatter.report_artifact,
+                formatter.artifact_format,
+            )
+            if key in self.formatters_by_type_artifact_and_format:
+                raise ValueError(f"Formatter {formatter} already registered")
+            self.formatters_by_type_artifact_and_format[key] = formatter
+
+        for storage in storages:
+            for storage_type in storage.supported_storage_types:
+                if storage_type in self.storages_by_type:
+                    raise ValueError(f"Storage type {storage_type} already registered")
+                self.storages_by_type[storage_type] = storage
+
+    def create_report(self, result: TestResultDTO) -> TestReportDTO:
+        """Creates a report for a given result"""
+
+        if isinstance(result, TestRunResultDTO):
+            return TestRunReportDTO.from_testrun_result(result)
+        elif isinstance(result, TestCaseResultDTO):
+            return TestCaseReportDTO.from_testcase_result(result)
+        else:
+            raise WrongReportTypeError(f"Wrong report type: {type(result)}")
+
+    def retrieve_report(self, location: str) -> TestReportDTO:
+        """Retrieves a testcase report from a given location"""
+
+        storage_type = location.split("://")[0]
+        if storage_type not in self.storages_by_type:
+            raise StorageTypeUnknownError(f"Storage type {storage_type} not supported")
+
+        storage = self.storages_by_type[storage_type]
+        report_as_dict_bytes = storage.read(location)
+        report_as_dict = json.loads(report_as_dict_bytes)
+
+        # try to initialize one of the both report types from the dict
+        report: TestCaseReportDTO | TestRunReportDTO | None = None
+        try:
+            report = TestCaseReportDTO.from_dict(report_as_dict)
+        except Exception:
+            pass
+        try:
+            report = TestRunReportDTO.from_dict(report_as_dict)
+        except Exception:
+            pass
+
+        if report is None:
+            msg = "Couldn't initialize TestRunReportDTO or TestCaseReportDTO from dict"
+            raise ValueError(msg)
+
+        return report
+
+    def create_artifact(
         self,
-        formatter: IReportFormatter,
-        artifact_types: List[ArtifactType],
-    ):
+        report: TestReportDTO,
+        artifact_format: ReportArtifactFormat,
+        artifact: ReportArtifact | None = None,
+    ) -> bytes:
         """
-        Using provided formatter, creates a list of requested report artifacts.
+        Formats a report artifact for a given report.
 
         Args:
-            formatter: formatter object responsible for creation of report artifacts from
-                report data.
-            artifact_types: List of requested artifact types
+            report: TestReportDTO can be either TestRunReportDTO or TestCaseReportDTO
+            artifact_format: ReportArtifactFormat
+            artifact: ReportArtifact | None = None must be specified as diff or report
+                in order to create a testcase report artifact. For TestRunReportDTO,
+                artifact is not required and will be set to ReportArtifact.REPORT.
+
+        Returns:
+            bytes: The formatted artifact
+
+        Raises:
+            ReportArtifactNotSpecifiedError: When artifact (report or diff) is not
+            specified for TestCaseReportDTO
+                WrongReportTypeError: When report is not of the expected type
+            NoFormatterFoundError: When no formatter is found for a given
+                report type, artifact and format
         """
 
-        artifacts = formatter.create_artifacts(
-            result=self.result,
-            artifact_types=artifact_types,
-        )
+        if isinstance(report, TestRunReportDTO):
+            artifact = ReportArtifact.REPORT
+            report_type = ReportType.TESTRUN
+        elif isinstance(report, TestCaseReportDTO):
+            report_type = ReportType.TESTCASE
+            if artifact is None:
+                msg = "Artifact (report or diff) must be specified for TestCaseReportDTO"
+                raise ReportArtifactNotSpecifiedError(msg)
+        else:
+            raise WrongReportTypeError(f"Wrong report type: {type(report)}")
 
-        for artifact in artifacts:
-            if artifact is not None:
-                self.artifacts[artifact.artifact_type.value] = artifact
+        key = (report_type, artifact, artifact_format)
+        formatter = self.formatters_by_type_artifact_and_format.get(key)
+        if formatter is None:
+            msg = f"Formatter for {key} not registered"
+            raise NoFormatterFoundError(msg)
+        artifact_bytes = formatter.create_artifact(report)
 
-    @staticmethod
-    def save_artifacts(
-        artifacts: List[ReportArtifactDTO],
-        location: str,
-        storage: IStorage,
-        save_only_artifact_content: bool = True,
-    ):
-        """
-        Uses storage object to save report to report storage.
+        return artifact_bytes
 
-        Args:
-            artifacts: list of artifacts to save
-            location: path (e.g. folder) where to save report to
-            storage: storage adapter which stores the report, e.g. to disk or S3
-            save_only_artifact_content: if True, only artifact_content will be saved
-                using artifact.filename. This is typically for access by end-users,
-                e.g. xlsx-based testreports. Otherwise whole artifact object will
-                be serialized and saved as json - typically for caching purpose.
-        """
+    def save_artifact(self, location: str, artifact: bytes) -> None:
+        """Saves a report artifact to a given location"""
 
-        for artifact in artifacts:
-            # if only artifact content to be save, artifact filename must be defined
-            if save_only_artifact_content and artifact.filename is None:
-                continue
+        storage_type = location.split("://")[0]
+        if storage_type not in self.storages_by_type:
+            raise StorageTypeUnknownError(f"Storage type {storage_type} not supported")
 
-            location = location + "/" if not location.endswith("/") else location
+        storage = self.storages_by_type[storage_type]
+        storage.write(content=artifact, path=location)
 
-            if save_only_artifact_content:
-                full_path = location + artifact.filename  # type: ignore
-                # b64 string returns actual, unencoded string when accessing!
-                content_as_str = artifact.content_b64_str
-                content = content_as_str.encode()
-            else:
-                full_path = location + str(artifact.id) + ".json"
-                content = artifact.to_json().encode()  # always store bytecontent
-
-            storage.write(content=content, path=full_path)
-
-    @staticmethod
-    def retrieve_artifact(
-        location: str,
-        artifact_id: str,
-        storage: IStorage,
-    ) -> ReportArtifactDTO:
-        """Retrieves artifact object from specified location"""
-
-        location = location + "/" if not location.endswith("/") else location
-
-        as_bytes: bytes = storage.read(
-            path=location + artifact_id + ".json",
-        )
-        as_json = as_bytes.decode()
-
-        artifact = ReportArtifactDTO.from_dict(json.loads(as_json))
-
-        return artifact
-
-    def to_dto(self):
-        """Subclasses TestRunReport and TestCaseReport must implement this method"""
-        raise NotImplementedError()
+        return None

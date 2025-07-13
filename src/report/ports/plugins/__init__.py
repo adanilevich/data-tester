@@ -1,2 +1,6 @@
 # ruff: noqa
-from src.report.ports.plugins.i_report_formatter import IReportFormatter, ReportFormatterError
+from src.report.ports.plugins.i_report_formatter import (
+    IReportFormatter,
+    ReportFormatterError,
+    ReportTypeNotSupportedError,
+)

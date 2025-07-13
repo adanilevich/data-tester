@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.core.precondition_checks import CheckSpecsAreUnique, ICheckable
-from src.dtos import SpecificationDTO
+from src.dtos import SpecificationDTO, SpecificationType
 
 
 class TestTestObjectNotEmptyChecker:
@@ -15,12 +15,12 @@ class TestTestObjectNotEmptyChecker:
     def spec(self) -> SpecificationDTO:
         return SpecificationDTO(
             location="my_location",
-            type="this",
+            spec_type=SpecificationType.SCHEMA,
             testobject="doesnt_matter",
         )
 
     def test_check_fails_if_several_specs_provided(self, checkable, spec):
-        checkable.required_specs = ["this"]
+        checkable.required_specs = [SpecificationType.SCHEMA.value]
         checkable.specs = [spec, spec]
         checker = CheckSpecsAreUnique()
 
@@ -30,19 +30,20 @@ class TestTestObjectNotEmptyChecker:
         assert "several (2) specifications were provided" in checkable.summary
 
     def test_check_fails_if_no_specs_are_provided(self, checkable):
-        checkable.required_specs = ["this"]
+        checkable.required_specs = [SpecificationType.SCHEMA.value]
         checkable.specs = []
         checker = CheckSpecsAreUnique()
 
         check_result = checker._check(checkable)
 
         assert check_result is False
-        assert "No spec of type this provided!" in checkable.summary
+        assert "No spec of type schema provided!" in checkable.summary
 
     def test_check_is_ok_if_unique_spec_provided(self, checkable, spec):
-        checkable.required_specs = ["this", "that"]
+        checkable.required_specs = [
+            SpecificationType.SCHEMA.value, SpecificationType.ROWCOUNT_SQL.value]
         new_spec = SpecificationDTO.from_dict(spec.to_dict())
-        new_spec.type = "that"
+        new_spec.spec_type = SpecificationType.ROWCOUNT_SQL
         checkable.specs = [spec, new_spec]
         checker = CheckSpecsAreUnique()
 

@@ -1,5 +1,5 @@
 import pytest
-from src.dtos.configs import DomainConfigDTO
+from src.dtos.domain_config import DomainConfigDTO
 
 
 class TestDomainConfigDTO:

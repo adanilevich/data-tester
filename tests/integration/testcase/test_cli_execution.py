@@ -35,8 +35,8 @@ domain_config = {
 
 def specs(testobject: dict):
     specs: List[dict] = [
-        {"type": "schema", "location": "my_location", "columns": {"a": "int"}},
-        {"type": "rowcount_sql", "location": "my_location", "query": "SELECT"},
+        {"spec_type": "schema", "location": "my_location", "columns": {"a": "int"}},
+        {"spec_type": "rowcount_sql", "location": "my_location", "query": "SELECT"},
     ]
 
     [spec.update({"testobject": testobject["name"]}) for spec in specs]

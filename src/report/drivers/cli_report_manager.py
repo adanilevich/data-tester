@@ -1,80 +1,75 @@
 from typing import List
 
 from src.config import Config
+from src.dtos import DomainConfigDTO
 from src.report.ports import (
-    ISaveReportCommandHandler,
+    IReportCommandHandler,
+    CreateReportCommand,
+    SaveReportArtifactsForUsersCommand,
     SaveReportCommand,
-    ICreateTestRunReportCommandHandler,
-    CreateTestRunReportCommand,
-    ICreateTestCaseReportCommandHandler,
-    CreateTestCaseReportCommand,
 )
 from src.dtos import (
     TestCaseResultDTO,
     TestRunResultDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
-    ReportDTO,
+    TestReportDTO,
+    ReportType,
 )
 
 
+# TODO: Add error handling here or in application if reports can't be formattted or saved
 class CliReportManager:
     def __init__(
         self,
-        create_testcase_report_handler: ICreateTestCaseReportCommandHandler,
-        create_testrun_report_handler: ICreateTestRunReportCommandHandler,
-        save_report_handler: ISaveReportCommandHandler,
+        report_handler: IReportCommandHandler,
+        domain_config: DomainConfigDTO,
         config: Config | None = None,
     ):
         self.config = config or Config()
-        self.create_testcase_report_handler = create_testcase_report_handler
-        self.create_testrun_report_handler = create_testrun_report_handler
-        self.save_report_handler = save_report_handler
+        self.report_handler = report_handler
+        self.domain_config = domain_config
 
-    def create_testcase_report(self, result: TestCaseResultDTO) -> TestCaseReportDTO:
+    def create_report(self, type: ReportType, result: TestReportDTO) -> TestReportDTO:
         """Creates testcase report and populates report artifacts relevant for storage"""
 
-        artifact_types = self.config.TESTCASE_REPORT_ARTIFACTS
+        if type == ReportType.TESTCASE:
+            if not isinstance(result, TestCaseResultDTO):
+                raise ValueError("Result is not a TestCaseResultDTO")
+        elif type == ReportType.TESTRUN:
+            if not isinstance(result, TestRunResultDTO):
+                raise ValueError("Result is not a TestRunResultDTO")
+        else:
+            raise ValueError("Invalid report type")
 
-        command = CreateTestCaseReportCommand(
-            testcase_result=result,
-            artifact_types=artifact_types
-        )
+        command = CreateReportCommand(result=result)
 
-        report = self.create_testcase_report_handler.create(command=command)
-
-        return report
-
-    def create_testrun_report(self, results: List[TestCaseResultDTO]) -> TestRunReportDTO:
-        """Creates testrun report and populates report artifacts relevant for storage"""
-
-        artifact_types = self.config.TESTRUN_REPORT_ARTIFACTS
-
-        command = CreateTestRunReportCommand(
-            testrun_result=TestRunResultDTO.from_testcase_results(results),
-            artifact_types=artifact_types
-        )
-
-        report = self.create_testrun_report_handler.create(command=command)
+        report = self.report_handler.create_report(command=command)
 
         return report
 
-    def save_report(self, report: ReportDTO, location: str):
+    def save_report_artifacts_for_users(
+        self, report: TestReportDTO, locations: str | List[str] | None = None) -> None:
         """
-        Saves all storage-related artifacts to subfolders of specified location.
-        Subfolders are defined by GROUP_TESTREPORTS_BY in Config.
+        Saves user-facing report artifacts to user-managed storage locations.
+        Several locations can be provided, e.g. storing in databases and in buckets or
+        local storage.
         """
 
-        location = location + "/" if not location.endswith("/") else location
+        locations = locations or self.domain_config.testreports_locations
+        if locations is None:
+            raise ValueError("Locations for user-facing report artifacts are not set")
 
-        # storage location is extended by group_by artifacts from Config
-        group_by = Config().GROUP_TESTREPORTS_BY
-        for item in group_by:
-            if item == "date":
-                location += "/" + report.start_ts.strftime("%Y-%m-%d")
-            if item in report.model_fields:
-                location += "/" + report.to_dict()[item]
+        for location in locations:
+            command = SaveReportArtifactsForUsersCommand(report=report, location=location)
+            self.report_handler.save_report_artifacts_for_users(command=command)
 
-        command = SaveReportCommand(report=report, location=location,)
+    def save_report_in_internal_storage(
+        self, report: TestReportDTO, location: str | None = None) -> None:
+        """
+        Saves all internal report artifacts to application-internal storage.
+        """
+        location = location or self.config.INTERNAL_TESTREPORT_LOCATION
+        if location is None:
+            raise ValueError("Location for internal report artifacts is not set")
 
-        self.save_report_handler.save(command=command)
+        command = SaveReportCommand(report=report, location=location)
+        self.report_handler.save_report(command=command)
