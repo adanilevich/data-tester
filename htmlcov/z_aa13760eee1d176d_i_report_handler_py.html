@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_efa524e7ed38585e___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-13 23:17 +0000
+            created at 2025-07-15 09:54 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -86,7 +86,7 @@
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">testcase</span> <span class="key">import</span> <span class="nam">TestResultDTO</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">report</span> <span class="key">import</span> <span class="nam">TestReportDTO</span><span class="op">,</span> <span class="nam">ReportArtifact</span><span class="op">,</span> <span class="nam">ReportArtifactFormat</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span><span class="op">.</span><span class="nam">dto</span> <span class="key">import</span> <span class="nam">DTO</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">dtos</span> <span class="key">import</span> <span class="nam">DTO</span><span class="op">,</span> <span class="nam">LocationDTO</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">class</span> <span class="nam">CreateReportCommand</span><span class="op">(</span><span class="nam">DTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -95,13 +95,13 @@
     <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t"><span class="key">class</span> <span class="nam">SaveReportCommand</span><span class="op">(</span><span class="nam">DTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="nam">report</span><span class="op">:</span> <span class="nam">TestReportDTO</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">str</span>  <span class="com"># base location of internal report storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">LocationDTO</span>  <span class="com"># base location of internal report storage</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">    <span class="nam">artifact_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># application-internal report storage format</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="key">class</span> <span class="nam">GetReportArtifactCommand</span><span class="op">(</span><span class="nam">DTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="nam">report_id</span><span class="op">:</span> <span class="nam">UUID4</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">str</span>  <span class="com"># base location of internal report storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">LocationDTO</span>  <span class="com"># base location of internal report storage</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">    <span class="nam">internal_artifact_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># internal report storage format</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">    <span class="nam">artifact</span><span class="op">:</span> <span class="nam">ReportArtifact</span>  <span class="com"># requested report artifact type, e.g. REPORT or DIFF</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="nam">artifact_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># requested report artifact format</span>&nbsp;</span><span class="r"></span></p>
@@ -109,7 +109,7 @@
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t"><span class="key">class</span> <span class="nam">SaveReportArtifactsForUsersCommand</span><span class="op">(</span><span class="nam">DTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="nam">report</span><span class="op">:</span> <span class="nam">TestReportDTO</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">str</span>  <span class="com"># base location of user-managed report storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="nam">location</span><span class="op">:</span> <span class="nam">LocationDTO</span>  <span class="com"># base location of user-managed report storage</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">    <span class="nam">testcase_report_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># user-managed tc report storage format</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="nam">testcase_diff_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># user-managed tc diff storage format</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="nam">testrun_report_format</span><span class="op">:</span> <span class="nam">ReportArtifactFormat</span>  <span class="com"># user-managed tr report storage format</span>&nbsp;</span><span class="r"></span></p>
@@ -155,7 +155,7 @@
             <a class="nav" href="z_efa524e7ed38585e___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-13 23:17 +0000
+            created at 2025-07-15 09:54 +0000
         </p>
     </div>
 </footer>
