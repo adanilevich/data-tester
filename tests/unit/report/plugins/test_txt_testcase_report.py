@@ -39,7 +39,6 @@ class TestTxtTestCaseReportFormatter:
         assert "result" in parsed_yaml
         assert "testobject" in parsed_yaml
         assert "testtype" in parsed_yaml
-        assert "scenario" in parsed_yaml
         assert "summary" in parsed_yaml
         assert "facts" in parsed_yaml
         assert "details" in parsed_yaml

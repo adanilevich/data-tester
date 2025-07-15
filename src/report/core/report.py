@@ -67,10 +67,15 @@ class Report:
     def create_report(self, result: TestResultDTO) -> TestReportDTO:
         """Creates a report for a given result"""
 
+        report: TestCaseReportDTO | TestRunReportDTO
         if isinstance(result, TestRunResultDTO):
-            return TestRunReportDTO.from_testrun_result(result)
+            report = TestRunReportDTO.from_testrun_result(result)
+            result.report_id = report.report_id
+            return report
         elif isinstance(result, TestCaseResultDTO):
-            return TestCaseReportDTO.from_testcase_result(result)
+            report = TestCaseReportDTO.from_testcase_result(result)
+            result.report_id = report.report_id
+            return report
         else:
             raise WrongReportTypeError(f"Wrong report type: {type(result)}")
 

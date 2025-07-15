@@ -91,7 +91,6 @@ class TestReport:
         assert report_dto.testrun_id == testcase_result.testrun_id
         assert report_dto.testobject == testcase_result.testobject.name
         assert report_dto.testtype == testcase_result.testtype.value
-        assert report_dto.scenario == testcase_result.scenario
         assert report_dto.diff == testcase_result.diff
         assert report_dto.summary == testcase_result.summary
         assert report_dto.facts == testcase_result.facts

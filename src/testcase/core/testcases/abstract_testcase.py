@@ -8,7 +8,7 @@ import time
 
 from src.dtos import (
     TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO, DomainConfigDTO,
-    SpecificationDTO, TestType
+    SpecificationDTO, TestType, TestCaseDefinitionDTO
 )
 
 from src.testcase.ports import IDataPlatform, INotifier
@@ -27,20 +27,21 @@ class AbstractTestCase(ICheckable):
     __test__ = False  # prevents pytest collection
 
     # TODO: refactor to receive a TestCaseDefinitionDTO incl. labels and testset_id
-    def __init__(self, testobject: TestObjectDTO, specs: List[SpecificationDTO],
-                 domain_config: DomainConfigDTO, testrun_id: UUID,
+    def __init__(self, definition: TestCaseDefinitionDTO,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 
         self.notifiers: List[INotifier] = notifiers
-        self.notify(f"Initiating testcase {self.ttype} for {testobject.name}")
+        self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
         self.testcase_id: UUID = uuid4()
         self.start_ts: datetime = datetime.now()
         self.end_ts: datetime | None = None
         self.status: TestStatus = TestStatus.NOT_STARTED
-        self.testobject: TestObjectDTO = testobject
-        self.specs: List[SpecificationDTO] = specs
-        self.domain_config: DomainConfigDTO = domain_config
-        self.testrun_id: UUID = testrun_id
+        self.testobject: TestObjectDTO = definition.testobject
+        self.specs: List[SpecificationDTO] = definition.specs
+        self.domain_config: DomainConfigDTO = definition.domain_config
+        self.testrun_id: UUID = definition.testrun_id
+        self.testset_id: UUID = definition.testset_id
+        self.labels: List[str] = definition.labels
         self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
@@ -85,6 +86,8 @@ class AbstractTestCase(ICheckable):
         dto = TestCaseResultDTO(
             testcase_id=self.testcase_id,
             testrun_id=self.testrun_id,
+            testset_id=self.testset_id,
+            labels=self.labels,
             testtype=self.ttype,
             testobject=self.testobject,
             status=self.status,

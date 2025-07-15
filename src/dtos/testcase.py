@@ -7,6 +7,7 @@ from datetime import datetime
 from pydantic import Field, UUID4
 
 from src.dtos import DTO
+from src.dtos.domain_config import DomainConfigDTO
 from src.dtos.specification import SpecificationDTO
 
 
@@ -44,8 +45,16 @@ class TestStatus(Enum):
     ERROR = "ERROR"
     FINISHED = "FINISHED"
 
-    def to_string(self) -> str:
-        return str(self.value)
+
+class TestCaseDefinitionDTO(DTO):
+    __test__ = False  # prevents pytest collection
+    testobject: TestObjectDTO
+    testtype: TestType
+    specs: List[SpecificationDTO]
+    labels: List[str] = Field(default=[])
+    testset_id: UUID4 = Field(default_factory=uuid4)
+    testrun_id: UUID4 = Field(default_factory=uuid4)
+    domain_config: DomainConfigDTO
 
 
 class TestResult(Enum):
@@ -53,9 +62,6 @@ class TestResult(Enum):
     NA = "N/A"
     OK = "OK"
     NOK = "NOK"
-
-    def to_string(self) -> str:
-        return str(self.value)
 
 
 class TestType(Enum):
@@ -70,10 +76,12 @@ class TestType(Enum):
     UNKNOWN = "UNKNOWN"
 
 
-# TODO: add report_id, testset_id and labels
 class TestResultDTO(DTO):
     __test__ = False  # prevents pytest collection
     testrun_id: UUID4 = Field(default_factory=uuid4)
+    testset_id: UUID4 = Field(default_factory=uuid4)
+    labels: List[str] = Field(default=[])
+    report_id: UUID4 | None = None
     start_ts: datetime
     end_ts: datetime
     result: TestResult
@@ -84,7 +92,6 @@ class TestCaseResultDTO(TestResultDTO):
     testcase_id: UUID4 = Field(default_factory=uuid4)
     testobject: TestObjectDTO
     testtype: TestType
-    scenario: str = Field(default="")
     status: TestStatus
     diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
     summary: str
@@ -113,6 +120,8 @@ class TestRunResultDTO(TestResultDTO):
             start_ts=start_ts,
             end_ts=end_ts,
             result=result,
+            testset_id=testcase_results[0].testset_id,
+            labels=testcase_results[0].labels,
             testcase_results=testcase_results,
         )
 
