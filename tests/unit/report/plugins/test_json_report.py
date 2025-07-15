@@ -45,7 +45,6 @@ class TestJsonTestCaseReportFormatter:
         assert "result" in parsed_json
         assert "testobject" in parsed_json
         assert "testtype" in parsed_json
-        assert "scenario" in parsed_json
         assert "diff" in parsed_json
         assert "summary" in parsed_json
         assert "facts" in parsed_json

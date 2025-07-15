@@ -2,9 +2,13 @@ import os
 from typing import List
 from uuid import uuid4
 
-from src.data_platform.dependency_injection import DataPlatformDependencyInjector
-from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
-from src.dtos import TestType, TestResult, TestStatus
+from src.testcase.dependency_injection import TestCaseDependencyInjector
+from src.config import Config
+from src.dtos import (
+    TestType, TestResult, TestStatus, TestObjectDTO,
+    SpecificationDTO, SpecificationType, DomainConfigDTO, LocationDTO,
+    TestCasesConfigDTO, SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO
+)
 
 
 testobjects = [
@@ -45,16 +49,50 @@ def specs(testobject: dict):
 MY_UUID = uuid4()
 
 testcases = [
-    {"testobject": testobject, "testtype": testtype, "specs": specs(testobject),
-     "domain_config": domain_config, "testrun_id": MY_UUID}
+    {
+        "definition": {
+            "testobject": TestObjectDTO(**testobject),
+            "testtype": TestType(testtype),
+            "specs": [
+                SpecificationDTO(
+                    spec_type=SpecificationType.SCHEMA,
+                    location="my_location",
+                    testobject=testobject["name"]
+                ),
+                SpecificationDTO(
+                    spec_type=SpecificationType.ROWCOUNT_SQL,
+                    location="my_location",
+                    testobject=testobject["name"]
+                )
+            ],
+            "domain_config": DomainConfigDTO(
+                domain="my_domain",
+                instances={},
+                specifications_locations=[],
+                testsets_location=LocationDTO("dict://my_location"),
+                testreports_location=LocationDTO("dict://my_location"),
+                testcases=TestCasesConfigDTO(
+                    schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
+                    compare_sample=CompareSampleTestCaseConfigDTO(sample_size=100)
+                )
+            ),
+            "testrun_id": MY_UUID
+        }
+    }
     for testobject, testtype in zip(testobjects, testtypes)
 ]
 
 
 def test_cli_execution_with_dummy_testcases():
+    # Set up environment for dummy platform
     os.environ["DATATESTER_ENV"] = "DUMMY"
-    command_handler = DataPlatformDependencyInjector().run_testcases_command_handler()
-    runner = CliTestCaseRunner(handler=command_handler)
+    os.environ["DATATESTER_DATA_PLATFORM"] = "DUMMY"
+    os.environ["DATATESTER_NOTIFIERS"] = '["IN_MEMORY", "STDOUT"]'
+
+    # Create config and dependency injector
+    config = Config()
+    dependency_injector = TestCaseDependencyInjector(config)
+    runner = dependency_injector.testcase_runner()
 
     results = runner.run_testcases(testcases=testcases)
 

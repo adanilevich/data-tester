@@ -29,6 +29,8 @@ class TestReportDTO(DTO):
     __test__ = False  # prevents pytest collection
     report_id: UUID4
     testrun_id: UUID4
+    testset_id: UUID4
+    labels: List[str]
     result: str
     start_ts: datetime
     end_ts: datetime
@@ -39,7 +41,6 @@ class TestCaseReportDTO(TestReportDTO):
     testcase_id: UUID4
     testobject: str
     testtype: str
-    scenario: str
     diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
     summary: str
     facts: List[Dict[str, str | int]]
@@ -51,13 +52,14 @@ class TestCaseReportDTO(TestReportDTO):
         return cls(
             report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
+            testset_id=testcase_result.testset_id,
+            labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
             end_ts=testcase_result.end_ts,
             testcase_id=testcase_result.testcase_id,
             testobject=testcase_result.testobject.name,
             testtype=testcase_result.testtype.value,
-            scenario=testcase_result.scenario,
             diff=testcase_result.diff,
             summary=testcase_result.summary,
             facts=testcase_result.facts,
@@ -77,6 +79,8 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
         return cls(
             report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
+            testset_id=testcase_result.testset_id,
+            labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
             end_ts=testcase_result.end_ts,
@@ -95,6 +99,8 @@ class TestRunReportDTO(TestReportDTO):
         return cls(
             report_id = uuid4(),
             testrun_id=testrun_result.testrun_id,
+            testset_id=testrun_result.testset_id,
+            labels=testrun_result.labels,
             result=testrun_result.result.value,
             start_ts=testrun_result.start_ts,
             end_ts=testrun_result.end_ts,

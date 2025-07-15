@@ -20,14 +20,11 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
 
         results = []
         for command in commands:
-            backend_ = self.backend_factory.create(domain_config=command.domain_config)
+            backend_ = self.backend_factory.create(
+                domain_config=command.definition.domain_config)
             try:
                 testcase = TestCaseFactory.create(
-                    ttype=command.testtype,
-                    testobject=command.testobject,
-                    specs=command.specs,
-                    domain_config=command.domain_config,
-                    testrun_id=command.testrun_id,
+                    definition=command.definition,
                     backend=backend_,
                     notifiers=self.notifiers
                 )
@@ -36,17 +33,19 @@ class RunTestCasesCommandHandler(IRunTestCasesCommandHandler):
                 result = TestCaseResultDTO(
                     testcase_id=uuid4(),
                     result=TestResult.NA,
-                    summary=f"Test type {command.testtype} unknown!",
+                    summary=f"Test type {command.definition.testtype} unknown!",
                     facts=[],
                     details=[],
                     status=TestStatus.ERROR,
                     start_ts=datetime.now(),
                     end_ts=datetime.now(),
-                    testobject=command.testobject,
-                    testrun_id=command.testrun_id,
+                    testobject=command.definition.testobject,
+                    testrun_id=command.definition.testrun_id,
+                    testset_id=command.definition.testset_id,
+                    labels=command.definition.labels,
                     diff=dict(),
-                    testtype=command.testtype,
-                    specifications=command.specs,
+                    testtype=command.definition.testtype,
+                    specifications=command.definition.specs,
                 )
             results.append(result)
 

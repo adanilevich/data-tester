@@ -25,6 +25,7 @@ from src.dtos import (
     TestType,
     SpecificationType,
     LocationDTO,
+    TestCaseDefinitionDTO,
 )
 from src.testcase.ports import IDataPlatform
 from src.notifier import InMemoryNotifier, StdoutNotifier
@@ -140,26 +141,32 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
             else:
                 raise ValueError(f"Invalid test type: {ttype}")
 
-            testcase = TestCaseFactory.create(
-                ttype=ttype,
+            definition = TestCaseDefinitionDTO(
                 testobject=testobject,
+                testtype=ttype,
                 specs=[
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location="my_location",
+                        location="dict://my_location",
                         testobject=testobject.name,
                     ),
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location="my_location",
+                        location="dict://my_location",
                         testobject=testobject.name,
                     ),
                 ],
                 domain_config=domain_config,
                 testrun_id=uuid4(),
+                labels=["my_label", "my_label2"],
+            )
+
+            testcase = TestCaseFactory.create(
+                definition=definition,
                 backend=DummyPlatform(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()],
             )
+
             return testcase
 
     return TestCaseCreator()
@@ -241,6 +248,7 @@ def testcase_result(testobject) -> TestCaseResultDTO:
         specifications=[],
         start_ts=datetime.now(),
         end_ts=datetime.now(),
+        labels=["my_label", "my_label2"],
     )
 
 
