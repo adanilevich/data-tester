@@ -30,7 +30,7 @@
 | src/domain\_config/ports/drivers/i\_save\_domain\_config.py                    |        6 |        0 |    100% |           |
 | src/domain\_config/ports/infrastructure/i\_storage.py                          |        5 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                       |        6 |        0 |    100% |           |
-| src/dtos/domain\_config.py                                                     |       40 |        4 |     90% | 22-25, 63 |
+| src/dtos/domain\_config.py                                                     |       35 |        1 |     97% |        52 |
 | src/dtos/dto.py                                                                |       15 |        0 |    100% |           |
 | src/dtos/location.py                                                           |       45 |        2 |     96% |    41, 47 |
 | src/dtos/report.py                                                             |       52 |        0 |    100% |           |
@@ -90,7 +90,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py          |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1947** |  **138** | **93%** |           |
+|                                                                      **TOTAL** | **1942** |  **135** | **93%** |           |
 
 7 empty files skipped.
 
