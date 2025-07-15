@@ -10,6 +10,7 @@ from src.dtos.report import (
     TestReportDTO,
     ReportArtifactFormat,
 )
+from src.dtos.location import LocationDTO
 from src.report.ports.drivers import (
     IReportCommandHandler,
     CreateReportCommand,
@@ -92,7 +93,8 @@ class ReportCommandHandler(IReportCommandHandler):
         return formatted_artifact
 
     def save_report_artifacts_for_users(
-        self, command: SaveReportArtifactsForUsersCommand) -> None:
+        self, command: SaveReportArtifactsForUsersCommand
+    ) -> None:
         """
         Saves report artifact in defined storage location. This method is for storing
         artifacts for users in user-managed storage locations (e.g. GCS buckets)
@@ -143,44 +145,51 @@ class ReportCommandHandler(IReportCommandHandler):
 
     @staticmethod
     def _testrun_artifact_location(
-        location: str,
+        location: LocationDTO,
         report: TestRunReportDTO,
-        artifact_format: ReportArtifactFormat
-    ) -> str:
-        return (
-            _user_report_location(location=location, testrun_id=report.testrun_id) +
+        artifact_format: ReportArtifactFormat,
+    ) -> LocationDTO:
+        result = _user_report_location(location=location, testrun_id=report.testrun_id)
+        result = result.append(
             "testrun_report_"
             + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            + "." + artifact_format.value.lower()
+            + "."
+            + artifact_format.value.lower()
         )
+        return result
 
     @staticmethod
     def _testcase_artifact_location(
-        location: str,
+        location: LocationDTO,
         report: TestCaseReportDTO,
         artifact: ReportArtifact,
-        artifact_format: ReportArtifactFormat
-    ) -> str:
-        return (
-            _user_report_location(location=location, testrun_id=report.testrun_id) +
-            report.testobject + "_" + report.testtype + "_" + artifact.value.lower()
-            + "." + artifact_format.value.lower()
+        artifact_format: ReportArtifactFormat,
+    ) -> LocationDTO:
+        result = _user_report_location(location=location, testrun_id=report.testrun_id)
+        result = result.append(
+            report.testobject
+            + "_"
+            + report.testtype
+            + "_"
+            + artifact.value.lower()
+            + "."
+            + artifact_format.value.lower()
         )
+        return result
 
     @staticmethod
     def _internal_report_location(
-        location: str, report_id: UUID4, format: ReportArtifactFormat) -> str:
-        return location + str(report_id) +"." + format.value.lower()
+        location: LocationDTO, report_id: UUID4, format: ReportArtifactFormat
+    ) -> LocationDTO:
+        result = location.append(f"{str(report_id)}.{format.value.lower()}")
+        return result
 
 
-def _user_report_location(location: str, testrun_id: UUID4) -> str:
+def _user_report_location(location: LocationDTO, testrun_id: UUID4) -> LocationDTO:
     """
     Returns the location to be used for user-facing report artifacts
     Reports are saved in subfolders by date and testrun_id
     """
-    location = location
-    location += "/" if not location.endswith("/") else location
-    location += datetime.now().strftime("%Y-%m-%d") + "/"
-    location += str(testrun_id) + "/"
-
-    return location
+    result = location.append(datetime.now().strftime("%Y-%m-%d"))
+    result = result.append(str(testrun_id))
+    return result

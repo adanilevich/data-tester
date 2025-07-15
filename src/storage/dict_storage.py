@@ -10,6 +10,7 @@ from src.report.ports import (
     ObjectNotFoundError as ReportStorageObjectNotFoundError,
     StorageTypeUnknownError as ReportStorageTypeUnknownError,
 )
+from src.dtos.location import LocationDTO, Store
 
 
 class DictStorageError(DomainConfigStorageError, ReportStorageError):
@@ -30,33 +31,33 @@ class DictStorage(IDomainConfigStorage, IReportStorage):
     def __init__(self):
         self._storage = {}
 
-    def _check_storage_type(self, path: str) -> None:
+    def _check_storage_type(self, path: LocationDTO) -> None:
         """Check if the storage type is supported"""
-        if not path.startswith("dict://"):
+        if path.store != Store.DICT:
             raise StorageTypeUnknownError(f"Storage type not supported: {path}")
 
-    def write(self, content: bytes, path: str):
+    def write(self, content: bytes, path: LocationDTO):
         """Stores content in memory under the specified path"""
         self._check_storage_type(path)
-        self._storage[path] = content
+        self._storage[path.path] = content
 
-    def read(self, path: str) -> bytes:
+    def read(self, path: LocationDTO) -> bytes:
         """Retrieves content from memory by path"""
         self._check_storage_type(path)
-        if path not in self._storage:
+        if path.path not in self._storage:
             raise ObjectNotFoundError(f"Path not found: {path}")
-        return self._storage[path]
+        return self._storage[path.path]
 
-    def find(self, path: str) -> List[str]:
+    def find(self, path: LocationDTO) -> List[LocationDTO]:
         """Returns all files in path, prefixed with the protocol"""
         self._check_storage_type(path)
         result = []
         for known_object in self._storage:
-            if known_object.startswith(path):
-                result.append(known_object)
+            if known_object.startswith(path.path):
+                result.append(LocationDTO(known_object))
         return result
 
     @property
-    def supported_storage_types(self) -> list[str]:
+    def supported_storage_types(self) -> List[Store]:
         """Returns supported storage types"""
-        return ["dict"]
+        return [Store.DICT]

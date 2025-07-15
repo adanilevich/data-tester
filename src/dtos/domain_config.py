@@ -1,6 +1,7 @@
 from typing import List, Dict, Optional, Any, Self
 
 from src.dtos import DTO
+from src.dtos.location import LocationDTO
 
 
 class SchemaTestCaseConfigDTO(DTO):
@@ -34,57 +35,37 @@ class DomainConfigDTO(DTO):
     """
     domain: str
     instances: Dict[str, List[str]]  # dict {stage: [instance1, instance2], ...}
-    # Specifications can be stored in one location or several locations,
-    # e.g. separated by type (sql, excel) or by layer of tested object in DWH.
-    # Alternatively, they are stored on one or several locations per stage and
-    # and instance - e.g. if different versions are relevant for TEST and UAT
-    specifications_locations: str | List[str] | Dict[str, str] | Dict[str, List[str]]
-    testmatrices_locations: str | Dict[str, str]  # testmatrix is stored in one location
-    # or one location per stage and instance, e.g. as dict(stage.instace: location)
-    testreports_locations: str | List[str]
+    """
+    Specifications can be stored
+        - in one location
+        - in several locations, e.g. separated by type (sql, excel) or by DWH layers
+        - in one location per stage, e.g. different versions for TEST and UAT
+        - in several locations per stage
+    """
+    specifications_locations: (
+        LocationDTO |
+        List[LocationDTO] |
+        Dict[str, LocationDTO] |
+        Dict[str, List[LocationDTO]]
+    )
+    # TODO: change this to a single location which can contain multiple testmatrices
+    testmatrices_locations: List[LocationDTO]
+    testreports_location: LocationDTO
     testcases: TestCasesConfigDTO
     platform_specific: Optional[Dict[str, Any]] = None
 
-    @classmethod
-    def from_dict(cls, dict_: dict) -> Self:
-        return cls(
-            domain=dict_["domain"],
-            instances=dict_["instances"],
-            specifications_locations=dict_["specifications_locations"],
-            testmatrices_locations=dict_["testmatrices_locations"],
-            testreports_locations=dict_["testreports_locations"],
-            testcases=TestCasesConfigDTO.from_dict(dict_["testcases"]),
-            platform_specific=dict_.get("platform_specific"),
-        )
-
-    def _item_as_list(self, input: str | List[str]) -> List[str]:
-        if isinstance(input, str):
+    def _item_as_list(self, input: LocationDTO | List[LocationDTO]) -> List[LocationDTO]:
+        if isinstance(input, LocationDTO):
             return [input]
         elif isinstance(input, list):
             return input
         else:
             raise ValueError("Input must be string or list of strings.")
 
-    def testmatrix_location_by_instance(self, stage: str, instance: str) -> str:
-        """
-        Returns testmatrix location relevant for given stage and instance. If only one
-        global testmatrix location is defined, that is returned.
-        """
-
-        if isinstance(self.testmatrices_locations, str):
-            return self.testmatrices_locations
-        else:
-            try:
-                return self.testmatrices_locations[f"{stage}.{instance}"]
-            except KeyError as err:
-                msg = "Testmatrices lolcations undefined " \
-                    f"for stage.instance={stage}.{instance}"
-                raise KeyError(msg) from err
-
     def specifications_locations_by_instance(
-            self, stage: str, instance: str) -> List[str]:
+            self, stage: str, instance: str) -> List[LocationDTO]:
 
-        if isinstance(self.specifications_locations, (str, list)):
+        if isinstance(self.specifications_locations, (LocationDTO, list)):
             return self._item_as_list(self.specifications_locations)
         else:
             try:

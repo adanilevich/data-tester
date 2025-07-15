@@ -1,15 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, DTO, LocationDTO
 
-class FetchDomainConfigsCommand:
-    def __init__(self, location: str):
-        self.location = location
-    def __eq__(self, other):
-        return all([
-            isinstance(other, FetchDomainConfigsCommand),
-            self.location == other.location
-        ])
+
+class FetchDomainConfigsCommand(DTO):
+    location: LocationDTO
+
 
 class IFetchDomainConfigsCommandHandler(ABC):
     @abstractmethod

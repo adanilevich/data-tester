@@ -4,7 +4,7 @@ from src.domain_config.ports import (
     IFetchDomainConfigsCommandHandler, FetchDomainConfigsCommand,
     ISaveDomainConfigCommandHandler, SaveDomainConfigCommand
 )
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, LocationDTO
 from src.config import Config
 
 
@@ -22,11 +22,15 @@ class CLIDomainConfigManager:
         self.config = config or Config()
 
     def fetch_domain_configs(
-        self, location: str | None = None) -> Dict[str, DomainConfigDTO]:
+        self, location: LocationDTO | None = None) -> Dict[str, DomainConfigDTO]:
 
-        location = location or self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION
         if location is None:
-            raise ValueError("DOMAIN_CONFIGS_LOCATION undefined")
+            if self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION is None:
+                raise ValueError("DOMAIN_CONFIGS_LOCATION undefined")
+            else:
+                location = LocationDTO(self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION)
+        else:
+            location = location
 
         command = FetchDomainConfigsCommand(location=location)
 
@@ -37,6 +41,6 @@ class CLIDomainConfigManager:
 
         return configs
 
-    def save_domain_config(self, location: str, config: DomainConfigDTO):
+    def save_domain_config(self, location: LocationDTO, config: DomainConfigDTO):
         command = SaveDomainConfigCommand(location=location, config=config)
         self.save_command_handler.save(command=command)

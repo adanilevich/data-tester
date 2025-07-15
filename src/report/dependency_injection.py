@@ -12,7 +12,7 @@ from src.report.adapters import (
 )
 from src.storage import FileStorage, DictStorage
 from src.config import Config
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, Store
 
 
 class ReportDependencyInjector:
@@ -37,17 +37,16 @@ class ReportDependencyInjector:
         storages.append(internal_storage)
 
         # SET USER REPORT STORAGE BASED ON DOMAIN CONFIG
-        for location in domain_config.testreports_locations:
-            storage: IStorage
-            if location.startswith(("gcs://", "gs://", "local://")):
-                storage = FileStorage(config=self.config)
-            elif location.startswith("dict://"):
-                storage = DictStorage()
-            else:
-                msg = f"Unknown user report location type {location}"
-                raise ValueError(msg)
-            if type(storage) not in [type(s) for s in storages]:
-                storages.append(storage)
+        location = domain_config.testreports_location
+        storage: IStorage
+        if location.store in [Store.GCS, Store.LOCAL, Store.MEMORY]:
+            storage = FileStorage(config=self.config)
+        elif location.store == Store.DICT:
+            storage = DictStorage()
+        else:
+            raise ValueError(f"Unknown user report location type {location}")
+        if type(storage) not in [type(s) for s in storages]:
+            storages.append(storage)
 
         # SET FORMATTERS BASED ON CONFIG
         formatters: List[IReportFormatter] = []

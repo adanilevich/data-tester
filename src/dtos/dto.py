@@ -19,3 +19,7 @@ class DTO(BaseModel):
 
     def create_copy(self) -> Self:
         return self.model_copy()
+
+    @classmethod
+    def from_json(cls, json_: str | bytes | bytearray) -> Self:
+        return cls.model_validate_json(json_)

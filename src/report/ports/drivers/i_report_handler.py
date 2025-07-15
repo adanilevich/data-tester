@@ -4,7 +4,7 @@ from pydantic import UUID4
 
 from src.dtos.testcase import TestResultDTO
 from src.dtos.report import TestReportDTO, ReportArtifact, ReportArtifactFormat
-from src.dtos.dto import DTO
+from src.dtos import DTO, LocationDTO
 
 
 class CreateReportCommand(DTO):
@@ -13,13 +13,13 @@ class CreateReportCommand(DTO):
 
 class SaveReportCommand(DTO):
     report: TestReportDTO
-    location: str  # base location of internal report storage
+    location: LocationDTO  # base location of internal report storage
     artifact_format: ReportArtifactFormat  # application-internal report storage format
 
 
 class GetReportArtifactCommand(DTO):
     report_id: UUID4
-    location: str  # base location of internal report storage
+    location: LocationDTO  # base location of internal report storage
     internal_artifact_format: ReportArtifactFormat  # internal report storage format
     artifact: ReportArtifact  # requested report artifact type, e.g. REPORT or DIFF
     artifact_format: ReportArtifactFormat  # requested report artifact format
@@ -27,7 +27,7 @@ class GetReportArtifactCommand(DTO):
 
 class SaveReportArtifactsForUsersCommand(DTO):
     report: TestReportDTO
-    location: str  # base location of user-managed report storage
+    location: LocationDTO  # base location of user-managed report storage
     testcase_report_format: ReportArtifactFormat  # user-managed tc report storage format
     testcase_diff_format: ReportArtifactFormat  # user-managed tc diff storage format
     testrun_report_format: ReportArtifactFormat  # user-managed tr report storage format
