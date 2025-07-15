@@ -17,17 +17,15 @@
 | src/data\_platform/dummy/dummy\_platform.py                                    |       26 |        9 |     65% |17, 20, 29, 37, 43, 47, 53, 60, 67 |
 | src/data\_platform/dummy/dummy\_platform\_factory.py                           |        6 |        0 |    100% |           |
 | src/domain\_config/\_\_init\_\_.py                                             |        1 |        0 |    100% |           |
-| src/domain\_config/application/\_\_init\_\_.py                                 |        2 |        0 |    100% |           |
-| src/domain\_config/application/fetch\_domain\_configs.py                       |       11 |        0 |    100% |           |
-| src/domain\_config/application/save\_domain\_config.py                         |        8 |        0 |    100% |           |
+| src/domain\_config/application/\_\_init\_\_.py                                 |        1 |        0 |    100% |           |
+| src/domain\_config/application/domain\_config\_handler.py                      |       15 |        0 |    100% |           |
 | src/domain\_config/core/\_\_init\_\_.py                                        |        1 |        0 |    100% |           |
 | src/domain\_config/core/domain\_config.py                                      |       65 |       13 |     80% |52-53, 65-67, 70-72, 80-82, 120-122 |
-| src/domain\_config/dependency\_injection.py                                    |       21 |        3 |     86% |22, 27, 32 |
+| src/domain\_config/dependency\_injection.py                                    |       20 |        3 |     85% |19, 24, 28 |
 | src/domain\_config/drivers/\_\_init\_\_.py                                     |        1 |        0 |    100% |           |
-| src/domain\_config/drivers/cli\_domain\_config\_manager.py                     |       24 |        0 |    100% |           |
-| src/domain\_config/ports/\_\_init\_\_.py                                       |        3 |        0 |    100% |           |
-| src/domain\_config/ports/drivers/i\_fetch\_domain\_configs.py                  |        6 |        0 |    100% |           |
-| src/domain\_config/ports/drivers/i\_save\_domain\_config.py                    |        6 |        0 |    100% |           |
+| src/domain\_config/drivers/cli\_domain\_config\_manager.py                     |       23 |        0 |    100% |           |
+| src/domain\_config/ports/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
+| src/domain\_config/ports/drivers/i\_domain\_config\_handler.py                 |        9 |        0 |    100% |           |
 | src/domain\_config/ports/infrastructure/i\_storage.py                          |        5 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                       |        6 |        0 |    100% |           |
 | src/dtos/domain\_config.py                                                     |       35 |        1 |     97% |        52 |
@@ -35,7 +33,7 @@
 | src/dtos/location.py                                                           |       45 |        2 |     96% |    41, 47 |
 | src/dtos/report.py                                                             |       52 |        0 |    100% |           |
 | src/dtos/specification.py                                                      |       45 |        2 |     96% |    31, 69 |
-| src/dtos/testcase.py                                                           |       87 |        4 |     95% |48, 58, 122, 125 |
+| src/dtos/testcase.py                                                           |       87 |        4 |     95% |48, 58, 123, 126 |
 | src/notifier/\_\_init\_\_.py                                                   |        2 |        0 |    100% |           |
 | src/notifier/in\_memory\_notifier.py                                           |        7 |        0 |    100% |           |
 | src/notifier/stdout\_notifier.py                                               |        4 |        0 |    100% |           |
@@ -47,7 +45,7 @@
 | src/report/adapters/plugins/xlsx\_testcase\_diff.py                            |       28 |        0 |    100% |           |
 | src/report/adapters/plugins/xlsx\_testrun\_report.py                           |       27 |        3 |     89% |     43-45 |
 | src/report/application/\_\_init\_\_.py                                         |        1 |        0 |    100% |           |
-| src/report/application/handle\_reports.py                                      |       63 |        1 |     98% |       144 |
+| src/report/application/handle\_reports.py                                      |       63 |        1 |     98% |       143 |
 | src/report/core/\_\_init\_\_.py                                                |        1 |        0 |    100% |           |
 | src/report/core/report.py                                                      |       73 |        2 |     97% |    99-100 |
 | src/report/dependency\_injection.py                                            |       43 |        7 |     84% |32-36, 43, 47, 49 |
@@ -90,7 +88,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py          |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1942** |  **135** | **93%** |           |
+|                                                                      **TOTAL** | **1931** |  **135** | **93%** |           |
 
 7 empty files skipped.
 
