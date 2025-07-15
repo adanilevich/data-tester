@@ -4,6 +4,7 @@ import re
 
 from src.domain_config.ports import IStorage, StorageError
 from src.dtos import DomainConfigDTO
+from src.dtos.location import LocationDTO
 
 
 class DomainConfigAlreadyExistsError(Exception):
@@ -43,7 +44,7 @@ class DomainConfig:
         """
         return "domain_config_" + config.domain + ".yaml"
 
-    def _find_candidates(self, location: str) -> List[str]:
+    def _find_candidates(self, location: LocationDTO) -> List[LocationDTO]:
         """Gets valid, name-matching objects from location"""
 
         try:
@@ -51,8 +52,7 @@ class DomainConfig:
         except StorageError:
             objects = []
 
-        candidates = list(filter(self._match_filename, objects))
-
+        candidates = [obj for obj in objects if self._match_filename(obj.path)]
         return candidates
 
     def _config_from_yaml_bytes(self, content: bytes) -> DomainConfigDTO:
@@ -81,7 +81,7 @@ class DomainConfig:
             msg = f"Failed to serialize YAML: {e}"
             raise DomainConfigSerializationError(msg) from e
 
-    def fetch_configs(self, location: str) -> Dict[str, DomainConfigDTO]:
+    def fetch_configs(self, location: LocationDTO) -> Dict[str, DomainConfigDTO]:
         """
         Parses all files in the given location that match the domain config naming
         conventions, deserializes their contents, and converts them into DomainConfigDTO
@@ -103,10 +103,10 @@ class DomainConfig:
             already exists.
         """
 
-        if not isinstance(location, str):
-            raise ValueError("Provide a string-valued location of domain configs")
+        if not isinstance(location, LocationDTO):
+            raise ValueError("Provide a LocationDTO-valued location of domain configs")
 
-        candidates: List[str] = []
+        candidates: List[LocationDTO] = []
         found_domain_configs: Dict[str, DomainConfigDTO] = {}
 
         candidates = self._find_candidates(location)
@@ -130,7 +130,7 @@ class DomainConfig:
 
         return found_domain_configs
 
-    def save_config(self, location: str, config: DomainConfigDTO):
+    def save_config(self, location: LocationDTO, config: DomainConfigDTO):
         """
         Saves a domain config to the given location.
 
@@ -144,7 +144,6 @@ class DomainConfig:
 
         config_as_bytes = self._config_to_yaml_bytes(config)
         filename = self._get_filename(config)
-        if not location.endswith("/"):
-            location += "/"
+        loc = location.append(filename)
 
-        self.storage.write(path=location + filename, content=config_as_bytes)
+        self.storage.write(path=loc, content=config_as_bytes)

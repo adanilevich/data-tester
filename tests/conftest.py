@@ -24,6 +24,7 @@ from src.dtos import (
     TestStatus,
     TestType,
     SpecificationType,
+    LocationDTO,
 )
 from src.testcase.ports import IDataPlatform
 from src.notifier import InMemoryNotifier, StdoutNotifier
@@ -53,9 +54,12 @@ def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
         instances={"test": ["alpha", "beta"], "uat": ["main"]},
-        specifications_locations=["my_first_location", "my_second_location"],
-        testmatrices_locations="my_location",
-        testreports_locations=[],
+        specifications_locations=[
+            LocationDTO("dict://my_first_location"),
+            LocationDTO("dict://my_second_location"),
+        ],
+        testmatrices_locations=[LocationDTO("dict://my_location")],
+        testreports_location=LocationDTO("dict://my_location"),
         testcases=TestCasesConfigDTO(
             compare_sample=CompareSampleTestCaseConfigDTO(
                 sample_size=100, sample_size_per_object={}

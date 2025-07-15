@@ -1,10 +1,11 @@
 from abc import ABC, abstractmethod
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, DTO, LocationDTO
 
-class SaveDomainConfigCommand:
-    def __init__(self, config: DomainConfigDTO, location: str):
-        self.config = config
-        self.location = location
+
+class SaveDomainConfigCommand(DTO):
+    config: DomainConfigDTO
+    location: LocationDTO
+
 
 class ISaveDomainConfigCommandHandler(ABC):
     @abstractmethod

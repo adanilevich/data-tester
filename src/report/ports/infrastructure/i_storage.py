@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from src.dtos.location import LocationDTO, Store
+
 
 class StorageError(Exception):
     """"""
@@ -22,7 +24,7 @@ class IStorage(ABC):
 
 
     @abstractmethod
-    def write(self, content: bytes, path: str):
+    def write(self, content: bytes, path: LocationDTO):
         """
         Stores content to disk under speficied path.
 
@@ -31,14 +33,14 @@ class IStorage(ABC):
         """
 
     @abstractmethod
-    def read(self, path: str) -> bytes:
+    def read(self, path: LocationDTO) -> bytes:
         """
         Loads object from specified path as bytes.
         """
 
     @property
     @abstractmethod
-    def supported_storage_types(self) -> List[str]:
+    def supported_storage_types(self) -> List[Store]:
         """
         Returns a list of supported storage types, e.g. ['local', 'gcs'].
         """

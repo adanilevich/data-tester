@@ -23,9 +23,9 @@ testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
 domain_config = {
     "domain": "my_domain",
     "instances": {},
-    "testreports_locations": [],
+    "testreports_location": {"path": "dict://my_location"},
     "specifications_locations": [],
-    "testmatrices_locations": "my_location",
+    "testmatrices_locations": [{"path": "dict://my_location"}],
     "testcases": {
         "compare_sample": {"sample_size": 100},
         "schema": {"compare_datatypes": ["int", "str"]}

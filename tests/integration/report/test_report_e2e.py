@@ -2,7 +2,6 @@ import random
 import string
 from typing import List
 import json
-import pytest
 
 from src.report.dependency_injection import ReportDependencyInjector
 from src.config import Config
@@ -13,10 +12,11 @@ from src.dtos import (
     TestType,
     TestRunResultDTO,
     TestCaseReportDTO,
+    LocationDTO,
 )
 
 
-@pytest.mark.skip(reason="Skipping report E2E tests")
+# TODO: split this into multiple tests with fixtures
 class TestReportE2E:
     def test_report_e2e(
         self, domain_config: DomainConfigDTO, testcase_result: TestCaseResultDTO
@@ -24,7 +24,7 @@ class TestReportE2E:
         # given a configured report manager
         config = Config()
         config.DATATESTER_ENV = "LOCAL"
-        domain_config.testreports_locations = ["dict://user_reports", "dict://user"]
+        domain_config.testreports_location = LocationDTO("dict://user_reports")
         di = ReportDependencyInjector(config=config)
         report_manager = di.report_manager(domain_config=domain_config)
 
@@ -70,7 +70,7 @@ class TestReportE2E:
         internal_format = config.INTERNAL_TESTREPORT_FORMAT.value.lower()
 
         # retrieve testrun report from internal storage
-        testrun_internal_path = (
+        testrun_internal_path = LocationDTO(
             f"{internal_location}{testrun_report.report_id}.{internal_format}"
         )
         testrun_internal_content = internal_storage.read(testrun_internal_path)
@@ -82,7 +82,7 @@ class TestReportE2E:
 
         # Check each testcase report in internal storage
         for testcase_report in testcase_reports:
-            testcase_internal_path = (
+            testcase_internal_path = LocationDTO(
                 f"{internal_location}{testcase_report.report_id}.{internal_format}"
             )
             content = internal_storage.read(testcase_internal_path)
@@ -96,53 +96,53 @@ class TestReportE2E:
             assert data["testtype"] == testcase_report.testtype
 
         # Verify user storage contains artifacts
-        user_locations = domain_config.testreports_locations
+        user_location = domain_config.testreports_location
         date_str = testrun_report.start_ts.strftime("%Y-%m-%d")
         datetime_str = testrun_report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
 
-        user_storage = report_handler.storages[1]  # type: ignore
-        for user_location in user_locations:
-            # Check testrun artifact in user storage
-            testrun_user_path = (
-                f"{user_location}/{date_str}/{testrun_report.testrun_id}/"
-                f"testrun_report_{datetime_str}."
-                f"{config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower()}"
+        user_storage = report_handler.storages[0]  # type: ignore
+
+        # Check testrun artifact in user storage
+        testrun_user_path = user_location.append(
+            f"{date_str}/{testrun_report.testrun_id}/"
+            f"testrun_report_{datetime_str}."
+            f"{config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower()}"
+        )
+        content = user_storage.read(testrun_user_path)
+        assert isinstance(content, bytes)
+
+        # Verify XLSX format for testrun report
+        if config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower() == "xlsx":
+            assert content.startswith(b"PK\x03\x04")  # XLSX format
+
+        # Check testcase artifacts in user storage
+        for testcase_report in testcase_reports:
+            # Check testcase report artifact
+            testcase_user_path = user_location.append(
+                f"{date_str}/{testcase_report.testrun_id}/"
+                f"{testcase_report.testobject}_{testcase_report.testtype}_report."
+                f"{config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower()}"
             )
-            content = user_storage.read(testrun_user_path)
+            content = user_storage.read(testcase_user_path)
             assert isinstance(content, bytes)
 
-            # Verify XLSX format for testrun report
-            if config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower() == "xlsx":
-                assert content.startswith(b"PK\x03\x04")  # XLSX format
+            # Verify TXT format for testcase report
+            if config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower() == "txt":
+                testcase_text = content.decode("utf-8")
+                assert testcase_report.summary in testcase_text
+                assert testcase_report.testobject in testcase_text
+                assert testcase_report.testtype in testcase_text
 
-            # Check testcase artifacts in user storage
-            for testcase_report in testcase_reports:
-                # Check testcase report artifact
-                testcase_user_path = (
-                    f"{user_location}/{date_str}/{testcase_report.testrun_id}/"
-                    f"{testcase_report.testobject}_{testcase_report.testtype}_report."
-                    f"{config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower()}"
+            # Check diff artifact if testcase has diff data
+            if testcase_report.diff and len(testcase_report.diff) > 0:
+                testcase_diff_path = user_location.append(
+                    f"{date_str}/{testcase_report.testrun_id}/"
+                    f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
+                    f"{config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower()}"
                 )
-                content = user_storage.read(testcase_user_path)
+                content = user_storage.read(testcase_diff_path)
                 assert isinstance(content, bytes)
 
-                # Verify TXT format for testcase report
-                if config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower() == "txt":
-                    testcase_text = content.decode("utf-8")
-                    assert testcase_report.summary in testcase_text
-                    assert testcase_report.testobject in testcase_text
-                    assert testcase_report.testtype in testcase_text
-
-                # Check diff artifact if testcase has diff data
-                if testcase_report.diff and len(testcase_report.diff) > 0:
-                    testcase_diff_path = (
-                        f"{user_location}/{date_str}/{testcase_report.testrun_id}/"
-                        f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
-                        f"{config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower()}"
-                    )
-                    content = user_storage.read(testcase_diff_path)
-                    assert isinstance(content, bytes)
-
-                    # Verify XLSX format for diff
-                    if config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower() == "xlsx":
-                        assert content.startswith(b"PK\x03\x04")  # XLSX format
+                # Verify XLSX format for diff
+                if config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower() == "xlsx":
+                    assert content.startswith(b"PK\x03\x04")  # XLSX format

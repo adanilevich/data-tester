@@ -12,6 +12,7 @@ from src.dtos import (
     ReportArtifactFormat,
     TestResult,
     TestType,
+    LocationDTO,
 )
 from src.storage.dict_storage import DictStorage
 from src.report.application.handle_reports import (
@@ -89,7 +90,7 @@ class TestReportCommandHandler:
     def test_save_testcase_report(self, report_handler, testcase_report):
         """Test saving a test case report"""
         # Given: a test case report, storage location, and report handler
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         command = SaveReportCommand(
             report=testcase_report,
             location=location,
@@ -101,7 +102,7 @@ class TestReportCommandHandler:
         report_handler.save_report(command)
 
         # Then: the report should be saved to the expected location with correct content
-        expected_path = f"{location}{testcase_report.report_id}.json"
+        expected_path = location.append(f"{testcase_report.report_id}.json")
         saved_content = storage.read(expected_path)
 
         # Should be valid JSON
@@ -112,7 +113,7 @@ class TestReportCommandHandler:
     def test_save_testrun_report(self, report_handler, testrun_report):
         """Test saving a test run report"""
         # Given: a test run report, storage location, and report handler
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         command = SaveReportCommand(
             report=testrun_report,
             location=location,
@@ -124,7 +125,7 @@ class TestReportCommandHandler:
         report_handler.save_report(command)
 
         # Then: the report should be saved to the expected location with correct content
-        expected_path = f"{location}{testrun_report.report_id}.json"
+        expected_path = location.append(f"{testrun_report.report_id}.json")
         saved_content = storage.read(expected_path)
 
         # Should be valid JSON
@@ -138,7 +139,7 @@ class TestReportCommandHandler:
 
         # We need to bypass the validation by creating the command directly
         # since Pydantic would reject the invalid type
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         command = SaveReportCommand(
             report=testcase_report,
             location=location,
@@ -155,7 +156,7 @@ class TestReportCommandHandler:
     def test_get_testcase_artifact(self, report_handler, testcase_report):
         """Test retrieving a test case report artifact"""
         # Given: a saved test case report and a report handler
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         save_command = SaveReportCommand(
             report=testcase_report,
             location=location,
@@ -182,7 +183,7 @@ class TestReportCommandHandler:
     def test_get_testcase_artifact_wrong_id(self, report_handler, testrun_report):
         """Test retrieving test case artifact from test run report raises error"""
         # Given: a saved test run report
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         save_command = SaveReportCommand(
             report=testrun_report,
             location=location,
@@ -208,7 +209,7 @@ class TestReportCommandHandler:
     def test_get_testrun_artifact(self, report_handler, testrun_report):
         """Test retrieving a test run report artifact"""
         # Given: a saved test run report
-        location = "dict:///test_reports"
+        location = LocationDTO("dict://test_reports")
         save_command = SaveReportCommand(
             report=testrun_report,
             location=location,
@@ -241,7 +242,7 @@ class TestReportCommandHandler:
         report.diff = {"any_diff": {"a": [1, 2, 3], "b": [4, 5, 6]}}
         report.testtype = TestType.SCHEMA.value
         report.result = TestResult.NOK.value
-        location = "dict:///user_reports"
+        location = LocationDTO("dict://user_reports")
         storage = report_handler.storages[0]
 
         command = SaveReportArtifactsForUsersCommand(
@@ -258,18 +259,14 @@ class TestReportCommandHandler:
         # Then: both report and diff artifacts should be saved to the expected locations
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
-        expected_report_path = (
-            f"dict:///user_reports/{date_str}/{report.testrun_id}/"
-            + f"{report.testobject}_{report.testtype}_report.txt"
-        )
+        expected_report_path = location.append(f"{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_report.txt")
         report_content = storage.read(expected_report_path)
         assert isinstance(report_content, bytes)
 
         # Should save diff artifact since testcase has diff
-        expected_diff_path = (
-            f"dict:///user_reports/{date_str}/{report.testrun_id}/"
-            + f"{report.testobject}_{report.testtype}_diff.xlsx"
-        )
+        expected_diff_path = location.append(f"{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_diff.xlsx")
         diff_content = storage.read(expected_diff_path)
 
         # diff artifact should contain all columns and rows
@@ -284,7 +281,7 @@ class TestReportCommandHandler:
         report.diff = {}
         report.testtype = TestType.SCHEMA.value
         report.result = TestResult.OK.value
-        location = "dict:///user_reports"
+        location = LocationDTO("dict://user_reports")
         storage = report_handler.storages[0]
 
         command = SaveReportArtifactsForUsersCommand(
@@ -301,25 +298,21 @@ class TestReportCommandHandler:
         # Then: only the report artifact should be saved, no diff artifact
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
-        expected_report_path = (
-            f"{location}/{date_str}/{report.testrun_id}/"
-            + f"{report.testobject}_{report.testtype}_report.txt"
-        )
+        expected_report_path = location.append(f"{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_report.txt")
         report_content = storage.read(expected_report_path)
         assert isinstance(report_content, bytes)
 
         # Should NOT save diff artifact since no diff
-        expected_diff_path = (
-            f"{location}/{date_str}/{report.testrun_id}/"
-            + f"{report.testobject}_{report.testtype}_diff.xlsx"
-        )
+        expected_diff_path = location.append(f"{date_str}/{report.testrun_id}/"
+            + f"{report.testobject}_{report.testtype}_diff.xlsx")
         with pytest.raises(ObjectNotFoundError):
             storage.read(expected_diff_path)
 
     def test_save_for_users_testrun(self, report_handler, testrun_report):
         """Test saving user artifacts for test run report"""
         # Given: a test run report and a report handler
-        location = "dict:///user_reports"
+        location = LocationDTO("dict://user_reports")
         command = SaveReportArtifactsForUsersCommand(
             report=testrun_report,
             location=location,
@@ -336,10 +329,8 @@ class TestReportCommandHandler:
         # Should save report artifact
         date_str = datetime.now().strftime("%Y-%m-%d")
         datetime_str = testrun_report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
-        expected_report_path = (
-            f"{location}/{date_str}/{testrun_report.testrun_id}/"
-            + f"testrun_report_{datetime_str}.xlsx"
-        )
+        expected_report_path = location.append(f"{date_str}/{testrun_report.testrun_id}/"
+            + f"testrun_report_{datetime_str}.xlsx")
 
         report_content = storage.read(expected_report_path)
         assert isinstance(report_content, bytes)

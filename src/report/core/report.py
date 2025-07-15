@@ -12,6 +12,8 @@ from src.dtos import (
     ReportArtifactFormat,
     ReportType,
     TestReportDTO,
+    LocationDTO,
+    Store,
 )
 
 
@@ -33,10 +35,15 @@ class Report:
     Bundles common functions like creating and saving artifacts.
     """
 
+    storages_by_type: Dict[Store, IStorage]
+    formatters_by_type_artifact_and_format: Dict[
+        Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
+    ]
+
     def __init__(self, formatters: List[IReportFormatter], storages: List[IStorage]):
         self.formatters = formatters
         self.storages = storages
-        self.storages_by_type: Dict[str, IStorage] = {}
+        self.storages_by_type: Dict[Store, IStorage] = {}
         self.formatters_by_type_artifact_and_format: Dict[
             Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
         ] = {}
@@ -67,14 +74,13 @@ class Report:
         else:
             raise WrongReportTypeError(f"Wrong report type: {type(result)}")
 
-    def retrieve_report(self, location: str) -> TestReportDTO:
+    def retrieve_report(self, location: LocationDTO) -> TestReportDTO:
         """Retrieves a testcase report from a given location"""
 
-        storage_type = location.split("://")[0]
-        if storage_type not in self.storages_by_type:
-            raise StorageTypeUnknownError(f"Storage type {storage_type} not supported")
+        storage = self.storages_by_type.get(location.store)
+        if storage is None:
+            raise StorageTypeUnknownError(f"Storage type {location.store} not supported")
 
-        storage = self.storages_by_type[storage_type]
         report_as_dict_bytes = storage.read(location)
         report_as_dict = json.loads(report_as_dict_bytes)
 
@@ -142,14 +148,13 @@ class Report:
 
         return artifact_bytes
 
-    def save_artifact(self, location: str, artifact: bytes) -> None:
+    def save_artifact(self, location: LocationDTO, artifact: bytes) -> None:
         """Saves a report artifact to a given location"""
 
-        storage_type = location.split("://")[0]
-        if storage_type not in self.storages_by_type:
-            raise StorageTypeUnknownError(f"Storage type {storage_type} not supported")
+        storage = self.storages_by_type.get(location.store)
+        if storage is None:
+            raise StorageTypeUnknownError(f"Storage type {location.store} not supported")
 
-        storage = self.storages_by_type[storage_type]
         storage.write(content=artifact, path=location)
 
         return None

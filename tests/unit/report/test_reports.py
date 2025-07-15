@@ -22,8 +22,10 @@ from src.dtos import (
     TestRunReportDTO,
     ReportArtifact,
     ReportArtifactFormat,
+    LocationDTO,
 )
 from src.storage.dict_storage import DictStorage
+from src.storage.file_storage import Store
 
 
 @pytest.fixture
@@ -55,7 +57,7 @@ class TestReport:
         # then formatters and storages are properly registered
         assert len(report.formatters) == 5
         assert len(report.storages) == 1
-        assert "dict" in report.storages_by_type
+        assert Store.DICT in report.storages_by_type
         assert len(report.formatters_by_type_artifact_and_format) == 5
 
     def test_initialization_with_duplicate_formatter(self):
@@ -132,7 +134,7 @@ class TestReport:
 
     def test_save_and_retrieve_report(self, report, testcase_report):
         # given a report artifact
-        location = "dict://test_report.json"
+        location = LocationDTO("dict://test_report.json")
         report_dict = testcase_report.to_dict(mode="json")
         report_bytes = json.dumps(report_dict).encode()
 
@@ -148,7 +150,7 @@ class TestReport:
 
     def test_retrieve_report_with_unsupported_storage(self, report):
         # given an unsupported storage type
-        location = "unsupported://test_report.json"
+        location = LocationDTO("memory://test_report.json")
 
         # then retrieving raises StorageTypeUnknownError
         with pytest.raises(StorageTypeUnknownError, match="Storage type.*not supported"):
@@ -156,7 +158,7 @@ class TestReport:
 
     def test_retrieve_report_with_invalid_json(self, report):
         # given invalid JSON in storage
-        location = "dict://test_report.json"
+        location = LocationDTO("dict://test_report.json")
         report.save_artifact(location, b"invalid json")
 
         # then retrieving raises JSONDecodeError
@@ -197,7 +199,7 @@ class TestReport:
 
     def test_save_artifact_with_unsupported_storage(self, report):
         # given an unsupported storage type
-        location = "unsupported://test_artifact.txt"
+        location = LocationDTO("memory://test_artifact.txt")
         artifact_content = b"test artifact content"
 
         # then saving raises StorageTypeUnknownError
