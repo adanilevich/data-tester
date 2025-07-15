@@ -55,11 +55,11 @@ def domain_config() -> DomainConfigDTO:
         domain="payments",
         instances={"test": ["alpha", "beta"], "uat": ["main"]},
         specifications_locations=[
-            LocationDTO("dict://my_first_location"),
-            LocationDTO("dict://my_second_location"),
+            LocationDTO("dict://sqls"),
+            LocationDTO("dict://specs"),
         ],
-        testmatrices_locations=[LocationDTO("dict://my_location")],
-        testreports_location=LocationDTO("dict://my_location"),
+        testsets_location=LocationDTO("dict://testsets"),
+        testreports_location=LocationDTO("dict://testreports"),
         testcases=TestCasesConfigDTO(
             compare_sample=CompareSampleTestCaseConfigDTO(
                 sample_size=100, sample_size_per_object={}
