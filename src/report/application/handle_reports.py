@@ -31,7 +31,6 @@ class InvalidArtifactTypeError(Exception):
     """Raised when an invalid artifact type is provided"""
 
 
-# TODO: Add error handling here or in drivers if reports can't be formattted or saved
 class ReportCommandHandler(IReportCommandHandler):
     """
     Handles the creation, storage and retrieval of reports.

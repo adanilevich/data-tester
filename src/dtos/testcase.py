@@ -70,6 +70,7 @@ class TestType(Enum):
     UNKNOWN = "UNKNOWN"
 
 
+# TODO: add report_id, testset_id and labels
 class TestResultDTO(DTO):
     __test__ = False  # prevents pytest collection
     testrun_id: UUID4 = Field(default_factory=uuid4)
