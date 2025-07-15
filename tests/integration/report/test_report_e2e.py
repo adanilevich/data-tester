@@ -1,8 +1,11 @@
 import random
 import string
-from typing import List
+from typing import List, Tuple
 import json
 
+import pytest
+
+from src.report.drivers import CliReportManager
 from src.report.dependency_injection import ReportDependencyInjector
 from src.config import Config
 from src.dtos import (
@@ -13,25 +16,33 @@ from src.dtos import (
     TestRunResultDTO,
     TestCaseReportDTO,
     LocationDTO,
+    TestRunReportDTO,
+    ReportArtifactFormat,
 )
 
 
-# TODO: split this into multiple tests with fixtures
-class TestReportE2E:
-    def test_report_e2e(
-        self, domain_config: DomainConfigDTO, testcase_result: TestCaseResultDTO
-    ):
-        # given a configured report manager
-        config = Config()
-        config.DATATESTER_ENV = "LOCAL"
-        domain_config.testreports_location = LocationDTO("dict://user_reports")
-        di = ReportDependencyInjector(config=config)
-        report_manager = di.report_manager(domain_config=domain_config)
+@pytest.fixture
+def report_manager(
+    domain_config: DomainConfigDTO,
+    testcase_result: TestCaseResultDTO
+) -> CliReportManager:
+    config = Config()
+    config.DATATESTER_ENV = "LOCAL"
+    config.TESTRUN_REPORT_ARTIFACT_FORMAT = ReportArtifactFormat.XLSX
+    config.TESTCASE_REPORT_ARTIFACT_FORMAT = ReportArtifactFormat.TXT
+    config.TESTCASE_DIFF_ARTIFACT_FORMAT = ReportArtifactFormat.XLSX
+    domain_config.testreports_location = LocationDTO("dict://user_reports")
+    di = ReportDependencyInjector(config=config)
+    return di.report_manager(domain_config=domain_config)
 
-        # and a list of testcase results
+@pytest.fixture
+def testresults(
+    testcase_result: TestCaseResultDTO
+) -> Tuple[TestRunResultDTO, List[TestCaseResultDTO]]:
+        # create 10 random testcase results
         testcase_results: List[TestCaseResultDTO] = []
         for _ in range(10):
-            # assign random testobject names, testtypes and results
+            # assign random testobject names, testtyp   es and results
             testobjects = [
                 "".join(random.choices(string.ascii_letters, k=5)) for _ in range(100)
             ]
@@ -41,68 +52,120 @@ class TestReportE2E:
             testcase_result_.testtype = random.choice(list(TestType))
             testcase_results.append(testcase_result_)
 
-        # and given a corresponding testrun result
+        # create a corresponding testrun result
         testrun_result = TestRunResultDTO.from_testcase_results(testcase_results)
 
-        # when creating and storing testcase and testrun reports
-        testrun_report = report_manager.create_report(testrun_result)
-        report_manager.save_report_artifacts_for_users(testrun_report)
-        report_manager.save_report_in_internal_storage(testrun_report)
+        return testrun_result, testcase_results
 
-        testcase_reports: List[TestCaseReportDTO] = []  # noqa: F823
-        for testcase_result in testrun_result.testcase_results:
-            testcase_report = report_manager.create_report(testcase_result)
-            report_manager.save_report_artifacts_for_users(testcase_report)
-            report_manager.save_report_in_internal_storage(testcase_report)
-            if not isinstance(testcase_report, TestCaseReportDTO):
-                raise ValueError("Expected TestCaseReportDTO, got something else")
-            testcase_reports.append(testcase_report)
+def create_and_save_reports(
+    report_manager: CliReportManager,
+    testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+) -> Tuple[TestRunReportDTO, List[TestCaseReportDTO]]:
 
-        # then verify that reports were created and stored
-        # Get access to storage instances for verification
-        report_handler = report_manager.report_handler
-        internal_storage = report_handler.storages[0]  # type: ignore
+    testrun_result, testcase_results = testresults
 
-        # Verify internal storage contains all reports
-        internal_location = str(config.INTERNAL_TESTREPORT_LOCATION)
-        if not internal_location.endswith("/"):
-            internal_location += "/"
+    testrun_report: TestRunReportDTO 
+    testrun_report = report_manager.create_report(testrun_result) # type: ignore
+    report_manager.save_report_artifacts_for_users(testrun_report)
+    report_manager.save_report_in_internal_storage(testrun_report)
+
+    testcase_reports: List[TestCaseReportDTO] = []
+    for testcase_result in testrun_result.testcase_results:
+        testcase_report = report_manager.create_report(testcase_result)
+        report_manager.save_report_artifacts_for_users(testcase_report)
+        report_manager.save_report_in_internal_storage(testcase_report)
+        testcase_reports.append(testcase_report)  # type: ignore
+
+    return testrun_report, testcase_reports
+
+class TestReportE2E:
+
+    def test_create_and_save_reports(
+        self,
+        report_manager: CliReportManager,
+        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+    ):
+        # given a configured report manager and testresults
+        report_manager = report_manager
+        testrun_result, testcase_results = testresults
+
+        # when reports are created and saved
+        testrun_report, testcase_reports = create_and_save_reports(
+            report_manager, testresults)
+
+        # then created reports are of correct type
+        assert isinstance(testrun_report, TestRunReportDTO)
+        assert isinstance(testcase_reports, list)
+        assert all(isinstance(report, TestCaseReportDTO) for report in testcase_reports)
+
+        # and the testrun report contains the correct number of testcase results
+        assert len(testrun_report.testcase_results) == len(testcase_results)
+
+    def test_retrieve_from_internal_storage(
+        self,
+        report_manager: CliReportManager,
+        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+    ):
+        # given a configured report manager and testresults
+        report_manager = report_manager
+        testrun_result, testcase_results = testresults
+        config = report_manager.config
+
+        internal_location_str = config.INTERNAL_TESTREPORT_LOCATION
+        internal_location = LocationDTO(internal_location_str) # type: ignore
         internal_format = config.INTERNAL_TESTREPORT_FORMAT.value.lower()
+        internal_storage = report_manager.report_handler.storages[0]  # type: ignore
 
-        # retrieve testrun report from internal storage
-        testrun_internal_path = LocationDTO(
-            f"{internal_location}{testrun_report.report_id}.{internal_format}"
-        )
-        testrun_internal_content = internal_storage.read(testrun_internal_path)
-        testrun_internal_data = json.loads(testrun_internal_content.decode("utf-8"))
+        # when reports are created and saved
+        testrun_report, testcase_reports = create_and_save_reports(
+            report_manager, testresults)
 
-        # verify testrun report content
-        assert testrun_internal_data["testrun_id"] == str(testrun_report.testrun_id)
-        assert len(testrun_internal_data["testcase_results"]) == len(testcase_results)
+        # then the testrun report can be retrieved from internal storage
+        path = internal_location.append(f"{testrun_report.report_id}.{internal_format}")
+        bytes_content = internal_storage.read(path)
+        content = bytes_content.decode("utf-8")
+        data = json.loads(content)
 
-        # Check each testcase report in internal storage
+        # and the testrun report content is correct
+        assert data["testrun_id"] == str(testrun_report.testrun_id)
+        assert len(data["testcase_results"]) == len(testcase_results)
+
+        # and the testcase reports can be retrieved from internal storage
         for testcase_report in testcase_reports:
-            testcase_internal_path = LocationDTO(
-                f"{internal_location}{testcase_report.report_id}.{internal_format}"
+            path = internal_location.append(
+                f"{testcase_report.report_id}.{internal_format}"
             )
-            content = internal_storage.read(testcase_internal_path)
-            assert isinstance(content, bytes)
-
-            # Verify testcase report content
-            data = json.loads(content.decode("utf-8"))
+            content = internal_storage.read(path).decode("utf-8")
+            data = json.loads(content)
+            # verify testcase report content
             assert data["testcase_id"] == str(testcase_report.testcase_id)
             assert data["testrun_id"] == str(testcase_report.testrun_id)
             assert data["testobject"] == testcase_report.testobject
             assert data["testtype"] == testcase_report.testtype
 
-        # Verify user storage contains artifacts
-        user_location = domain_config.testreports_location
+
+    def test_retrieve_from_user_storage(
+        self,
+        report_manager: CliReportManager,
+        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+    ):
+
+        # given a configured report manager and testresults
+        report_manager = report_manager
+        testrun_result, testcase_results = testresults
+        config = report_manager.config
+
+        user_location = report_manager.domain_config.testreports_location
+        user_storage = report_manager.report_handler.storages[0]  # type: ignore
+
+        # when reports are created and saved
+        testrun_report, testcase_reports = create_and_save_reports(
+            report_manager, testresults)
+
+        # then the testrun report can be retrieved from user storage
         date_str = testrun_report.start_ts.strftime("%Y-%m-%d")
         datetime_str = testrun_report.start_ts.strftime("%Y-%m-%d_%H-%M-%S")
 
-        user_storage = report_handler.storages[0]  # type: ignore
-
-        # Check testrun artifact in user storage
         testrun_user_path = user_location.append(
             f"{date_str}/{testrun_report.testrun_id}/"
             f"testrun_report_{datetime_str}."
@@ -111,13 +174,11 @@ class TestReportE2E:
         content = user_storage.read(testrun_user_path)
         assert isinstance(content, bytes)
 
-        # Verify XLSX format for testrun report
-        if config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower() == "xlsx":
-            assert content.startswith(b"PK\x03\x04")  # XLSX format
+        # and the testrun report content is a valid XLSX file
+        assert content.startswith(b"PK\x03\x04")
 
-        # Check testcase artifacts in user storage
+        # and the testcase reports can be retrieved from user storage
         for testcase_report in testcase_reports:
-            # Check testcase report artifact
             testcase_user_path = user_location.append(
                 f"{date_str}/{testcase_report.testrun_id}/"
                 f"{testcase_report.testobject}_{testcase_report.testtype}_report."
@@ -126,23 +187,24 @@ class TestReportE2E:
             content = user_storage.read(testcase_user_path)
             assert isinstance(content, bytes)
 
-            # Verify TXT format for testcase report
-            if config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower() == "txt":
-                testcase_text = content.decode("utf-8")
-                assert testcase_report.summary in testcase_text
-                assert testcase_report.testobject in testcase_text
-                assert testcase_report.testtype in testcase_text
+            # and the testcase report content is a valid TXT file
+            testcase_text = content.decode("utf-8")
+            assert testcase_report.summary in testcase_text
+            assert testcase_report.testobject in testcase_text
+            assert testcase_report.testtype in testcase_text
 
-            # Check diff artifact if testcase has diff data
-            if testcase_report.diff and len(testcase_report.diff) > 0:
-                testcase_diff_path = user_location.append(
-                    f"{date_str}/{testcase_report.testrun_id}/"
-                    f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
-                    f"{config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower()}"
-                )
-                content = user_storage.read(testcase_diff_path)
-                assert isinstance(content, bytes)
+            # if there is no diff, skip
+            if not (testcase_report.diff or len(testcase_report.diff) > 0):
+                continue
 
-                # Verify XLSX format for diff
-                if config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower() == "xlsx":
-                    assert content.startswith(b"PK\x03\x04")  # XLSX format
+            # if there is a diff, the diff artifact can be retrieved from user storage
+            testcase_diff_path = user_location.append(
+                f"{date_str}/{testcase_report.testrun_id}/"
+                f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
+                f"{config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower()}"
+            )
+            content = user_storage.read(testcase_diff_path)
+            assert isinstance(content, bytes)
+
+            # and the diff artifact content is a valid XLSX file
+            assert content.startswith(b"PK\x03\x04")
