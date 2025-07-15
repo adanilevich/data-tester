@@ -25,7 +25,7 @@ domain_config = {
     "instances": {},
     "testreports_location": {"path": "dict://my_location"},
     "specifications_locations": [],
-    "testmatrices_locations": [{"path": "dict://my_location"}],
+    "testsets_location": {"path": "dict://my_location"},
     "testcases": {
         "compare_sample": {"sample_size": 100},
         "schema": {"compare_datatypes": ["int", "str"]}

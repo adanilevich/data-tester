@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any, Self
+from typing import List, Dict, Optional, Any
 
 from src.dtos import DTO
 from src.dtos.location import LocationDTO
@@ -16,16 +16,6 @@ class CompareSampleTestCaseConfigDTO(DTO):
 class TestCasesConfigDTO(DTO):
     schema: SchemaTestCaseConfigDTO  # type: ignore
     compare_sample: CompareSampleTestCaseConfigDTO
-
-    @classmethod
-    def from_dict(cls, dict_: dict) -> Self:
-        schema = dict_["schema"]
-        compare_sample = dict_["compare_sample"]
-
-        return cls(
-            schema=SchemaTestCaseConfigDTO.from_dict(schema),
-            compare_sample=CompareSampleTestCaseConfigDTO.from_dict(compare_sample),
-        )
 
 class DomainConfigDTO(DTO):
     """
@@ -48,8 +38,7 @@ class DomainConfigDTO(DTO):
         Dict[str, LocationDTO] |
         Dict[str, List[LocationDTO]]
     )
-    # TODO: change this to a single location which can contain multiple testmatrices
-    testmatrices_locations: List[LocationDTO]
+    testsets_location: LocationDTO
     testreports_location: LocationDTO
     testcases: TestCasesConfigDTO
     platform_specific: Optional[Dict[str, Any]] = None
