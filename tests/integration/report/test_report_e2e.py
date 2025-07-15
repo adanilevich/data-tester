@@ -64,7 +64,7 @@ def create_and_save_reports(
 
     testrun_result, testcase_results = testresults
 
-    testrun_report: TestRunReportDTO 
+    testrun_report: TestRunReportDTO
     testrun_report = report_manager.create_report(testrun_result) # type: ignore
     report_manager.save_report_artifacts_for_users(testrun_report)
     report_manager.save_report_in_internal_storage(testrun_report)
