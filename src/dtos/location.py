@@ -3,7 +3,7 @@ from enum import Enum
 
 from pydantic import field_validator
 
-from src.dtos import DTO
+from src.dtos.dto import DTO
 
 
 class Store(Enum):

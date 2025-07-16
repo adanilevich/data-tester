@@ -1,5 +1,5 @@
 from src.testcase.core.precondition_checks import IPreconditionChecker, ICheckable
-from src.dtos import TestCaseResultDTO, TestType, SpecificationType
+from src.dtos import TestCaseDTO, TestType, SpecificationType
 
 
 class DummyChecker(IPreconditionChecker):
@@ -63,7 +63,7 @@ class TestExecutingTestcases:
 
         assert testcase.status.name == "ABORTED"
         assert testcase.result.name == "NA"
-        assert isinstance(result, TestCaseResultDTO)
+        assert isinstance(result, TestCaseDTO)
 
     def test_execution_with_exception(self, testcase_creator):
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)
@@ -81,7 +81,7 @@ class TestExecutingTestcases:
 
         assert testcase.status.name == "ERROR"
         assert testcase.result.name == "NA"
-        assert isinstance(result, TestCaseResultDTO)
+        assert isinstance(result, TestCaseDTO)
 
     def test_execution_when_everything_is_ok(self, testcase_creator):
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)
@@ -92,7 +92,7 @@ class TestExecutingTestcases:
 
         assert testcase.status.name == "FINISHED"
         assert testcase.result.name == "OK"
-        assert isinstance(result, TestCaseResultDTO)
+        assert isinstance(result, TestCaseDTO)
 
     def test_adding_details(self, testcase_creator):
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)

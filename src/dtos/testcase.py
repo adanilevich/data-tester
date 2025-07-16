@@ -1,12 +1,12 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Self, Union, List, Dict
+from typing import Union, List, Dict, Self
 from uuid import uuid4
 from datetime import datetime
 
 from pydantic import Field, UUID4
 
-from src.dtos import DTO
+from src.dtos.dto import DTO
 from src.dtos.domain_config import DomainConfigDTO
 from src.dtos.specification import SpecificationDTO
 
@@ -46,7 +46,7 @@ class TestStatus(Enum):
     FINISHED = "FINISHED"
 
 
-class TestCaseDefinitionDTO(DTO):
+class TestDefinitionDTO(DTO):
     __test__ = False  # prevents pytest collection
     testobject: TestObjectDTO
     testtype: TestType
@@ -76,23 +76,33 @@ class TestType(Enum):
     UNKNOWN = "UNKNOWN"
 
 
-class TestResultDTO(DTO):
+class TestDTO(DTO):
     __test__ = False  # prevents pytest collection
+    # reference fields
     testrun_id: UUID4 = Field(default_factory=uuid4)
     testset_id: UUID4 = Field(default_factory=uuid4)
-    labels: List[str] = Field(default=[])
     report_id: UUID4 | None = None
-    start_ts: datetime
-    end_ts: datetime
+    # data object coordinates
+    domain: str
+    stage: str
+    instance: str
+    # dynamic data
     result: TestResult
+    status: TestStatus
+    start_ts: datetime
+    end_ts: datetime | None = None
+    # user-defined data
+    testset_name: str = Field(default="Testset name not set")
+    labels: List[str] = Field(default=[])
+    domain_config: DomainConfigDTO
 
 
-class TestCaseResultDTO(TestResultDTO):
+
+class TestCaseDTO(TestDTO):
     __test__ = False  # prevents pytest collection
     testcase_id: UUID4 = Field(default_factory=uuid4)
     testobject: TestObjectDTO
     testtype: TestType
-    status: TestStatus
     diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
     summary: str
     facts: List[Dict[str, str | int]]
@@ -100,29 +110,37 @@ class TestCaseResultDTO(TestResultDTO):
     specifications: List[SpecificationDTO]
 
 
-class TestRunResultDTO(TestResultDTO):
+class TestRunDTO(TestDTO):
     __test__ = False  # prevents pytest collection
-    testcase_results: List[TestCaseResultDTO]
+    testdefinitions: List[TestDefinitionDTO]
+    testcase_results: List[TestCaseDTO] = Field(default=[])
 
     @classmethod
-    def from_testcase_results(cls, testcase_results: List[TestCaseResultDTO]) -> Self:
+    def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
 
         result = TestResult.OK
-        for testcase_result in testcase_results:
-            if testcase_result.result != TestResult.OK:
+        for testcase in testcases:
+            if testcase.result != TestResult.OK:
                 result = TestResult.NOK
 
-        start_ts = min([res.start_ts for res in testcase_results])
-        end_ts = max([res.end_ts for res in testcase_results])
-        testrun_id = cls._get_testrun_id([res.testrun_id for res in testcase_results])
+        testrun_id = cls._get_testrun_id([testcase.testrun_id for testcase in testcases])
+        testdefinitions = cls._get_testdefinitions(testcases)
+
         return cls(
             testrun_id=testrun_id,
-            start_ts=start_ts,
-            end_ts=end_ts,
+            start_ts=min([tc.start_ts for tc in testcases]),
+            end_ts=max([tc.end_ts for tc in testcases if tc.end_ts is not None]),
             result=result,
-            testset_id=testcase_results[0].testset_id,
-            labels=testcase_results[0].labels,
-            testcase_results=testcase_results,
+            testset_id=testcases[0].testset_id,
+            labels=testcases[0].labels,
+            testcase_results=testcases,
+            testset_name="undefined testset",
+            stage=testcases[0].testobject.stage,
+            instance=testcases[0].testobject.instance,
+            domain=testcases[0].domain_config.domain,
+            domain_config=testcases[0].domain_config,
+            status=TestStatus.FINISHED,
+            testdefinitions=testdefinitions,
         )
 
     @staticmethod
@@ -135,3 +153,21 @@ class TestRunResultDTO(TestResultDTO):
             raise ValueError("At least one testcase must be provided!")
 
         return testrun_ids[0]
+
+    @staticmethod
+    def _get_testdefinitions(testcases: List[TestCaseDTO]) -> List[TestDefinitionDTO]:
+
+        definitions = []
+        for testcase in testcases:
+            definition = TestDefinitionDTO(
+                testobject=testcase.testobject,
+                testtype=testcase.testtype,
+                specs=testcase.specifications,
+                labels=testcase.labels,
+                testset_id=testcase.testset_id,
+                testrun_id=testcase.testrun_id,
+                domain_config=testcase.domain_config,
+            )
+            definitions.append(definition)
+
+        return definitions

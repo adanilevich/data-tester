@@ -10,7 +10,8 @@ from src.report.adapters import (
     JsonTestRunReportFormatter,
     XlsxTestRunReportFormatter,
 )
-from src.storage import FileStorage, DictStorage
+# from src.storage.file_storage import FileStorage
+# from src.storage.dict_storage import DictStorage
 from src.config import Config
 from src.dtos import DomainConfigDTO, Store
 
@@ -20,6 +21,8 @@ class ReportDependencyInjector:
         self.config = config or Config()
 
     def report_manager(self, domain_config: DomainConfigDTO) -> CliReportManager:
+        from src.storage.file_storage import FileStorage
+        from src.storage.dict_storage import DictStorage
         storages: List[IStorage] = []
 
         # SET INTERNAL STORAGE BASED ON CONFIG

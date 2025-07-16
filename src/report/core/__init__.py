@@ -1,2 +1,8 @@
 # flake8: noqa
-from src.report.core.report import Report, WrongReportTypeError
+from .report import Report, WrongReportTypeError
+
+
+__all__ = [
+    "Report",
+    "WrongReportTypeError",
+]

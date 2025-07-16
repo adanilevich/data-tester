@@ -1,9 +1,10 @@
 from pathlib import Path
 
 from src.dtos import DomainConfigDTO
-from src.data_platform.demo import (
-    DemoDataPlatform, DemoNamingResolver, DemoQueryHandler
-)
+from .demo_platform import DemoDataPlatform
+from .demo_naming_resolver import DemoNamingResolver
+from .demo_query_handler import DemoQueryHandler
+
 from src.testcase.ports import IDataPlatformFactory
 
 # Use project-root-relative paths for test fixtures

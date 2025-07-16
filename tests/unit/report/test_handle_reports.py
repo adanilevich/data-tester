@@ -73,19 +73,19 @@ class TestReportCommandHandler:
         assert result.testobject == testcase_result.testobject.name
         assert result.testtype == testcase_result.testtype.value
 
-    def test_create_testrun_report(self, report_handler, testrun_result):
+    def test_create_testrun_report(self, report_handler, testrun):
         """Test creating a report from a test run result"""
         # Given: a test run result and a report handler
-        command = CreateReportCommand(result=testrun_result)
+        command = CreateReportCommand(result=testrun)
 
         # When: creating a report from the test run result
         result = report_handler.create_report(command)
 
         # Then: the result should be a TestRunReportDTO with correct data
         assert isinstance(result, TestRunReportDTO)
-        assert result.testrun_id == testrun_result.testrun_id
-        assert result.result == testrun_result.result.value
-        assert len(result.testcase_results) == len(testrun_result.testcase_results)
+        assert result.testrun_id == testrun.testrun_id
+        assert result.result == testrun.result.value
+        assert len(result.testcase_results) == len(testrun.testcase_results)
 
     def test_save_testcase_report(self, report_handler, testcase_report):
         """Test saving a test case report"""

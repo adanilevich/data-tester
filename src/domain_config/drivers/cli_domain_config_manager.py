@@ -19,6 +19,8 @@ class CLIDomainConfigManager:
     def fetch_domain_configs(
         self, location: LocationDTO | None = None
     ) -> Dict[str, DomainConfigDTO]:
+        """Fetches domain configs from the configured location"""
+
         if location is None:
             if self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION is None:
                 raise ValueError("DOMAIN_CONFIGS_LOCATION undefined")

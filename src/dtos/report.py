@@ -6,7 +6,10 @@ from uuid import uuid4
 
 from pydantic import UUID4
 
-from src.dtos import DTO, SpecificationDTO, TestCaseResultDTO, TestRunResultDTO
+from src.dtos.dto import DTO
+from src.dtos.specification import SpecificationDTO
+from src.dtos.testcase import TestCaseDTO
+from src.dtos.testcase import TestRunDTO
 
 
 class ReportArtifactFormat(Enum):
@@ -48,7 +51,7 @@ class TestCaseReportDTO(TestReportDTO):
     specifications: List[SpecificationDTO]
 
     @classmethod
-    def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
+    def from_testcase_result(cls, testcase_result: TestCaseDTO) -> Self:
         return cls(
             report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
@@ -56,7 +59,7 @@ class TestCaseReportDTO(TestReportDTO):
             labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
-            end_ts=testcase_result.end_ts,
+            end_ts=testcase_result.end_ts or datetime.now(),
             testcase_id=testcase_result.testcase_id,
             testobject=testcase_result.testobject.name,
             testtype=testcase_result.testtype.value,
@@ -75,7 +78,7 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
     summary: str
 
     @classmethod
-    def from_testcase_result(cls, testcase_result: TestCaseResultDTO) -> Self:
+    def from_testcase_result(cls, testcase_result: TestCaseDTO) -> Self:
         return cls(
             report_id = uuid4(),
             testrun_id=testcase_result.testrun_id,
@@ -83,7 +86,7 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
             labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
-            end_ts=testcase_result.end_ts,
+            end_ts=testcase_result.end_ts or datetime.now(),
             testobject=testcase_result.testobject.name,
             testtype=testcase_result.testtype.value,
             summary=testcase_result.summary,
@@ -95,17 +98,17 @@ class TestRunReportDTO(TestReportDTO):
     testcase_results: List[TestRunReportTestCaseEntryDTO]
 
     @classmethod
-    def from_testrun_result(cls, testrun_result: TestRunResultDTO) -> Self:
+    def from_testrun(cls, testrun: TestRunDTO) -> Self:
         return cls(
             report_id = uuid4(),
-            testrun_id=testrun_result.testrun_id,
-            testset_id=testrun_result.testset_id,
-            labels=testrun_result.labels,
-            result=testrun_result.result.value,
-            start_ts=testrun_result.start_ts,
-            end_ts=testrun_result.end_ts,
+            testrun_id=testrun.testrun_id,
+            testset_id=testrun.testset_id,
+            labels=testrun.labels,
+            result=testrun.result.value,
+            start_ts=testrun.start_ts,
+            end_ts=testrun.end_ts or datetime.now(),
             testcase_results=[
                 TestRunReportTestCaseEntryDTO.from_testcase_result(testcase_result)
-                for testcase_result in testrun_result.testcase_results
+                for testcase_result in testrun.testcase_results
             ],
         )

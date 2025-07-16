@@ -1,18 +1,20 @@
 from typing import List
 
-from src.testcase.drivers import CliTestCaseRunner
-from src.testcase.application import RunTestCasesCommandHandler
 from src.notifier import InMemoryNotifier, StdoutNotifier
-from src.testcase.ports import INotifier
 from src.config import Config
 from src.data_platform import DemoDataPlatformFactory, DummyPlatformFactory
+from src.storage.dict_storage import DictStorage
+
+from .drivers import CliTestRunManager
+from .application import TestRunCommandHandler
+from .ports import INotifier
 
 
 class TestCaseDependencyInjector:
     def __init__(self, config: Config):
         self.config = config
 
-    def testcase_runner(self) -> CliTestCaseRunner:
+    def testrun_manager(self) -> CliTestRunManager:
 
         # SET NOTIFIERS
         notifiers: List[INotifier] = []
@@ -40,9 +42,18 @@ class TestCaseDependencyInjector:
         else:
             raise ValueError(f"Unknown platform: {self.config.DATATESTER_DATA_PLATFORM}")
 
-        return CliTestCaseRunner(
-            handler=RunTestCasesCommandHandler(
+        # SET STORAGE
+        if self.config.INTERNAL_STORAGE_ENGINE == "DICT":
+            storage = DictStorage()
+        else:
+            msg = f"Unknown storage engine: {self.config.INTERNAL_STORAGE_ENGINE}"
+            raise ValueError(msg)
+
+        return CliTestRunManager(
+            handler=TestRunCommandHandler(
                 backend_factory=data_platform_factory,
-                notifiers=notifiers
-            )
+                notifiers=notifiers,
+                storage=storage,
+            ),
+            config=self.config,
         )

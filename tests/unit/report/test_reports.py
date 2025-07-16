@@ -100,20 +100,20 @@ class TestReport:
         assert report_dto.start_ts == testcase_result.start_ts
         assert report_dto.end_ts == testcase_result.end_ts
 
-    def test_create_report_from_testrun_result(self, report, testrun_result):
+    def test_create_report_from_testrun_result(self, report, testrun):
         # when creating a report from testrun result
-        report_dto = report.create_report(testrun_result)
+        report_dto = report.create_report(testrun)
 
         # then it returns a TestRunReportDTO
         assert isinstance(report_dto, TestRunReportDTO)
-        assert report_dto.testrun_id == testrun_result.testrun_id
-        assert report_dto.result == testrun_result.result.value
-        assert report_dto.start_ts == testrun_result.start_ts
-        assert report_dto.end_ts == testrun_result.end_ts
-        assert len(report_dto.testcase_results) == len(testrun_result.testcase_results)
+        assert report_dto.testrun_id == testrun.testrun_id
+        assert report_dto.result == testrun.result.value
+        assert report_dto.start_ts == testrun.start_ts
+        assert report_dto.end_ts == testrun.end_ts
+        assert len(report_dto.testcase_results) == len(testrun.testcase_results)
 
         # then the testcase results are correctly converted
-        for i, testcase_result in enumerate(testrun_result.testcase_results):
+        for i, testcase_result in enumerate(testrun.testcase_results):
             dto_testcase = report_dto.testcase_results[i]
             assert dto_testcase.testrun_id == testcase_result.testrun_id
             assert dto_testcase.testobject == testcase_result.testobject.name

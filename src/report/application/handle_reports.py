@@ -3,24 +3,24 @@ from datetime import datetime
 
 from pydantic import UUID4
 
-from src.dtos.report import (
+from src.dtos import (
     TestRunReportDTO,
     TestCaseReportDTO,
     ReportArtifact,
     TestReportDTO,
     ReportArtifactFormat,
+    LocationDTO,
 )
-from src.dtos.location import LocationDTO
-from src.report.ports.drivers import (
+from src.report.ports import (
     IReportCommandHandler,
     CreateReportCommand,
     GetReportArtifactCommand,
     SaveReportArtifactsForUsersCommand,
     SaveReportCommand,
+    IReportFormatter,
+    IStorage,
 )
 from src.report.core import Report
-from src.report.ports.plugins import IReportFormatter
-from src.report.ports.infrastructure import IStorage
 
 
 class InvalidReportTypeError(Exception):

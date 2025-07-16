@@ -1,3 +1,11 @@
 # flake8: noqa
-from src.data_platform.demo import DemoDataPlatformFactory, DemoDataPlatform
-from src.data_platform.dummy import DummyPlatformFactory, DummyPlatform
+from .demo import DemoDataPlatformFactory, DemoDataPlatform
+from .dummy import DummyPlatformFactory, DummyPlatform
+
+
+__all__ = [
+    "DemoDataPlatformFactory",
+    "DemoDataPlatform",
+    "DummyPlatformFactory",
+    "DummyPlatform",
+]

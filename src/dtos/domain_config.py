@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Any
 
-from src.dtos import DTO
+from src.dtos.dto import DTO
 from src.dtos.location import LocationDTO
 
 

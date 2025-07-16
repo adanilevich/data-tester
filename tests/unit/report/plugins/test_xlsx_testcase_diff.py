@@ -5,7 +5,7 @@ import pytest
 import polars as pl
 
 from src.report.adapters.plugins.xlsx_testcase_diff import XlsxTestCaseDiffFormatter
-from src.report.ports import ReportTypeNotSupportedError, ReportFormatterError
+from src.report.ports.plugins import ReportTypeNotSupportedError, ReportFormatterError
 from src.dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,

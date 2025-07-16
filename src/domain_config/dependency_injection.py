@@ -1,6 +1,7 @@
 from src.domain_config.application import DomainConfigHandler
 from src.domain_config.drivers.cli_domain_config_manager import CLIDomainConfigManager
-from src.storage import FileStorage, DictStorage
+from src.storage.file_storage import FileStorage
+from src.storage.dict_storage import DictStorage
 from src.config import Config
 from src.dtos.location import LocationDTO, Store
 

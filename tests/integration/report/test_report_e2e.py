@@ -10,10 +10,10 @@ from src.report.dependency_injection import ReportDependencyInjector
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
-    TestCaseResultDTO,
+    TestCaseDTO,
     TestResult,
     TestType,
-    TestRunResultDTO,
+    TestRunDTO,
     TestCaseReportDTO,
     LocationDTO,
     TestRunReportDTO,
@@ -24,7 +24,7 @@ from src.dtos import (
 @pytest.fixture
 def report_manager(
     domain_config: DomainConfigDTO,
-    testcase_result: TestCaseResultDTO
+    testcase_result: TestCaseDTO
 ) -> CliReportManager:
     config = Config()
     config.DATATESTER_ENV = "LOCAL"
@@ -37,10 +37,10 @@ def report_manager(
 
 @pytest.fixture
 def testresults(
-    testcase_result: TestCaseResultDTO
-) -> Tuple[TestRunResultDTO, List[TestCaseResultDTO]]:
+    testcase_result: TestCaseDTO
+) -> Tuple[TestRunDTO, List[TestCaseDTO]]:
         # create 10 random testcase results
-        testcase_results: List[TestCaseResultDTO] = []
+        testcase_results: List[TestCaseDTO] = []
         for _ in range(10):
             # assign random testobject names, testtyp   es and results
             testobjects = [
@@ -53,13 +53,13 @@ def testresults(
             testcase_results.append(testcase_result_)
 
         # create a corresponding testrun result
-        testrun_result = TestRunResultDTO.from_testcase_results(testcase_results)
+        testrun_result = TestRunDTO.from_testcases(testcases=testcase_results)
 
         return testrun_result, testcase_results
 
 def create_and_save_reports(
     report_manager: CliReportManager,
-    testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+    testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
 ) -> Tuple[TestRunReportDTO, List[TestCaseReportDTO]]:
 
     testrun_result, testcase_results = testresults
@@ -83,7 +83,7 @@ class TestReportE2E:
     def test_create_and_save_reports(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
     ):
         # given a configured report manager and testresults
         report_manager = report_manager
@@ -104,7 +104,7 @@ class TestReportE2E:
     def test_retrieve_from_internal_storage(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
     ):
         # given a configured report manager and testresults
         report_manager = report_manager
@@ -147,7 +147,7 @@ class TestReportE2E:
     def test_retrieve_from_user_storage(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunResultDTO, List[TestCaseResultDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
     ):
 
         # given a configured report manager and testresults

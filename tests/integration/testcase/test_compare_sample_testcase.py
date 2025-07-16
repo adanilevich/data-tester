@@ -1,12 +1,12 @@
 from uuid import uuid4
-from src.testcase.core.testcases import TestCaseFactory
+from src.testcase.core.testcases import CompareSampleTestCase
 from src.dtos import (
     CompareSampleSqlDTO,
     SchemaSpecificationDTO,
     TestObjectDTO,
     TestType,
     SpecificationType,
-    TestCaseDefinitionDTO,
+    TestDefinitionDTO,
 )
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
@@ -50,14 +50,14 @@ testobject = TestObjectDTO(
 
 
 def test_straight_through_execution(domain_config, prepare_local_data):
-    definition = TestCaseDefinitionDTO(
+    definition = TestDefinitionDTO(
         testobject=testobject,
         testtype=TestType.COMPARE_SAMPLE,
         specs=[schema, sql],
         domain_config=domain_config,
         testrun_id=uuid4(),
     )
-    testcase = TestCaseFactory.create(
+    testcase = CompareSampleTestCase(
         definition=definition,
         backend=DemoDataPlatformFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier(), StdoutNotifier()]

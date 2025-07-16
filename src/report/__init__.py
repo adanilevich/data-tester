@@ -1,2 +1,7 @@
 # flake8: noqa
-from src.report.core import Report
+from .dependency_injection import ReportDependencyInjector
+
+
+__all__ = [
+    "ReportDependencyInjector",
+]

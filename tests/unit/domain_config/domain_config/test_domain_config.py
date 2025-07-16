@@ -4,7 +4,7 @@ import yaml  # type: ignore
 from src.dtos import DomainConfigDTO
 from src.dtos.location import LocationDTO
 from src.domain_config.core import DomainConfig, DomainConfigAlreadyExistsError
-from src.storage import DictStorage
+from src.storage.dict_storage import DictStorage
 
 
 class TestDomainConfig:
