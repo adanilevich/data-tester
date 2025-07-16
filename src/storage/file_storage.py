@@ -77,8 +77,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
         try:
             exists = fs.exists(path.path)
         except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg) from err
+            raise FileStorageError() from err
 
         return exists
 
@@ -120,8 +119,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
             with fs.open(path.path, mode="rb", encoding=self.default_encoding) as file:
                 content = file.read()
         except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg) from err
+            raise FileStorageError() from err
 
         return content
 
@@ -137,8 +135,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage):
             with fs.open(path.path, mode="wb") as file:
                 file.write(content)
         except Exception as err:
-            msg = err.__class__.__name__ + ": " + str(err)
-            raise FileStorageError(msg) from err
+            raise FileStorageError() from err
 
     @property
     def supported_storage_types(self) -> List[Store]:
