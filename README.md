@@ -60,7 +60,7 @@
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
 | src/storage/\_\_init\_\_.py                                                    |        2 |        0 |    100% |           |
 | src/storage/dict\_storage.py                                                   |       31 |        0 |    100% |           |
-| src/storage/file\_storage.py                                                   |       83 |       20 |     76% |54, 67-72, 79-81, 89, 94, 103-104, 122-124, 139-141, 147 |
+| src/storage/file\_storage.py                                                   |       80 |        4 |     95% |54, 70, 102-103 |
 | src/testcase/application/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/testcase/application/run\_testcases.py                                     |       21 |        0 |    100% |           |
 | src/testcase/core/precondition\_checks/\_\_init\_\_.py                         |       10 |        0 |    100% |           |
@@ -91,7 +91,7 @@
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform.py          |        9 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/data\_platform/i\_data\_platform\_factory.py |        4 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
-|                                                                      **TOTAL** | **1971** |  **160** | **92%** |           |
+|                                                                      **TOTAL** | **1968** |  **144** | **93%** |           |
 
 5 empty files skipped.
 
