@@ -1,8 +1,8 @@
 import pytest
 from pathlib import Path
-from src.storage import (
-    FileStorage, StorageTypeUnknownError, ObjectNotFoundError, ObjectIsNotAFileError,
-    FileStorageError
+from src.storage.file_storage import FileStorage
+from src.storage.file_storage import (
+    StorageTypeUnknownError, ObjectNotFoundError, ObjectIsNotAFileError, FileStorageError
 )
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore

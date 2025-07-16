@@ -15,15 +15,28 @@ from src.report.ports import (
     ObjectNotFoundError as ReportStorageObjectNotFoundError,
     StorageTypeUnknownError as ReportStorageTypeUnknownError,
 )
-from src.dtos.location import LocationDTO, Store
+from src.testcase.ports import (
+    IStorage as ITestcaseStorage,
+    StorageError as TestcaseStorageError,
+    ObjectNotFoundError as TestcaseStorageObjectNotFoundError,
+    StorageTypeUnknownError as TestcaseStorageTypeUnknownError,
+)
+from src.dtos import LocationDTO, Store
 from src.config import Config
 
 
-class FileStorageError(DomainConfigStorageError, ReportStorageError):
+class FileStorageError(
+    DomainConfigStorageError,
+    ReportStorageError,
+    TestcaseStorageError,
+):
     """"""
 
 
-class ObjectNotFoundError(ReportStorageObjectNotFoundError):
+class ObjectNotFoundError(
+    ReportStorageObjectNotFoundError,
+    TestcaseStorageObjectNotFoundError,
+):
     """"""
 
 
@@ -31,11 +44,14 @@ class ObjectIsNotAFileError(FileStorageError):
     """"""
 
 
-class StorageTypeUnknownError(ReportStorageTypeUnknownError):
+class StorageTypeUnknownError(
+    ReportStorageTypeUnknownError,
+    TestcaseStorageTypeUnknownError,
+):
     """"""
 
 
-class FileStorage(IDomainConfigStorage, IReportStorage):
+class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
     """
     Handles files in Google Cloud Storage or local file system. Must conform to
     IStorage interfaces defined by all clients, e.g. domain_config, report, specification.

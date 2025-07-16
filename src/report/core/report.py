@@ -5,9 +5,9 @@ from src.report.ports import IReportFormatter, IStorage, StorageTypeUnknownError
 from src.dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,
-    TestCaseResultDTO,
-    TestRunResultDTO,
-    TestResultDTO,
+    TestCaseDTO,
+    TestRunDTO,
+    TestDTO,
     ReportArtifact,
     ReportArtifactFormat,
     ReportType,
@@ -64,15 +64,15 @@ class Report:
                     raise ValueError(f"Storage type {storage_type} already registered")
                 self.storages_by_type[storage_type] = storage
 
-    def create_report(self, result: TestResultDTO) -> TestReportDTO:
+    def create_report(self, result: TestDTO) -> TestReportDTO:
         """Creates a report for a given result"""
 
         report: TestCaseReportDTO | TestRunReportDTO
-        if isinstance(result, TestRunResultDTO):
-            report = TestRunReportDTO.from_testrun_result(result)
+        if isinstance(result, TestRunDTO):
+            report = TestRunReportDTO.from_testrun(result)
             result.report_id = report.report_id
             return report
-        elif isinstance(result, TestCaseResultDTO):
+        elif isinstance(result, TestCaseDTO):
             report = TestCaseReportDTO.from_testcase_result(result)
             result.report_id = report.report_id
             return report

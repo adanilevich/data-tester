@@ -2,13 +2,13 @@ from abc import ABC, abstractmethod
 
 from pydantic import UUID4
 
-from src.dtos.testcase import TestResultDTO
+from src.dtos.testcase import TestDTO
 from src.dtos.report import TestReportDTO, ReportArtifact, ReportArtifactFormat
 from src.dtos import DTO, LocationDTO
 
 
 class CreateReportCommand(DTO):
-    result: TestResultDTO
+    result: TestDTO
 
 
 class SaveReportCommand(DTO):

@@ -1,2 +1,7 @@
 # flake8: noqa
-from src.report.application.handle_reports import *
+from .handle_reports import ReportCommandHandler
+
+
+__all__ = [
+    "ReportCommandHandler",
+]

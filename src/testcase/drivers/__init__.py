@@ -1,2 +1,2 @@
 # flake8: noqa
-from src.testcase.drivers.cli_testcase_runner import CliTestCaseRunner
+from .cli_testrun_manager import CliTestRunManager

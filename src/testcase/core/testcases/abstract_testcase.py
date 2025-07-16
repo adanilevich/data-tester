@@ -7,8 +7,8 @@ from typing import Dict, List, Optional, Any
 import time
 
 from src.dtos import (
-    TestObjectDTO, TestStatus, TestResult, TestCaseResultDTO, DomainConfigDTO,
-    SpecificationDTO, TestType, TestCaseDefinitionDTO
+    TestObjectDTO, TestStatus, TestResult, TestCaseDTO, DomainConfigDTO,
+    SpecificationDTO, TestType, TestDefinitionDTO
 )
 
 from src.testcase.ports import IDataPlatform, INotifier
@@ -26,8 +26,8 @@ class AbstractTestCase(ICheckable):
     required_specs: List[str] = []
     __test__ = False  # prevents pytest collection
 
-    # TODO: refactor to receive a TestCaseDefinitionDTO incl. labels and testset_id
-    def __init__(self, definition: TestCaseDefinitionDTO,
+    # TODO: refactor to receive a TestDefinitionDTO incl. labels and testset_id
+    def __init__(self, definition: TestDefinitionDTO,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 
         self.notifiers: List[INotifier] = notifiers
@@ -82,8 +82,8 @@ class AbstractTestCase(ICheckable):
 
         return True
 
-    def to_dto(self) -> TestCaseResultDTO:
-        dto = TestCaseResultDTO(
+    def to_dto(self) -> TestCaseDTO:
+        dto = TestCaseDTO(
             testcase_id=self.testcase_id,
             testrun_id=self.testrun_id,
             testset_id=self.testset_id,
@@ -99,6 +99,10 @@ class AbstractTestCase(ICheckable):
             specifications=self.specs,
             start_ts=self.start_ts,
             end_ts=self.end_ts or datetime.now(),
+            domain_config=self.domain_config,
+            domain=self.testobject.domain,
+            stage=self.testobject.stage,
+            instance=self.testobject.instance,
         )
         return dto
 
@@ -107,7 +111,7 @@ class AbstractTestCase(ICheckable):
         raise NotImplementedError(f"Implement _execute for {self.__class__}")
 
     def execute(self,
-                checker: Optional[IPreconditionChecker] = None) -> TestCaseResultDTO:
+                checker: Optional[IPreconditionChecker] = None) -> TestCaseDTO:
 
         self.notify(f"Starting execution of {self.ttype} for {self.testobject}")
         checker = checker or PreConditionChecker()

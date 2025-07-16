@@ -1,16 +1,11 @@
 from src.config import Config
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, TestReportDTO, TestDTO, LocationDTO
 from src.report.ports import (
     IReportCommandHandler,
     CreateReportCommand,
     SaveReportArtifactsForUsersCommand,
     SaveReportCommand,
 )
-from src.dtos import (
-    TestReportDTO,
-    TestResultDTO,
-)
-from src.dtos.location import LocationDTO
 
 
 # TODO: Add error handling here or in application if reports can't be formattted or saved
@@ -25,7 +20,7 @@ class CliReportManager:
         self.report_handler = report_handler
         self.domain_config = domain_config
 
-    def create_report(self, result: TestResultDTO) -> TestReportDTO:
+    def create_report(self, result: TestDTO) -> TestReportDTO:
         """Creates testcase or testrun report"""
 
         command = CreateReportCommand(result=result)

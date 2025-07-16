@@ -10,22 +10,33 @@ from src.report.ports import (
     ObjectNotFoundError as ReportStorageObjectNotFoundError,
     StorageTypeUnknownError as ReportStorageTypeUnknownError,
 )
-from src.dtos.location import LocationDTO, Store
+from src.testcase.ports import (
+    IStorage as ITestcaseStorage,
+    StorageError as TestcaseStorageError,
+    ObjectNotFoundError as TestcaseStorageObjectNotFoundError,
+    StorageTypeUnknownError as TestcaseStorageTypeUnknownError,
+)
+from src.dtos import LocationDTO, Store
 
 
-class DictStorageError(DomainConfigStorageError, ReportStorageError):
+class DictStorageError(
+    DomainConfigStorageError, ReportStorageError, TestcaseStorageError):
     """"""
 
 
-class ObjectNotFoundError(ReportStorageObjectNotFoundError):
+class ObjectNotFoundError(
+    ReportStorageObjectNotFoundError, TestcaseStorageObjectNotFoundError
+):
     """"""
 
 
-class StorageTypeUnknownError(ReportStorageTypeUnknownError):
+class StorageTypeUnknownError(
+    ReportStorageTypeUnknownError, TestcaseStorageTypeUnknownError
+):
     """"""
 
 
-class DictStorage(IDomainConfigStorage, IReportStorage):
+class DictStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
     """In-memory storage implementation using a dictionary"""
 
     def __init__(self):

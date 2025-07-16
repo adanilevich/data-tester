@@ -1,3 +1,10 @@
 # flake8: noqa
-from src.storage.file_storage import *
-from src.storage.dict_storage import DictStorage, DictStorageError
+# from .file_storage import FileStorage
+# from .dict_storage import DictStorage
+
+
+__all__ = [
+    "FileStorage",
+    "DictStorage",
+    "DictStorageError",
+]

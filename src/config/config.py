@@ -28,12 +28,13 @@ class Config(BaseSettings):
     # DOMAIN CONFIG CONFIGURATION
     DATATESTER_DOMAIN_CONFIGS_LOCATION: str | None = Field(default=None)
 
-    # CONFIGURATION OF INTERNAL TESTREPORT STORAGE
-    # based on this, implementations of src.storage will be injected to report handler
+    # CONFIGURATION OF INTERNAL STORAGE
     INTERNAL_STORAGE_ENGINE: str = Field(default="DICT")  # GCS, LOCAL or other
+
+    # CONFIGURATION OF INTERNAL STORAGES
+    INTERNAL_TESTRUN_LOCATION: str | None = Field(default="dict://testruns/")
     INTERNAL_TESTREPORT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.JSON
-    # define application-internal location for testreports
-    INTERNAL_TESTREPORT_LOCATION: str | None = Field(default=None)
+    INTERNAL_TESTREPORT_LOCATION: str | None = Field(default="dict://reports/")
 
     # CONFIGURATION OF USER-FACING TESTREPORT STORAGE
     # This report artifacts will be created by default for testrun reports

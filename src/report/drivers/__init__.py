@@ -1,2 +1,7 @@
 # flake8: noqa
-from src.report.drivers.cli_report_manager import *
+from .cli_report_manager import CliReportManager
+
+
+__all__ = [
+    "CliReportManager",
+]

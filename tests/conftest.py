@@ -9,28 +9,36 @@ import polars as pl
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from urllib import request
 
-from src.dtos import (
-    SpecificationDTO,
+from src.dtos.specification import SpecificationDTO, SpecificationType
+from src.dtos.domain_config import (
     SchemaTestCaseConfigDTO,
     CompareSampleTestCaseConfigDTO,
     DomainConfigDTO,
     TestCasesConfigDTO,
+)
+from src.dtos.testcase import (
     TestObjectDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
-    TestCaseResultDTO,
-    TestRunResultDTO,
+    TestCaseDTO,
     TestResult,
     TestStatus,
     TestType,
-    SpecificationType,
-    LocationDTO,
-    TestCaseDefinitionDTO,
+    TestDefinitionDTO,
 )
+from src.dtos.report import TestCaseReportDTO, TestRunReportDTO
+from src.dtos.testcase import TestRunDTO
+from src.dtos.location import LocationDTO
 from src.testcase.ports import IDataPlatform
 from src.notifier import InMemoryNotifier, StdoutNotifier
 from src.data_platform import DummyPlatform
-from src.testcase.core.testcases import TestCaseFactory, AbstractTestCase
+from src.testcase.core.testcases import (
+    AbstractTestCase,
+    SchemaTestCase,
+    RowCountTestCase,
+    CompareSampleTestCase,
+    DummyOkTestCase,
+    DummyNokTestCase,
+    DummyExceptionTestCase,
+)
 from src.testcase.core.precondition_checks import ICheckable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
@@ -126,22 +134,34 @@ class ITestCaseCreator(ABC):
 
 @pytest.fixture
 def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
+
     class TestCaseCreator(ITestCaseCreator):
+
         def create(self, ttype: TestType) -> AbstractTestCase:
+
+            testcase_class: type[AbstractTestCase]
             if ttype == TestType.SCHEMA:
                 spec_type = SpecificationType.SCHEMA
+                testcase_class = SchemaTestCase
             elif ttype == TestType.ROWCOUNT:
                 spec_type = SpecificationType.ROWCOUNT_SQL
+                testcase_class = RowCountTestCase
             elif ttype == TestType.COMPARE_SAMPLE:
                 spec_type = SpecificationType.COMPARE_SAMPLE_SQL
-            elif ttype in [
-                TestType.DUMMY_OK, TestType.DUMMY_NOK, TestType.DUMMY_EXCEPTION
-            ]:
+                testcase_class = CompareSampleTestCase
+            elif ttype == TestType.DUMMY_OK:
+                testcase_class = DummyOkTestCase
+                spec_type = SpecificationType.SCHEMA
+            elif ttype == TestType.DUMMY_NOK:
+                testcase_class = DummyNokTestCase
+                spec_type = SpecificationType.SCHEMA
+            elif ttype == TestType.DUMMY_EXCEPTION:
+                testcase_class = DummyExceptionTestCase
                 spec_type = SpecificationType.SCHEMA
             else:
-                raise ValueError(f"Invalid test type: {ttype}")
+                raise ValueError(f"Conftest: Invalid test type: {ttype}")
 
-            definition = TestCaseDefinitionDTO(
+            definition = TestDefinitionDTO(
                 testobject=testobject,
                 testtype=ttype,
                 specs=[
@@ -161,7 +181,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 labels=["my_label", "my_label2"],
             )
 
-            testcase = TestCaseFactory.create(
+            testcase = testcase_class(
                 definition=definition,
                 backend=DummyPlatform(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()],
@@ -233,8 +253,8 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
 
 
 @pytest.fixture
-def testcase_result(testobject) -> TestCaseResultDTO:
-    return TestCaseResultDTO(
+def testcase_result(testobject, domain_config) -> TestCaseDTO:
+    return TestCaseDTO(
         testcase_id=uuid4(),
         testrun_id=uuid4(),
         testobject=testobject,
@@ -246,16 +266,20 @@ def testcase_result(testobject) -> TestCaseResultDTO:
         facts=[{"a": 5}, {"b": "2"}],
         details=[{"a": 5}, {"b": "2"}],
         specifications=[],
+        domain_config=domain_config,
         start_ts=datetime.now(),
         end_ts=datetime.now(),
         labels=["my_label", "my_label2"],
+        domain=testobject.domain,
+        stage=testobject.stage,
+        instance=testobject.instance,
     )
 
 
 @pytest.fixture
-def testrun_result(testcase_result) -> TestRunResultDTO:
-    return TestRunResultDTO.from_testcase_results(
-        testcase_results=[testcase_result, testcase_result]
+def testrun(testcase_result) -> TestRunDTO:
+    return TestRunDTO.from_testcases(
+        testcases=[testcase_result, testcase_result]
     )
 
 
@@ -265,5 +289,5 @@ def testcase_report(testcase_result) -> TestCaseReportDTO:
 
 
 @pytest.fixture
-def testrun_report(testrun_result) -> TestRunReportDTO:
-    return TestRunReportDTO.from_testrun_result(testrun_result)
+def testrun_report(testrun) -> TestRunReportDTO:
+    return TestRunReportDTO.from_testrun(testrun)
