@@ -23,13 +23,12 @@ from src.dtos import (
     CompareSampleTestCaseConfigDTO,
 )
 from src.testcase.ports import (
-    ExecuteTestRunCommand,
     SaveTestRunCommand,
     LoadTestRunCommand,
     SetReportIdsCommand,
-    StorageTypeUnknownError,
-    ObjectNotFoundError,
+    ExecuteTestRunCommand,
 )
+from src.storage.i_storage import StorageTypeUnknownError, ObjectNotFoundError
 
 
 @pytest.fixture

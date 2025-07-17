@@ -35,6 +35,7 @@ class Config(BaseSettings):
     INTERNAL_TESTRUN_LOCATION: str | None = Field(default="dict://testruns/")
     INTERNAL_TESTREPORT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.JSON
     INTERNAL_TESTREPORT_LOCATION: str | None = Field(default="dict://reports/")
+    INTERNAL_TESTSET_LOCATION: str | None = Field(default="dict://testsets/")
 
     # CONFIGURATION OF USER-FACING TESTREPORT STORAGE
     # This report artifacts will be created by default for testrun reports

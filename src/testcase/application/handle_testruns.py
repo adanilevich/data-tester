@@ -5,14 +5,13 @@ from src.testcase.ports import (
     ExecuteTestRunCommand,
     IDataPlatformFactory,
     INotifier,
-    IStorage,
     SaveTestRunCommand,
     LoadTestRunCommand,
     SetReportIdsCommand,
-    StorageTypeUnknownError,
 )
 from src.dtos import LocationDTO, TestRunDTO
 from src.testcase.core import TestRun
+from src.storage.i_storage import IStorage, StorageTypeUnknownError
 
 
 class TestRunCommandHandler(ITestRunCommandHandler):

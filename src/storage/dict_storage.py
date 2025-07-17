@@ -1,42 +1,21 @@
 from typing import List
 
-from src.domain_config.ports import (
-    IStorage as IDomainConfigStorage,
-    StorageError as DomainConfigStorageError,
-)
-from src.report.ports import (
-    IStorage as IReportStorage,
-    StorageError as ReportStorageError,
-    ObjectNotFoundError as ReportStorageObjectNotFoundError,
-    StorageTypeUnknownError as ReportStorageTypeUnknownError,
-)
-from src.testcase.ports import (
-    IStorage as ITestcaseStorage,
-    StorageError as TestcaseStorageError,
-    ObjectNotFoundError as TestcaseStorageObjectNotFoundError,
-    StorageTypeUnknownError as TestcaseStorageTypeUnknownError,
+from src.storage.i_storage import (
+    IStorage,
+    StorageError,
+    ObjectNotFoundError,
+    StorageTypeUnknownError,
 )
 from src.dtos import LocationDTO, Store
 
 
 class DictStorageError(
-    DomainConfigStorageError, ReportStorageError, TestcaseStorageError):
-    """"""
-
-
-class ObjectNotFoundError(
-    ReportStorageObjectNotFoundError, TestcaseStorageObjectNotFoundError
+    StorageError,
 ):
     """"""
 
 
-class StorageTypeUnknownError(
-    ReportStorageTypeUnknownError, TestcaseStorageTypeUnknownError
-):
-    """"""
-
-
-class DictStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
+class DictStorage(IStorage):
     """In-memory storage implementation using a dictionary"""
 
     def __init__(self):
@@ -59,8 +38,11 @@ class DictStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
             raise ObjectNotFoundError(f"Path not found: {path}")
         return self._storage[path.path]
 
-    def find(self, path: LocationDTO) -> List[LocationDTO]:
-        """Returns all files in path, prefixed with the protocol"""
+    def list(self, path: LocationDTO) -> list[LocationDTO]:
+        """
+        Lists all files in given storage location. Only returns files at top level,
+        not from subfolders.
+        """
         self._check_storage_type(path)
         result = []
         for known_object in self._storage:

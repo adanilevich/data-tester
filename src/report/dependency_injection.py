@@ -2,7 +2,8 @@ from typing import List
 
 from src.report.application import ReportCommandHandler
 from src.report.drivers import CliReportManager
-from src.report.ports import IStorage, IReportFormatter
+from src.storage.i_storage import IStorage
+from src.report.ports import IReportFormatter
 from src.report.adapters import (
     XlsxTestCaseDiffFormatter,
     TxtTestCaseReportFormatter,

@@ -8,15 +8,16 @@ from src.report.ports import (
 )
 
 
+# TODO remove configuration handling from here and put to dependency injection
 # TODO: Add error handling here or in application if reports can't be formattted or saved
 class CliReportManager:
     def __init__(
         self,
         report_handler: IReportCommandHandler,
         domain_config: DomainConfigDTO,
-        config: Config | None = None,
+        config: Config,
     ):
-        self.config = config or Config()
+        self.config = config
         self.report_handler = report_handler
         self.domain_config = domain_config
 

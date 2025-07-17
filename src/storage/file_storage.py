@@ -3,58 +3,33 @@ from typing import Dict, List
 from fsspec import AbstractFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
+
 try:
     from gcsfs import GCSFileSystem  # type: ignore
 except ImportError:
     GCSFileSystem = None
 
-from src.domain_config.ports import (
-    IStorage as IDomainConfigStorage,
-    StorageError as DomainConfigStorageError,
-)
-from src.report.ports import (
-    IStorage as IReportStorage,
-    StorageError as ReportStorageError,
-    ObjectNotFoundError as ReportStorageObjectNotFoundError,
-    StorageTypeUnknownError as ReportStorageTypeUnknownError,
-)
-from src.testcase.ports import (
-    IStorage as ITestcaseStorage,
-    StorageError as TestcaseStorageError,
-    ObjectNotFoundError as TestcaseStorageObjectNotFoundError,
-    StorageTypeUnknownError as TestcaseStorageTypeUnknownError,
+from src.storage.i_storage import (
+    IStorage,
+    StorageError,
+    ObjectNotFoundError,
+    StorageTypeUnknownError,
 )
 from src.dtos import LocationDTO, Store
 from src.config import Config
 
 
 class FileStorageError(
-    DomainConfigStorageError,
-    ReportStorageError,
-    TestcaseStorageError,
-):
-    """"""
-
-
-class ObjectNotFoundError(
-    ReportStorageObjectNotFoundError,
-    TestcaseStorageObjectNotFoundError,
+    StorageError,
 ):
     """"""
 
 
 class ObjectIsNotAFileError(FileStorageError):
-    """"""
+    """Raised when a directory is accessed as a file."""
 
 
-class StorageTypeUnknownError(
-    ReportStorageTypeUnknownError,
-    TestcaseStorageTypeUnknownError,
-):
-    """"""
-
-
-class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
+class FileStorage(IStorage):
     """
     Handles files in Google Cloud Storage or local file system. Must conform to
     IStorage interfaces defined by all clients, e.g. domain_config, report, specification.
@@ -63,8 +38,8 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
     protocols: Dict[Store, AbstractFileSystem]
     default_encoding: str = "utf-8"
 
-    def __init__(self, config: Config | None = None):
-        self.config: Config = config or Config()
+    def __init__(self, config: Config):
+        self.config = config
         self.protocols = {
             Store.LOCAL: LocalFileSystem(auto_mkdir=True),
             Store.MEMORY: MemoryFileSystem(),  # for testing purpose
@@ -73,7 +48,8 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
             if GCSFileSystem is None:
                 raise ImportError("GCSFileSystem is not installed")
             self.protocols[Store.GCS] = GCSFileSystem(
-                project=self.config.DATATESTER_GCP_PROJECT)
+                project=self.config.DATATESTER_GCP_PROJECT
+            )
 
     def _fs(self, path: LocationDTO) -> AbstractFileSystem:
         fs = self.protocols.get(path.store)
@@ -102,14 +78,15 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
 
         return exists
 
-    def find(self, path: LocationDTO) -> List[LocationDTO]:
-        """Returns all files in path, prefixed with the protocol"""
-
+    def list(self, path: LocationDTO) -> list[LocationDTO]:
+        """
+        Lists all files in given storage location. Only returns files at top level,
+        not from subfolders.
+        """
         if not self._exists(path=path):
             raise ObjectNotFoundError(str(path))
-
         fs = self._fs(path)
-        files: List[LocationDTO] = []
+        files: list[LocationDTO] = []
         if fs.isfile(path.path):
             files.append(path)
         else:
@@ -122,7 +99,6 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
                         files.append(file_location)
                 except Exception:
                     continue
-
         return files
 
     def read(self, path: LocationDTO) -> bytes:

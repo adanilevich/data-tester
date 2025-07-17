@@ -4,7 +4,7 @@ from src.domain_config.ports.drivers.i_domain_config_handler import (
     FetchDomainConfigsCommand,
     SaveDomainConfigCommand,
 )
-from src.domain_config.ports.infrastructure.i_storage import IStorage
+from src.storage.i_storage import IStorage
 from src.domain_config.core import DomainConfig
 from src.dtos import DomainConfigDTO
 

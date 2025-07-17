@@ -7,6 +7,7 @@ from src.testcase.ports import (
 )
 
 
+# TODO remove configuration handling from here and put to dependency injection
 class CliTestRunManager:
     """Runs testcases in batch mode from CLI"""
 

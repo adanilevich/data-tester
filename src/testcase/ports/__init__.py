@@ -10,10 +10,6 @@ from .infrastructure import (
     IDataPlatform,
     IDataPlatformFactory,
     INotifier,
-    IStorage,
-    StorageError,
-    ObjectNotFoundError,
-    StorageTypeUnknownError,
 )
 
 __all__ = [
@@ -25,8 +21,4 @@ __all__ = [
     "IDataPlatform",
     "IDataPlatformFactory",
     "INotifier",
-    "IStorage",
-    "StorageError",
-    "ObjectNotFoundError",
-    "StorageTypeUnknownError",
 ]

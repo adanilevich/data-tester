@@ -10,6 +10,7 @@
 **Data Tester** is a flexible framework designed to automate and standardize business validation tests for ETL (Extract, Transform, Load) pipelines. It enables data analysts, data platform owners, and engineers to define, execute, and report on business logic tests that ensure ETL processes produce correct and complete data.
 
 The framework is built to:
+
 - Validate business rules and transformations in ETL pipelines
 - Automate regression and acceptance testing for data flows incl. test reporting
 - Support rapid iteration and deployment of new ETL logic
