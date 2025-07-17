@@ -60,7 +60,7 @@
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
 | src/storage/\_\_init\_\_.py                                                    |        1 |        0 |    100% |           |
 | src/storage/dict\_storage.py                                                   |       32 |        0 |    100% |           |
-| src/storage/file\_storage.py                                                   |       81 |        4 |     95% |70, 86, 118-119 |
+| src/storage/file\_storage.py                                                   |       86 |        6 |     93% |73-75, 91, 123-124 |
 | src/testcase/\_\_init\_\_.py                                                   |        2 |        0 |    100% |           |
 | src/testcase/application/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
 | src/testcase/application/handle\_testruns.py                                   |       33 |        0 |    100% |           |
@@ -100,7 +100,7 @@
 | src/testcase/ports/infrastructure/notifier/i\_notifier.py                      |        2 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/storage/\_\_init\_\_.py                      |        2 |        0 |    100% |           |
 | src/testcase/ports/infrastructure/storage/i\_storage.py                        |        7 |        0 |    100% |           |
-|                                                                      **TOTAL** | **2096** |  **127** | **94%** |           |
+|                                                                      **TOTAL** | **2101** |  **129** | **94%** |           |
 
 1 empty file skipped.
 
