@@ -1,9 +1,36 @@
 [project]
 name = "data-tester"
+version = "0.0.1"
+description = "Plattform for testing data and ETL logic"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic",  # DTOs and data validation
+    "pydantic-settings",  # for reading from ENV vars
+    "polars",  # used for fixtures crunching - esp. for testcase COMPARE_SAMPLE
+    "xlsxwriter",  # required for polars to write excel
+    "fastexcel",  # required for polars to read excel
+    "pyarrow",  # required as backend for polars
+    "pyyaml",  # read and write yaml files
+    "duckdb",  # needed for demo and for e2e tests
+    "fsspec",  # needed for demo, 2e2 tests and also for input finders and report storage
+]
 
+[project.optional-dependencies]
+gcs = ["gcsfs"]  # needed if data is stored in GCS
+
+[dependency-groups]
+dev = [
+    "ruff",  # linter / syntax checker and formatter - replaces flake8
+    "mypy",  # type checker
+    "pytest",  # test framework
+    "coverage",  # test coverage reports
+]
+
+[tool.uv]
+default-groups = ["dev"]  # uv will install dev dependency group by default
 
 [tool.pytest.ini_options]
-
 minversion = "8.1"
 testpaths = ["tests",]
 markers = [
@@ -17,14 +44,12 @@ filterwarnings = [
 
 
 [tool.coverage.run]
-
 command_line = "-m pytest -m 'not skip_test and not infrastructure'"
 source = ["src/"]  # only analyze source code in src for coverage
 relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3
 
 
 [tool.coverage.report]
-
 skip_empty = true  # empty python files like __init__.py are not included in report
 show_missing = true
 exclude_also = [

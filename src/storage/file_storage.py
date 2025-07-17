@@ -3,7 +3,10 @@ from typing import Dict, List
 from fsspec import AbstractFileSystem  # type: ignore
 from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
-from gcsfs import GCSFileSystem  # type: ignore
+try:
+    from gcsfs import GCSFileSystem  # type: ignore
+except ImportError:
+    GCSFileSystem = None
 
 from src.domain_config.ports import (
     IStorage as IDomainConfigStorage,
@@ -67,6 +70,8 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
             Store.MEMORY: MemoryFileSystem(),  # for testing purpose
         }
         if self.config.DATATESTER_USE_GCS_STORAGE:
+            if GCSFileSystem is None:
+                raise ImportError("GCSFileSystem is not installed")
             self.protocols[Store.GCS] = GCSFileSystem(
                 project=self.config.DATATESTER_GCP_PROJECT)
 
@@ -82,7 +87,7 @@ class FileStorage(IDomainConfigStorage, IReportStorage, ITestcaseStorage):
             return Store.MEMORY
         elif isinstance(fs, LocalFileSystem):
             return Store.LOCAL
-        elif isinstance(fs, GCSFileSystem):
+        elif GCSFileSystem is not None and isinstance(fs, GCSFileSystem):
             return Store.GCS
         else:
             raise StorageTypeUnknownError(f"Storage type {fs} not supported")
