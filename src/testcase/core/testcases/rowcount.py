@@ -44,7 +44,7 @@ class RowCountTestCase(AbstractTestCase):
 
         counts_as_tuples = list(zip(
             query_result.to_dict(as_series=False)[count_column_name],
-            query_result.to_dict(as_series=False)["__source__"]
+            query_result.to_dict(as_series=False)["__source__"], strict=False
         ))
         if self._validate_counts(counts_as_tuples) is False:
             return None

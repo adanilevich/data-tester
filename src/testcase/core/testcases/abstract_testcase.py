@@ -26,7 +26,6 @@ class AbstractTestCase(ICheckable):
     required_specs: List[str] = []
     __test__ = False  # prevents pytest collection
 
-    # TODO: refactor to receive a TestDefinitionDTO incl. labels and testset_id
     def __init__(self, definition: TestDefinitionDTO,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
 

@@ -15,7 +15,6 @@ PATH = Path(__file__).parent.resolve()
 int_ = 1
 
 
-# TODO: increase test coverage
 class TestFileStorage:
 
     files = [

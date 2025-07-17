@@ -193,7 +193,7 @@ class DemoDataPlatform(IDataPlatform):
         schema_as_named_dict = schema_as_df.to_dict(as_series=False)
         # convert to a dict with column names as keys and dtypes as values
         schema_as_dict = dict(
-            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"])
+            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
         result = SchemaSpecificationDTO(
@@ -222,7 +222,7 @@ class DemoDataPlatform(IDataPlatform):
         schema_as_df = self.duckdb.query(query).pl()
         schema_as_named_dict = schema_as_df.to_dict(as_series=False)
         schema_as_dict = dict(
-            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"])
+            zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
         result = SchemaSpecificationDTO(

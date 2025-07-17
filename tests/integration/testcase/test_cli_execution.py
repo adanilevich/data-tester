@@ -81,7 +81,7 @@ testcases = [
         ),
         testrun_id=MY_UUID
     )
-    for testobject, testtype in zip(testobjects, testtypes)
+    for testobject, testtype in zip(testobjects, testtypes, strict=False)
 ]
 
 
