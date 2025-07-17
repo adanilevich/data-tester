@@ -20,11 +20,6 @@ class TestDomainConfig:
         # then result set is empty
         assert len(result) == 0
 
-    def test_fetch_only_accepts_string_inputs(self, domain_conf: DomainConfig):
-        path = 1
-        with pytest.raises(ValueError):
-            _ = domain_conf.fetch_configs(location=path)  # type: ignore
-
     def test_matching_objects_are_fetched(
         self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
     ):

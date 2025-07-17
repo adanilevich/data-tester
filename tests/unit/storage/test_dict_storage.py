@@ -24,7 +24,7 @@ class TestDictStorage:
         read_content = storage.read(LocationDTO("dict://folder/file.txt"))
         assert read_content == content
 
-    def test_find_returns_matching_paths(self, storage):
+    def test_list_returns_matching_paths(self, storage):
         path1 = LocationDTO("dict://folder/file1.txt")
         path2 = LocationDTO("dict://folder/file2.txt")
         path3 = LocationDTO("dict://other/file3.txt")
@@ -32,7 +32,7 @@ class TestDictStorage:
         storage.write(b"b", path2)
         storage.write(b"c", path3)
         # find should return only those under folder/
-        found = storage.find(LocationDTO("dict://folder/"))
+        found = storage.list(LocationDTO("dict://folder/"))
         assert path1 in found
         assert path2 in found
         assert path3 not in found
@@ -49,4 +49,4 @@ class TestDictStorage:
         with pytest.raises(StorageTypeUnknownError):
             storage.read(path)
         with pytest.raises(StorageTypeUnknownError):
-            storage.find(path)
+            storage.list(path)

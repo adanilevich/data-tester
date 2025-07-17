@@ -18,8 +18,8 @@ from src.report.ports import (
     SaveReportArtifactsForUsersCommand,
     SaveReportCommand,
     IReportFormatter,
-    IStorage,
 )
+from src.storage.i_storage import IStorage
 from src.report.core import Report
 
 

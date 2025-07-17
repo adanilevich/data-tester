@@ -8,8 +8,10 @@ from src.dtos import (
     TestResult, TestCaseDTO, TestStatus, LocationDTO
 )
 from src.testcase.ports import (
-    IDataPlatform, INotifier, IStorage, StorageTypeUnknownError
+    IDataPlatform, INotifier
 )
+from src.storage import IStorage, StorageTypeUnknownError
+
 # we need to import all subclasses of TestCase such that they are registered
 # and can be created via TestCaseFactory.create.
 # This is done in testcase.__init__.py which is imported here

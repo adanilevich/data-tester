@@ -4,6 +4,7 @@ from src.storage.file_storage import FileStorage
 from src.storage.dict_storage import DictStorage
 from src.config import Config
 from src.dtos.location import LocationDTO, Store
+from src.storage import IStorage
 
 
 class DomainConfigDependencyInjector:
@@ -21,12 +22,13 @@ class DomainConfigDependencyInjector:
         domain_config_location = LocationDTO(
             self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION
         )
+        storage: IStorage
         if domain_config_location.store in [Store.GCS, Store.LOCAL, Store.MEMORY]:
             storage = FileStorage(config=self.config)
         elif domain_config_location.store == Store.DICT:
-            storage = DictStorage()  # type: ignore
+            storage = DictStorage()
         if self.config.DATATESTER_ENV in ["DUMMY", "LOCAL"]:
-            storage = DictStorage()  # type: ignore
+            storage = DictStorage()
         domain_config_handler = DomainConfigHandler(storage=storage)
         return CLIDomainConfigManager(
             domain_config_handler=domain_config_handler,

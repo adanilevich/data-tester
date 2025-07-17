@@ -1,7 +1,8 @@
 from typing import List, Dict, Tuple
 import json
 
-from src.report.ports import IReportFormatter, IStorage, StorageTypeUnknownError
+from src.storage.i_storage import IStorage, StorageTypeUnknownError
+from src.report.ports import IReportFormatter
 from src.dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,

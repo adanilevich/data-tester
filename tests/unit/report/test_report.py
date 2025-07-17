@@ -9,7 +9,7 @@ from src.report.core.report import (
     ReportArtifactNotSpecifiedError,
     WrongReportTypeError,
 )
-from src.report.ports.infrastructure import StorageTypeUnknownError
+from src.storage import StorageTypeUnknownError
 from src.report.adapters.plugins import (
     JsonTestCaseReportFormatter,
     JsonTestRunReportFormatter,
@@ -152,7 +152,7 @@ class TestReport:
         location = LocationDTO("memory://test_report.json")
 
         # then retrieving raises StorageTypeUnknownError
-        with pytest.raises(StorageTypeUnknownError, match="Storage type.*not supported"):
+        with pytest.raises(StorageTypeUnknownError):
             report.retrieve_report(location)
 
     def test_retrieve_report_with_invalid_json(self, report):

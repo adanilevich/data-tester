@@ -25,7 +25,7 @@ from src.report.ports.drivers import (
     GetReportArtifactCommand,
     SaveReportArtifactsForUsersCommand,
 )
-from src.report.ports.infrastructure import ObjectNotFoundError
+from src.storage import ObjectNotFoundError
 from src.report.adapters.plugins import (
     JsonTestCaseReportFormatter,
     JsonTestRunReportFormatter,

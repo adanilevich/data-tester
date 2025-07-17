@@ -2,7 +2,7 @@ from typing import List, Dict
 import yaml  # type: ignore
 import re
 
-from src.domain_config.ports import IStorage, StorageError
+from src.storage.i_storage import IStorage, StorageError
 from src.dtos import DomainConfigDTO
 from src.dtos.location import LocationDTO
 
@@ -48,7 +48,7 @@ class DomainConfig:
         """Gets valid, name-matching objects from location"""
 
         try:
-            objects = self.storage.find(path=location)
+            objects = self.storage.list(path=location)
         except StorageError:
             objects = []
 
@@ -102,9 +102,6 @@ class DomainConfig:
             DomainConfigAlreadyExistsError: If a domain config for the same domain
             already exists.
         """
-
-        if not isinstance(location, LocationDTO):
-            raise ValueError("Provide a LocationDTO-valued location of domain configs")
 
         candidates: List[LocationDTO] = []
         found_domain_configs: Dict[str, DomainConfigDTO] = {}

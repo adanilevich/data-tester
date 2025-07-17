@@ -47,7 +47,8 @@ class TestFileStorage:
 
     @pytest.fixture
     def storage(self) -> FileStorage:
-        return FileStorage()
+        from src.config import Config
+        return FileStorage(config=Config())
 
     def test_setting_file_systems(self, storage: FileStorage, setup):
 
@@ -63,7 +64,7 @@ class TestFileStorage:
 
         # then trying to find, read or writy objects raises StorageTypeUnknownError
         with pytest.raises(StorageTypeUnknownError):
-            storage.find(path=path)
+            storage.list(path=path)
         with pytest.raises(StorageTypeUnknownError):
             storage.read(path=path)
         with pytest.raises(StorageTypeUnknownError):
@@ -99,7 +100,7 @@ class TestFileStorage:
         path = self.datapath
 
         # only top-level objects are returned when searching in this path
-        found = storage.find(path=path)
+        found = storage.list(path=path)
         assert len(found) == 2
         path1 = self.datapath.append("first.txt")
         path2 = self.datapath.append("second.bytes")
@@ -163,7 +164,7 @@ class TestFileStorage:
         assert storage.read(path=filepath) == content2
         assert storage.read(path=filepath2) == content3
 
-    def test_find(self, setup, storage: FileStorage):
+    def test_list(self, setup, storage: FileStorage):
         # given a FileStorage
         storage = storage
 
@@ -171,7 +172,7 @@ class TestFileStorage:
         path = self.datapath
 
         # then only top-level files are found
-        found = storage.find(path=path)
+        found = storage.list(path=path)
         assert len(found) == 2
         assert self.datapath.append("first.txt") in found
         assert self.datapath.append("second.bytes") in found
@@ -180,7 +181,7 @@ class TestFileStorage:
         path = self.datapath.append("subfolder")
 
         # then the files are found and the correct paths are returned
-        found = storage.find(path=path)
+        found = storage.list(path=path)
         assert found == [self.datapath.append("subfolder/third.txt")]
 
     def test__protocol_local(self, storage: FileStorage):
@@ -205,7 +206,7 @@ class TestFileStorage:
         # when calling find on a non-existing directory
         # then it should raise ObjectNotFoundError
         with pytest.raises(ObjectNotFoundError):
-            storage.find(path)
+            storage.list(path)
 
     def test_find_object_isfile_raises(self, storage: FileStorage):
         # given a FileStorage and a directory with a file
@@ -214,7 +215,7 @@ class TestFileStorage:
         fs.write_text("file_exists_dir/file1.txt", "abc")
         path = LocationDTO("memory://file_exists_dir/file1.txt")
         # when calling find on the file path
-        result = storage.find(path)
+        result = storage.list(path)
         # then it should return the file path in a list
         assert result == [path]
 
