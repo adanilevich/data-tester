@@ -38,7 +38,7 @@ jobs:
     - name: typechecks
       # mypy config is defined in pyproject.toml
       run: |
-        uv runmypy
+        uv run mypy
 
     - name: tests
       # coverage and pytest configuration are in pyproject.toml
