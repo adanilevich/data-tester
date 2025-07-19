@@ -4,7 +4,6 @@ from typing import List
 from pydantic import Field
 from pydantic_settings import BaseSettings
 
-from src.dtos import ReportArtifactFormat
 
 def env(name: str) -> str | None:
     return os.environ.get(name, None)
@@ -25,22 +24,26 @@ class Config(BaseSettings):
     # NOTIFIERS CONFIGURATION
     DATATESTER_NOTIFIERS: List[str] = Field(default=["IN_MEMORY", "STDOUT"])
 
-    # DOMAIN CONFIG CONFIGURATION
-    DATATESTER_DOMAIN_CONFIGS_LOCATION: str | None = Field(default=None)
-
     # CONFIGURATION OF INTERNAL STORAGE
-    INTERNAL_STORAGE_ENGINE: str = Field(default="DICT")  # GCS, LOCAL or other
+    DATATESTER_INTERNAL_STORAGE_ENGINE: str = Field(default="DICT")  # GCS, LOCAL or other
 
     # CONFIGURATION OF INTERNAL STORAGES
-    INTERNAL_TESTRUN_LOCATION: str | None = Field(default="dict://testruns/")
-    INTERNAL_TESTREPORT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.JSON
-    INTERNAL_TESTREPORT_LOCATION: str | None = Field(default="dict://reports/")
-    INTERNAL_TESTSET_LOCATION: str | None = Field(default="dict://testsets/")
+    DATATESTER_DOMAIN_CONFIGS_LOCATION: str = Field(default="dict://domain_configs/")
+    DATATESTER_INTERNAL_TESTRUN_LOCATION: str = Field(default="dict://testruns/")
+    DATATESTER_INTERNAL_TESTREPORT_LOCATION: str = Field(default="dict://reports/")
+    DATATESTER_INTERNAL_TESTSET_LOCATION: str = Field(default="dict://testsets/")
 
-    # CONFIGURATION OF USER-FACING TESTREPORT STORAGE
-    # This report artifacts will be created by default for testrun reports
-    TESTRUN_REPORT_ARTIFACT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.XLSX
-    # This artifact will be created for tescase reports
-    TESTCASE_REPORT_ARTIFACT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.TXT
-    # This artifact will be created for testcase diffs
-    TESTCASE_DIFF_ARTIFACT_FORMAT: ReportArtifactFormat = ReportArtifactFormat.XLSX
+    def model_post_init(self, __context) -> None:
+        """Set config values for local mode"""
+        if self.DATATESTER_ENV == "LOCAL":
+
+            # in local mode, we use a dict storage for internal storage
+            self.DATATESTER_INTERNAL_STORAGE_ENGINE = "DICT"
+            self.DATATESTER_INTERNAL_TESTRUN_LOCATION = "dict://testruns/"
+            self.DATATESTER_INTERNAL_TESTREPORT_LOCATION = "dict://reports/"
+            self.DATATESTER_INTERNAL_TESTSET_LOCATION = "dict://testsets/"
+            self.DATATESTER_DOMAIN_CONFIGS_LOCATION = "dict://domain_configs/"
+
+            # in local mode, we use simple notifiers
+            self.DATATESTER_NOTIFIERS = ["IN_MEMORY", "STDOUT"]
+

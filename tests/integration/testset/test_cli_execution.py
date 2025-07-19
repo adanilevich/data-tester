@@ -1,6 +1,6 @@
 import pytest
 
-from src.testset.dependency_injection import CliTestSetDependencyInjector
+from src.testset.dependency_injection import TestSetDependencyInjector
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.location import LocationDTO
 from src.dtos.testcase import TestType
@@ -10,19 +10,19 @@ from src.config import Config
 @pytest.fixture
 def config():
     cfg = Config()
-    cfg.INTERNAL_STORAGE_ENGINE = "DICT"
-    cfg.INTERNAL_TESTSET_LOCATION = "dict://testsets/"
+    cfg.DATATESTER_INTERNAL_STORAGE_ENGINE = "DICT"
+    cfg.DATATESTER_INTERNAL_TESTSET_LOCATION = "dict://testsets/"
     return cfg
 
 
 @pytest.fixture
 def injector(config):
-    return CliTestSetDependencyInjector(config)
+    return TestSetDependencyInjector(config)
 
 
 @pytest.fixture
 def cli_manager(injector):
-    return injector.testset_manager()
+    return injector.cli_testset_manager()
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def testset_dto():
 
 def test_load_domain_testset_by_name_success(cli_manager, injector, testset_dto):
     # Given a testset saved in DictStorage for a specific domain and name
-    handler = injector.testset_manager().testset_handler
+    handler = injector.cli_testset_manager().testset_handler
     location = injector.storage_location
     storage = handler.storage
     location = LocationDTO("dict://testsets/").append(

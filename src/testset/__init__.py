@@ -1,2 +1,2 @@
 # flake8: noqa
-from .dependency_injection import CliTestSetDependencyInjector
+from .dependency_injection import TestSetDependencyInjector

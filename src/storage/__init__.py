@@ -7,6 +7,7 @@ from .i_storage import (
     StorageError,
     ObjectNotFoundError,
 )
+from .map import map_storage
 
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "StorageTypeUnknownError",
     "StorageError",
     "ObjectNotFoundError",
+    "map_storage",
 ]

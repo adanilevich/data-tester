@@ -1,36 +1,20 @@
 from src.config import Config
 from src.dtos.location import LocationDTO
-from src.storage.file_storage import FileStorage
-from src.storage.dict_storage import DictStorage
-from src.storage.i_storage import IStorage
+from src.storage import map_storage
 from .drivers import CliTestSetManager
 from .application.handle_testsets import TestSetCommandHandler
 
 
-class CliTestSetDependencyInjector:
+class TestSetDependencyInjector:
     def __init__(self, config: Config):
         self.config = config
 
-        # Extract relevant configuration values
-        self.internal_storage_engine = config.INTERNAL_STORAGE_ENGINE
-        if self.internal_storage_engine is None:
-            raise ValueError("INTERNAL_STORAGE_ENGINE is not set")
+        # set storage location and storage engine
+        self.storage_location = LocationDTO(
+            self.config.DATATESTER_INTERNAL_TESTSET_LOCATION)
+        self.storage = map_storage(self.config.DATATESTER_INTERNAL_STORAGE_ENGINE)
 
-        if config.INTERNAL_TESTSET_LOCATION is None:
-            raise ValueError("INTERNAL_TESTSET_LOCATION is not set")
-        self.storage_location = LocationDTO(config.INTERNAL_TESTSET_LOCATION)
-
-        self.storage: IStorage
-        if self.internal_storage_engine in ["LOCAL", "GCS", "MEMORY"]:
-            self.storage = FileStorage(config=self.config)
-        elif self.internal_storage_engine == "DICT":
-            self.storage = DictStorage()
-        else:
-            raise ValueError(
-                f"INTERNAL_STORAGE_ENGINE {self.internal_storage_engine} is not supported"
-            )
-
-    def testset_manager(self) -> CliTestSetManager:
+    def cli_testset_manager(self) -> CliTestSetManager:
         # Create the core TestSet handler (implements ITestSetHandler)
         testset_handler = TestSetCommandHandler(storage=self.storage)
 

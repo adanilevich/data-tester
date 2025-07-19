@@ -17,7 +17,6 @@ from src.dtos import (
     TestCaseReportDTO,
     LocationDTO,
     TestRunReportDTO,
-    ReportArtifactFormat,
 )
 
 
@@ -28,12 +27,9 @@ def report_manager(
 ) -> CliReportManager:
     config = Config()
     config.DATATESTER_ENV = "LOCAL"
-    config.TESTRUN_REPORT_ARTIFACT_FORMAT = ReportArtifactFormat.XLSX
-    config.TESTCASE_REPORT_ARTIFACT_FORMAT = ReportArtifactFormat.TXT
-    config.TESTCASE_DIFF_ARTIFACT_FORMAT = ReportArtifactFormat.XLSX
     domain_config.testreports_location = LocationDTO("dict://user_reports")
     di = ReportDependencyInjector(config=config)
-    return di.report_manager(domain_config=domain_config)
+    return di.cli_report_manager(domain_config=domain_config)
 
 @pytest.fixture
 def testresults(
@@ -109,11 +105,9 @@ class TestReportE2E:
         # given a configured report manager and testresults
         report_manager = report_manager
         testrun_result, testcase_results = testresults
-        config = report_manager.config
 
-        internal_location_str = config.INTERNAL_TESTREPORT_LOCATION
-        internal_location = LocationDTO(internal_location_str) # type: ignore
-        internal_format = config.INTERNAL_TESTREPORT_FORMAT.value.lower()
+        internal_location = report_manager.internal_location
+        internal_format = report_manager.internal_format.value.lower()
         internal_storage = report_manager.report_handler.storages[0]  # type: ignore
 
         # when reports are created and saved
@@ -153,9 +147,8 @@ class TestReportE2E:
         # given a configured report manager and testresults
         report_manager = report_manager
         testrun_result, testcase_results = testresults
-        config = report_manager.config
 
-        user_location = report_manager.domain_config.testreports_location
+        user_location = report_manager.user_location
         user_storage = report_manager.report_handler.storages[0]  # type: ignore
 
         # when reports are created and saved
@@ -169,7 +162,7 @@ class TestReportE2E:
         testrun_user_path = user_location.append(
             f"{date_str}/{testrun_report.testrun_id}/"
             f"testrun_report_{datetime_str}."
-            f"{config.TESTRUN_REPORT_ARTIFACT_FORMAT.value.lower()}"
+            f"{report_manager.user_testrun_format.value.lower()}"
         )
         content = user_storage.read(testrun_user_path)
         assert isinstance(content, bytes)
@@ -182,7 +175,7 @@ class TestReportE2E:
             testcase_user_path = user_location.append(
                 f"{date_str}/{testcase_report.testrun_id}/"
                 f"{testcase_report.testobject}_{testcase_report.testtype}_report."
-                f"{config.TESTCASE_REPORT_ARTIFACT_FORMAT.value.lower()}"
+                f"{report_manager.user_report_format.value.lower()}"
             )
             content = user_storage.read(testcase_user_path)
             assert isinstance(content, bytes)
@@ -201,7 +194,7 @@ class TestReportE2E:
             testcase_diff_path = user_location.append(
                 f"{date_str}/{testcase_report.testrun_id}/"
                 f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
-                f"{config.TESTCASE_DIFF_ARTIFACT_FORMAT.value.lower()}"
+                f"{report_manager.user_diff_format.value.lower()}"
             )
             content = user_storage.read(testcase_diff_path)
             assert isinstance(content, bytes)
