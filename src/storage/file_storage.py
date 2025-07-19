@@ -38,8 +38,8 @@ class FileStorage(IStorage):
     protocols: Dict[Store, AbstractFileSystem]
     default_encoding: str = "utf-8"
 
-    def __init__(self, config: Config):
-        self.config = config
+    def __init__(self, config: Config | None = None):
+        self.config = config or Config()
         self.protocols = {
             Store.LOCAL: LocalFileSystem(auto_mkdir=True),
             Store.MEMORY: MemoryFileSystem(),  # for testing purpose

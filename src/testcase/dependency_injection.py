@@ -1,9 +1,11 @@
 from typing import List
 
-from src.notifier import InMemoryNotifier, StdoutNotifier
+from src.notifier import map_notifier
 from src.config import Config
-from src.data_platform import DemoDataPlatformFactory, DummyPlatformFactory
-from src.storage.dict_storage import DictStorage
+from src.data_platform import map_platform
+from src.testcase.ports import IDataPlatformFactory
+from src.storage import map_storage, IStorage
+from src.dtos.location import LocationDTO
 
 from .drivers import CliTestRunManager
 from .application import TestRunCommandHandler
@@ -13,47 +15,30 @@ from .ports import INotifier
 class TestCaseDependencyInjector:
     def __init__(self, config: Config):
         self.config = config
+        self.notifiers: List[INotifier] = []
+        self.data_platform_factory: IDataPlatformFactory
+        self.storage: IStorage
+        self.storage_location: LocationDTO
 
-    def testrun_manager(self) -> CliTestRunManager:
-
-        # SET NOTIFIERS
-        notifiers: List[INotifier] = []
-        if self.config.DATATESTER_NOTIFIERS is None:
-            raise ValueError("DATATESTER_NOTIFIERS is not set")
-        mapper = {
-            "IN_MEMORY": InMemoryNotifier,
-            "STDOUT": StdoutNotifier,
-        }
+        # set notifiers
         for notifier in self.config.DATATESTER_NOTIFIERS:
-            notifier_obj = mapper.get(notifier)
-            if notifier_obj is None:
-                raise ValueError(f"Unknown notifier: {notifier}")
-            notifiers.append(notifier_obj())
+            self.notifiers.append(map_notifier(notifier))
+        self.data_platform_factory = map_platform(self.config.DATATESTER_DATA_PLATFORM)
 
-        # SET DATA PLATFORM FACTORY
-        if self.config.DATATESTER_DATA_PLATFORM == "DEMO":
-            data_platform_factory = DemoDataPlatformFactory()
-        elif self.config.DATATESTER_DATA_PLATFORM == "DUMMY":
-            data_platform_factory = DummyPlatformFactory()  # type: ignore
-        elif self.config.DATATESTER_ENV == "LOCAL":
-            data_platform_factory = DemoDataPlatformFactory()
-        elif self.config.DATATESTER_ENV == "DUMMY":
-            data_platform_factory = DummyPlatformFactory()  # type: ignore
-        else:
-            raise ValueError(f"Unknown platform: {self.config.DATATESTER_DATA_PLATFORM}")
+        # set storage
+        self.storage = map_storage(self.config.DATATESTER_INTERNAL_STORAGE_ENGINE)
 
-        # SET STORAGE
-        if self.config.INTERNAL_STORAGE_ENGINE == "DICT":
-            storage = DictStorage()
-        else:
-            msg = f"Unknown storage engine: {self.config.INTERNAL_STORAGE_ENGINE}"
-            raise ValueError(msg)
+        # set storage location
+        self.storage_location = LocationDTO(
+            self.config.DATATESTER_INTERNAL_TESTRUN_LOCATION)
+
+    def cli_testrun_manager(self) -> CliTestRunManager:
 
         return CliTestRunManager(
             handler=TestRunCommandHandler(
-                backend_factory=data_platform_factory,
-                notifiers=notifiers,
-                storage=storage,
+                backend_factory=self.data_platform_factory,
+                notifiers=self.notifiers,
+                storage=self.storage,
             ),
-            config=self.config,
+            storage_location=self.storage_location,
         )

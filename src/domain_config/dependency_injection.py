@@ -1,10 +1,8 @@
 from src.domain_config.application import DomainConfigHandler
 from src.domain_config.drivers.cli_domain_config_manager import CLIDomainConfigManager
-from src.storage.file_storage import FileStorage
-from src.storage.dict_storage import DictStorage
 from src.config import Config
-from src.dtos.location import LocationDTO, Store
-from src.storage import IStorage
+from src.dtos.location import LocationDTO
+from src.storage import IStorage, map_storage
 
 
 class DomainConfigDependencyInjector:
@@ -15,22 +13,23 @@ class DomainConfigDependencyInjector:
     """
     def __init__(self, config: Config):
         self.config = config
+        self.domain_config_location: LocationDTO
+        self.storage: IStorage
 
-    def domain_config_manager(self) -> CLIDomainConfigManager:
+        # extract domain config location from config
         if self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION is None:
             raise ValueError("DATATESTER_DOMAIN_CONFIGS_LOCATION is not set")
-        domain_config_location = LocationDTO(
+        self.domain_config_location = LocationDTO(
             self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION
         )
-        storage: IStorage
-        if domain_config_location.store in [Store.GCS, Store.LOCAL, Store.MEMORY]:
-            storage = FileStorage(config=self.config)
-        elif domain_config_location.store == Store.DICT:
-            storage = DictStorage()
-        if self.config.DATATESTER_ENV in ["DUMMY", "LOCAL"]:
-            storage = DictStorage()
-        domain_config_handler = DomainConfigHandler(storage=storage)
+
+        # extract storage backend type from config
+        self.storage = map_storage(self.domain_config_location.store.value.upper())
+
+    def cli_domain_config_manager(self) -> CLIDomainConfigManager:
+
+        domain_config_handler = DomainConfigHandler(storage=self.storage)
         return CLIDomainConfigManager(
             domain_config_handler=domain_config_handler,
-            config=self.config
+            domain_config_location=self.domain_config_location
         )

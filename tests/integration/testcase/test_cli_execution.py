@@ -95,7 +95,7 @@ def test_cli_execution_with_dummy_testcases():
     config = Config()
     dependency_injector = TestCaseDependencyInjector(config)
     # The correct method is testrun_manager, not testcase_runner
-    runner = dependency_injector.testrun_manager()
+    runner = dependency_injector.cli_testrun_manager()
 
     # When: Execute testrun with defined testcases
     testrun = TestRunDTO(
@@ -146,7 +146,7 @@ def test_cli_execution_with_empty_testcases():
     os.environ["DATATESTER_NOTIFIERS"] = '["IN_MEMORY", "STDOUT"]'
     config = Config()
     dependency_injector = TestCaseDependencyInjector(config)
-    runner = dependency_injector.testrun_manager()
+    runner = dependency_injector.cli_testrun_manager()
     # When: Execute testrun with no testcases
     testrun = TestRunDTO(
         testrun_id=uuid4(),
@@ -176,7 +176,7 @@ def test_cli_execution_with_invalid_testcase():
     os.environ["DATATESTER_NOTIFIERS"] = '["IN_MEMORY", "STDOUT"]'
     config = Config()
     dependency_injector = TestCaseDependencyInjector(config)
-    runner = dependency_injector.testrun_manager()
+    runner = dependency_injector.cli_testrun_manager()
     # When: Execute testrun with an invalid testcase (unknown testtype)
     invalid_definition = TestDefinitionDTO(
         testobject=TestObjectDTO(**testobjects[0]),

@@ -13,6 +13,7 @@ class Store(Enum):
     DICT = "dict"
     MEMORY = "memory"
     BQ = "bq"
+    UNKNOWN = "unknown"
 
 
 class LocationDTO(DTO):

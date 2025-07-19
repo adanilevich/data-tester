@@ -1,5 +1,4 @@
-from src.config import Config
-from src.dtos import DomainConfigDTO, TestReportDTO, TestDTO, LocationDTO
+from src.dtos import ReportArtifactFormat, TestReportDTO, TestDTO, LocationDTO
 from src.report.ports import (
     IReportCommandHandler,
     CreateReportCommand,
@@ -8,18 +7,24 @@ from src.report.ports import (
 )
 
 
-# TODO remove configuration handling from here and put to dependency injection
-# TODO: Add error handling here or in application if reports can't be formattted or saved
 class CliReportManager:
     def __init__(
         self,
         report_handler: IReportCommandHandler,
-        domain_config: DomainConfigDTO,
-        config: Config,
+        user_location: LocationDTO,
+        internal_location: LocationDTO,
+        internal_format: ReportArtifactFormat,
+        user_report_format: ReportArtifactFormat,
+        user_diff_format: ReportArtifactFormat,
+        user_testrun_format: ReportArtifactFormat,
     ):
-        self.config = config
         self.report_handler = report_handler
-        self.domain_config = domain_config
+        self.user_location = user_location
+        self.internal_location = internal_location
+        self.internal_format = internal_format
+        self.user_report_format = user_report_format
+        self.user_diff_format = user_diff_format
+        self.user_testrun_format = user_testrun_format
 
     def create_report(self, result: TestDTO) -> TestReportDTO:
         """Creates testcase or testrun report"""
@@ -36,24 +41,12 @@ class CliReportManager:
         local storage.
         """
 
-        testcase_report_format = self.config.TESTCASE_REPORT_ARTIFACT_FORMAT
-        if testcase_report_format is None:
-            raise ValueError("Testcase report artifact format is not set")
-
-        testcase_diff_format = self.config.TESTCASE_DIFF_ARTIFACT_FORMAT
-        if testcase_diff_format is None:
-            raise ValueError("Testcase diff artifact format is not set")
-
-        testrun_report_format = self.config.TESTRUN_REPORT_ARTIFACT_FORMAT
-        if testrun_report_format is None:
-            raise ValueError("Testrun report artifact format is not set")
-
         command = SaveReportArtifactsForUsersCommand(
             report=report,
-            location=self.domain_config.testreports_location,
-            testcase_report_format=testcase_report_format,
-            testcase_diff_format=testcase_diff_format,
-            testrun_report_format=testrun_report_format,
+            location=self.user_location,
+            testcase_report_format=self.user_report_format,
+            testcase_diff_format=self.user_diff_format,
+            testrun_report_format=self.user_testrun_format,
         )
         self.report_handler.save_report_artifacts_for_users(command=command)
 
@@ -61,17 +54,10 @@ class CliReportManager:
         """
         Saves all internal report artifacts to application-internal storage.
         """
-        if self.config.INTERNAL_TESTREPORT_LOCATION is None:
-            raise ValueError("Location for internal report artifacts is not set")
-        location = LocationDTO(self.config.INTERNAL_TESTREPORT_LOCATION)
-
-        artifact_format = self.config.INTERNAL_TESTREPORT_FORMAT
-        if artifact_format is None:
-            raise ValueError("Internal report artifact format is not set")
 
         command = SaveReportCommand(
             report=report,
-            location=location,
-            artifact_format=artifact_format,
+            location=self.internal_location,
+            artifact_format=self.internal_format,
         )
         self.report_handler.save_report(command=command)

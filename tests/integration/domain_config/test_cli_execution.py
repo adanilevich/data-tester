@@ -1,54 +1,57 @@
 from src.domain_config.dependency_injection import DomainConfigDependencyInjector
+from src.domain_config.application.domain_config_handler import DomainConfigHandler
+from src.domain_config.ports import SaveDomainConfigCommand
 from src.dtos import DomainConfigDTO
 from src.config import Config
 from src.dtos.location import LocationDTO
 
 
 class TestDomainConfigIntegration:
-
     def test_saving_and_fetching_config(self, domain_config: DomainConfigDTO):
-
-        # given an intialized domain config manager
+        # Given: an initialized domain config manager and handler
         PATH = "dict://my/path"
         config = Config()
         config.DATATESTER_DOMAIN_CONFIGS_LOCATION = PATH
         di = DomainConfigDependencyInjector(config=config)
-        manager = di.domain_config_manager()
-
-        # when valid yaml-based domain_configs are stored in a given location
+        manager = di.cli_domain_config_manager()
+        handler = DomainConfigHandler(storage=di.storage)
         location = LocationDTO(PATH)
 
+        # Given: two valid yaml-based domain_configs to store
         domain_config_1 = domain_config.model_copy()
         domain_config_1.domain = "domain_1"
         domain_config_2 = domain_config.model_copy()
         domain_config_2.domain = "domain_2"
         domain_configs = [domain_config_1, domain_config_2]
 
-        for domain_config in domain_configs:
-            manager.save_domain_config(location=location, config=domain_config)
+        # When: saving the domain configs using the handler
+        for dc in domain_configs:
+            handler.save_domain_config(
+                SaveDomainConfigCommand(config=dc, location=location)
+            )
 
-        # and manager fetches from that location
-        found_domain_configs = manager.fetch_domain_configs(location=location)
+        # When: manager fetches from that location (manager uses its configured location)
+        found_domain_configs = manager.fetch_domain_configs()
 
-        # then two domain configs should be found
+        # Then: two domain configs should be found
         assert len(found_domain_configs) == 2
-
-        # and domain names should be domain_1 and domain_2
+        # Then: domain names should be domain_1 and domain_2
         domain_names = [config.domain for config in found_domain_configs.values()]
         assert "domain_1" in domain_names
         assert "domain_2" in domain_names
-
         dict_keys = found_domain_configs.keys()
         assert "domain_1" in dict_keys
         assert "domain_2" in dict_keys
 
-        # and when a third domain config is saved
+        # When: a third domain config is saved
         domain_config_3: DomainConfigDTO = domain_config.model_copy()
         domain_config_3.domain = "domain_3"
-        manager.save_domain_config(location=location, config=domain_config_3)
+        handler.save_domain_config(
+            SaveDomainConfigCommand(config=domain_config_3, location=location)
+        )
 
-        # and domain configs are searched again
-        found_domain_configs = manager.fetch_domain_configs(location=location)
+        # When: domain configs are searched again
+        found_domain_configs = manager.fetch_domain_configs()
 
-        # then 3 domain configs should be found
+        # Then: 3 domain configs should be found
         assert len(found_domain_configs) == 3
