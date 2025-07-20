@@ -13,12 +13,16 @@ class TestCaseEntryDTO(DTO):
     __test__ = False  # prevents pytest collection
     testobject: str
     testtype: TestType
+    scenario: str | None = Field(default=None)
     comment: str = Field(default="")
 
     @computed_field  # type: ignore[prop-decorator]
     @property
     def identifier(self) -> str:
-        return f"{self.testobject}_{self.testtype.value}"
+        res = f"{self.testobject}_{self.testtype.value}"
+        if self.scenario:
+            res += f"_{self.scenario}"
+        return res
 
 
 class TestSetDTO(DTO):

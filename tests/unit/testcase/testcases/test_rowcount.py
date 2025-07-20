@@ -2,13 +2,13 @@ import pytest
 import polars as pl
 
 from src.testcase.core.testcases import AbstractTestCase
-from src.dtos import RowCountSqlDTO, TestType, SpecificationType
+from src.dtos import RowCountSqlDTO, TestType, SpecificationType, LocationDTO
 
 
 # noinspection PyUnusedLocal
 class TestRowCountTestCase:
     spec = RowCountSqlDTO(
-        location="this_location",
+        location=LocationDTO(path="dummy://this_location"),
         query="to be replaced by test",
         testobject="stage_customers",
         spec_type=SpecificationType.ROWCOUNT_SQL,

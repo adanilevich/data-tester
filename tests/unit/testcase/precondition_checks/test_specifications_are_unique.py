@@ -1,7 +1,7 @@
 import pytest
 
 from src.testcase.core.precondition_checks import CheckSpecsAreUnique, ICheckable
-from src.dtos import SpecificationDTO, SpecificationType
+from src.dtos import SpecificationDTO, SpecificationType, LocationDTO
 
 
 class TestTestObjectNotEmptyChecker:
@@ -14,7 +14,7 @@ class TestTestObjectNotEmptyChecker:
     @pytest.fixture
     def spec(self) -> SpecificationDTO:
         return SpecificationDTO(
-            location="my_location",
+            location=LocationDTO(path="dummy://my_location"),
             spec_type=SpecificationType.SCHEMA,
             testobject="doesnt_matter",
         )

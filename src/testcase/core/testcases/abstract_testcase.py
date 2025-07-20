@@ -28,20 +28,22 @@ class AbstractTestCase(ICheckable):
 
     def __init__(self, definition: TestDefinitionDTO,
                  backend: IDataPlatform, notifiers: List[INotifier]) -> None:
-
+        # set infra
         self.notifiers: List[INotifier] = notifiers
         self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
+        self.backend: IDataPlatform = backend
+        # set testcase data
         self.testcase_id: UUID = uuid4()
         self.start_ts: datetime = datetime.now()
         self.end_ts: datetime | None = None
         self.status: TestStatus = TestStatus.NOT_STARTED
         self.testobject: TestObjectDTO = definition.testobject
+        self.scenario: str | None = definition.scenario
         self.specs: List[SpecificationDTO] = definition.specs
         self.domain_config: DomainConfigDTO = definition.domain_config
         self.testrun_id: UUID = definition.testrun_id
         self.testset_id: UUID = definition.testset_id
         self.labels: List[str] = definition.labels
-        self.backend: IDataPlatform = backend
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         # list of key facts about test execution
@@ -89,6 +91,7 @@ class AbstractTestCase(ICheckable):
             labels=self.labels,
             testtype=self.ttype,
             testobject=self.testobject,
+            scenario=self.scenario,
             status=self.status,
             summary=self.summary,
             facts=self.facts,

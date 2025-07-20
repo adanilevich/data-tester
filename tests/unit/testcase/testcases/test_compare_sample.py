@@ -6,7 +6,7 @@ import polars as pl
 
 from src.testcase.core.testcases import CompareSampleTestCase
 from src.dtos import (
-    SchemaSpecificationDTO, CompareSampleSqlDTO, TestType, SpecificationType
+    SchemaSpecificationDTO, CompareSampleSqlDTO, TestType, SpecificationType, LocationDTO
 )
 
 
@@ -14,7 +14,7 @@ from src.dtos import (
 class TestCompareSampleTestCase:
 
     schema = SchemaSpecificationDTO(
-        location="this_location",
+        location=LocationDTO(path="dummy://this_location"),
         columns={"a": "int", "b": "string", "c": "bool"},
         primary_keys=["a", "b"],
         testobject="stage_customers",
@@ -22,7 +22,7 @@ class TestCompareSampleTestCase:
     )
 
     sql = CompareSampleSqlDTO(
-        location="this_location",
+        location=LocationDTO(path="dummy://this_location"),
         query="this_will_be_changed",
         testobject="stage_customers",
         spec_type=SpecificationType.COMPARE_SAMPLE_SQL,

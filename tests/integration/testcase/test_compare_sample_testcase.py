@@ -7,13 +7,14 @@ from src.dtos import (
     TestType,
     SpecificationType,
     TestDefinitionDTO,
+    LocationDTO,
 )
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
 
 sql = CompareSampleSqlDTO(
-    location="this_location",
+    location=LocationDTO(path="dummy://this_location"),
     testobject="core_customer_transactions",
     spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
     query="""
@@ -34,7 +35,7 @@ sql = CompareSampleSqlDTO(
 )
 
 schema = SchemaSpecificationDTO(
-    location="that_location",
+    location=LocationDTO(path="dummy://that_location"),
     testobject="core_customer_transactions",
     spec_type=SpecificationType.SCHEMA,
     columns={"customer_id": "int"},  # plays no role, but must be non-empty

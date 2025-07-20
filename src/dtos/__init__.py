@@ -13,6 +13,11 @@ from .specification import (
     RowCountSqlDTO,
     CompareSampleSqlDTO,
     SpecFactory,
+    SpecificationFormat,
+    SpecContent,
+    SchemaContent,
+    RowCountSqlContent,
+    CompareSampleSqlContent,
 )
 from .testcase import (
     TestObjectDTO,
@@ -33,5 +38,5 @@ from .report import (
     TestRunReportDTO,
 )
 from .location import LocationDTO, Store
-from .testset import TestSetDTO
+from .testset import TestSetDTO, TestCaseEntryDTO
 from .testcase import TestRunDTO

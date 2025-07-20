@@ -12,7 +12,7 @@ from .demo_query_handler import DemoQueryHandler
 from src.testcase.ports import IDataPlatform
 from src.dtos import (
     SchemaSpecificationDTO, DomainConfigDTO, TestObjectDTO, DBInstanceDTO,
-    SpecificationType
+    SpecificationType, LocationDTO
 )
 
 
@@ -196,8 +196,12 @@ class DemoDataPlatform(IDataPlatform):
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
+        location = LocationDTO(
+            f"duckdb://{testobject.domain}_{testobject.stage}"
+            f".{testobject.instance}.{testobject.name}.duck"
+        )
         result = SchemaSpecificationDTO(
-            location=".".join(testobject.to_dict().values()),
+            location=location,
             columns=schema_as_dict,
             testobject=testobject.name,
             spec_type=SpecificationType.SCHEMA,
@@ -225,8 +229,12 @@ class DemoDataPlatform(IDataPlatform):
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
+        location = LocationDTO(
+            f"duckdb://{db.domain}_{db.stage}"
+            f".{db.instance}.user_query.duck"
+        )
         result = SchemaSpecificationDTO(
-            location="user query",
+            location=location,
             testobject="user query",
             columns=schema_as_dict,
             spec_type=SpecificationType.SCHEMA,

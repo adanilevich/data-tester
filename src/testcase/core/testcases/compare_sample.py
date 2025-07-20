@@ -27,8 +27,8 @@ class CompareSampleTestCase(AbstractTestCase):
         self.translated_query = self.backend.translate_query(self.sql.query, self.db)
 
         self.add_fact({"Primary keys": ",".join(self.schema.primary_keys or [])})
-        self.add_fact({"Schema specification": self.schema.location})
-        self.add_fact({"Compare sample SQL": self.sql.location})
+        self.add_fact({"Schema specification": self.schema.location.path})
+        self.add_fact({"Compare sample SQL": self.sql.location.path})
         self.add_detail({"Original query": self.sql.query})
         self.add_detail({"Applied query": self.translated_query})
 

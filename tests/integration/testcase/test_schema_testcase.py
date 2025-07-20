@@ -2,13 +2,13 @@ from uuid import uuid4
 from src.testcase.core.testcases import SchemaTestCase
 from src.dtos import (
     SchemaSpecificationDTO, TestObjectDTO, TestType, SpecificationType,
-    TestDefinitionDTO
+    TestDefinitionDTO, LocationDTO
 )
 from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
 spec = SchemaSpecificationDTO(
-    location="this_location",
+    location=LocationDTO(path="dummy://this_location"),
     testobject="stage_customers",
     spec_type=SpecificationType.SCHEMA,
     columns={

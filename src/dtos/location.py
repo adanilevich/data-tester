@@ -14,6 +14,9 @@ class Store(Enum):
     MEMORY = "memory"
     BQ = "bq"
     UNKNOWN = "unknown"
+    UPLOAD = "upload"
+    DUCKDB = "duckdb"
+    DUMMY = "dummy"
 
 
 class LocationDTO(DTO):
