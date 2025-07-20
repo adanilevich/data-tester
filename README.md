@@ -5,11 +5,11 @@
 | Name                                                                           |    Stmts |     Miss |   Cover |   Missing |
 |------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
 | src/config/\_\_init\_\_.py                                                     |        1 |        0 |    100% |           |
-| src/config/config.py                                                           |       25 |        1 |     96% |         9 |
+| src/config/config.py                                                           |       26 |        1 |     96% |         9 |
 | src/data\_platform/\_\_init\_\_.py                                             |        4 |        0 |    100% |           |
 | src/data\_platform/demo/\_\_init\_\_.py                                        |        3 |        0 |    100% |           |
 | src/data\_platform/demo/demo\_naming\_resolver.py                              |       47 |        4 |     91% |     82-85 |
-| src/data\_platform/demo/demo\_platform.py                                      |      168 |       16 |     90% |115, 132-134, 154, 262, 266, 268, 271-276, 368, 394, 398 |
+| src/data\_platform/demo/demo\_platform.py                                      |      170 |       16 |     91% |115, 132-134, 154, 270, 274, 276, 279-284, 376, 402, 406 |
 | src/data\_platform/demo/demo\_platform\_factory.py                             |       17 |        0 |    100% |           |
 | src/data\_platform/demo/demo\_query\_handler.py                                |       21 |        1 |     95% |        36 |
 | src/data\_platform/dummy/\_\_init\_\_.py                                       |        3 |        0 |    100% |           |
@@ -30,11 +30,11 @@
 | src/dtos/\_\_init\_\_.py                                                       |        8 |        0 |    100% |           |
 | src/dtos/domain\_config.py                                                     |       35 |        1 |     97% |        52 |
 | src/dtos/dto.py                                                                |       15 |        0 |    100% |           |
-| src/dtos/location.py                                                           |       46 |        2 |     96% |    42, 48 |
+| src/dtos/location.py                                                           |       49 |        2 |     96% |    45, 51 |
 | src/dtos/report.py                                                             |       56 |        0 |    100% |           |
-| src/dtos/specification.py                                                      |       45 |        2 |     96% |    31, 69 |
-| src/dtos/testcase.py                                                           |      107 |        2 |     98% |  150, 153 |
-| src/dtos/testset.py                                                            |       27 |        0 |    100% |           |
+| src/dtos/specification.py                                                      |       62 |        4 |     94% | 34-37, 95 |
+| src/dtos/testcase.py                                                           |      109 |        2 |     98% |  152, 155 |
+| src/dtos/testset.py                                                            |       31 |        1 |     97% |        24 |
 | src/notifier/\_\_init\_\_.py                                                   |        4 |        0 |    100% |           |
 | src/notifier/in\_memory\_notifier.py                                           |        7 |        0 |    100% |           |
 | src/notifier/map.py                                                            |        7 |        1 |     86% |        10 |
@@ -58,6 +58,24 @@
 | src/report/ports/drivers/i\_report\_handler.py                                 |       24 |        0 |    100% |           |
 | src/report/ports/plugins/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
+| src/specification/adapters/\_\_init\_\_.py                                     |        4 |        0 |    100% |           |
+| src/specification/adapters/formatter.py                                        |       36 |        0 |    100% |           |
+| src/specification/adapters/naming\_conventions.py                              |       17 |        1 |     94% |        35 |
+| src/specification/adapters/requirements.py                                     |       12 |        7 |     42% |     12-19 |
+| src/specification/application/\_\_init\_\_.py                                  |        2 |        2 |      0% |       1-3 |
+| src/specification/application/handle\_specs.py                                 |       23 |       23 |      0% |      1-61 |
+| src/specification/core/\_\_init\_\_.py                                         |        2 |        2 |      0% |       1-3 |
+| src/specification/core/specification.py                                        |       56 |       56 |      0% |     1-147 |
+| src/specification/dependency\_injection.py                                     |       16 |       16 |      0% |      1-37 |
+| src/specification/drivers/\_\_init\_\_.py                                      |        2 |        2 |      0% |       1-3 |
+| src/specification/drivers/cli\_spec\_manager.py                                |        9 |        9 |      0% |      1-24 |
+| src/specification/ports/\_\_init\_\_.py                                        |        3 |        0 |    100% |           |
+| src/specification/ports/drivers/\_\_init\_\_.py                                |        2 |        0 |    100% |           |
+| src/specification/ports/drivers/i\_handle\_specs.py                            |       10 |        0 |    100% |           |
+| src/specification/ports/plugins/\_\_init\_\_.py                                |        4 |        0 |    100% |           |
+| src/specification/ports/plugins/i\_naming\_conventions.py                      |        4 |        0 |    100% |           |
+| src/specification/ports/plugins/i\_requirements.py                             |        4 |        0 |    100% |           |
+| src/specification/ports/plugins/i\_spec\_formatter.py                          |        6 |        0 |    100% |           |
 | src/storage/\_\_init\_\_.py                                                    |        5 |        0 |    100% |           |
 | src/storage/dict\_storage.py                                                   |       28 |        0 |    100% |           |
 | src/storage/file\_storage.py                                                   |       82 |        6 |     93% |48-50, 67, 100-101 |
@@ -79,7 +97,7 @@
 | src/testcase/core/precondition\_checks/i\_precondition\_checker.py             |        3 |        0 |    100% |           |
 | src/testcase/core/precondition\_checks/precondition\_checker.py                |       14 |        0 |    100% |           |
 | src/testcase/core/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
-| src/testcase/core/testcases/abstract\_testcase.py                              |       99 |        0 |    100% |           |
+| src/testcase/core/testcases/abstract\_testcase.py                              |      100 |        0 |    100% |           |
 | src/testcase/core/testcases/compare\_sample.py                                 |      130 |       23 |     82% |93, 100, 106-108, 113-115, 149-151, 170-172, 186-194 |
 | src/testcase/core/testcases/dummy\_exception.py                                |       11 |        0 |    100% |           |
 | src/testcase/core/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
@@ -111,9 +129,9 @@
 | src/testset/ports/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/i\_testset\_handler.py                               |       15 |        0 |    100% |           |
-|                                                                      **TOTAL** | **2159** |  **109** | **95%** |           |
+|                                                                      **TOTAL** | **2401** |  **230** | **90%** |           |
 
-2 empty files skipped.
+3 empty files skipped.
 
 
 ## Setup coverage badge
