@@ -4,6 +4,7 @@ from typing import Dict, List, Optional, Self
 from pydantic import model_validator, Field
 
 from src.dtos.dto import DTO
+from src.dtos.location import LocationDTO
 
 
 class SpecificationType(Enum):
@@ -12,14 +13,17 @@ class SpecificationType(Enum):
     COMPARE_SAMPLE_SQL = "compare_sample_sql"
 
 
+class SpecificationFormat(Enum):
+    SQL = "sql"
+    XLSX = "xlsx"
+
+
 class SpecificationDTO(DTO):
-    location: str = Field(min_length=1)  # e.g. full path to .sql file or .xlsx spec file
-    testobject: str = Field(min_length=1)  # name of the specified testobject
+    location: LocationDTO
+    testobject: str
     spec_type: SpecificationType
-    url: str = Field(default="none", min_length=1)  # clickable path to URL
-    display_name: str = ""  # name how specification is to be displayed to user
-    content: Optional[str] = Field(default=None, min_length=1)  # base64 (file) content
-    #  for downloading in frontend
+    url: str | None = Field(default=None)  # clickable path to URL
+    display_name: str | None = Field(default=None)
 
     class Config:
         validate_assignment = True
@@ -30,8 +34,30 @@ class SpecificationDTO(DTO):
             if self.location == "":
                 self.display_name = self.testobject
             else:
-                self.display_name = self.location
+                self.display_name = self.location.filename
         return self
+
+
+class SpecContent(DTO):
+    spec_type: SpecificationType
+
+
+class SchemaContent(SpecContent):
+    spec_type: SpecificationType = SpecificationType.SCHEMA
+    columns: Dict[str, str]  # schema as dict with keys 'column', 'dtype'
+    primary_keys: Optional[List[str]] = None  # list of primary keys (if supported)
+    partition_columns: Optional[List[str]] = None  # list of table partition keys
+    clustering_columns: Optional[List[str]] = None  # lsit of table clustering keys
+
+
+class RowCountSqlContent(SpecContent):
+    spec_type: SpecificationType = SpecificationType.ROWCOUNT_SQL
+    query: str
+
+
+class CompareSampleSqlContent(SpecContent):
+    spec_type: SpecificationType = SpecificationType.COMPARE_SAMPLE_SQL
+    query: str
 
 
 class SchemaSpecificationDTO(SpecificationDTO):

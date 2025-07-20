@@ -4,7 +4,7 @@ from src.dtos import SchemaSpecificationDTO, SpecFactory, SpecificationType
 def test_creating_spec_from_dict():
     spec = SchemaSpecificationDTO.from_dict(
         {
-            "location": "this",
+            "location": {"path": "dummy://this"},
             "testobject": "doesnt matter",
             "spec_type": SpecificationType.SCHEMA,
             "columns": {"a": "b"},
@@ -20,7 +20,7 @@ class TestSpecFactory:
     def test_that_known_spec_type_is_created(self):
         # given a dict with a known spec type
         dict_ = {
-            "location": "this",
+            "location": {"path": "dummy://this"},
             "spec_type": "schema",
             "testobject": "doesnt matter",
             "columns": {"a": "b"},

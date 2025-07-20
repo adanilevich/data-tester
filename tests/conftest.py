@@ -167,12 +167,12 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 specs=[
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location="dict://my_location",
+                        location=LocationDTO("dict://my_location"),
                         testobject=testobject.name,
                     ),
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location="dict://my_location",
+                        location=LocationDTO("dict://my_location"),
                         testobject=testobject.name,
                     ),
                 ],

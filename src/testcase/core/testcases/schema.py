@@ -41,7 +41,7 @@ class SchemaTestCase(AbstractTestCase):
         expected = self.schema
         actual = self._get_actual_schema()
 
-        self.add_fact({"Specification": expected.location})
+        self.add_fact({"Specification": expected.location.path})
 
         # we start by comparing columns and datatypes
         columns_diff_dto = self._compare_columns(expected, actual)

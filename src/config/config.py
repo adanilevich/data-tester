@@ -24,10 +24,12 @@ class Config(BaseSettings):
     # NOTIFIERS CONFIGURATION
     DATATESTER_NOTIFIERS: List[str] = Field(default=["IN_MEMORY", "STDOUT"])
 
+    # CONFIGRATION OF USER STORAGE
+    DATATESTER_USER_STORAGE_ENGINE: str = Field(default="LOCAL")
+
     # CONFIGURATION OF INTERNAL STORAGE
     DATATESTER_INTERNAL_STORAGE_ENGINE: str = Field(default="DICT")  # GCS, LOCAL or other
 
-    # CONFIGURATION OF INTERNAL STORAGES
     DATATESTER_DOMAIN_CONFIGS_LOCATION: str = Field(default="dict://domain_configs/")
     DATATESTER_INTERNAL_TESTRUN_LOCATION: str = Field(default="dict://testruns/")
     DATATESTER_INTERNAL_TESTREPORT_LOCATION: str = Field(default="dict://reports/")

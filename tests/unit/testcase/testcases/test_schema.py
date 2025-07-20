@@ -1,13 +1,13 @@
 import pytest
 
 from src.testcase.core.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO, TestType, SpecificationType
+from src.dtos import SchemaSpecificationDTO, TestType, SpecificationType, LocationDTO
 
 
 class TestSchemaTestCase:
 
     spec = SchemaSpecificationDTO(
-        location="this_location",
+        location=LocationDTO(path="dummy://this_location"),
         columns={"a": "int", "b": "string", "c": "array"},
         partition_columns=["a"],
         clustering_columns=["b"],
@@ -42,7 +42,7 @@ class TestSchemaTestCase:
         testcase._execute()
 
         assert testcase.result == testcase.result.OK
-        assert {"Specification": "this_location"} in testcase.facts
+        assert {"Specification": "dummy://this_location/"} in testcase.facts
 
     def test_that_result_is_nok_if_pk_comparison_fails(self, testcase):
         spec = SchemaSpecificationDTO(**self.spec.to_dict())

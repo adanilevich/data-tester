@@ -19,7 +19,7 @@ class RowCountTestCase(AbstractTestCase):
 
     def _execute(self):
 
-        self.add_fact({"Rowcount Query": self.sql.location})
+        self.add_fact({"Rowcount Query": self.sql.location.path})
         db = DBInstanceDTO.from_testobject(self.testobject)
 
         query = self.sql.query + """

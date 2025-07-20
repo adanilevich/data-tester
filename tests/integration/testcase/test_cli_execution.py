@@ -59,12 +59,12 @@ testcases = [
         specs=[
             SpecificationDTO(
                 spec_type=SpecificationType.SCHEMA,
-                location="my_location",
+                location=LocationDTO(path="dict://my_location"),
                 testobject=testobject["name"]
             ),
             SpecificationDTO(
                 spec_type=SpecificationType.ROWCOUNT_SQL,
-                location="my_location",
+                location=LocationDTO(path="dict://my_location"),
                 testobject=testobject["name"]
             )
         ],

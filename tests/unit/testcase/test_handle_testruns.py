@@ -97,7 +97,7 @@ def test_definition(test_object, domain_config):
         specs=[
             SpecificationDTO(
                 spec_type=SpecificationType.SCHEMA,
-                location="dict://specs/",
+                location=LocationDTO(path="dict://specs/"),
                 testobject=test_object.name,
             )
         ],

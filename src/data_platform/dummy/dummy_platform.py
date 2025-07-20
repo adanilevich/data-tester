@@ -4,7 +4,7 @@ import polars as pl
 
 from src.testcase.ports import IDataPlatform
 from src.dtos import (
-    SchemaSpecificationDTO, DBInstanceDTO, TestObjectDTO, SpecificationType
+    SchemaSpecificationDTO, DBInstanceDTO, TestObjectDTO, SpecificationType, LocationDTO
 )
 
 
@@ -18,7 +18,7 @@ class DummyPlatform(IDataPlatform):
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
         return SchemaSpecificationDTO(
-            location="my_loc",
+            location=LocationDTO(f"dummy://{testobject.name}.dummy"),
             testobject=testobject.name,
             columns={"my_col": "my_dtype"},
             spec_type=SpecificationType.SCHEMA,
@@ -27,7 +27,7 @@ class DummyPlatform(IDataPlatform):
     def get_schema_from_query(
             self, query: str, db: DBInstanceDTO) -> SchemaSpecificationDTO:
         return SchemaSpecificationDTO(
-            location="my_loc",
+            location=LocationDTO("dummy://user_query.dummy"),
             testobject="user query",
             columns={"my_col": "my_dtype"},
             spec_type=SpecificationType.SCHEMA,

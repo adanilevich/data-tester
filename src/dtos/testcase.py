@@ -50,6 +50,7 @@ class TestDefinitionDTO(DTO):
     __test__ = False  # prevents pytest collection
     testobject: TestObjectDTO
     testtype: TestType
+    scenario: str | None = Field(default=None)
     specs: List[SpecificationDTO]
     labels: List[str] = Field(default=[])
     testset_id: UUID4 = Field(default_factory=uuid4)
@@ -103,6 +104,7 @@ class TestCaseDTO(TestDTO):
     testcase_id: UUID4 = Field(default_factory=uuid4)
     testobject: TestObjectDTO
     testtype: TestType
+    scenario: str | None = Field(default=None)
     diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
     summary: str
     facts: List[Dict[str, str | int]]
@@ -162,6 +164,7 @@ class TestRunDTO(TestDTO):
             definition = TestDefinitionDTO(
                 testobject=testcase.testobject,
                 testtype=testcase.testtype,
+                scenario=testcase.scenario,
                 specs=testcase.specifications,
                 labels=testcase.labels,
                 testset_id=testcase.testset_id,

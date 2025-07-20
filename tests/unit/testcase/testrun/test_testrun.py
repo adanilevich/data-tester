@@ -29,10 +29,12 @@ class TestTestRun:
     def specifications(self):
         return [
             SpecificationDTO(
-                spec_type=SpecificationType.SCHEMA, location="loc", testobject="to"
+                spec_type=SpecificationType.SCHEMA,
+                location=LocationDTO(path="dummy://loc"), testobject="to"
             ),
             SpecificationDTO(
-                spec_type=SpecificationType.ROWCOUNT_SQL, location="loc", testobject="to"
+                spec_type=SpecificationType.ROWCOUNT_SQL,
+                location=LocationDTO(path="dummy://loc"), testobject="to"
             ),
         ]
 
