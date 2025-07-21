@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_f6eb1e6d0d9e75c7_naming_conventions_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-21 19:07 +0000
+            created at 2025-07-21 19:53 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -86,7 +86,7 @@
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">    <span class="nam">SpecContent</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t">    <span class="nam">SchemaContent</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">    <span class="nam">SpecificationType</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">    <span class="nam">CompareSampleSqlContent</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t">    <span class="nam">CompareSqlContent</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">    <span class="nam">RowCountSqlContent</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">from</span> <span class="nam">src</span><span class="op">.</span><span class="nam">specification</span><span class="op">.</span><span class="nam">ports</span> <span class="key">import</span> <span class="nam">ISpecFormatter</span><span class="op">,</span> <span class="nam">ISpecFormatterFactory</span>&nbsp;</span><span class="r"></span></p>
@@ -164,9 +164,9 @@
     <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">        <span class="key">return</span> <span class="nam">result</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSampleSqlFormatter</span><span class="op">(</span><span class="nam">ISpecFormatter</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSqlFormatter</span><span class="op">(</span><span class="nam">ISpecFormatter</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">    <span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="str">    Implementation Parses compare sample information from a .sql file.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="str">    Implementation Parses compare information from a .sql file.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">    <span class="key">def</span> <span class="nam">deserialize</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">file</span><span class="op">:</span> <span class="nam">bytes</span><span class="op">)</span> <span class="op">-></span> <span class="nam">SpecContent</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -174,8 +174,8 @@
     <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="nam">result</span><span class="op">:</span> <span class="nam">SpecContent</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">        <span class="key">if</span> <span class="str">"__EXPECTED__"</span> <span class="key">in</span> <span class="nam">content</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="nam">spec_type</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="nam">result</span> <span class="op">=</span> <span class="nam">CompareSampleSqlContent</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="nam">spec_type</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SQL</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="nam">result</span> <span class="op">=</span> <span class="nam">CompareSqlContent</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">                <span class="nam">query</span><span class="op">=</span><span class="nam">content</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">                <span class="nam">spec_type</span><span class="op">=</span><span class="nam">spec_type</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -197,8 +197,8 @@
     <p class="run"><span class="n"><a id="t115" href="#t115">115</a></span><span class="t">            <span class="key">return</span> <span class="nam">XlsxSchemaFormatter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t116" href="#t116">116</a></span><span class="t">        <span class="key">elif</span> <span class="nam">spec_type</span> <span class="op">==</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">ROWCOUNT_SQL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t117" href="#t117">117</a></span><span class="t">            <span class="key">return</span> <span class="nam">RowcountSqlFormatter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">        <span class="key">elif</span> <span class="nam">spec_type</span> <span class="op">==</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">            <span class="key">return</span> <span class="nam">CompareSampleSqlFormatter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t118" href="#t118">118</a></span><span class="t">        <span class="key">elif</span> <span class="nam">spec_type</span> <span class="op">==</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SQL</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t119" href="#t119">119</a></span><span class="t">            <span class="key">return</span> <span class="nam">CompareSqlFormatter</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t120" href="#t120">120</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t121" href="#t121">121</a></span><span class="t">            <span class="nam">msg</span> <span class="op">=</span> <span class="fst">f"</span><span class="fst">Parsing </span><span class="op">{</span><span class="nam">spec_type</span><span class="op">}</span><span class="fst"> is not supported</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t122" href="#t122">122</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="nam">msg</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -211,7 +211,7 @@
             <a class="nav" href="z_f6eb1e6d0d9e75c7_naming_conventions_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-21 19:07 +0000
+            created at 2025-07-21 19:53 +0000
         </p>
     </div>
 </footer>

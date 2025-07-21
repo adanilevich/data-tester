@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_5c6937c4f82f2610_testcase_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-21 19:07 +0000
+            created at 2025-07-21 19:53 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -92,7 +92,7 @@
     <p class="run"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="key">class</span> <span class="nam">SpecificationType</span><span class="op">(</span><span class="nam">Enum</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">    <span class="nam">SCHEMA</span> <span class="op">=</span> <span class="str">"schema"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">    <span class="nam">ROWCOUNT_SQL</span> <span class="op">=</span> <span class="str">"rowcount_sql"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">COMPARE_SAMPLE_SQL</span> <span class="op">=</span> <span class="str">"compare_sample_sql"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">COMPARE_SQL</span> <span class="op">=</span> <span class="str">"compare_sql"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="key">class</span> <span class="nam">SpecificationFormat</span><span class="op">(</span><span class="nam">Enum</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -137,8 +137,8 @@
     <p class="run"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">    <span class="nam">query</span><span class="op">:</span> <span class="nam">str</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSampleSqlContent</span><span class="op">(</span><span class="nam">SpecContent</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">    <span class="nam">spec_type</span><span class="op">:</span> <span class="nam">SpecificationType</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSqlContent</span><span class="op">(</span><span class="nam">SpecContent</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">    <span class="nam">spec_type</span><span class="op">:</span> <span class="nam">SpecificationType</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SQL</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">    <span class="nam">query</span><span class="op">:</span> <span class="nam">str</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -155,8 +155,8 @@
     <p class="run"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">    <span class="nam">query</span><span class="op">:</span> <span class="nam">str</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSampleSqlDTO</span><span class="op">(</span><span class="nam">SpecificationDTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">    <span class="nam">spec_type</span><span class="op">:</span> <span class="nam">SpecificationType</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t"><span class="key">class</span> <span class="nam">CompareSqlDTO</span><span class="op">(</span><span class="nam">SpecificationDTO</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">    <span class="nam">spec_type</span><span class="op">:</span> <span class="nam">SpecificationType</span> <span class="op">=</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SQL</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="nam">query</span><span class="op">:</span> <span class="nam">str</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -184,7 +184,7 @@
             <a class="nav" href="z_5c6937c4f82f2610_testcase_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-21 19:07 +0000
+            created at 2025-07-21 19:53 +0000
         </p>
     </div>
 </footer>

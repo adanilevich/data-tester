@@ -28,7 +28,7 @@
 | src/domain\_config/ports/drivers/\_\_init\_\_.py                               |        2 |        0 |    100% |           |
 | src/domain\_config/ports/drivers/i\_domain\_config\_handler.py                 |        9 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                       |        8 |        0 |    100% |           |
-| src/dtos/domain\_config.py                                                     |       35 |        1 |     97% |        52 |
+| src/dtos/domain\_config.py                                                     |       32 |        1 |     97% |        42 |
 | src/dtos/dto.py                                                                |       15 |        0 |    100% |           |
 | src/dtos/location.py                                                           |       49 |        2 |     96% |    45, 51 |
 | src/dtos/report.py                                                             |       56 |        0 |    100% |           |
@@ -98,7 +98,7 @@
 | src/testcase/core/precondition\_checks/precondition\_checker.py                |       14 |        0 |    100% |           |
 | src/testcase/core/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
 | src/testcase/core/testcases/abstract\_testcase.py                              |      100 |        0 |    100% |           |
-| src/testcase/core/testcases/compare\_sample.py                                 |      130 |       23 |     82% |93, 100, 106-108, 113-115, 149-151, 170-172, 186-194 |
+| src/testcase/core/testcases/compare.py                                         |      130 |       23 |     82% |93, 100, 106-108, 113-115, 149-151, 170-172, 186-194 |
 | src/testcase/core/testcases/dummy\_exception.py                                |       11 |        0 |    100% |           |
 | src/testcase/core/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/testcase/core/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
@@ -129,7 +129,7 @@
 | src/testset/ports/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/i\_testset\_handler.py                               |       15 |        0 |    100% |           |
-|                                                                      **TOTAL** | **2411** |  **142** | **94%** |           |
+|                                                                      **TOTAL** | **2408** |  **142** | **94%** |           |
 
 3 empty files skipped.
 
