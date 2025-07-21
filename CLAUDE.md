@@ -54,7 +54,7 @@ The codebase follows hexagonal architecture principles with these key patterns:
 ### Main Domain Modules
 
 1. **testcase/**: Core testing execution engine
-   - Executes different test types (SCHEMA, ROWCOUNT, COMPARE_SAMPLE)
+   - Executes different test types (SCHEMA, ROWCOUNT, COMPARE)
    - Manages test runs and precondition checks
    - Plugin architecture for different test case implementations
 

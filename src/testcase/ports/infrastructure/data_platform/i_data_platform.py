@@ -7,7 +7,7 @@ from src.dtos import SchemaSpecificationDTO, TestObjectDTO, DBInstanceDTO
 
 
 class IDataPlatform(ABC):
-    # if the backend supports pushdown, compare_sample will delegate to backend
+    # if the backend supports pushdown, compare will delegate to backend
     supports_db_comparison: bool
     # if clustering/partitioning are supported, testcase schema compare them to specs
     supports_clustering: bool

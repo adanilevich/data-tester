@@ -19,7 +19,7 @@ from src.dtos import (
 
 class XlsxTestCaseDiffFormatter(IReportFormatter):
     """
-    Excel-based diff of a compare_sample testcase
+    Excel-based diff of a compare testcase
     """
 
     @property

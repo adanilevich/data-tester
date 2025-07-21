@@ -10,7 +10,7 @@ from src.dtos.location import LocationDTO
 class SpecificationType(Enum):
     SCHEMA = "schema"
     ROWCOUNT_SQL = "rowcount_sql"
-    COMPARE_SAMPLE_SQL = "compare_sample_sql"
+    COMPARE_SQL = "compare_sql"
 
 
 class SpecificationFormat(Enum):
@@ -55,8 +55,8 @@ class RowCountSqlContent(SpecContent):
     query: str
 
 
-class CompareSampleSqlContent(SpecContent):
-    spec_type: SpecificationType = SpecificationType.COMPARE_SAMPLE_SQL
+class CompareSqlContent(SpecContent):
+    spec_type: SpecificationType = SpecificationType.COMPARE_SQL
     query: str
 
 
@@ -73,8 +73,8 @@ class RowCountSqlDTO(SpecificationDTO):
     query: str
 
 
-class CompareSampleSqlDTO(SpecificationDTO):
-    spec_type: SpecificationType = SpecificationType.COMPARE_SAMPLE_SQL
+class CompareSqlDTO(SpecificationDTO):
+    spec_type: SpecificationType = SpecificationType.COMPARE_SQL
     query: str
 
 

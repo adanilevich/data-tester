@@ -45,7 +45,7 @@ class TestSpecCommandHandler:
         # Add compare sample SQL and schema files for table2
         compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
         storage.write(
-            compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE_SAMPLE.sql")
+            compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE.sql")
         )
         storage.write(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
 
@@ -96,9 +96,9 @@ class TestSpecCommandHandler:
                 testtype=TestType.ROWCOUNT,
                 comment="Rowcount test for table1",
             ),
-            "table2_COMPARE_SAMPLE": TestCaseEntryDTO(
+            "table2_COMPARE": TestCaseEntryDTO(
                 testobject="table2",
-                testtype=TestType.COMPARE_SAMPLE,
+                testtype=TestType.COMPARE,
                 comment="Compare sample test for table2",
             ),
         }
@@ -226,10 +226,10 @@ class TestSpecCommandHandler:
         assert isinstance(result[1][0], RowCountSqlDTO)
         assert result[1][0].testobject == "table1"
 
-        # Third testcase: table2_COMPARE_SAMPLE
+        # Third testcase: table2_COMPARE
         assert len(result[2]) == 2  # Should find both SQL and schema specs
         spec_types = [spec.spec_type for spec in result[2]]
-        assert SpecificationType.COMPARE_SAMPLE_SQL in spec_types
+        assert SpecificationType.COMPARE_SQL in spec_types
         assert SpecificationType.SCHEMA in spec_types
 
     def test_fetch_specs_no_specs_found(self, handler: SpecCommandHandler):

@@ -18,7 +18,7 @@ from src.storage import IStorage, StorageTypeUnknownError
 from src.testcase.core.testcases import (
     AbstractTestCase,
     SchemaTestCase,
-    CompareSampleTestCase,
+    CompareTestCase,
     RowCountTestCase,
     DummyExceptionTestCase,
     DummyNokTestCase,

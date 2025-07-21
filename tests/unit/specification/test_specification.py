@@ -14,7 +14,7 @@ from src.dtos import (
     SpecificationType,
     SchemaSpecificationDTO,
     RowCountSqlDTO,
-    CompareSampleSqlDTO,
+    CompareSqlDTO,
 )
 
 
@@ -39,10 +39,10 @@ class TestSpecification:
         # Add compare sample SQL file for table2
         compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
         storage.write(
-            compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE_SAMPLE.sql")
+            compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE.sql")
         )
 
-        # Add schema file for table2 (for COMPARE_SAMPLE which needs both)
+        # Add schema file for table2 (for COMPARE which needs both)
         storage.write(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
 
         return storage
@@ -132,16 +132,16 @@ class TestSpecification:
         assert specs[0].spec_type == SpecificationType.ROWCOUNT_SQL
         assert "__EXPECTED_ROWCOUNT__" in specs[0].query
 
-    def test_find_specs_compare_sample(self, specification: Specification):
+    def test_find_specs_compare(self, specification: Specification):
         """Test find_specs for compare sample test type (requires both SQL and schema)"""
         location = LocationDTO("dict://specs/")
-        testcase = TestCaseEntryDTO(testobject="table2", testtype=TestType.COMPARE_SAMPLE)
+        testcase = TestCaseEntryDTO(testobject="table2", testtype=TestType.COMPARE)
 
         specs = specification.find_specs(location, testcase, "test_domain")
 
-        # Should find compare sample SQL and also the schema definition file
+        # Should find compare SQL and also the schema definition file
         assert len(specs) == 2
-        assert specs[0].spec_type == SpecificationType.COMPARE_SAMPLE_SQL
+        assert specs[0].spec_type == SpecificationType.COMPARE_SQL
         assert specs[1].spec_type == SpecificationType.SCHEMA
 
     def test_find_specs_no_matching_files(self, specification: Specification):
@@ -203,16 +203,16 @@ class TestSpecification:
         assert specs[0].testobject == "test_table"
         assert specs[0].location.path == "upload://test_table_rowcount_sql.file"
 
-    def test_parse_spec_file_compare_sample_sql(self, specification: Specification):
-        """Test parse_spec_file with compare sample SQL content"""
+    def test_parse_spec_file_compare_sql(self, specification: Specification):
+        """Test parse_spec_file with compare SQL content"""
         sql_content = "SELECT * FROM table1 -- __EXPECTED__".encode()
 
         specs = specification.parse_spec_file(sql_content, "test_table")
 
         assert len(specs) == 1
-        assert isinstance(specs[0], CompareSampleSqlDTO)
+        assert isinstance(specs[0], CompareSqlDTO)
         assert specs[0].testobject == "test_table"
-        assert specs[0].location.path == "upload://test_table_compare_sample_sql.file"
+        assert specs[0].location.path == "upload://test_table_compare_sql.file"
 
     def test_parse_spec_file_invalid_content(self, specification: Specification):
         """Test parse_spec_file with invalid content that can't be parsed"""
@@ -251,12 +251,12 @@ class TestSpecification:
             sql_content.encode(), LocationDTO("dict://specs/table3_ROWCOUNT.sql"))
 
         location = LocationDTO("dict://specs/")
-        testcase = TestCaseEntryDTO(testobject="table3", testtype=TestType.COMPARE_SAMPLE)
+        testcase = TestCaseEntryDTO(testobject="table3", testtype=TestType.COMPARE)
 
         specs = specification.find_specs(location, testcase, "test_domain")
 
         # Should only return successfully parsed specs, ignoring failed ones
-        # COMPARE_SAMPLE requires both COMPARE_SAMPLE_SQL and SCHEMA,
+        # COMPARE requires both COMPARE_SQL and SCHEMA,
         # but we only have corrupted schema
         # So we should get 0 specs since schema parsing fails
         assert len(specs) == 0

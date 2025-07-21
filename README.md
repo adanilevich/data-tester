@@ -43,6 +43,14 @@ The framework is built to:
    - Organize tests in test sets depending on your stage (e.g. test, uat), test scenario or other requirements.
    - Schedule and execute test sets to ensure ETL result quality
 
+## Extension Points
+
+- Add new test types by implementing `AbstractTestCase`
+- Add new data platforms via `IDataPlatform` interface
+- Add new specification formats via `ISpecFormatter`
+- Add new report formats via `IReportFormatter`
+- Add new storage backends via `IStorage`
+
 ---
 
 For more details, see the source code and module-level documentation.

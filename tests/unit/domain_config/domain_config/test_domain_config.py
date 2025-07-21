@@ -88,7 +88,5 @@ class TestDomainConfig:
         assert fetched_config.domain == config.domain
         assert fetched_config.instances == config.instances
         assert fetched_config.specifications_locations == config.specifications_locations
-        assert fetched_config.testsets_location == config.testsets_location
         assert fetched_config.testreports_location == config.testreports_location
         assert fetched_config.testcases == config.testcases
-        assert fetched_config.platform_specific == config.platform_specific

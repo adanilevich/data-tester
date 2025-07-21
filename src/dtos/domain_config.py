@@ -8,40 +8,30 @@ class SchemaTestCaseConfigDTO(DTO):
     compare_datatypes: List[str]
 
 
-class CompareSampleTestCaseConfigDTO(DTO):
+class CompareTestCaseConfigDTO(DTO):
     sample_size: int
     sample_size_per_object: Dict[str, int] = dict()
 
 
 class TestCasesConfigDTO(DTO):
     schema: SchemaTestCaseConfigDTO  # type: ignore
-    compare_sample: CompareSampleTestCaseConfigDTO
+    compare: CompareTestCaseConfigDTO
+
 
 class DomainConfigDTO(DTO):
     """
-    This serves as a generic fixtures container for business-related configurations.
-    The required attributes are defined by configuration needs of implemented Testcases,
-    e.g., the testcase compare_sample requires a sample size definition.
+    This represents the business-related configuration for test execution for a domain.
     """
-    domain: str
-    instances: Dict[str, List[str]]  # dict {stage: [instance1, instance2], ...}
-    """
-    Specifications can be stored
-        - in one location
-        - in several locations, e.g. separated by type (sql, excel) or by DWH layers
-        - in one location per stage, e.g. different versions for TEST and UAT
-        - in several locations per stage
-    """
-    specifications_locations: (
-        LocationDTO |
-        List[LocationDTO] |
-        Dict[str, LocationDTO] |
-        Dict[str, List[LocationDTO]]
+    domain: str  # domain name
+    instances: Dict[str, List[str]]  # list of domain instance names per stage
+    specifications_locations: (  # user-managed locations for specifications, can be ...
+        LocationDTO |  # a single location
+        List[LocationDTO] |  # a list of locations, e.g. by type or DWH layers
+        Dict[str, LocationDTO] |  # a dict of locations by stage
+        Dict[str, List[LocationDTO]]  # list or locations by stage.instance
     )
-    testsets_location: LocationDTO
-    testreports_location: LocationDTO
-    testcases: TestCasesConfigDTO
-    platform_specific: Optional[Dict[str, Any]] = None
+    testreports_location: LocationDTO  # storage location for user-facing reports
+    testcases: TestCasesConfigDTO  # testcase specific configuration
 
     def _item_as_list(self, input: LocationDTO | List[LocationDTO]) -> List[LocationDTO]:
         if isinstance(input, LocationDTO):

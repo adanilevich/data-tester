@@ -5,7 +5,7 @@ from .dummy_ok import DummyOkTestCase
 from .dummy_nok import DummyNokTestCase
 from .schema import SchemaTestCase
 from .rowcount import RowCountTestCase
-from .compare_sample import CompareSampleTestCase
+from .compare import CompareTestCase
 
 
 __all__ = [
@@ -16,5 +16,5 @@ __all__ = [
     "DummyNokTestCase",
     "SchemaTestCase",
     "RowCountTestCase",
-    "CompareSampleTestCase",
+    "CompareTestCase",
 ]

@@ -9,10 +9,10 @@ from src.dtos import (
     SpecContent,
     SchemaContent,
     RowCountSqlContent,
-    CompareSampleSqlContent,
+    CompareSqlContent,
     SchemaSpecificationDTO,
     RowCountSqlDTO,
-    CompareSampleSqlDTO,
+    CompareSqlDTO,
 )
 from src.specification.ports.plugins import (
     INamingConventionsFactory,
@@ -84,8 +84,8 @@ class Specification:
                 spec_type=content.spec_type,
                 query=content.query,
             )
-        elif isinstance(content, CompareSampleSqlContent):
-            result = CompareSampleSqlDTO(
+        elif isinstance(content, CompareSqlContent):
+            result = CompareSqlDTO(
                 location=location,
                 testobject=testobject,
                 spec_type=content.spec_type,

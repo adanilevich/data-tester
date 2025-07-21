@@ -6,7 +6,7 @@ from src.dtos import (
     LocationDTO,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
-    CompareSampleTestCaseConfigDTO,
+    CompareTestCaseConfigDTO,
 )
 from src.report.dependency_injection import ReportDependencyInjector
 from src.report.drivers import CliReportManager
@@ -30,11 +30,10 @@ def domain_config():
         domain="test_domain",
         instances={"test": ["alpha"]},
         specifications_locations=[LocationDTO("dict://specs")],
-        testsets_location=LocationDTO("dict://testsets"),
         testreports_location=LocationDTO("dict://testreports"),
         testcases=TestCasesConfigDTO(
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-            compare_sample=CompareSampleTestCaseConfigDTO(sample_size=100),
+            compare=CompareTestCaseConfigDTO(sample_size=100),
         ),
     )
 
@@ -141,11 +140,10 @@ class TestReportDependencyInjector:
             domain="test_domain",
             instances={"test": ["alpha"]},
             specifications_locations=[LocationDTO("dict://specs")],
-            testsets_location=LocationDTO("dict://testsets"),
             testreports_location=LocationDTO("local://testreports"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-                compare_sample=CompareSampleTestCaseConfigDTO(sample_size=100),
+                compare=CompareTestCaseConfigDTO(sample_size=100),
             ),
         )
         injector = ReportDependencyInjector(config)

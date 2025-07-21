@@ -32,7 +32,7 @@ class TestXlsxTestCaseDiffFormatter:
         # given a TestCaseReportDTO with non-empty diff
         formatter = XlsxTestCaseDiffFormatter()
         testcase_report.diff = {
-            "compare_sample_diff": {"a": [1, 2, 3], "b": ["ab", "bb", "df"]},
+            "compare_diff": {"a": [1, 2, 3], "b": ["ab", "bb", "df"]},
             "another_diff": {"x": [10, 20], "y": ["test1", "test2"]},
         }
         # when create_artifact is called
@@ -44,8 +44,8 @@ class TestXlsxTestCaseDiffFormatter:
         # Use BytesIO to avoid writing to disk
         excel_io = io.BytesIO(result)
 
-        # Then compare_sample sheet should exist
-        sheet_name = "compare_sample_diff"
+        # Then compare sheet should exist
+        sheet_name = "compare_diff"
         df_compare = pl.read_excel(excel_io, sheet_name=sheet_name)
 
         # And it should have the correct columns and values
