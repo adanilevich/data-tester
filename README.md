@@ -59,13 +59,13 @@
 | src/report/ports/plugins/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
 | src/specification/adapters/\_\_init\_\_.py                                     |        4 |        0 |    100% |           |
-| src/specification/adapters/formatter.py                                        |       36 |        0 |    100% |           |
-| src/specification/adapters/naming\_conventions.py                              |       17 |        1 |     94% |        35 |
-| src/specification/adapters/requirements.py                                     |       12 |        7 |     42% |     12-19 |
-| src/specification/application/\_\_init\_\_.py                                  |        2 |        2 |      0% |       1-3 |
-| src/specification/application/handle\_specs.py                                 |       23 |       23 |      0% |      1-61 |
-| src/specification/core/\_\_init\_\_.py                                         |        2 |        2 |      0% |       1-3 |
-| src/specification/core/specification.py                                        |       56 |       56 |      0% |     1-147 |
+| src/specification/adapters/formatter.py                                        |       44 |        0 |    100% |           |
+| src/specification/adapters/naming\_conventions.py                              |       19 |        0 |    100% |           |
+| src/specification/adapters/requirements.py                                     |       12 |        1 |     92% |        19 |
+| src/specification/application/\_\_init\_\_.py                                  |        2 |        0 |    100% |           |
+| src/specification/application/handle\_specs.py                                 |       23 |        0 |    100% |           |
+| src/specification/core/\_\_init\_\_.py                                         |        2 |        0 |    100% |           |
+| src/specification/core/specification.py                                        |       56 |        2 |     96% |    55, 95 |
 | src/specification/dependency\_injection.py                                     |       16 |       16 |      0% |      1-37 |
 | src/specification/drivers/\_\_init\_\_.py                                      |        2 |        2 |      0% |       1-3 |
 | src/specification/drivers/cli\_spec\_manager.py                                |        9 |        9 |      0% |      1-24 |
@@ -129,7 +129,7 @@
 | src/testset/ports/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/i\_testset\_handler.py                               |       15 |        0 |    100% |           |
-|                                                                      **TOTAL** | **2401** |  **230** | **90%** |           |
+|                                                                      **TOTAL** | **2411** |  **142** | **94%** |           |
 
 3 empty files skipped.
 

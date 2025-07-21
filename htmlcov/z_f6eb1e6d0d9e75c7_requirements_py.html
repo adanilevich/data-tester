@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/specification/adapters/requirements.py: 42%</title>
+    <title>Coverage for src/specification/adapters/requirements.py: 92%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_58284776.png">
     <link rel="stylesheet" href="style_cb_81f8c14c.css" type="text/css">
     <script src="coverage_html_cb_6fb7b396.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src/specification/adapters/requirements.py</b>:
-            <span class="pc_cov">42%</span>
+            <span class="pc_cov">92%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,8 +55,8 @@
         </aside>
         <h2>
             <span class="text">12 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">5<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">7<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">11<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_5fbc85d15d46d6da___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-20 22:58 +0000
+            created at 2025-07-21 19:07 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -91,12 +91,12 @@
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="str">    Default requirements implementation. Should only be changed in rare cases.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_requirements</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">testcase</span><span class="op">:</span> <span class="nam">TestCaseEntryDTO</span><span class="op">)</span> <span class="op">-></span> <span class="nam">List</span><span class="op">[</span><span class="nam">SpecificationType</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">        <span class="key">if</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">        <span class="key">elif</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">ROWCOUNT</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">ROWCOUNT_SQL</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">        <span class="key">elif</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span><span class="op">,</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">        <span class="key">if</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">        <span class="key">elif</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">ROWCOUNT</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">ROWCOUNT_SQL</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">        <span class="key">elif</span> <span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span> <span class="op">==</span> <span class="nam">TestType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">            <span class="key">return</span> <span class="op">[</span><span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">COMPARE_SAMPLE_SQL</span><span class="op">,</span> <span class="nam">SpecificationType</span><span class="op">.</span><span class="nam">SCHEMA</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Unsupported testtype: </span><span class="op">{</span><span class="nam">testcase</span><span class="op">.</span><span class="nam">testtype</span><span class="op">}</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
@@ -108,7 +108,7 @@
             <a class="nav" href="z_5fbc85d15d46d6da___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.9.2">coverage.py v7.9.2</a>,
-            created at 2025-07-20 22:58 +0000
+            created at 2025-07-21 19:07 +0000
         </p>
     </div>
 </footer>
