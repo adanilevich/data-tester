@@ -60,9 +60,31 @@ class XlsxSchemaFormatter(ISpecFormatter):
         )
 
 
-class SqlFormatter(ISpecFormatter):
+class RowcountSqlFormatter(ISpecFormatter):
     """
     Implementation Parses schema information from a .sql file.
+    """
+
+    def deserialize(self, file: bytes) -> SpecContent:
+        content = file.decode("utf-8")
+        result: SpecContent
+
+        if "__EXPECTED_ROWCOUNT__" in content:
+            spec_type = SpecificationType.ROWCOUNT_SQL
+            result = RowCountSqlContent(
+                query=content,
+                spec_type=spec_type,
+            )
+        else:
+            msg = "Unknown sql format. Missing __EXPECTED_ROWCOUNT__"
+            raise ValueError(msg)
+
+        return result
+
+
+class CompareSampleSqlFormatter(ISpecFormatter):
+    """
+    Implementation Parses compare sample information from a .sql file.
     """
 
     def deserialize(self, file: bytes) -> SpecContent:
@@ -75,14 +97,8 @@ class SqlFormatter(ISpecFormatter):
                 query=content,
                 spec_type=spec_type,
             )
-        elif "__EXPECTED_ROWCOUNT__" in content:
-            spec_type = SpecificationType.ROWCOUNT_SQL
-            result = RowCountSqlContent(
-                query=content,
-                spec_type=spec_type,
-            )
         else:
-            msg = "Unknown sql format. Missing __EXPECTED__ or __EXPECTED_ROWCOUNT__"
+            msg = "Unknown sql format. Missing __EXPECTED__"
             raise ValueError(msg)
 
         return result
@@ -97,11 +113,10 @@ class FormatterFactory(ISpecFormatterFactory):
     def get_formatter(self, spec_type: SpecificationType) -> ISpecFormatter:
         if spec_type == SpecificationType.SCHEMA:
             return XlsxSchemaFormatter()
-        elif spec_type in [
-            SpecificationType.ROWCOUNT_SQL,
-            SpecificationType.COMPARE_SAMPLE_SQL,
-        ]:
-            return SqlFormatter()
+        elif spec_type == SpecificationType.ROWCOUNT_SQL:
+            return RowcountSqlFormatter()
+        elif spec_type == SpecificationType.COMPARE_SAMPLE_SQL:
+            return CompareSampleSqlFormatter()
         else:
             msg = f"Parsing {spec_type} is not supported"
             raise ValueError(msg)

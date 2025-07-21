@@ -10,7 +10,8 @@ from src.dtos import (
 )
 from src.specification.adapters.formatter import (
     XlsxSchemaFormatter,
-    SqlFormatter,
+    RowcountSqlFormatter,
+    CompareSampleSqlFormatter,
     FormatterFactory,
 )
 
@@ -115,7 +116,7 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When
-        result = SqlFormatter().deserialize(file_content)
+        result = CompareSampleSqlFormatter().deserialize(file_content)
 
         # Then
         assert isinstance(result, CompareSampleSqlContent)
@@ -132,7 +133,7 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When
-        result = SqlFormatter().deserialize(file_content)
+        result = RowcountSqlFormatter().deserialize(file_content)
 
         # Then
         assert isinstance(result, RowCountSqlContent)
@@ -146,7 +147,9 @@ class TestSqlFormatter:
 
         # When deserializing the file an error is raised
         with pytest.raises(ValueError, match="Unknown sql format"):
-            SqlFormatter().deserialize(file_content)
+            RowcountSqlFormatter().deserialize(file_content)
+        with pytest.raises(ValueError, match="Unknown sql format"):
+            CompareSampleSqlFormatter().deserialize(file_content)
 
 
 class TestFormatterFactory:
@@ -172,7 +175,7 @@ class TestFormatterFactory:
         result = factory.get_formatter(spec_type)
 
         # Then the result is a SqlFormatter instance
-        assert isinstance(result, SqlFormatter)
+        assert isinstance(result, RowcountSqlFormatter)
 
     def test_get_formatter_for_compare_sample_sql(self):
         # Given a compare sample sql specification type
@@ -183,7 +186,7 @@ class TestFormatterFactory:
         result = factory.get_formatter(spec_type)
 
         # Then the result is a SqlFormatter instance
-        assert isinstance(result, SqlFormatter)
+        assert isinstance(result, CompareSampleSqlFormatter)
 
     def test_get_formatter_for_unsupported_type_raises_error(self):
         # Given an unsupported specification type
