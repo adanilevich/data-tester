@@ -49,15 +49,11 @@ class TestDefaultNamingConventions:
 
     def test_match_compare_sample(self):
         testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE_SAMPLE)
-        file = LocationDTO("local://path/to/orders_COMPARE_SAMPLE.sql")
+        file1 = LocationDTO("local://path/to/orders_COMPARE_SAMPLE.sql")
+        file2 = LocationDTO("local://path/to/orders_spec_v1.xlsx")
 
-        assert DefaultNamingConventions().match(testcase, file)
-
-    def test_match_compare_sample_invalid_extension(self):
-        testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE_SAMPLE)
-        file = LocationDTO("local://path/to/orders_COMPARE_SAMPLE.xlsx")
-
-        assert not DefaultNamingConventions().match(testcase, file)
+        assert DefaultNamingConventions().match(testcase, file1)
+        assert DefaultNamingConventions().match(testcase, file2)
 
     def test_match_compare_sample_wrong_prefix(self):
         testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE_SAMPLE)

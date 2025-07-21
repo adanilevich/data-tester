@@ -14,27 +14,36 @@ class DefaultNamingConventions(INamingConventions):
         for schema and .sql files for rowcount and compare sample.
         """
         testobject_ = testcase.testobject
-        spec_type = testcase.testtype
 
-        if spec_type == TestType.SCHEMA:
-            conditions = [
-                file.filename.startswith(f"{testobject_}_"),
-                file.filename.endswith(".xlsx"),
-            ]
-        elif spec_type == TestType.ROWCOUNT:
-            conditions = [
-                file.filename.startswith(f"{testobject_}_ROWCOUNT"),
-                file.filename.endswith(".sql"),
-            ]
-        elif spec_type == TestType.COMPARE_SAMPLE:
-            conditions = [
+        schema_xlsx_naming_conditions = [
+            file.filename.startswith(f"{testobject_}_"),
+            file.filename.endswith(".xlsx"),
+        ]
+        rowcount_sql_naming_conditions = [
+            file.filename.startswith(f"{testobject_}_ROWCOUNT"),
+            file.filename.endswith(".sql"),
+        ]
+        compare_sample_sql_naming_conditions = [
                 file.filename.startswith(f"{testobject_}_COMPARE_SAMPLE"),
                 file.filename.endswith(".sql"),
-            ]
-        else:
-            raise ValueError(f"Unsupported testtype: {spec_type}")
+        ]
 
-        return all(conditions)
+        # for schema testcase, only an .xlsx schema definition file is expected
+        if testcase.testtype == TestType.SCHEMA:
+            result = all(schema_xlsx_naming_conditions)
+        # for rowcount testcase, only a .sql file is expected
+        elif testcase.testtype == TestType.ROWCOUNT:
+            result = all(rowcount_sql_naming_conditions)
+        # for compare sample testcase, an .sql file and a schema defintion are expected
+        elif testcase.testtype == TestType.COMPARE_SAMPLE:
+            result = any([
+                all(compare_sample_sql_naming_conditions),
+                all(schema_xlsx_naming_conditions)
+            ])
+        else:
+            raise ValueError(f"Unsupported testtype: {testcase.testtype}")
+
+        return result
 
 
 class NamingConventionsFactory(INamingConventionsFactory):

@@ -50,8 +50,10 @@ class Specification:
         candidates: List[LocationDTO] = []
         files: List[LocationDTO] = self.storage.list(location)
         for file in files:
+            # skip if location is not a file
             if not file.filename:
                 continue
+            # skip if file does not match the naming convention
             if not naming_conventions.match(testcase, file):
                 continue
             candidates.append(file)
