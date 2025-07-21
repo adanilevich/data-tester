@@ -12,7 +12,7 @@ from urllib import request
 from src.dtos.specification import SpecificationDTO, SpecificationType
 from src.dtos.domain_config import (
     SchemaTestCaseConfigDTO,
-    CompareSampleTestCaseConfigDTO,
+    CompareTestCaseConfigDTO,
     DomainConfigDTO,
     TestCasesConfigDTO,
 )
@@ -34,7 +34,7 @@ from src.testcase.core.testcases import (
     AbstractTestCase,
     SchemaTestCase,
     RowCountTestCase,
-    CompareSampleTestCase,
+    CompareTestCase,
     DummyOkTestCase,
     DummyNokTestCase,
     DummyExceptionTestCase,
@@ -67,10 +67,9 @@ def domain_config() -> DomainConfigDTO:
             LocationDTO("dict://sqls"),
             LocationDTO("dict://specs"),
         ],
-        testsets_location=LocationDTO("dict://testsets"),
         testreports_location=LocationDTO("dict://testreports"),
         testcases=TestCasesConfigDTO(
-            compare_sample=CompareSampleTestCaseConfigDTO(
+            compare=CompareTestCaseConfigDTO(
                 sample_size=100, sample_size_per_object={}
             ),
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
@@ -146,9 +145,9 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
             elif ttype == TestType.ROWCOUNT:
                 spec_type = SpecificationType.ROWCOUNT_SQL
                 testcase_class = RowCountTestCase
-            elif ttype == TestType.COMPARE_SAMPLE:
-                spec_type = SpecificationType.COMPARE_SAMPLE_SQL
-                testcase_class = CompareSampleTestCase
+            elif ttype == TestType.COMPARE:
+                spec_type = SpecificationType.COMPARE_SQL
+                testcase_class = CompareTestCase
             elif ttype == TestType.DUMMY_OK:
                 testcase_class = DummyOkTestCase
                 spec_type = SpecificationType.SCHEMA

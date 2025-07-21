@@ -5,13 +5,13 @@ import polars as pl
 from src.dtos import (
     SpecificationType,
     SchemaContent,
-    CompareSampleSqlContent,
+    CompareSqlContent,
     RowCountSqlContent,
 )
 from src.specification.adapters.formatter import (
     XlsxSchemaFormatter,
     RowcountSqlFormatter,
-    CompareSampleSqlFormatter,
+    CompareSqlFormatter,
     FormatterFactory,
 )
 
@@ -106,8 +106,8 @@ class TestXlsxSchemaFormatter:
 class TestSqlFormatter:
     """Test cases for SqlFormatter class."""
 
-    def test_deserialize_compare_sample_sql(self):
-        # Given a compare sample sql file
+    def test_deserialize_compare_sql(self):
+        # Given a compare sql file
         sql_content = """
         SELECT * FROM customers WHERE created_at > '2024-01-01';
         __EXPECTED__
@@ -116,11 +116,11 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When
-        result = CompareSampleSqlFormatter().deserialize(file_content)
+        result = CompareSqlFormatter().deserialize(file_content)
 
         # Then
-        assert isinstance(result, CompareSampleSqlContent)
-        assert result.spec_type == SpecificationType.COMPARE_SAMPLE_SQL
+        assert isinstance(result, CompareSqlContent)
+        assert result.spec_type == SpecificationType.COMPARE_SQL
         assert sql_content == result.query
 
     def test_deserialize_rowcount_sql(self):
@@ -149,7 +149,7 @@ class TestSqlFormatter:
         with pytest.raises(ValueError, match="Unknown sql format"):
             RowcountSqlFormatter().deserialize(file_content)
         with pytest.raises(ValueError, match="Unknown sql format"):
-            CompareSampleSqlFormatter().deserialize(file_content)
+            CompareSqlFormatter().deserialize(file_content)
 
 
 class TestFormatterFactory:
@@ -177,16 +177,16 @@ class TestFormatterFactory:
         # Then the result is a SqlFormatter instance
         assert isinstance(result, RowcountSqlFormatter)
 
-    def test_get_formatter_for_compare_sample_sql(self):
-        # Given a compare sample sql specification type
+    def test_get_formatter_for_compare_sql(self):
+        # Given a compare sql specification type
         factory = FormatterFactory()
-        spec_type = SpecificationType.COMPARE_SAMPLE_SQL
+        spec_type = SpecificationType.COMPARE_SQL
 
         # When getting the formatter
         result = factory.get_formatter(spec_type)
 
         # Then the result is a SqlFormatter instance
-        assert isinstance(result, CompareSampleSqlFormatter)
+        assert isinstance(result, CompareSqlFormatter)
 
     def test_get_formatter_for_unsupported_type_raises_error(self):
         # Given an unsupported specification type

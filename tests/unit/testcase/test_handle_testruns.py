@@ -20,7 +20,7 @@ from src.dtos import (
     SpecificationType,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
-    CompareSampleTestCaseConfigDTO,
+    CompareTestCaseConfigDTO,
 )
 from src.testcase.ports import (
     SaveTestRunCommand,
@@ -66,11 +66,10 @@ def domain_config():
         domain="test_domain",
         instances={"test_stage": ["test_instance"]},
         specifications_locations=LocationDTO("dict://specs/"),
-        testsets_location=LocationDTO("dict://testsets/"),
         testreports_location=LocationDTO("dict://reports/"),
         testcases=TestCasesConfigDTO(
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-            compare_sample=CompareSampleTestCaseConfigDTO(
+            compare=CompareTestCaseConfigDTO(
                 sample_size=100, sample_size_per_object={}
             ),
         ),

@@ -38,6 +38,6 @@ Requirement: Given a specification file, parse it and return the contained speci
         - lowercase value of <testtype> is used
         - <scenario> is only used it not None
         - version number <N> can be an arbitrary non-negative integer
-        - <extension> is  .sql for ROWCOUNT and COMPARE_SAMPLE testtypes and .xlsx for SCHEMA
-    - serializes and de_serialize specs to/from plain-text .sql files (for rowcount, compare_sample) or .xslx schema definitions
+        - <extension> is  .sql for ROWCOUNT and COMPARE testtypes and .xlsx for SCHEMA
+    - serializes and de_serialize specs to/from plain-text .sql files (for rowcount, compare) or .xslx schema definitions
 6. Finall a SpecDependencyInjector in .dependency_injection.py reads required application config values and creates a cli_spec_manager via .cli_spec_manager method

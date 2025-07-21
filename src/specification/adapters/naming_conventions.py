@@ -11,7 +11,7 @@ class DefaultNamingConventions(INamingConventions):
     def match(self, testcase: TestCaseEntryDTO, file: LocationDTO) -> bool:
         """
         Match files to testcase by testobject name and testtype. Expects .xlsx files
-        for schema and .sql files for rowcount and compare sample.
+        for schema and .sql files for rowcount and compare.
         """
         testobject_ = testcase.testobject
 
@@ -23,8 +23,8 @@ class DefaultNamingConventions(INamingConventions):
             file.filename.startswith(f"{testobject_}_ROWCOUNT"),
             file.filename.endswith(".sql"),
         ]
-        compare_sample_sql_naming_conditions = [
-                file.filename.startswith(f"{testobject_}_COMPARE_SAMPLE"),
+        compare_sql_naming_conditions = [
+                file.filename.startswith(f"{testobject_}_COMPARE"),
                 file.filename.endswith(".sql"),
         ]
 
@@ -34,10 +34,10 @@ class DefaultNamingConventions(INamingConventions):
         # for rowcount testcase, only a .sql file is expected
         elif testcase.testtype == TestType.ROWCOUNT:
             result = all(rowcount_sql_naming_conditions)
-        # for compare sample testcase, an .sql file and a schema defintion are expected
-        elif testcase.testtype == TestType.COMPARE_SAMPLE:
+        # for compare testcase, an .sql file and a schema defintion are expected
+        elif testcase.testtype == TestType.COMPARE:
             result = any([
-                all(compare_sample_sql_naming_conditions),
+                all(compare_sql_naming_conditions),
                 all(schema_xlsx_naming_conditions)
             ])
         else:

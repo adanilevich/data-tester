@@ -8,7 +8,7 @@ from src.config import Config
 from src.dtos import (
     TestType, TestResult, TestStatus, TestObjectDTO,
     SpecificationDTO, SpecificationType, DomainConfigDTO, LocationDTO,
-    TestCasesConfigDTO, SchemaTestCaseConfigDTO, CompareSampleTestCaseConfigDTO,
+    TestCasesConfigDTO, SchemaTestCaseConfigDTO, CompareTestCaseConfigDTO,
     TestDefinitionDTO
 )
 from src.dtos.testcase import TestRunDTO
@@ -32,9 +32,8 @@ domain_config = {
     "instances": {},
     "testreports_location": {"path": "dict://my_location"},
     "specifications_locations": [],
-    "testsets_location": {"path": "dict://my_location"},
     "testcases": {
-        "compare_sample": {"sample_size": 100},
+        "compare": {"sample_size": 100},
         "schema": {"compare_datatypes": ["int", "str"]}
     }
 }
@@ -72,11 +71,10 @@ testcases = [
             domain="my_domain",
             instances={},
             specifications_locations=[],
-            testsets_location=LocationDTO("dict://my_location"),
             testreports_location=LocationDTO("dict://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare_sample=CompareSampleTestCaseConfigDTO(sample_size=100)
+                compare=CompareTestCaseConfigDTO(sample_size=100)
             )
         ),
         testrun_id=MY_UUID
@@ -186,11 +184,10 @@ def test_cli_execution_with_invalid_testcase():
             domain="my_domain",
             instances={},
             specifications_locations=[],
-            testsets_location=LocationDTO("dict://my_location"),
             testreports_location=LocationDTO("dict://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare_sample=CompareSampleTestCaseConfigDTO(sample_size=100)
+                compare=CompareTestCaseConfigDTO(sample_size=100)
             )
         ),
         testrun_id=MY_UUID

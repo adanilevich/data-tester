@@ -47,17 +47,17 @@ class TestDefaultNamingConventions:
 
         assert not DefaultNamingConventions().match(testcase, file)
 
-    def test_match_compare_sample(self):
-        testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE_SAMPLE)
-        file1 = LocationDTO("local://path/to/orders_COMPARE_SAMPLE.sql")
+    def test_match_compare(self):
+        testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE)
+        file1 = LocationDTO("local://path/to/orders_COMPARE.sql")
         file2 = LocationDTO("local://path/to/orders_spec_v1.xlsx")
 
         assert DefaultNamingConventions().match(testcase, file1)
         assert DefaultNamingConventions().match(testcase, file2)
 
-    def test_match_compare_sample_wrong_prefix(self):
-        testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE_SAMPLE)
-        file = LocationDTO("local://path/to/customers_COMPARE_SAMPLE.sql")
+    def test_match_compare_wrong_prefix(self):
+        testcase = TestCaseEntryDTO(testobject="orders", testtype=TestType.COMPARE)
+        file = LocationDTO("local://path/to/customers_COMPARE.sql")
 
         assert not DefaultNamingConventions().match(testcase, file)
 

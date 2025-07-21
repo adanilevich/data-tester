@@ -13,7 +13,7 @@ class Requirements(IRequirements):
             return [SpecificationType.SCHEMA]
         elif testcase.testtype == TestType.ROWCOUNT:
             return [SpecificationType.ROWCOUNT_SQL]
-        elif testcase.testtype == TestType.COMPARE_SAMPLE:
-            return [SpecificationType.COMPARE_SAMPLE_SQL, SpecificationType.SCHEMA]
+        elif testcase.testtype == TestType.COMPARE:
+            return [SpecificationType.COMPARE_SQL, SpecificationType.SCHEMA]
         else:
             raise ValueError(f"Unsupported testtype: {testcase.testtype}")

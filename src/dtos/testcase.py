@@ -69,7 +69,7 @@ class TestType(Enum):
     __test__ = False
     ABSTRACT = "ABSTRACT"
     SCHEMA = "SCHEMA"
-    COMPARE_SAMPLE = "COMPARE_SAMPLE"
+    COMPARE = "COMPARE"
     ROWCOUNT = "ROWCOUNT"
     DUMMY_OK = "DUMMY_OK"
     DUMMY_NOK = "DUMMY_NOK"

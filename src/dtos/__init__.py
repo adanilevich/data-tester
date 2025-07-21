@@ -4,20 +4,20 @@ from .domain_config import (
     DomainConfigDTO,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
-    CompareSampleTestCaseConfigDTO,
+    CompareTestCaseConfigDTO,
 )
 from .specification import (
     SpecificationDTO,
     SpecificationType,
     SchemaSpecificationDTO,
     RowCountSqlDTO,
-    CompareSampleSqlDTO,
+    CompareSqlDTO,
     SpecFactory,
     SpecificationFormat,
     SpecContent,
     SchemaContent,
     RowCountSqlContent,
-    CompareSampleSqlContent,
+    CompareSqlContent,
 )
 from .testcase import (
     TestObjectDTO,

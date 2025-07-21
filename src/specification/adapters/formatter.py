@@ -4,7 +4,7 @@ from src.dtos import (
     SpecContent,
     SchemaContent,
     SpecificationType,
-    CompareSampleSqlContent,
+    CompareSqlContent,
     RowCountSqlContent,
 )
 from src.specification.ports import ISpecFormatter, ISpecFormatterFactory
@@ -82,9 +82,9 @@ class RowcountSqlFormatter(ISpecFormatter):
         return result
 
 
-class CompareSampleSqlFormatter(ISpecFormatter):
+class CompareSqlFormatter(ISpecFormatter):
     """
-    Implementation Parses compare sample information from a .sql file.
+    Implementation Parses compare information from a .sql file.
     """
 
     def deserialize(self, file: bytes) -> SpecContent:
@@ -92,8 +92,8 @@ class CompareSampleSqlFormatter(ISpecFormatter):
         result: SpecContent
 
         if "__EXPECTED__" in content:
-            spec_type = SpecificationType.COMPARE_SAMPLE_SQL
-            result = CompareSampleSqlContent(
+            spec_type = SpecificationType.COMPARE_SQL
+            result = CompareSqlContent(
                 query=content,
                 spec_type=spec_type,
             )
@@ -115,8 +115,8 @@ class FormatterFactory(ISpecFormatterFactory):
             return XlsxSchemaFormatter()
         elif spec_type == SpecificationType.ROWCOUNT_SQL:
             return RowcountSqlFormatter()
-        elif spec_type == SpecificationType.COMPARE_SAMPLE_SQL:
-            return CompareSampleSqlFormatter()
+        elif spec_type == SpecificationType.COMPARE_SQL:
+            return CompareSqlFormatter()
         else:
             msg = f"Parsing {spec_type} is not supported"
             raise ValueError(msg)

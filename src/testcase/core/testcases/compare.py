@@ -4,18 +4,18 @@ import polars as pl
 
 from src.testcase.core.testcases import AbstractTestCase, time_it
 from src.dtos import (
-    CompareSampleSqlDTO, SchemaSpecificationDTO, DBInstanceDTO, TestResult, TestType
+    CompareSqlDTO, SchemaSpecificationDTO, DBInstanceDTO, TestResult, TestType
 )
 
 
-class CompareSampleTestCase(AbstractTestCase):
+class CompareTestCase(AbstractTestCase):
     """
     Testcase compares a sample of data from provided test sql vs the data in the test-
     object. All rows and columns which are defined in the test sql are compared.
     If provided backend supports execution pushdown, comparison is pushed to backend.
     """
-    ttype = TestType.COMPARE_SAMPLE
-    required_specs = ["compare_sample_sql", "schema"]
+    ttype = TestType.COMPARE
+    required_specs = ["compare_sql", "schema"]
     preconditions = [
         "specs_are_unique", "primary_keys_are_specified", "testobject_exists",
         "testobject_not_empty",
@@ -28,7 +28,7 @@ class CompareSampleTestCase(AbstractTestCase):
 
         self.add_fact({"Primary keys": ",".join(self.schema.primary_keys or [])})
         self.add_fact({"Schema specification": self.schema.location.path})
-        self.add_fact({"Compare sample SQL": self.sql.location.path})
+        self.add_fact({"Compare SQL": self.sql.location.path})
         self.add_detail({"Original query": self.sql.query})
         self.add_detail({"Applied query": self.translated_query})
 
@@ -65,13 +65,13 @@ class CompareSampleTestCase(AbstractTestCase):
             self.summary = f"Testobject differs from SQL in {diff.shape[0]} row(s)."
             # trimm diff to ca. 500 examples to not blow up Excel memory
             diff_example = diff.head(500).to_dict(as_series=False)
-            self.diff.update({"compare_sample_diff": diff_example})
+            self.diff.update({"compare_diff": diff_example})
 
         return None
 
     @property
     def sample_size(self) -> int:
-        config = self.domain_config.testcases.compare_sample
+        config = self.domain_config.testcases.compare
         sample_size = config.sample_size_per_object.get(self.testobject.name)
         if sample_size is None:
             sample_size = config.sample_size
@@ -86,11 +86,11 @@ class CompareSampleTestCase(AbstractTestCase):
         return sample_size
 
     @property
-    def sql(self) -> CompareSampleSqlDTO:
+    def sql(self) -> CompareSqlDTO:
         for spec in self.specs:
-            if isinstance(spec, CompareSampleSqlDTO):
+            if isinstance(spec, CompareSqlDTO):
                 return spec
-        raise ValueError("Compare sample sql not found")
+        raise ValueError("Compare sql not found")
 
     @property
     def schema(self) -> SchemaSpecificationDTO:

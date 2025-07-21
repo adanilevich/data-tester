@@ -1,7 +1,7 @@
 from uuid import uuid4
-from src.testcase.core.testcases import CompareSampleTestCase
+from src.testcase.core.testcases import CompareTestCase
 from src.dtos import (
-    CompareSampleSqlDTO,
+    CompareSqlDTO,
     SchemaSpecificationDTO,
     TestObjectDTO,
     TestType,
@@ -13,10 +13,10 @@ from src.data_platform import DemoDataPlatformFactory
 from src.notifier import InMemoryNotifier, StdoutNotifier
 
 
-sql = CompareSampleSqlDTO(
+sql = CompareSqlDTO(
     location=LocationDTO(path="dummy://this_location"),
     testobject="core_customer_transactions",
-    spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
+    spec_type=SpecificationType.COMPARE_SQL,
     query="""
     WITH __expected__ AS (
         SELECT
@@ -53,12 +53,12 @@ testobject = TestObjectDTO(
 def test_straight_through_execution(domain_config, prepare_local_data):
     definition = TestDefinitionDTO(
         testobject=testobject,
-        testtype=TestType.COMPARE_SAMPLE,
+        testtype=TestType.COMPARE,
         specs=[schema, sql],
         domain_config=domain_config,
         testrun_id=uuid4(),
     )
-    testcase = CompareSampleTestCase(
+    testcase = CompareTestCase(
         definition=definition,
         backend=DemoDataPlatformFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier(), StdoutNotifier()]

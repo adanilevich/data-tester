@@ -7,7 +7,7 @@ requires-python = ">=3.11"
 dependencies = [
     "pydantic",  # DTOs and data validation
     "pydantic-settings",  # for reading from ENV vars
-    "polars",  # used for fixtures crunching - esp. for testcase COMPARE_SAMPLE
+    "polars",  # used for fixtures crunching - esp. for testcase COMPARE
     "xlsxwriter",  # required for polars to write excel
     "fastexcel",  # required for polars to read excel
     "pyarrow",  # required as backend for polars

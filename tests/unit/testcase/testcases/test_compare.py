@@ -4,28 +4,28 @@ import pytest
 import time
 import polars as pl
 
-from src.testcase.core.testcases import CompareSampleTestCase
+from src.testcase.core.testcases import CompareTestCase
 from src.dtos import (
-    SchemaSpecificationDTO, CompareSampleSqlDTO, TestType, SpecificationType, LocationDTO
+    SchemaSpecificationDTO, CompareSqlDTO, TestType, SpecificationType, LocationDTO
 )
 
 
 # noinspection PyUnusedLocal
-class TestCompareSampleTestCase:
+class TestCompareTestCase:
 
     schema = SchemaSpecificationDTO(
         location=LocationDTO(path="dummy://this_location"),
         columns={"a": "int", "b": "string", "c": "bool"},
         primary_keys=["a", "b"],
         testobject="stage_customers",
-        spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
+        spec_type=SpecificationType.COMPARE_SQL,
     )
 
-    sql = CompareSampleSqlDTO(
+    sql = CompareSqlDTO(
         location=LocationDTO(path="dummy://this_location"),
         query="this_will_be_changed",
         testobject="stage_customers",
-        spec_type=SpecificationType.COMPARE_SAMPLE_SQL,
+        spec_type=SpecificationType.COMPARE_SQL,
     )
 
     data = pl.DataFrame({
@@ -36,9 +36,9 @@ class TestCompareSampleTestCase:
     })
 
     @pytest.fixture
-    def testcase(self, testcase_creator) -> CompareSampleTestCase:
+    def testcase(self, testcase_creator) -> CompareTestCase:
 
-        testcase_ = testcase_creator.create(ttype=TestType.COMPARE_SAMPLE)
+        testcase_ = testcase_creator.create(ttype=TestType.COMPARE)
 
         def get_schema_from_query(*args, **kwargs) -> SchemaSpecificationDTO:
             return self.schema
@@ -74,20 +74,20 @@ class TestCompareSampleTestCase:
         return testcase_
 
     def test_default_sample_size_is_used_if_specific_not_specified(self, testcase):
-        testcase.domain_config.testcases.compare_sample.sample_size_per_object = {}
-        testcase.domain_config.testcases.compare_sample.sample_size = 1
+        testcase.domain_config.testcases.compare.sample_size_per_object = {}
+        testcase.domain_config.testcases.compare.sample_size = 1
 
         assert testcase.sample_size == 1
 
     def test_specific_sample_size_is_used_if_specified(self, testcase):
         sizes = {testcase.testobject.name: 100}
-        testcase.domain_config.testcases.compare_sample.sample_size_per_object = sizes
-        testcase.domain_config.testcases.compare_sample.sample_size = 1
+        testcase.domain_config.testcases.compare.sample_size_per_object = sizes
+        testcase.domain_config.testcases.compare.sample_size = 1
 
         assert testcase.sample_size == 100
 
     def test_key_sampling_exception_is_caught(self, testcase):
-        sql = CompareSampleSqlDTO.from_dict(self.sql.to_dict())
+        sql = CompareSqlDTO.from_dict(self.sql.to_dict())
         sql.query = "exception"
         testcase.specs = [sql, self.schema]
 
@@ -105,14 +105,14 @@ class TestCompareSampleTestCase:
         assert "from testobject equals sample from test sql" in testcase.summary
 
     def test_that_diff_is_treated_correctly(self, testcase):
-        sql = CompareSampleSqlDTO.from_dict(self.sql.to_dict())
+        sql = CompareSqlDTO.from_dict(self.sql.to_dict())
         sql.query = "bad"
         testcase.specs = [sql, self.schema]
 
         testcase._execute()
 
         assert testcase.result == testcase.result.NOK
-        assert "compare_sample_diff" in testcase.diff
+        assert "compare_diff" in testcase.diff
         assert testcase.summary == "Testobject differs from SQL in 1 row(s)."
 
     # skip performance test, only execute if needed
@@ -129,7 +129,7 @@ class TestCompareSampleTestCase:
                 - comparison duration if only one col is casted: ca 70 s
         """
 
-        print("\nStarting performance tests for compare_sample ...")
+        print("\nStarting performance tests for compare ...")
 
         def compare_data(df, other_df):
             print("Comparing dataframes of shapes", df.shape, other_df.shape)
