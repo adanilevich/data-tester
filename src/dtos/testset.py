@@ -35,4 +35,9 @@ class TestSetDTO(DTO):
     default_stage: str  # default stage. not necessarily where testset is executed
     default_instance: str  # default instance. not necessarily where testset is executed
     testcases: Dict[str, TestCaseEntryDTO]  # dict by identifier
+
+    @property
+    def object_id(self) -> str:
+        """Object ID for storage purposes."""
+        return str(self.testset_id)
     last_updated: datetime = Field(default_factory=datetime.now)

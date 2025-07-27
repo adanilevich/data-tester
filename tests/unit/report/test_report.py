@@ -1,4 +1,3 @@
-import json
 from unittest.mock import Mock
 
 import pytest
@@ -9,10 +8,7 @@ from src.report.core.report import (
     ReportArtifactNotSpecifiedError,
     WrongReportTypeError,
 )
-from src.storage import StorageTypeUnknownError
 from src.report.adapters.plugins import (
-    JsonTestCaseReportFormatter,
-    JsonTestRunReportFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestRunReportFormatter,
     XlsxTestCaseDiffFormatter,
@@ -23,17 +19,16 @@ from src.dtos import (
     ReportArtifact,
     ReportArtifactFormat,
     LocationDTO,
+    ReportType,
 )
-from src.storage.dict_storage import DictStorage
-from src.storage.file_storage import Store
+from src.storage import StorageFactory, FormatterFactory, StorageTypeUnknownError
+from src.config import Config
 
 
 @pytest.fixture
 def formatters():
     """Create formatters as defined in config.py"""
     return [
-        JsonTestCaseReportFormatter(),
-        JsonTestRunReportFormatter(),
         TxtTestCaseReportFormatter(),
         XlsxTestRunReportFormatter(),
         XlsxTestCaseDiffFormatter(),
@@ -41,45 +36,40 @@ def formatters():
 
 
 @pytest.fixture
-def report(formatters):
-    return Report(formatters=formatters, storages=[DictStorage()])
+def storage_factory():
+    config = Config()
+    formatter_factory = FormatterFactory()
+    return StorageFactory(config, formatter_factory)
+
+
+@pytest.fixture
+def report(formatters, storage_factory):
+    return Report(formatters=formatters, storage_factory=storage_factory)
 
 
 class TestReport:
-    def test_initialization_with_formatters_and_storages(self, formatters):
-        # given formatters and storages
-        formatters = formatters
-        storage = DictStorage()
-
-        # when initializing Report with formatters and storages
-        report = Report(formatters=formatters, storages=[storage])
+    def test_initialization_with_formatters_and_storages(
+        self, formatters, storage_factory
+    ):
+        # given formatters and storage factory
+        # when initializing Report with formatters and storage factory
+        report = Report(formatters=formatters, storage_factory=storage_factory)
 
         # then formatters and storages are properly registered
-        assert len(report.formatters) == 5
-        assert len(report.storages) == 1
-        assert Store.DICT in report.storages_by_type
-        assert len(report.formatters_by_type_artifact_and_format) == 5
+        assert len(report.formatters) == 3
+        assert report.storage_factory == storage_factory
+        assert len(report.formatters_by_type_artifact_and_format) == 3
 
-    def test_initialization_with_duplicate_formatter(self):
-        # given duplicate formatters and correct storage
+    def test_initialization_with_duplicate_formatter(self, storage_factory):
+        # given duplicate formatters and correct storage factory
         duplicate_formatters = [
-            JsonTestCaseReportFormatter(),
-            JsonTestCaseReportFormatter(),
+            TxtTestCaseReportFormatter(),
+            TxtTestCaseReportFormatter(),
         ]
-        storage = DictStorage()
 
         # then initialization raises ValueError
         with pytest.raises(ValueError, match="Formatter.*already registered"):
-            Report(formatters=duplicate_formatters, storages=[storage])  # type: ignore
-
-    def test_initialization_with_duplicate_storage_type(self):
-        # given storages with duplicate storage types
-        storage1 = DictStorage()
-        storage2 = DictStorage()
-
-        # then initialization raises ValueError
-        with pytest.raises(ValueError, match="Storage type.*already registered"):
-            Report(formatters=[], storages=[storage1, storage2])
+            Report(formatters=duplicate_formatters, storage_factory=storage_factory)  # type: ignore
 
     def test_create_report_from_testcase_result(self, report, testcase_result):
         # when creating a report from testcase result
@@ -131,38 +121,83 @@ class TestReport:
         with pytest.raises(WrongReportTypeError, match="Wrong report type"):
             report.create_report(invalid_result)
 
-    def test_save_and_retrieve_report(self, report, testcase_report):
-        # given a report artifact
-        location = LocationDTO("dict://test_report.json")
-        report_dict = testcase_report.to_dict(mode="json")
-        report_bytes = json.dumps(report_dict).encode()
+    def test_save_and_retrieve_report(self, report, testcase_report, testrun_report):
+        # given a testcase report and a testrun report and storage location
+        location = LocationDTO("dict://reports/")
 
-        # when artifact is saved
-        report.save_artifact(location, report_bytes)
+        # when both reports are saved
+        report.save_report(location, testcase_report)
+        report.save_report(location, testrun_report)
 
-        # when retrieving the report
-        retrieved_report = report.retrieve_report(location)
+        # when retrieving both reports
+        retrieved_testcase_report = report.retrieve_report(
+            location=location,
+            report_id=testcase_report.report_id,
+            report_type=ReportType.TESTCASE,
+        )
+        retrieved_testrun_report = report.retrieve_report(
+            location=location,
+            report_id=testrun_report.report_id,
+            report_type=ReportType.TESTRUN,
+        )
 
         # then it returns the correct report
-        assert isinstance(retrieved_report, TestCaseReportDTO)
-        assert retrieved_report.testcase_id == testcase_report.testcase_id
+        assert isinstance(retrieved_testcase_report, TestCaseReportDTO)
+        assert retrieved_testcase_report.testcase_id == testcase_report.testcase_id
+        assert retrieved_testcase_report.testrun_id == testcase_report.testrun_id
+        assert retrieved_testrun_report.testrun_id == testrun_report.testrun_id
+        assert retrieved_testrun_report.result == testrun_report.result
+        assert retrieved_testrun_report.start_ts == testrun_report.start_ts
+        assert retrieved_testrun_report.end_ts == testrun_report.end_ts
+        assert len(retrieved_testrun_report.testcase_results) == len(
+            testrun_report.testcase_results
+        )
 
-    def test_retrieve_report_with_unsupported_storage(self, report):
+    def test_retrieve_report_with_unsupported_storage(self, report, testcase_report):
         # given an unsupported storage type
-        location = LocationDTO("memory://test_report.json")
+        location = LocationDTO("unknown://test_reports/")
 
         # then retrieving raises StorageTypeUnknownError
         with pytest.raises(StorageTypeUnknownError):
-            report.retrieve_report(location)
+            report.retrieve_report(
+                location=location,
+                report_id=testcase_report.report_id,
+                report_type=ReportType.TESTCASE,
+            )
 
-    def test_retrieve_report_with_invalid_json(self, report):
-        # given invalid JSON in storage
-        location = LocationDTO("dict://test_report.json")
-        report.save_artifact(location, b"invalid json")
+    def test_create_artifact_for_testcase_report(self, report, testcase_report):
+        # given a testcase report
+        # when creating an artifact for the testcase report
+        artifact_bytes = report.create_artifact(
+            report=testcase_report,
+            artifact=ReportArtifact.DIFF,
+            artifact_format=ReportArtifactFormat.XLSX,
+        )
+        # then it returns a bytes object
+        assert isinstance(artifact_bytes, bytes)
+        # and the artifact is a valid XLSX file
+        assert artifact_bytes.startswith(b"PK\x03\x04")
 
-        # then retrieving raises JSONDecodeError
-        with pytest.raises(json.JSONDecodeError):
-            report.retrieve_report(location)
+        artifact_bytes = report.create_artifact(
+            report=testcase_report,
+            artifact=ReportArtifact.REPORT,
+            artifact_format=ReportArtifactFormat.TXT,
+        )
+        artifact_txt = artifact_bytes.decode()
+        assert isinstance(artifact_bytes, bytes)
+        assert testcase_report.summary in artifact_txt
+
+    def test_create_artifact_for_testrun_report(self, report, testrun_report):
+        # given a testrun report
+        # when creating an artifact for the testrun report
+        artifact_bytes = report.create_artifact(
+            report=testrun_report,
+            artifact=ReportArtifact.REPORT,
+            artifact_format=ReportArtifactFormat.XLSX,
+        )
+        assert isinstance(artifact_bytes, bytes)
+        # and the artifact is a valid XLSX file
+        assert artifact_bytes.startswith(b"PK\x03\x04")
 
     def test_create_artifact_without_artifact_for_testcase(self, report, testcase_report):
         # when creating an artifact for testcase report without specifying artifact
@@ -196,9 +231,19 @@ class TestReport:
                 artifact=ReportArtifact.DIFF,  # JSON diff formatter doesn't exist
             )
 
+    def test_save_artifact(self, report):
+        # given a testcase report and a testrun report
+        location = LocationDTO("dict://test_artifacts/test_artifact.txt")
+        artifact_bytes = b"test artifact content"
+        # when saving the artifact
+        report.save_artifact(location, artifact_bytes)
+        # then the artifact is saved
+        storage = report.storage_factory.get_storage(location)
+        assert storage.read_bytes(location) == artifact_bytes
+
     def test_save_artifact_with_unsupported_storage(self, report):
         # given an unsupported storage type
-        location = LocationDTO("memory://test_artifact.txt")
+        location = LocationDTO("unknown://test_artifact.txt")
         artifact_content = b"test artifact content"
 
         # then saving raises StorageTypeUnknownError

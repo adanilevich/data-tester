@@ -2,12 +2,17 @@ import pytest
 import io
 from datetime import datetime
 from uuid import uuid4
+from typing import cast
+import polars as pl
 
 from src.specification.application.handle_specs import SpecCommandHandler
 from src.specification.adapters.naming_conventions import NamingConventionsFactory
 from src.specification.adapters.formatter import FormatterFactory
 from src.specification.adapters.requirements import Requirements
 from src.storage.dict_storage import DictStorage
+from src.storage.formatter_factory import FormatterFactory as StorageFormatterFactory
+from src.storage.storage_factory import StorageFactory
+from src.config import Config
 from src.specification.ports.drivers.i_handle_specs import (
     FetchSpecsCommand,
     ParseSpecCommand,
@@ -27,29 +32,35 @@ class TestSpecCommandHandler:
     """Test suite for the SpecCommandHandler class"""
 
     @pytest.fixture
-    def storage(self) -> DictStorage:
+    def storage_factory(self) -> StorageFactory:
+        """Create a StorageFactory instance"""
+        config = Config()
+        storage_formatter_factory = StorageFormatterFactory()
+        storage_factory = StorageFactory(config, storage_formatter_factory)
+
         """Create a DictStorage instance with test data"""
-        storage = DictStorage()
+        location = LocationDTO("dict://specs/")
+        storage = cast(DictStorage, storage_factory.get_storage(location))
 
         # Add schema xlsx file for table1
         schema_data = self._create_test_xlsx_schema()
-        storage.write(schema_data, LocationDTO("dict://specs/table1_schema.xlsx"))
-        storage.write(schema_data, LocationDTO("dict://backup/table1_schema.xlsx"))
+        storage.write_bytes(schema_data, LocationDTO("dict://specs/table1_schema.xlsx"))
+        storage.write_bytes(schema_data, LocationDTO("dict://backup/table1_schema.xlsx"))
 
         # Add rowcount SQL file for table1
         rowcount_sql = "SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM table1"
-        storage.write(
+        storage.write_bytes(
             rowcount_sql.encode(), LocationDTO("dict://specs/table1_ROWCOUNT.sql")
         )
 
         # Add compare sample SQL and schema files for table2
         compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
-        storage.write(
+        storage.write_bytes(
             compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE.sql")
         )
-        storage.write(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
+        storage.write_bytes(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
 
-        return storage
+        return storage_factory
 
     @pytest.fixture
     def naming_conventions_factory(self) -> NamingConventionsFactory:
@@ -69,7 +80,7 @@ class TestSpecCommandHandler:
     @pytest.fixture
     def handler(
         self,
-        storage: DictStorage,
+        storage_factory: StorageFactory,
         naming_conventions_factory: NamingConventionsFactory,
         formatter_factory: FormatterFactory,
         requirements: Requirements,
@@ -77,7 +88,7 @@ class TestSpecCommandHandler:
         """Create a SpecCommandHandler instance with all dependencies"""
         return SpecCommandHandler(
             naming_conventions_factory=naming_conventions_factory,
-            storage=storage,
+            storage_factory=storage_factory,
             formatter_factory=formatter_factory,
             requirements=requirements,
         )
@@ -117,7 +128,6 @@ class TestSpecCommandHandler:
 
     def _create_test_xlsx_schema(self) -> bytes:
         """Create a test Excel file with schema data"""
-        import polars as pl
 
         # Create test data for schema
         data = {
@@ -137,7 +147,7 @@ class TestSpecCommandHandler:
     def test_init(self, handler: SpecCommandHandler):
         """Test that SpecCommandHandler initializes correctly"""
         assert handler.naming_conventions_factory is not None
-        assert handler.storage is not None
+        assert handler.storage_factory is not None
         assert handler.formatter_factory is not None
         assert handler.requirements is not None
         assert handler.spec_manager is not None

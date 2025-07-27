@@ -18,8 +18,9 @@ from src.report.ports import (
     SaveReportArtifactsForUsersCommand,
     SaveReportCommand,
     IReportFormatter,
+    LoadReportCommand,
 )
-from src.storage.i_storage import IStorage
+from src.storage.i_storage_factory import IStorageFactory
 from src.report.core import Report
 
 
@@ -36,10 +37,12 @@ class ReportCommandHandler(IReportCommandHandler):
     Handles the creation, storage and retrieval of reports.
     """
 
-    def __init__(self, formatters: List[IReportFormatter], storages: List[IStorage]):
+    def __init__(
+        self, formatters: List[IReportFormatter], storage_factory: IStorageFactory
+    ):
         self.formatters = formatters
-        self.storages = storages
-        self.report = Report(formatters=formatters, storages=storages)
+        self.storage_factory = storage_factory
+        self.report = Report(formatters=formatters, storage_factory=storage_factory)
 
     def create_report(self, command: CreateReportCommand) -> TestReportDTO:
         """
@@ -56,32 +59,32 @@ class ReportCommandHandler(IReportCommandHandler):
         if not isinstance(command.report, (TestRunReportDTO, TestCaseReportDTO)):
             raise InvalidReportTypeError(f"Invalid report type: {type(command.report)}")
 
-        report_bytes = self.report.create_artifact(
-            report=command.report,
-            artifact=ReportArtifact.REPORT,
-            artifact_format=command.artifact_format,
-        )
-        location = self._internal_report_location(
+        self.report.save_report(location=command.location, report=command.report)
+
+    def load_report(self, command: LoadReportCommand) -> TestReportDTO:
+        """
+        Loads a report from internal storage.
+        """
+        reportDTO = self.report.retrieve_report(
             location=command.location,
-            report_id=command.report.report_id,
-            format=command.artifact_format,
+            report_id=str(command.report_id),
+            report_type=command.report_type,
         )
-        self.report.save_artifact(location=location, artifact=report_bytes)
+
+        return reportDTO
 
     def get_report_artifact(self, command: GetReportArtifactCommand) -> bytes:
         """
         Retrieves a report by id from application-internal storage and
         creates requested artifact type (report or diff) in requested format
         """
-        location = self._internal_report_location(
-            location=command.location,
-            report_id=command.report_id,
-            format=command.internal_artifact_format,
-        )
-        reportDTO = self.report.retrieve_report(location=location)
 
-        if not isinstance(reportDTO, TestCaseReportDTO):
-            raise InvalidReportTypeError("Can't create testcase artifacts from testrun")
+        load_command = LoadReportCommand(
+            report_id=command.report_id,
+            location=command.location,
+            report_type=command.report_type,
+        )
+        reportDTO = self.load_report(load_command)
 
         formatted_artifact = self.report.create_artifact(
             report=reportDTO,
@@ -174,13 +177,6 @@ class ReportCommandHandler(IReportCommandHandler):
             + "."
             + artifact_format.value.lower()
         )
-        return result
-
-    @staticmethod
-    def _internal_report_location(
-        location: LocationDTO, report_id: UUID4, format: ReportArtifactFormat
-    ) -> LocationDTO:
-        result = location.append(f"{str(report_id)}.{format.value.lower()}")
         return result
 
 

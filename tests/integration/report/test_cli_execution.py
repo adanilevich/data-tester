@@ -1,7 +1,6 @@
 import random
 import string
-from typing import List, Tuple
-import json
+from typing import List, Tuple, cast
 
 import pytest
 
@@ -17,7 +16,9 @@ from src.dtos import (
     TestCaseReportDTO,
     LocationDTO,
     TestRunReportDTO,
+    ReportType,
 )
+from src.report.ports import LoadReportCommand
 
 
 @pytest.fixture
@@ -104,38 +105,43 @@ class TestReportE2E:
     ):
         # given a configured report manager and testresults
         report_manager = report_manager
+        report_handler = report_manager.report_handler
         testrun_result, testcase_results = testresults
-
-        internal_location = report_manager.internal_location
-        internal_format = report_manager.internal_format.value.lower()
-        internal_storage = report_manager.report_handler.storages[0]  # type: ignore
 
         # when reports are created and saved
         testrun_report, testcase_reports = create_and_save_reports(
             report_manager, testresults)
 
         # then the testrun report can be retrieved from internal storage
-        path = internal_location.append(f"{testrun_report.report_id}.{internal_format}")
-        bytes_content = internal_storage.read(path)
-        content = bytes_content.decode("utf-8")
-        data = json.loads(content)
+        internal_location = report_manager.internal_location
+        report_dto = report_handler.load_report(
+            command=LoadReportCommand(
+                location=internal_location,
+                report_id=testrun_report.report_id,
+                report_type=ReportType.TESTRUN,
+            )
+        )
+        report_dto = cast(TestRunReportDTO, report_dto)
 
         # and the testrun report content is correct
-        assert data["testrun_id"] == str(testrun_report.testrun_id)
-        assert len(data["testcase_results"]) == len(testcase_results)
+        assert str(report_dto.testrun_id) == str(testrun_report.testrun_id)
+        assert len(report_dto.testcase_results) == len(testcase_reports)
 
         # and the testcase reports can be retrieved from internal storage
         for testcase_report in testcase_reports:
-            path = internal_location.append(
-                f"{testcase_report.report_id}.{internal_format}"
+            report_dto = report_handler.load_report(
+                command=LoadReportCommand(
+                    location=internal_location,
+                    report_id=testcase_report.report_id,
+                    report_type=ReportType.TESTCASE,
+                )
             )
-            content = internal_storage.read(path).decode("utf-8")
-            data = json.loads(content)
+            report_dto = cast(TestCaseReportDTO, report_dto)
             # verify testcase report content
-            assert data["testcase_id"] == str(testcase_report.testcase_id)
-            assert data["testrun_id"] == str(testcase_report.testrun_id)
-            assert data["testobject"] == testcase_report.testobject
-            assert data["testtype"] == testcase_report.testtype
+            assert str(report_dto.testcase_id) == str(testcase_report.testcase_id)
+            assert str(report_dto.testrun_id) == str(testcase_report.testrun_id)
+            assert report_dto.testobject == testcase_report.testobject
+            assert report_dto.testtype == testcase_report.testtype
 
 
     def test_retrieve_from_user_storage(
@@ -147,9 +153,11 @@ class TestReportE2E:
         # given a configured report manager and testresults
         report_manager = report_manager
         testrun_result, testcase_results = testresults
+        handler = report_manager.report_handler
 
         user_location = report_manager.user_location
-        user_storage = report_manager.report_handler.storages[0]  # type: ignore
+        user_storage = handler.storage_factory.get_storage(  # type: ignore
+            user_location)
 
         # when reports are created and saved
         testrun_report, testcase_reports = create_and_save_reports(
@@ -164,7 +172,7 @@ class TestReportE2E:
             f"testrun_report_{datetime_str}."
             f"{report_manager.user_testrun_format.value.lower()}"
         )
-        content = user_storage.read(testrun_user_path)
+        content = user_storage.read_bytes(testrun_user_path)
         assert isinstance(content, bytes)
 
         # and the testrun report content is a valid XLSX file
@@ -177,7 +185,7 @@ class TestReportE2E:
                 f"{testcase_report.testobject}_{testcase_report.testtype}_report."
                 f"{report_manager.user_report_format.value.lower()}"
             )
-            content = user_storage.read(testcase_user_path)
+            content = user_storage.read_bytes(testcase_user_path)
             assert isinstance(content, bytes)
 
             # and the testcase report content is a valid TXT file
@@ -196,7 +204,7 @@ class TestReportE2E:
                 f"{testcase_report.testobject}_{testcase_report.testtype}_diff."
                 f"{report_manager.user_diff_format.value.lower()}"
             )
-            content = user_storage.read(testcase_diff_path)
+            content = user_storage.read_bytes(testcase_diff_path)
             assert isinstance(content, bytes)
 
             # and the diff artifact content is a valid XLSX file

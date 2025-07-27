@@ -5,12 +5,12 @@ from uuid import uuid4
 
 from src.dtos import (
     TestRunDTO, TestDefinitionDTO, TestType, 
-    TestResult, TestCaseDTO, TestStatus, LocationDTO
+    TestResult, TestCaseDTO, TestStatus, LocationDTO, StorageObject
 )
 from src.testcase.ports import (
     IDataPlatform, INotifier
 )
-from src.storage import IStorage, StorageTypeUnknownError
+from src.storage.i_storage_factory import IStorageFactory
 
 # we need to import all subclasses of TestCase such that they are registered
 # and can be created via TestCaseFactory.create.
@@ -41,13 +41,13 @@ class TestRun:
         testrun: TestRunDTO,
         backend: IDataPlatform,
         notifiers: List[INotifier],
-        storage: IStorage,
+        storage_factory: IStorageFactory,
         storage_location: LocationDTO,
     ):
         self.testrun = testrun
         self.backend = backend
         self.notifiers = notifiers
-        self.storage = storage
+        self.storage_factory = storage_factory
         self.storage_location = storage_location
 
         # set dynamic fields
@@ -156,13 +156,5 @@ class TestRun:
         if dto is None:
             dto = self.to_dto()
 
-        storage_type = self.storage_location.store
-        if storage_type not in self.storage.supported_storage_types:
-            raise StorageTypeUnknownError(f"Storage type {storage_type} not supported!")
-
-        json_str = dto.to_json()
-        json_bytes = json_str.encode()
-
-        location = self.storage_location.append(str(self.testrun.testrun_id) + ".json")
-
-        self.storage.write(json_bytes, location)
+        storage = self.storage_factory.get_storage(self.storage_location)
+        storage.write(dto, StorageObject.TESTRUN, self.storage_location)

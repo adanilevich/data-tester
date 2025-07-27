@@ -4,23 +4,26 @@ from uuid import uuid4
 from src.testset.application.handle_testsets import TestSetCommandHandler
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.location import LocationDTO
-from src.storage.dict_storage import DictStorage, ObjectNotFoundError
+from src.storage import StorageFactory, FormatterFactory, ObjectNotFoundError
 from src.dtos.testcase import TestType
 from src.testset.ports.drivers.i_testset_handler import (
     SaveTestSetCommand,
     LoadTestSetCommand,
     ListTestSetsCommand,
 )
+from src.config import Config
 
 
 @pytest.fixture
-def storage():
-    return DictStorage()
+def storage_factory():
+    config = Config()
+    formatter_factory = FormatterFactory()
+    return StorageFactory(config, formatter_factory)
 
 
 @pytest.fixture
-def handler(storage):
-    return TestSetCommandHandler(storage)
+def handler(storage_factory):
+    return TestSetCommandHandler(storage_factory)
 
 
 @pytest.fixture

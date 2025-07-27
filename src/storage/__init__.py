@@ -7,7 +7,9 @@ from .i_storage import (
     StorageError,
     ObjectNotFoundError,
 )
-from .map import map_storage
+from .i_storage_factory import IStorageFactory
+from .storage_factory import StorageFactory
+from .formatter_factory import FormatterFactory
 
 
 __all__ = [
@@ -17,5 +19,7 @@ __all__ = [
     "StorageTypeUnknownError",
     "StorageError",
     "ObjectNotFoundError",
-    "map_storage",
+    "IStorageFactory",
+    "StorageFactory",
+    "FormatterFactory",
 ]

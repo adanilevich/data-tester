@@ -1,12 +1,18 @@
-import pytest
 import io
+from typing import cast
 from unittest.mock import Mock, patch
+
+import pytest
+import polars as pl
 
 from src.specification.core.specification import Specification
 from src.specification.adapters.naming_conventions import NamingConventionsFactory
 from src.specification.adapters.formatter import FormatterFactory
 from src.specification.adapters.requirements import Requirements
 from src.storage.dict_storage import DictStorage
+from src.storage.formatter_factory import FormatterFactory as StorageFormatterFactory
+from src.storage.storage_factory import StorageFactory
+from src.config import Config
 from src.dtos import (
     LocationDTO,
     TestCaseEntryDTO,
@@ -22,30 +28,36 @@ class TestSpecification:
     """Test suite for the Specification class"""
 
     @pytest.fixture
-    def storage(self) -> DictStorage:
+    def storage_factory(self) -> StorageFactory:
+        """Create a StorageFactory instance"""
+        config = Config()
+        storage_formatter_factory = StorageFormatterFactory()
+        storage_factory = StorageFactory(config, storage_formatter_factory)
+
         """Create a DictStorage instance with test data"""
-        storage = DictStorage()
+        location = LocationDTO("dict://specs/")
+        storage = cast(DictStorage, storage_factory.get_storage(location))
 
         # Add schema xlsx file for table1
         schema_data = self._create_test_xlsx_schema()
-        storage.write(schema_data, LocationDTO("dict://specs/table1_schema.xlsx"))
+        storage.write_bytes(schema_data, LocationDTO("dict://specs/table1_schema.xlsx"))
 
         # Add rowcount SQL file for table1
         rowcount_sql = "SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM table1"
-        storage.write(
+        storage.write_bytes(
             rowcount_sql.encode(), LocationDTO("dict://specs/table1_ROWCOUNT.sql")
         )
 
         # Add compare sample SQL file for table2
         compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
-        storage.write(
+        storage.write_bytes(
             compare_sql.encode(), LocationDTO("dict://specs/table2_COMPARE.sql")
         )
 
         # Add schema file for table2 (for COMPARE which needs both)
-        storage.write(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
+        storage.write_bytes(schema_data, LocationDTO("dict://specs/table2_schema.xlsx"))
 
-        return storage
+        return storage_factory
 
     @pytest.fixture
     def naming_conventions_factory(self) -> NamingConventionsFactory:
@@ -65,14 +77,14 @@ class TestSpecification:
     @pytest.fixture
     def specification(
         self,
-        storage: DictStorage,
+        storage_factory: StorageFactory,
         naming_conventions_factory: NamingConventionsFactory,
         formatter_factory: FormatterFactory,
         requirements: Requirements,
     ) -> Specification:
         """Create a Specification instance with all dependencies"""
         return Specification(
-            storage=storage,
+            storage_factory=storage_factory,
             naming_conventions_factory=naming_conventions_factory,
             formatter_factory=formatter_factory,
             requirements=requirements,
@@ -80,7 +92,6 @@ class TestSpecification:
 
     def _create_test_xlsx_schema(self) -> bytes:
         """Create a test Excel file with schema data"""
-        import polars as pl
 
         # Create test data for schema
         data = {
@@ -99,7 +110,7 @@ class TestSpecification:
 
     def test_init(self, specification: Specification):
         """Test that Specification initializes correctly"""
-        assert specification.storage is not None
+        assert specification.storage_factory is not None
         assert specification.naming_conventions_factory is not None
         assert specification.formatter_factory is not None
         assert specification.requirements is not None
@@ -165,7 +176,7 @@ class TestSpecification:
         mock_formatter.deserialize.side_effect = Exception("Parse error")
 
         with patch.object(
-            specification.formatter_factory, 'get_formatter', return_value=mock_formatter
+            specification.formatter_factory, "get_formatter", return_value=mock_formatter
         ):
             specs = specification.find_specs(location, testcase, "test_domain")
             # Should return empty list when parsing fails
@@ -229,26 +240,37 @@ class TestSpecification:
         location = LocationDTO("dict://specs/")
         testcase = TestCaseEntryDTO(testobject="table1", testtype=TestType.SCHEMA)
 
-        # Mock storage.read to raise an exception
+        # Mock storage_factory to return a storage that raises exceptions on read_bytes
+        mock_storage = Mock()
+        mock_storage.list_files.return_value = [
+            LocationDTO("dict://specs/table1_schema.xlsx")
+        ]
+        mock_storage.read_bytes.side_effect = Exception("Read error")
+
         with patch.object(
-            specification.storage, 'read', side_effect=Exception("Read error")
+            specification.storage_factory, "get_storage", return_value=mock_storage
         ):
             specs = specification.find_specs(location, testcase, "test_domain")
             # Should return empty list when files can't be read
             assert len(specs) == 0
 
     def test_find_specs_partial_success(
-        self, specification: Specification, storage: DictStorage
+        self, specification: Specification, storage_factory: StorageFactory
     ):
         """Test find_specs when some files parse successfully and others fail"""
+        storage = cast(
+            DictStorage, storage_factory.get_storage(LocationDTO("dict://specs/")))
+
         # Add a corrupted Excel file that will fail to parse
-        storage.write(
-            b"corrupted excel data", LocationDTO("dict://specs/table3_schema.xlsx"))
+        storage.write_bytes(
+            b"corrupted excel data", LocationDTO("dict://specs/table3_schema.xlsx")
+        )
 
         # Also add a valid SQL file for same testobject
-        sql_content = "SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM table3"
-        storage.write(
-            sql_content.encode(), LocationDTO("dict://specs/table3_ROWCOUNT.sql"))
+        sql_content = "SELECT COUNT(*) as __EXPECTED__ FROM table3"
+        storage.write_bytes(
+            sql_content.encode(), LocationDTO("dict://specs/table3_COMPARE.sql")
+        )
 
         location = LocationDTO("dict://specs/")
         testcase = TestCaseEntryDTO(testobject="table3", testtype=TestType.COMPARE)
@@ -257,6 +279,9 @@ class TestSpecification:
 
         # Should only return successfully parsed specs, ignoring failed ones
         # COMPARE requires both COMPARE_SQL and SCHEMA,
-        # but we only have corrupted schema
-        # So we should get 0 specs since schema parsing fails
-        assert len(specs) == 0
+        # we have a corrupted schema, but a valid compare sql, so we should get 1 spec
+        assert len(specs) == 1
+        assert isinstance(specs[0], CompareSqlDTO)
+        assert specs[0].testobject == "table3"
+        assert specs[0].spec_type == SpecificationType.COMPARE_SQL
+        assert "__EXPECTED__" in specs[0].query

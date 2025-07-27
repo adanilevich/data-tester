@@ -3,8 +3,14 @@ from abc import ABC, abstractmethod
 from pydantic import UUID4
 
 from src.dtos.testcase import TestDTO
-from src.dtos.report import TestReportDTO, ReportArtifact, ReportArtifactFormat
-from src.dtos import DTO, LocationDTO
+from src.dtos import (
+    DTO,
+    LocationDTO,
+    ReportType,
+    TestReportDTO,
+    ReportArtifact,
+    ReportArtifactFormat,
+)
 
 
 class CreateReportCommand(DTO):
@@ -14,13 +20,18 @@ class CreateReportCommand(DTO):
 class SaveReportCommand(DTO):
     report: TestReportDTO
     location: LocationDTO  # base location of internal report storage
-    artifact_format: ReportArtifactFormat  # application-internal report storage format
+
+
+class LoadReportCommand(DTO):
+    report_id: UUID4
+    location: LocationDTO  # base location of internal report storage
+    report_type: ReportType  # look for testcase or testrun report
 
 
 class GetReportArtifactCommand(DTO):
     report_id: UUID4
+    report_type: ReportType  # look for testcase or testrun report
     location: LocationDTO  # base location of internal report storage
-    internal_artifact_format: ReportArtifactFormat  # internal report storage format
     artifact: ReportArtifact  # requested report artifact type, e.g. REPORT or DIFF
     artifact_format: ReportArtifactFormat  # requested report artifact format
 
@@ -49,6 +60,12 @@ class IReportCommandHandler(ABC):
         """
 
     @abstractmethod
+    def load_report(self, command: LoadReportCommand) -> TestReportDTO:
+        """
+        Loads a report from internal storage.
+        """
+
+    @abstractmethod
     def get_report_artifact(self, command: GetReportArtifactCommand) -> bytes:
         """
         Retrieves requested report (testrun or testcase) from internal storage,
@@ -58,7 +75,8 @@ class IReportCommandHandler(ABC):
 
     @abstractmethod
     def save_report_artifacts_for_users(
-        self, command: SaveReportArtifactsForUsersCommand) -> None:
+        self, command: SaveReportArtifactsForUsersCommand
+    ) -> None:
         """
         Creates all possible report artifacts (diffs and reports) in requested formats
         (which are supposed to be usable by users, e.g. xlsx) and saves the artifacts

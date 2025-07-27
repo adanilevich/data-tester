@@ -1,16 +1,17 @@
 import pytest
-import yaml  # type: ignore
 
-from src.dtos import DomainConfigDTO
+from src.dtos import DomainConfigDTO, StorageObject
 from src.dtos.location import LocationDTO
 from src.domain_config.core import DomainConfig, DomainConfigAlreadyExistsError
 from src.storage.dict_storage import DictStorage
+from src.storage.formatter_factory import FormatterFactory
 
 
 class TestDomainConfig:
     @pytest.fixture
     def domain_conf(self) -> DomainConfig:
-        return DomainConfig(storage=DictStorage())  # type: ignore
+        formatter_factory = FormatterFactory()
+        return DomainConfig(storage=DictStorage(formatter_factory))  # type: ignore
 
     def test_fetching_from_empty_path(self, domain_conf: DomainConfig):
         # given an empty path
@@ -29,19 +30,9 @@ class TestDomainConfig:
         config_b = domain_config.model_copy()
         config_b.domain = "b"
 
-        # when these configs and a non-config file are written to the storage
-        domain_conf.storage.write(
-            content=yaml.safe_dump(config_a.to_dict()).encode(),
-            path=LocationDTO("dict://domain_config_a.yaml"),
-        )
-        domain_conf.storage.write(
-            content=yaml.safe_dump(config_b.to_dict()).encode(),
-            path=LocationDTO("dict://domain_config_b.yaml"),
-        )
-        domain_conf.storage.write(
-            content=b"any text",
-            path=LocationDTO("dict://not_a_config.txt"),
-        )
+        # when these configs are saved to the storage
+        domain_conf.save_config(LocationDTO("dict://"), config_a)
+        domain_conf.save_config(LocationDTO("dict://"), config_b)
 
         # when fetching domain configs from this path
         result = domain_conf.fetch_configs(location=LocationDTO("dict://"))
@@ -52,19 +43,30 @@ class TestDomainConfig:
     def test_exception_if_config_already_exists(
         self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
     ):
-        # given two domain configs a and b with different domain names
+        # given two domain configs with the same domain name
         config_a = domain_config.model_copy()
-        config_b = domain_config.model_copy()
+        config_a.domain = "same_domain"
 
-        # when these configs and a non-config file are written to the storage
-        domain_conf.storage.write(
-            content=yaml.safe_dump(config_a.to_dict()).encode(),
-            path=LocationDTO("dict://domain_config_a.yaml"),
+        config_b = domain_config.model_copy()
+        config_b.domain = "same_domain"
+
+        # manually place content in storage to simulate two different files with same
+        # domain - this bypasses normal save_config which would use domain as object_id
+        formatter = domain_conf.storage.formatter_factory.get_formatter(  # type: ignore
+            StorageObject.DOMAIN_CONFIG
         )
-        domain_conf.storage.write(
-            content=yaml.safe_dump(config_b.to_dict()).encode(),
-            path=LocationDTO("dict://domain_config_b.yaml"),
-        )
+
+        # write first config with filename suffix _1
+        content_a = formatter.serialize(config_a)
+        domain_conf.storage._storage[  # type: ignore
+            "dict://domain_config_file1.json"
+        ] = content_a
+
+        # write second config with filename suffix _2
+        content_b = formatter.serialize(config_b)
+        domain_conf.storage._storage[  # type: ignore
+            "dict://domain_config_file2.json"
+        ] = content_b
 
         with pytest.raises(DomainConfigAlreadyExistsError):
             _ = domain_conf.fetch_configs(location=LocationDTO("dict://"))

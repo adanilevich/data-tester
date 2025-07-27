@@ -1,9 +1,8 @@
-from typing import List
+from typing import List, cast
 from datetime import datetime
 
-from src.storage.i_storage import IStorage
-from src.dtos.testset import TestSetDTO
-from src.dtos.location import LocationDTO
+from src.storage.i_storage_factory import IStorageFactory
+from src.dtos import TestSetDTO, LocationDTO, StorageObject
 
 
 class TestSet:
@@ -11,46 +10,53 @@ class TestSet:
     Handles creation, retrieval, saving, and listing of TestSetDTOs using a Storage.
     """
 
-    def __init__(self, storage: IStorage):
-        self.storage = storage
-
-    def _file_location(self, testset_id: str, location: LocationDTO) -> LocationDTO:
-        """
-        Constructs the file location for a testset given its id and base location.
-        """
-        filename = f"{testset_id}.json"
-        return location.append(filename)
+    def __init__(self, storage_factory: IStorageFactory):
+        self.storage_factory = storage_factory
 
     def save_testset(self, testset: TestSetDTO, location: LocationDTO) -> None:
         """
-        Saves a TestSetDTO to the specified location as a json file.
+        Saves a TestSetDTO to the specified location using structured storage.
         """
-        file_location = self._file_location(str(testset.testset_id), location)
         testset.last_updated = datetime.now()
-        testset_bytes = testset.to_json().encode()
-        self.storage.write(content=testset_bytes, path=file_location)
+        storage = self.storage_factory.get_storage(location)
+        storage.write(
+            dto=testset,
+            object_type=StorageObject.TESTSET,
+            location=location
+        )
 
     def retrieve_testset(self, testset_id: str, location: LocationDTO) -> TestSetDTO:
         """
         Retrieves a TestSetDTO by testset_id from the specified location.
         """
-        file_location = self._file_location(testset_id, location)
-        testset_bytes = self.storage.read(file_location)
-        return TestSetDTO.from_json(testset_bytes)
+        storage = self.storage_factory.get_storage(location)
+        dto = storage.read(
+            object_type=StorageObject.TESTSET,
+            object_id=testset_id,
+            location=location
+        )
+        return cast(TestSetDTO, dto)
 
     def list_testsets(self, location: LocationDTO, domain: str) -> List[TestSetDTO]:
         """
         Lists all TestSetDTOs in the specified location that match the provided
         domain name.
         """
-        testset_locations = self.storage.list(location)
+        storage = self.storage_factory.get_storage(location)
+        object_locations = storage.list(
+            location=location, object_type=StorageObject.TESTSET
+        )
         result = []
-        for loc in testset_locations:
+        for obj_loc in object_locations:
             try:
-                testset_bytes = self.storage.read(loc)
-                testset = TestSetDTO.from_json(testset_bytes)
+                dto = storage.read(
+                    object_type=StorageObject.TESTSET,
+                    object_id=obj_loc.located_object_id,
+                    location=location
+                )
+                testset = cast(TestSetDTO, dto)
                 if testset.domain == domain:
                     result.append(testset)
             except Exception:
-                continue  # skip files that are not valid testsets
+                continue  # skip objects that can't be read
         return result

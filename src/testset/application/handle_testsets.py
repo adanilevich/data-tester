@@ -6,14 +6,14 @@ from src.testset.ports import (
     LoadTestSetCommand,
     ListTestSetsCommand,
 )
-from src.dtos.testset import TestSetDTO
-from src.storage.i_storage import IStorage
+from src.dtos import TestSetDTO
+from src.storage.i_storage_factory import IStorageFactory
 
 
 class TestSetCommandHandler(ITestSetCommandHandler):
-    def __init__(self, storage: IStorage):
-        self.storage = storage
-        self.testset = TestSet(storage)
+    def __init__(self, storage_factory: IStorageFactory):
+        self.storage_factory = storage_factory
+        self.testset = TestSet(storage_factory)
 
     def save_testset(self, command: SaveTestSetCommand) -> None:
         self.testset.save_testset(testset=command.testset, location=command.location)

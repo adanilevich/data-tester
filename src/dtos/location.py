@@ -19,6 +19,20 @@ class Store(Enum):
     DUMMY = "dummy"
 
 
+class StorageObject(Enum):
+    """
+    Object types which can be stored in internal storage. Correspond to the defined
+    DTO objects.
+    """
+    TESTRUN = "testrun"
+    TESTCASE_REPORT = "testcase_report"
+    TESTRUN_REPORT = "testrun_report"
+    TESTSET = "testset"
+    DOMAIN_CONFIG = "domain_config"
+    SPECIFICATION = "specification"
+    UNKNOWN = "unknown"
+
+
 class LocationDTO(DTO):
     path: str
 
@@ -65,3 +79,8 @@ class LocationDTO(DTO):
             if not path.endswith("/"):
                 path += "/"
         return path
+
+class ObjectLocationDTO(DTO):
+    location: LocationDTO
+    located_object_id: str
+    object_type: StorageObject

@@ -4,13 +4,16 @@ from uuid import uuid4
 from src.testset.core.testset import TestSet
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.location import LocationDTO
-from src.storage.dict_storage import DictStorage, ObjectNotFoundError
+from src.storage import ObjectNotFoundError, StorageFactory, FormatterFactory
 from src.dtos.testcase import TestType
+from src.config import Config
 
 
 @pytest.fixture
-def storage():
-    return DictStorage()
+def storage_factory():
+    config = Config()
+    formatter_factory = FormatterFactory()
+    return StorageFactory(config, formatter_factory)
 
 
 @pytest.fixture
@@ -34,8 +37,8 @@ def testset_dto():
 
 
 @pytest.fixture
-def testset(storage):
-    return TestSet(storage)
+def testset(storage_factory):
+    return TestSet(storage_factory)
 
 
 def test_save_and_load_testset(testset, testset_dto):
@@ -75,12 +78,11 @@ def test_list_testsets_by_domain(testset, testset_dto):
     assert result[0].name == testset_dto.name
 
 
-def test_list_testsets_empty(storage):
+def test_list_testsets_empty(testset):
     # Given an empty storage
-    testset_core = TestSet(storage)
     location = LocationDTO("dict://testsets/")
     # When listing testsets for any domain
-    result = testset_core.list_testsets(location, "anydomain")
+    result = testset.list_testsets(location, "anydomain")
     # Then the result is empty
     assert result == []
 

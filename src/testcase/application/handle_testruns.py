@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, cast
 
 from src.testcase.ports import (
     ITestRunCommandHandler,
@@ -9,9 +9,9 @@ from src.testcase.ports import (
     LoadTestRunCommand,
     SetReportIdsCommand,
 )
-from src.dtos import LocationDTO, TestRunDTO
+from src.dtos import TestRunDTO, StorageObject
 from src.testcase.core import TestRun
-from src.storage.i_storage import IStorage, StorageTypeUnknownError
+from src.storage.i_storage_factory import IStorageFactory
 
 
 class TestRunCommandHandler(ITestRunCommandHandler):
@@ -21,11 +21,11 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         self,
         backend_factory: IDataPlatformFactory,
         notifiers: List[INotifier],
-        storage: IStorage,
+        storage_factory: IStorageFactory,
     ):
         self.backend_factory: IDataPlatformFactory = backend_factory
         self.notifiers: List[INotifier] = notifiers
-        self.storage: IStorage = storage
+        self.storage_factory: IStorageFactory = storage_factory
 
     def run(self, command: ExecuteTestRunCommand) -> TestRunDTO:
 
@@ -35,7 +35,7 @@ class TestRunCommandHandler(ITestRunCommandHandler):
                 domain_config=command.testrun.domain_config
             ),
             notifiers=self.notifiers,
-            storage=self.storage,
+            storage_factory=self.storage_factory,
             storage_location=command.storage_location,
         )
 
@@ -47,20 +47,23 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         """Saves a testrun, e.g. to disk"""
 
         testrun = command.testrun
-        location = self._loc(command.storage_location, str(testrun.testrun_id))
-
-        self.storage.write(testrun.to_json().encode(), location)
+        storage = self.storage_factory.get_storage(command.storage_location)
+        storage.write(
+            dto=testrun,
+            object_type=StorageObject.TESTRUN,
+            location=command.storage_location
+        )
 
     def load(self, command: LoadTestRunCommand) -> TestRunDTO:
         """Loads a testrun, e.g. from disk"""
 
-        location = self._loc(command.storage_location, command.testrun_id)
-
-        json_bytes = self.storage.read(location)
-        json_str = json_bytes.decode()
-        dto = TestRunDTO.from_json(json_str)
-
-        return dto
+        storage = self.storage_factory.get_storage(command.storage_location)
+        dto = storage.read(
+            object_type=StorageObject.TESTRUN,
+            object_id=command.testrun_id,
+            location=command.storage_location
+        )
+        return cast(TestRunDTO, dto)
 
     def set_report_ids(self, command: SetReportIdsCommand) -> None:
         """Sets report ids for testrun report and testcase reports and persists testrun"""
@@ -68,14 +71,10 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         testrun = command.testrun
         testrun.report_id = command.testrun_report.report_id
 
-        location = self._loc(command.storage_location, str(testrun.testrun_id))
-        self.storage.write(testrun.to_json().encode(), location)
+        storage = self.storage_factory.get_storage(command.storage_location)
+        storage.write(
+            dto=testrun,
+            object_type=StorageObject.TESTRUN,
+            location=command.storage_location
+        )
 
-    def _loc(self, location: LocationDTO, testrun_id: str) -> LocationDTO:
-        """Extends base location with filename, checks if storage type is supported"""
-
-        location = location.append(str(testrun_id) + ".json")
-        if location.store not in self.storage.supported_storage_types:
-            raise StorageTypeUnknownError(f"Storage type {location.store} not supported!")
-
-        return location
