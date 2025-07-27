@@ -50,6 +50,11 @@ class TestCaseReportDTO(TestReportDTO):
     details: List[Dict[str, Union[str, int, float]]]
     specifications: List[SpecificationDTO]
 
+    @property
+    def object_id(self) -> str:
+        """Object ID for storage purposes."""
+        return str(self.report_id)
+
     @classmethod
     def from_testcase_result(cls, testcase_result: TestCaseDTO) -> Self:
         return cls(
@@ -96,6 +101,11 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
 class TestRunReportDTO(TestReportDTO):
     __test__ = False  # prevents pytest collection
     testcase_results: List[TestRunReportTestCaseEntryDTO]
+
+    @property
+    def object_id(self) -> str:
+        """Object ID for storage purposes."""
+        return str(self.report_id)
 
     @classmethod
     def from_testrun(cls, testrun: TestRunDTO) -> Self:

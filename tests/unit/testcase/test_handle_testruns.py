@@ -4,7 +4,9 @@ from uuid import uuid4
 
 from src.testcase.application.handle_testruns import TestRunCommandHandler
 from src.data_platform import DummyPlatformFactory
-from src.storage.dict_storage import DictStorage
+from src.storage.formatter_factory import FormatterFactory
+from src.storage.storage_factory import StorageFactory
+from src.config import Config
 from src.notifier import InMemoryNotifier, StdoutNotifier
 from src.dtos import (
     TestRunDTO,
@@ -21,6 +23,7 @@ from src.dtos import (
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
+    StorageObject,
 )
 from src.testcase.ports import (
     SaveTestRunCommand,
@@ -38,9 +41,11 @@ def dummy_platform_factory():
 
 
 @pytest.fixture
-def dict_storage():
-    """Create a DictStorage for testing"""
-    return DictStorage()
+def storage_factory():
+    """Create a StorageFactory for testing"""
+    config = Config()
+    formatter_factory = FormatterFactory()
+    return StorageFactory(config, formatter_factory)
 
 
 @pytest.fixture
@@ -50,12 +55,12 @@ def notifiers():
 
 
 @pytest.fixture
-def testrun_command_handler(dummy_platform_factory, dict_storage, notifiers):
+def testrun_command_handler(dummy_platform_factory, storage_factory, notifiers):
     """Create a TestRunCommandHandler with test dependencies"""
     return TestRunCommandHandler(
         backend_factory=dummy_platform_factory,
         notifiers=notifiers,
-        storage=dict_storage,
+        storage_factory=storage_factory,
     )
 
 
@@ -137,21 +142,26 @@ class TestTestRunCommandHandler:
     """Test suite for TestRunCommandHandler"""
 
     def test_init(
-        self, dummy_platform_factory, dict_storage, notifiers, testrun, storage_location
+        self,
+        dummy_platform_factory,
+        storage_factory,
+        notifiers,
+        testrun,
+        storage_location,
     ):
         """Test TestRunCommandHandler initialization and basic functionality"""
-        # Given: DummyPlatformFactory, DictStorage, and notifiers
+        # Given: DummyPlatformFactory, StorageFactory, and notifiers
         # When: Creating a TestRunCommandHandler
         handler = TestRunCommandHandler(
             backend_factory=dummy_platform_factory,
             notifiers=notifiers,
-            storage=dict_storage,
+            storage_factory=storage_factory,
         )
 
         # Then: The handler should be properly initialized
         assert handler.backend_factory == dummy_platform_factory
         assert handler.notifiers == notifiers
-        assert handler.storage == dict_storage
+        assert handler.storage_factory == storage_factory
 
 
     def test_run_executes_testrun_successfully(
@@ -176,7 +186,7 @@ class TestTestRunCommandHandler:
         assert result.testcase_results[0].result == TestResult.OK
 
     def test_save_load_roundtrip(
-        self, testrun_command_handler, testrun, storage_location, dict_storage
+        self, testrun_command_handler, testrun, storage_location, storage_factory
     ):
         """Test that save and load work together for a complete roundtrip"""
         # Given: A testrun to save and load
@@ -203,7 +213,7 @@ class TestTestRunCommandHandler:
         assert len(loaded_testrun.testcase_results) == len(testrun.testcase_results)
 
     def test_set_report_ids_updates_testrun_and_persists(
-        self, testrun_command_handler, testrun, storage_location, dict_storage
+        self, testrun_command_handler, testrun, storage_location, storage_factory
     ):
         """Test that set_report_ids updates testrun with report ID and persists it"""
         # Given: A testrun and testrun report
@@ -228,9 +238,10 @@ class TestTestRunCommandHandler:
         testrun_command_handler.set_report_ids(command)
 
         # Then: The testrun should be updated with report ID and persisted
-        expected_location = storage_location.append(f"{testrun.testrun_id}.json")
-        saved_content = dict_storage.read(expected_location)
-        saved_testrun = TestRunDTO.from_json(saved_content.decode())
+        storage = storage_factory.get_storage(storage_location)
+        saved_testrun = storage.read(
+            StorageObject.TESTRUN, str(testrun.testrun_id), storage_location
+        )
         assert saved_testrun.report_id == report_id
 
     def test_load_raises_error_when_testrun_not_found(
@@ -252,8 +263,8 @@ class TestTestRunCommandHandler:
         self, testrun_command_handler, testrun
     ):
         """Test that save raises error with unsupported storage type"""
-        # Given: An unsupported storage location
-        unsupported_location = LocationDTO("local://testruns/")
+        # Given: An unsupported storage location (S3 is in enum but not supported)
+        unsupported_location = LocationDTO("s3://testruns/")
         save_command = SaveTestRunCommand(
             testrun=testrun,
             storage_location=unsupported_location,

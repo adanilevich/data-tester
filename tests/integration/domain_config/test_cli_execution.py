@@ -1,5 +1,4 @@
 from src.domain_config.dependency_injection import DomainConfigDependencyInjector
-from src.domain_config.application.domain_config_handler import DomainConfigHandler
 from src.domain_config.ports import SaveDomainConfigCommand
 from src.dtos import DomainConfigDTO
 from src.config import Config
@@ -14,10 +13,10 @@ class TestDomainConfigIntegration:
         config.DATATESTER_DOMAIN_CONFIGS_LOCATION = PATH
         di = DomainConfigDependencyInjector(config=config)
         manager = di.cli_domain_config_manager()
-        handler = DomainConfigHandler(storage=di.storage)
+        handler = manager.domain_config_handler
         location = LocationDTO(PATH)
 
-        # Given: two valid yaml-based domain_configs to store
+        # Given: two valid domain_configs to store
         domain_config_1 = domain_config.model_copy()
         domain_config_1.domain = "domain_1"
         domain_config_2 = domain_config.model_copy()

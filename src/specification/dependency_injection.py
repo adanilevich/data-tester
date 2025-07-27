@@ -1,5 +1,6 @@
 from src.config import Config
-from src.storage import map_storage
+from src.storage.storage_factory import StorageFactory
+from src.storage.formatter_factory import FormatterFactory as StorageFormatterFactory
 
 from .adapters import (
     NamingConventionsFactory,
@@ -17,7 +18,10 @@ class SpecDependencyInjector:
     """
     def __init__(self, config: Config):
         self.config = config
-        self.storage = map_storage(config.DATATESTER_USER_STORAGE_ENGINE)
+        # Create storage formatter factory - this is not used for specifications,
+        # but it is needed to create the storage factory
+        storage_formatter_factory = StorageFormatterFactory()
+        self.storage_factory = StorageFactory(config, storage_formatter_factory)
         self.naming_conventions_factory = NamingConventionsFactory()
         self.formatter_factory = FormatterFactory()
         self.requirements = Requirements()
@@ -27,7 +31,7 @@ class SpecDependencyInjector:
         Create and return a CliSpecManager instance with all dependencies injected.
         """
         command_handler = SpecCommandHandler(
-            storage=self.storage,
+            storage_factory=self.storage_factory,
             naming_conventions_factory=self.naming_conventions_factory,
             formatter_factory=self.formatter_factory,
             requirements=self.requirements,

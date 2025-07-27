@@ -5,6 +5,7 @@ from .i_report_handler import (
     SaveReportCommand,
     GetReportArtifactCommand,
     SaveReportArtifactsForUsersCommand,
+    LoadReportCommand,
 )
 
 
@@ -14,4 +15,5 @@ __all__ = [
     "SaveReportCommand",
     "GetReportArtifactCommand",
     "SaveReportArtifactsForUsersCommand",
+    "LoadReportCommand",
 ]

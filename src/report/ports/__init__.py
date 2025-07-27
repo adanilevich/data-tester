@@ -4,6 +4,7 @@ from .drivers import (
     SaveReportCommand,
     GetReportArtifactCommand,
     SaveReportArtifactsForUsersCommand,
+    LoadReportCommand,
 )
 from .plugins import IReportFormatter
 
@@ -14,5 +15,6 @@ __all__ = [
     "SaveReportCommand",
     "GetReportArtifactCommand",
     "SaveReportArtifactsForUsersCommand",
+    "LoadReportCommand",
     "IReportFormatter",
 ]

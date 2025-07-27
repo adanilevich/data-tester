@@ -1,7 +1,6 @@
 from typing import List
 
-
-from src.storage import IStorage
+from src.storage.i_storage_factory import IStorageFactory
 from src.specification.ports import (
     ISpecCommandHandler,
     FetchSpecsCommand,
@@ -20,16 +19,16 @@ class SpecCommandHandler(ISpecCommandHandler):
     def __init__(
         self,
         naming_conventions_factory: INamingConventionsFactory,
-        storage: IStorage,
+        storage_factory: IStorageFactory,
         formatter_factory: ISpecFormatterFactory,
         requirements: IRequirements,
     ):
         self.naming_conventions_factory = naming_conventions_factory
-        self.storage = storage
+        self.storage_factory = storage_factory
         self.formatter_factory = formatter_factory
         self.requirements = requirements
         self.spec_manager = Specification(
-            storage=self.storage,
+            storage_factory=self.storage_factory,
             naming_conventions_factory=self.naming_conventions_factory,
             formatter_factory=self.formatter_factory,
             requirements=self.requirements,

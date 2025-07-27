@@ -1,7 +1,6 @@
-from typing import List, Dict, Tuple
-import json
+from typing import List, Dict, Tuple, cast
 
-from src.storage.i_storage import IStorage, StorageTypeUnknownError
+from src.storage.i_storage_factory import IStorageFactory
 from src.report.ports import IReportFormatter
 from src.dtos import (
     TestCaseReportDTO,
@@ -14,7 +13,7 @@ from src.dtos import (
     ReportType,
     TestReportDTO,
     LocationDTO,
-    Store,
+    StorageObject,
 )
 
 
@@ -36,15 +35,15 @@ class Report:
     Bundles common functions like creating and saving artifacts.
     """
 
-    storages_by_type: Dict[Store, IStorage]
     formatters_by_type_artifact_and_format: Dict[
         Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
     ]
 
-    def __init__(self, formatters: List[IReportFormatter], storages: List[IStorage]):
+    def __init__(
+        self, formatters: List[IReportFormatter], storage_factory: IStorageFactory
+    ):
         self.formatters = formatters
-        self.storages = storages
-        self.storages_by_type: Dict[Store, IStorage] = {}
+        self.storage_factory = storage_factory
         self.formatters_by_type_artifact_and_format: Dict[
             Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
         ] = {}
@@ -58,12 +57,6 @@ class Report:
             if key in self.formatters_by_type_artifact_and_format:
                 raise ValueError(f"Formatter {formatter} already registered")
             self.formatters_by_type_artifact_and_format[key] = formatter
-
-        for storage in storages:
-            for storage_type in storage.supported_storage_types:
-                if storage_type in self.storages_by_type:
-                    raise ValueError(f"Storage type {storage_type} already registered")
-                self.storages_by_type[storage_type] = storage
 
     def create_report(self, result: TestDTO) -> TestReportDTO:
         """Creates a report for a given result"""
@@ -80,32 +73,35 @@ class Report:
         else:
             raise WrongReportTypeError(f"Wrong report type: {type(result)}")
 
-    def retrieve_report(self, location: LocationDTO) -> TestReportDTO:
-        """Retrieves a testcase report from a given location"""
+    def retrieve_report(
+        self, location: LocationDTO, report_id: str, report_type: ReportType
+    ) -> TestReportDTO:
+        """Retrieves a testcase or testrun report from internal structured storage"""
 
-        storage = self.storages_by_type.get(location.store)
-        if storage is None:
-            raise StorageTypeUnknownError(f"Storage type {location.store} not supported")
+        storage = self.storage_factory.get_storage(location)
 
-        report_as_dict_bytes = storage.read(location)
-        report_as_dict = json.loads(report_as_dict_bytes)
+        if report_type == ReportType.TESTCASE:
+            object_type = StorageObject.TESTCASE_REPORT
+        elif report_type == ReportType.TESTRUN:
+            object_type = StorageObject.TESTRUN_REPORT
+        else:
+            raise ValueError(f"Invalid report type: {report_type}")
 
-        # try to initialize one of the both report types from the dict
-        report: TestCaseReportDTO | TestRunReportDTO | None = None
+        report_dto = storage.read(
+            object_type=object_type,
+            object_id=report_id,
+            location=location,
+        )
+
         try:
-            report = TestCaseReportDTO.from_dict(report_as_dict)
+            if report_type == ReportType.TESTCASE:
+                return cast(TestCaseReportDTO, report_dto)
+            elif report_type == ReportType.TESTRUN:
+                return cast(TestRunReportDTO, report_dto)
         except Exception:
             pass
-        try:
-            report = TestRunReportDTO.from_dict(report_as_dict)
-        except Exception:
-            pass
 
-        if report is None:
-            msg = "Couldn't initialize TestRunReportDTO or TestCaseReportDTO from dict"
-            raise ValueError(msg)
-
-        return report
+        raise ValueError(f"Couldn't retrieve report {report_id} as {report_type}")
 
     def create_artifact(
         self,
@@ -154,13 +150,25 @@ class Report:
 
         return artifact_bytes
 
+    def save_report(self, location: LocationDTO, report: TestReportDTO) -> None:
+        """Saves an internal report to structured storage"""
+
+        storage = self.storage_factory.get_storage(location)
+
+        # Determine object type based on report type
+        if isinstance(report, TestCaseReportDTO):
+            object_type = StorageObject.TESTCASE_REPORT
+        elif isinstance(report, TestRunReportDTO):
+            object_type = StorageObject.TESTRUN_REPORT
+        else:
+            raise ValueError(f"Unsupported report type: {type(report)}")
+
+        storage.write(dto=report, object_type=object_type, location=location)
+
     def save_artifact(self, location: LocationDTO, artifact: bytes) -> None:
-        """Saves a report artifact to a given location"""
+        """Saves a user report artifact as bytes"""
 
-        storage = self.storages_by_type.get(location.store)
-        if storage is None:
-            raise StorageTypeUnknownError(f"Storage type {location.store} not supported")
-
-        storage.write(content=artifact, path=location)
+        storage = self.storage_factory.get_storage(location)
+        storage.write_bytes(content=artifact, location=location)
 
         return None

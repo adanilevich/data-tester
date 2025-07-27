@@ -117,6 +117,11 @@ class TestRunDTO(TestDTO):
     testdefinitions: List[TestDefinitionDTO]
     testcase_results: List[TestCaseDTO] = Field(default=[])
 
+    @property
+    def object_id(self) -> str:
+        """Object ID for storage purposes."""
+        return str(self.testrun_id)
+
     @classmethod
     def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
 

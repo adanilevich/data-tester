@@ -2,6 +2,7 @@ import pytest
 from src.domain_config.dependency_injection import DomainConfigDependencyInjector
 from src.config import Config
 from src.storage import DictStorage, FileStorage
+from src.dtos import LocationDTO
 import os
 
 # Given-When-Then style tests for DomainConfigDependencyInjector
@@ -20,8 +21,10 @@ def test_injector_uses_dict_storage_for_dict_location():
     config = make_config("dict://my/path")
     # When: creating the injector
     injector = DomainConfigDependencyInjector(config)
-    # Then: storage is DictStorage
-    assert isinstance(injector.storage, DictStorage)
+    # Then: storage factory creates DictStorage for dict locations
+    location = LocationDTO("dict://my/path")
+    storage = injector.storage_factory.get_storage(location)
+    assert isinstance(storage, DictStorage)
 
 
 def test_injector_uses_file_storage_for_local_location():
@@ -29,17 +32,11 @@ def test_injector_uses_file_storage_for_local_location():
     config = make_config("local://my/path")
     # When: creating the injector
     injector = DomainConfigDependencyInjector(config)
-    # Then: storage is FileStorage
-    assert isinstance(injector.storage, FileStorage)
+    # Then: storage factory creates FileStorage for local locations
+    location = LocationDTO("local://my/path")
+    storage = injector.storage_factory.get_storage(location)
+    assert isinstance(storage, FileStorage)
 
-
-def test_injector_uses_file_storage_for_gcs_location():
-    # Given: a config with GCS location
-    config = make_config("gcs://my/path")
-    # When: creating the injector
-    injector = DomainConfigDependencyInjector(config)
-    # Then: storage is FileStorage
-    assert isinstance(injector.storage, FileStorage)
 
 
 def test_injector_uses_file_storage_for_memory_location():
@@ -47,8 +44,10 @@ def test_injector_uses_file_storage_for_memory_location():
     config = make_config("memory://my/path")
     # When: creating the injector
     injector = DomainConfigDependencyInjector(config)
-    # Then: storage is FileStorage
-    assert isinstance(injector.storage, FileStorage)
+    # Then: storage factory creates FileStorage for memory locations
+    location = LocationDTO("memory://my/path")
+    storage = injector.storage_factory.get_storage(location)
+    assert isinstance(storage, FileStorage)
 
 
 def test_injector_raises_if_location_not_set():

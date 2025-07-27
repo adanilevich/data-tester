@@ -2,7 +2,9 @@ from src.domain_config.application import DomainConfigHandler
 from src.domain_config.drivers.cli_domain_config_manager import CLIDomainConfigManager
 from src.config import Config
 from src.dtos.location import LocationDTO
-from src.storage import IStorage, map_storage
+from src.storage.i_storage_factory import IStorageFactory
+from src.storage.storage_factory import StorageFactory
+from src.storage.formatter_factory import FormatterFactory
 
 
 class DomainConfigDependencyInjector:
@@ -14,7 +16,7 @@ class DomainConfigDependencyInjector:
     def __init__(self, config: Config):
         self.config = config
         self.domain_config_location: LocationDTO
-        self.storage: IStorage
+        self.storage_factory: IStorageFactory
 
         # extract domain config location from config
         if self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION is None:
@@ -23,12 +25,12 @@ class DomainConfigDependencyInjector:
             self.config.DATATESTER_DOMAIN_CONFIGS_LOCATION
         )
 
-        # extract storage backend type from config
-        self.storage = map_storage(self.domain_config_location.store.value.upper())
+        # create formatter factory and storage factory
+        formatter_factory = FormatterFactory()
+        self.storage_factory = StorageFactory(self.config, formatter_factory)
 
     def cli_domain_config_manager(self) -> CLIDomainConfigManager:
-
-        domain_config_handler = DomainConfigHandler(storage=self.storage)
+        domain_config_handler = DomainConfigHandler(storage_factory=self.storage_factory)
         return CLIDomainConfigManager(
             domain_config_handler=domain_config_handler,
             domain_config_location=self.domain_config_location

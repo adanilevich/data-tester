@@ -84,17 +84,22 @@ Each domain module has a `dependency_injection.py` file that wires together:
 
 ### Key Interfaces
 - `IDataPlatform`: Abstraction for different data platforms
-- `IStorage`: File/blob storage abstraction
+- `IStorage`: File/blob or database storage abstraction
+- `IStorageFactory`: abstraction for dynamic creation of IStorage instances based on the
+   required storagge location
 - `INotifier`: Test execution notifications
 - `ISpecFormatter`: Specification format parsers
 - `INamingConventions`: File naming pattern matchers
 
 ## Configuration
 
-Configuration is handled via `src/config/config.py` using Pydantic settings:
+Application configuration is handled via `src/config/config.py` using Pydantic settings:
 - Environment variables prefixed with `DATATESTER_`
 - Support for local file storage and cloud storage (GCS via optional dependency)
 - Configurable data platforms, notifiers, and storage engines
+
+Business-related configuration is handled via `src/domain_config` where users can define
+business-related config parameters, e.g. storage paths for test reports 
 
 ## Testing Strategy
 
@@ -110,6 +115,8 @@ All data transfer objects are defined in `src/dtos/`:
 - `SpecificationDTO`: Test specifications
 - `LocationDTO`: Storage location abstraction
 - `DomainConfigDTO`: Domain configuration data
+- `ReportDTO`: Test case or testrun report data
+- `TestSetDTO`: Definition of test suites
 
 ## Extension Points
 - Add new test types by implementing `AbstractTestCase`
@@ -117,3 +124,10 @@ All data transfer objects are defined in `src/dtos/`:
 - Add new specification formats via `ISpecFormatter`
 - Add new report formats via `IReportFormatter`
 - Add new storage backends via `IStorage`
+
+## Code Quality Standards
+Claude must follow these rules when implementing code changes
+- All code must pass linter and formatter checks. Claude can automatically apply
+formatting without asking for permission
+- All code must pass typechecks. "... is defined" here messages from MyPy can be ignored
+unless Claude is promted explicitely to address them

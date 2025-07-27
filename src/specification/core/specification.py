@@ -19,7 +19,7 @@ from src.specification.ports.plugins import (
     ISpecFormatterFactory,
     IRequirements,
 )
-from src.storage import IStorage
+from src.storage.i_storage_factory import IStorageFactory
 
 
 class Specification:
@@ -30,12 +30,12 @@ class Specification:
 
     def __init__(
         self,
-        storage: IStorage,
+        storage_factory: IStorageFactory,
         naming_conventions_factory: INamingConventionsFactory,
         formatter_factory: ISpecFormatterFactory,
         requirements: IRequirements,
     ):
-        self.storage = storage
+        self.storage_factory = storage_factory
         self.naming_conventions_factory = naming_conventions_factory
         self.formatter_factory = formatter_factory
         self.requirements = requirements
@@ -48,7 +48,8 @@ class Specification:
         """
         naming_conventions = self.naming_conventions_factory.create(domain)
         candidates: List[LocationDTO] = []
-        files: List[LocationDTO] = self.storage.list(location)
+        storage = self.storage_factory.get_storage(location)
+        files: List[LocationDTO] = storage.list_files(location)
         for file in files:
             # skip if location is not a file
             if not file.filename:
@@ -110,7 +111,8 @@ class Specification:
         for file, spec_type in itertools.product(candidates, required_specs):
             formatter = self.formatter_factory.get_formatter(spec_type)
             try:
-                file_bytes = self.storage.read(file)
+                storage = self.storage_factory.get_storage(file)
+                file_bytes = storage.read_bytes(file)
                 spec_content = formatter.deserialize(file_bytes)
             # if parsing or reading fails, try next spec type
             except Exception:

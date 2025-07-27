@@ -23,6 +23,11 @@ class DomainConfigDTO(DTO):
     This represents the business-related configuration for test execution for a domain.
     """
     domain: str  # domain name
+
+    @property
+    def object_id(self) -> str:
+        """Object ID for storage purposes."""
+        return self.domain
     instances: Dict[str, List[str]]  # list of domain instance names per stage
     specifications_locations: (  # user-managed locations for specifications, can be ...
         LocationDTO |  # a single location

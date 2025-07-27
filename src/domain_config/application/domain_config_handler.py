@@ -4,7 +4,7 @@ from src.domain_config.ports.drivers.i_domain_config_handler import (
     FetchDomainConfigsCommand,
     SaveDomainConfigCommand,
 )
-from src.storage.i_storage import IStorage
+from src.storage.i_storage_factory import IStorageFactory
 from src.domain_config.core import DomainConfig
 from src.dtos import DomainConfigDTO
 
@@ -14,13 +14,14 @@ class DomainConfigHandler(IDomainConfigHandler):
     Implementation of IDomainConfigHandler for fetching and saving domain configs.
     """
 
-    def __init__(self, storage: IStorage):
+    def __init__(self, storage_factory: IStorageFactory):
         """
-        Initialize the handler with a storage backend.
+        Initialize the handler with a storage factory.
         Args:
-            storage (IStorage): The storage backend to use for domain configs.
+            storage_factory (IStorageFactory): The storage factory to use for
+                domain configs.
         """
-        self.storage = storage
+        self.storage_factory = storage_factory
 
     def fetch_domain_configs(
         self, command: FetchDomainConfigsCommand
@@ -34,7 +35,8 @@ class DomainConfigHandler(IDomainConfigHandler):
             Dict[str, DomainConfigDTO]: A dictionary mapping domain names to
             corresponding domain configs.
         """
-        manager = DomainConfig(storage=self.storage)
+        storage = self.storage_factory.get_storage(command.location)
+        manager = DomainConfig(storage=storage)
         domain_configs = manager.fetch_configs(location=command.location)
         return domain_configs
 
@@ -45,5 +47,6 @@ class DomainConfigHandler(IDomainConfigHandler):
             command (SaveDomainConfigCommand): The command containing the config and
                 location to save to.
         """
-        manager = DomainConfig(storage=self.storage)
+        storage = self.storage_factory.get_storage(command.location)
+        manager = DomainConfig(storage=storage)
         manager.save_config(location=command.location, config=command.config)

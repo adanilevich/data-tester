@@ -1,28 +1,19 @@
 import pytest
+import uuid
 
 from src.testset.dependency_injection import TestSetDependencyInjector
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
-from src.dtos.location import LocationDTO
 from src.dtos.testcase import TestType
 from src.config import Config
+from src.testset.ports import SaveTestSetCommand
 
 
 @pytest.fixture
-def config():
+def injector():
     cfg = Config()
     cfg.DATATESTER_INTERNAL_STORAGE_ENGINE = "DICT"
     cfg.DATATESTER_INTERNAL_TESTSET_LOCATION = "dict://testsets/"
-    return cfg
-
-
-@pytest.fixture
-def injector(config):
-    return TestSetDependencyInjector(config)
-
-
-@pytest.fixture
-def cli_manager(injector):
-    return injector.cli_testset_manager()
+    return TestSetDependencyInjector(cfg)
 
 
 @pytest.fixture
@@ -43,28 +34,54 @@ def testset_dto():
     )
 
 
-def test_load_domain_testset_by_name_success(cli_manager, injector, testset_dto):
-    # Given a testset saved in DictStorage for a specific domain and name
+def test_load_domain_testset_by_name_success(injector, testset_dto):
+    # given an injector which provides a cli testset manager with a testset handler
+    cli_manager = injector.cli_testset_manager()
     handler = injector.cli_testset_manager().testset_handler
-    location = injector.storage_location
-    storage = handler.storage
-    location = LocationDTO("dict://testsets/").append(
-        str(testset_dto.testset_id) + ".json"
-    )
-    storage.write(content=testset_dto.to_json().encode(), path=location)
 
-    # When loading the testset by domain and name
+    # when two testsets are saved in the configured storage location
+    location = cli_manager.storage_location
+    save_command_1 = SaveTestSetCommand(
+        testset=testset_dto, location=location
+    )
+    handler.save_testset(save_command_1)
+
+    new_testset_dto = testset_dto.copy()
+    new_testset_dto.name = "TestSet2"
+    new_testset_dto.testset_id = uuid.uuid4()
+    save_command_2 = SaveTestSetCommand(
+        testset=new_testset_dto, location=location
+    )
+    handler.save_testset(save_command_2)
+
+    # When loading first testset by domain and name
     loaded = cli_manager.load_domain_testset_by_name("domain1", "TestSet1")
     # Then the loaded testset matches the original
     assert loaded.name == testset_dto.name
     assert loaded.domain == testset_dto.domain
     assert loaded.testcases == testset_dto.testcases
 
+    # When loading second testset by domain and name
+    loaded = cli_manager.load_domain_testset_by_name("domain1", "TestSet2")
+    # Then the loaded testset matches the original
+    assert loaded.name == new_testset_dto.name
+    assert loaded.domain == new_testset_dto.domain
+    assert loaded.testcases == new_testset_dto.testcases
 
-def test_load_domain_testset_by_name_not_found(cli_manager):
-    # Given no testsets in storage
-    # When loading a testset by domain and name that does not exist
-    # Then a ValueError is raised with the correct message
+
+def test_load_domain_testset_by_name_not_found(injector, testset_dto):
+    # given an injector which provides a cli testset manager with a testset handler
+    cli_manager = injector.cli_testset_manager()
+    handler = injector.cli_testset_manager().testset_handler
+
+    # when saving a testset
+    save_command = SaveTestSetCommand(
+        testset=testset_dto, location=cli_manager.storage_location
+    )
+    handler.save_testset(save_command)
+
+    # when loading a testset by domain and name that does not exist
+    # then a ValueError is raised with the correct message
     domain = "domain1"
     name = "NonExistentSet"
     with pytest.raises(ValueError) as excinfo:

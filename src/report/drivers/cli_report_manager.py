@@ -13,7 +13,6 @@ class CliReportManager:
         report_handler: IReportCommandHandler,
         user_location: LocationDTO,
         internal_location: LocationDTO,
-        internal_format: ReportArtifactFormat,
         user_report_format: ReportArtifactFormat,
         user_diff_format: ReportArtifactFormat,
         user_testrun_format: ReportArtifactFormat,
@@ -21,7 +20,6 @@ class CliReportManager:
         self.report_handler = report_handler
         self.user_location = user_location
         self.internal_location = internal_location
-        self.internal_format = internal_format
         self.user_report_format = user_report_format
         self.user_diff_format = user_diff_format
         self.user_testrun_format = user_testrun_format
@@ -58,6 +56,5 @@ class CliReportManager:
         command = SaveReportCommand(
             report=report,
             location=self.internal_location,
-            artifact_format=self.internal_format,
         )
         self.report_handler.save_report(command=command)
