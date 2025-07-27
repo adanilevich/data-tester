@@ -18,23 +18,23 @@
 | src/data\_platform/map.py                                                      |        7 |        2 |     71% |     6, 10 |
 | src/domain\_config/\_\_init\_\_.py                                             |        2 |        0 |    100% |           |
 | src/domain\_config/application/\_\_init\_\_.py                                 |        1 |        0 |    100% |           |
-| src/domain\_config/application/domain\_config\_handler.py                      |       15 |        0 |    100% |           |
+| src/domain\_config/application/domain\_config\_handler.py                      |       17 |        0 |    100% |           |
 | src/domain\_config/core/\_\_init\_\_.py                                        |        1 |        0 |    100% |           |
-| src/domain\_config/core/domain\_config.py                                      |       63 |       13 |     79% |52-53, 65-67, 70-72, 80-82, 117-119 |
-| src/domain\_config/dependency\_injection.py                                    |       17 |        0 |    100% |           |
+| src/domain\_config/core/domain\_config.py                                      |       28 |        4 |     86% |57-58, 68-73 |
+| src/domain\_config/dependency\_injection.py                                    |       20 |        0 |    100% |           |
 | src/domain\_config/drivers/\_\_init\_\_.py                                     |        2 |        0 |    100% |           |
 | src/domain\_config/drivers/cli\_domain\_config\_manager.py                     |       11 |        0 |    100% |           |
 | src/domain\_config/ports/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
 | src/domain\_config/ports/drivers/\_\_init\_\_.py                               |        2 |        0 |    100% |           |
 | src/domain\_config/ports/drivers/i\_domain\_config\_handler.py                 |        9 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                       |        8 |        0 |    100% |           |
-| src/dtos/domain\_config.py                                                     |       32 |        1 |     97% |        42 |
-| src/dtos/dto.py                                                                |       15 |        0 |    100% |           |
-| src/dtos/location.py                                                           |       49 |        2 |     96% |    45, 51 |
-| src/dtos/report.py                                                             |       56 |        0 |    100% |           |
+| src/dtos/domain\_config.py                                                     |       35 |        1 |     97% |        47 |
+| src/dtos/dto.py                                                                |       17 |        0 |    100% |           |
+| src/dtos/location.py                                                           |       61 |        3 |     95% |59, 65, 67 |
+| src/dtos/report.py                                                             |       62 |        0 |    100% |           |
 | src/dtos/specification.py                                                      |       62 |        4 |     94% | 34-37, 95 |
-| src/dtos/testcase.py                                                           |      109 |        2 |     98% |  152, 155 |
-| src/dtos/testset.py                                                            |       31 |        1 |     97% |        24 |
+| src/dtos/testcase.py                                                           |      112 |        2 |     98% |  157, 160 |
+| src/dtos/testset.py                                                            |       34 |        1 |     97% |        24 |
 | src/notifier/\_\_init\_\_.py                                                   |        4 |        0 |    100% |           |
 | src/notifier/in\_memory\_notifier.py                                           |        7 |        0 |    100% |           |
 | src/notifier/map.py                                                            |        7 |        1 |     86% |        10 |
@@ -42,20 +42,19 @@
 | src/report/\_\_init\_\_.py                                                     |        2 |        0 |    100% |           |
 | src/report/adapters/\_\_init\_\_.py                                            |        2 |        0 |    100% |           |
 | src/report/adapters/plugins/\_\_init\_\_.py                                    |        4 |        0 |    100% |           |
-| src/report/adapters/plugins/json\_report.py                                    |       43 |        6 |     86% |50-52, 87-89 |
 | src/report/adapters/plugins/txt\_testcase\_report.py                           |       24 |        3 |     88% |     47-49 |
 | src/report/adapters/plugins/xlsx\_testcase\_diff.py                            |       28 |        0 |    100% |           |
 | src/report/adapters/plugins/xlsx\_testrun\_report.py                           |       27 |        3 |     89% |     44-46 |
 | src/report/application/\_\_init\_\_.py                                         |        2 |        0 |    100% |           |
-| src/report/application/handle\_reports.py                                      |       61 |        1 |     98% |       143 |
+| src/report/application/handle\_reports.py                                      |       56 |        1 |     98% |       146 |
 | src/report/core/\_\_init\_\_.py                                                |        2 |        0 |    100% |           |
-| src/report/core/report.py                                                      |       78 |        2 |     97% |   105-106 |
-| src/report/dependency\_injection.py                                            |       33 |        0 |    100% |           |
+| src/report/core/report.py                                                      |       73 |        5 |     93% |88, 101-104, 164 |
+| src/report/dependency\_injection.py                                            |       25 |        0 |    100% |           |
 | src/report/drivers/\_\_init\_\_.py                                             |        2 |        0 |    100% |           |
-| src/report/drivers/cli\_report\_manager.py                                     |       21 |        0 |    100% |           |
+| src/report/drivers/cli\_report\_manager.py                                     |       20 |        0 |    100% |           |
 | src/report/ports/\_\_init\_\_.py                                               |        3 |        0 |    100% |           |
 | src/report/ports/drivers/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
-| src/report/ports/drivers/i\_report\_handler.py                                 |       24 |        0 |    100% |           |
+| src/report/ports/drivers/i\_report\_handler.py                                 |       26 |        0 |    100% |           |
 | src/report/ports/plugins/\_\_init\_\_.py                                       |        1 |        0 |    100% |           |
 | src/report/ports/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
 | src/specification/adapters/\_\_init\_\_.py                                     |        4 |        0 |    100% |           |
@@ -65,10 +64,10 @@
 | src/specification/application/\_\_init\_\_.py                                  |        2 |        0 |    100% |           |
 | src/specification/application/handle\_specs.py                                 |       23 |        0 |    100% |           |
 | src/specification/core/\_\_init\_\_.py                                         |        2 |        0 |    100% |           |
-| src/specification/core/specification.py                                        |       56 |        2 |     96% |    55, 95 |
-| src/specification/dependency\_injection.py                                     |       16 |       16 |      0% |      1-37 |
-| src/specification/drivers/\_\_init\_\_.py                                      |        2 |        2 |      0% |       1-3 |
-| src/specification/drivers/cli\_spec\_manager.py                                |        9 |        9 |      0% |      1-24 |
+| src/specification/core/specification.py                                        |       58 |        2 |     97% |    56, 96 |
+| src/specification/dependency\_injection.py                                     |       18 |        0 |    100% |           |
+| src/specification/drivers/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
+| src/specification/drivers/cli\_spec\_manager.py                                |        9 |        0 |    100% |           |
 | src/specification/ports/\_\_init\_\_.py                                        |        3 |        0 |    100% |           |
 | src/specification/ports/drivers/\_\_init\_\_.py                                |        2 |        0 |    100% |           |
 | src/specification/ports/drivers/i\_handle\_specs.py                            |       10 |        0 |    100% |           |
@@ -76,14 +75,19 @@
 | src/specification/ports/plugins/i\_naming\_conventions.py                      |        4 |        0 |    100% |           |
 | src/specification/ports/plugins/i\_requirements.py                             |        4 |        0 |    100% |           |
 | src/specification/ports/plugins/i\_spec\_formatter.py                          |        6 |        0 |    100% |           |
-| src/storage/\_\_init\_\_.py                                                    |        5 |        0 |    100% |           |
-| src/storage/dict\_storage.py                                                   |       28 |        0 |    100% |           |
-| src/storage/file\_storage.py                                                   |       82 |        6 |     93% |48-50, 67, 100-101 |
+| src/storage/\_\_init\_\_.py                                                    |        7 |        0 |    100% |           |
+| src/storage/dict\_storage.py                                                   |       66 |        2 |     97% |   118-120 |
+| src/storage/file\_storage.py                                                   |      140 |       38 |     73% |57-64, 72-73, 80, 100-101, 120, 127-128, 144-145, 157, 160, 167-168, 182, 189-200, 217-221, 234, 240, 249-250 |
+| src/storage/formatter\_factory.py                                              |       11 |        0 |    100% |           |
+| src/storage/i\_formatter.py                                                    |        4 |        0 |    100% |           |
+| src/storage/i\_formatter\_factory.py                                           |        4 |        0 |    100% |           |
 | src/storage/i\_storage.py                                                      |        7 |        0 |    100% |           |
-| src/storage/map.py                                                             |        7 |        0 |    100% |           |
+| src/storage/i\_storage\_factory.py                                             |        4 |        0 |    100% |           |
+| src/storage/json\_formatter.py                                                 |       31 |        0 |    100% |           |
+| src/storage/storage\_factory.py                                                |       22 |        0 |    100% |           |
 | src/testcase/\_\_init\_\_.py                                                   |        2 |        0 |    100% |           |
 | src/testcase/application/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
-| src/testcase/application/handle\_testruns.py                                   |       34 |        0 |    100% |           |
+| src/testcase/application/handle\_testruns.py                                   |       27 |        0 |    100% |           |
 | src/testcase/core/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/testcase/core/precondition\_checks/\_\_init\_\_.py                         |       10 |        0 |    100% |           |
 | src/testcase/core/precondition\_checks/abstract\_check.py                      |        6 |        0 |    100% |           |
@@ -105,8 +109,8 @@
 | src/testcase/core/testcases/rowcount.py                                        |       56 |        1 |     98% |        70 |
 | src/testcase/core/testcases/schema.py                                          |      130 |        3 |     98% |92, 101, 136 |
 | src/testcase/core/testrun/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
-| src/testcase/core/testrun/testrun.py                                           |       62 |        1 |     98% |       161 |
-| src/testcase/dependency\_injection.py                                          |       24 |        0 |    100% |           |
+| src/testcase/core/testrun/testrun.py                                           |       57 |        0 |    100% |           |
+| src/testcase/dependency\_injection.py                                          |       27 |        0 |    100% |           |
 | src/testcase/drivers/\_\_init\_\_.py                                           |        1 |        0 |    100% |           |
 | src/testcase/drivers/cli\_testrun\_manager.py                                  |       13 |        2 |     85% |     31-37 |
 | src/testcase/ports/\_\_init\_\_.py                                             |        3 |        0 |    100% |           |
@@ -122,14 +126,14 @@
 | src/testset/application/\_\_init\_\_.py                                        |        1 |        0 |    100% |           |
 | src/testset/application/handle\_testsets.py                                    |       15 |        0 |    100% |           |
 | src/testset/core/\_\_init\_\_.py                                               |        1 |        0 |    100% |           |
-| src/testset/core/testset.py                                                    |       32 |        2 |     94% |     54-55 |
-| src/testset/dependency\_injection.py                                           |       13 |        0 |    100% |           |
+| src/testset/core/testset.py                                                    |       28 |        2 |     93% |     60-61 |
+| src/testset/dependency\_injection.py                                           |       14 |        0 |    100% |           |
 | src/testset/drivers/\_\_init\_\_.py                                            |        1 |        0 |    100% |           |
 | src/testset/drivers/cli\_testset\_manager.py                                   |       14 |        0 |    100% |           |
 | src/testset/ports/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/\_\_init\_\_.py                                      |        2 |        0 |    100% |           |
 | src/testset/ports/drivers/i\_testset\_handler.py                               |       15 |        0 |    100% |           |
-|                                                                      **TOTAL** | **2408** |  **142** | **94%** |           |
+|                                                                      **TOTAL** | **2506** |  **137** | **95%** |           |
 
 3 empty files skipped.
 
