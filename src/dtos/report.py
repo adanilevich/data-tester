@@ -58,7 +58,7 @@ class TestCaseReportDTO(TestReportDTO):
     @classmethod
     def from_testcase_result(cls, testcase_result: TestCaseDTO) -> Self:
         return cls(
-            report_id = uuid4(),
+            report_id=uuid4(),
             testrun_id=testcase_result.testrun_id,
             testset_id=testcase_result.testset_id,
             labels=testcase_result.labels,
@@ -85,7 +85,7 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
     @classmethod
     def from_testcase_result(cls, testcase_result: TestCaseDTO) -> Self:
         return cls(
-            report_id = uuid4(),
+            report_id=uuid4(),
             testrun_id=testcase_result.testrun_id,
             testset_id=testcase_result.testset_id,
             labels=testcase_result.labels,
@@ -110,7 +110,7 @@ class TestRunReportDTO(TestReportDTO):
     @classmethod
     def from_testrun(cls, testrun: TestRunDTO) -> Self:
         return cls(
-            report_id = uuid4(),
+            report_id=uuid4(),
             testrun_id=testrun.testrun_id,
             testset_id=testrun.testset_id,
             labels=testrun.labels,

@@ -1,11 +1,11 @@
 import pytest
 import uuid
 
-from src.testset.dependency_injection import TestSetDependencyInjector
+from src.drivers.cli.testset_di import TestSetDependencyInjector
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.testcase import TestType
 from src.config import Config
-from src.testset.ports import SaveTestSetCommand
+from src.domain.testset.ports import SaveTestSetCommand
 
 
 @pytest.fixture
@@ -41,17 +41,13 @@ def test_load_domain_testset_by_name_success(injector, testset_dto):
 
     # when two testsets are saved in the configured storage location
     location = cli_manager.storage_location
-    save_command_1 = SaveTestSetCommand(
-        testset=testset_dto, location=location
-    )
+    save_command_1 = SaveTestSetCommand(testset=testset_dto, location=location)
     handler.save_testset(save_command_1)
 
     new_testset_dto = testset_dto.copy()
     new_testset_dto.name = "TestSet2"
     new_testset_dto.testset_id = uuid.uuid4()
-    save_command_2 = SaveTestSetCommand(
-        testset=new_testset_dto, location=location
-    )
+    save_command_2 = SaveTestSetCommand(testset=new_testset_dto, location=location)
     handler.save_testset(save_command_2)
 
     # When loading first testset by domain and name

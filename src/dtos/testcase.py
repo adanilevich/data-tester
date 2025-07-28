@@ -13,6 +13,7 @@ from src.dtos.specification import SpecificationDTO
 
 class TestObjectDTO(DTO):
     """Unambigiusly identifies the testobject (e.g. table) to be tested"""
+
     __test__ = False  # prevents pytest collection
     name: str
     domain: str
@@ -22,6 +23,7 @@ class TestObjectDTO(DTO):
 
 class DBInstanceDTO(DTO):
     """Unambiguously identifies the database to be tested."""
+
     domain: str
     stage: str
     instance: str
@@ -29,9 +31,7 @@ class DBInstanceDTO(DTO):
     @classmethod
     def from_testobject(cls, testobject: TestObjectDTO) -> DBInstanceDTO:
         return cls(
-            domain=testobject.domain,
-            stage=testobject.stage,
-            instance=testobject.instance
+            domain=testobject.domain, stage=testobject.stage, instance=testobject.instance
         )
 
 
@@ -98,7 +98,6 @@ class TestDTO(DTO):
     domain_config: DomainConfigDTO
 
 
-
 class TestCaseDTO(TestDTO):
     __test__ = False  # prevents pytest collection
     testcase_id: UUID4 = Field(default_factory=uuid4)
@@ -124,7 +123,6 @@ class TestRunDTO(TestDTO):
 
     @classmethod
     def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
-
         result = TestResult.OK
         for testcase in testcases:
             if testcase.result != TestResult.OK:
@@ -152,7 +150,6 @@ class TestRunDTO(TestDTO):
 
     @staticmethod
     def _get_testrun_id(testrun_ids: List[UUID4]) -> UUID4:
-
         if not len(set(testrun_ids)) == 1:
             raise ValueError("All testcases must belong to same testrun_id!")
 
@@ -163,7 +160,6 @@ class TestRunDTO(TestDTO):
 
     @staticmethod
     def _get_testdefinitions(testcases: List[TestCaseDTO]) -> List[TestDefinitionDTO]:
-
         definitions = []
         for testcase in testcases:
             definition = TestDefinitionDTO(

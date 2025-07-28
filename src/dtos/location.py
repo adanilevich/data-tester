@@ -24,6 +24,7 @@ class StorageObject(Enum):
     Object types which can be stored in internal storage. Correspond to the defined
     DTO objects.
     """
+
     TESTRUN = "testrun"
     TESTCASE_REPORT = "testcase_report"
     TESTRUN_REPORT = "testrun_report"
@@ -79,6 +80,7 @@ class LocationDTO(DTO):
             if not path.endswith("/"):
                 path += "/"
         return path
+
 
 class ObjectLocationDTO(DTO):
     location: LocationDTO

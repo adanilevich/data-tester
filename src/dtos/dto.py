@@ -7,6 +7,7 @@ class DTO(BaseModel):
     def object_id(self) -> str:
         """Object ID for storage purposes. Should be overridden by subclasses."""
         raise NotImplementedError("Subclasses must implement object_id property")
+
     @classmethod
     def from_dict(cls, dict_: dict) -> Self:  # mytype: ignore-error
         return cls(**dict_)
