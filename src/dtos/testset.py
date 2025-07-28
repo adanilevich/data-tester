@@ -40,4 +40,5 @@ class TestSetDTO(DTO):
     def object_id(self) -> str:
         """Object ID for storage purposes."""
         return str(self.testset_id)
+
     last_updated: datetime = Field(default_factory=datetime.now)

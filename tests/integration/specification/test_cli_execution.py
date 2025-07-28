@@ -5,9 +5,9 @@ from uuid import uuid4
 from typing import List, cast
 import polars as pl
 
-from src.specification.drivers.cli_spec_manager import CliSpecManager
-from src.specification.dependency_injection import SpecDependencyInjector
-from src.specification.application.handle_specs import SpecCommandHandler
+from src.drivers.cli.specification import CliSpecManager
+from src.drivers.cli.specification_di import SpecDependencyInjector
+from src.domain.specification.application.handle_specs import SpecCommandHandler
 from src.config import Config
 from src.dtos import (
     LocationDTO,
@@ -18,7 +18,7 @@ from src.dtos import (
     SchemaSpecificationDTO,
     RowCountSqlDTO,
 )
-from src.storage.i_storage import IStorage
+from src.infrastructure.storage.i_storage import IStorage
 
 
 @pytest.fixture

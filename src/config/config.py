@@ -10,7 +10,6 @@ def env(name: str) -> str | None:
 
 
 class Config(BaseSettings):
-
     # ENVIRONMENT CONFIGURATION
     DATATESTER_ENV: str = Field(default="LOCAL")
 
@@ -38,7 +37,6 @@ class Config(BaseSettings):
     def model_post_init(self, __context) -> None:
         """Set config values for local mode"""
         if self.DATATESTER_ENV == "LOCAL":
-
             # in local mode, we use a dict storage for internal storage
             self.DATATESTER_INTERNAL_STORAGE_ENGINE = "DICT"
             self.DATATESTER_INTERNAL_TESTRUN_LOCATION = "dict://testruns/"
@@ -48,4 +46,3 @@ class Config(BaseSettings):
 
             # in local mode, we use simple notifiers
             self.DATATESTER_NOTIFIERS = ["IN_MEMORY", "STDOUT"]
-

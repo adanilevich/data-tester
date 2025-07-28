@@ -3,26 +3,50 @@ from typing import List
 from uuid import uuid4
 from datetime import datetime
 
-from src.testcase.dependency_injection import TestCaseDependencyInjector
+from src.drivers.cli.testcase_di import TestCaseDependencyInjector
 from src.config import Config
 from src.dtos import (
-    TestType, TestResult, TestStatus, TestObjectDTO,
-    SpecificationDTO, SpecificationType, DomainConfigDTO, LocationDTO,
-    TestCasesConfigDTO, SchemaTestCaseConfigDTO, CompareTestCaseConfigDTO,
-    TestDefinitionDTO
+    TestType,
+    TestResult,
+    TestStatus,
+    TestObjectDTO,
+    SpecificationDTO,
+    SpecificationType,
+    DomainConfigDTO,
+    LocationDTO,
+    TestCasesConfigDTO,
+    SchemaTestCaseConfigDTO,
+    CompareTestCaseConfigDTO,
+    TestDefinitionDTO,
 )
 from src.dtos.testcase import TestRunDTO
 
 
 testobjects = [
-    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
-     "name": "my_testobject_1"},
-    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
-     "name": "my_testobject_2"},
-    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
-     "name": "my_testobject_3"},
-    {"domain": "my_domain", "stage": "my_stage", "instance": "my_instance",
-     "name": "my_testobject_4"},
+    {
+        "domain": "my_domain",
+        "stage": "my_stage",
+        "instance": "my_instance",
+        "name": "my_testobject_1",
+    },
+    {
+        "domain": "my_domain",
+        "stage": "my_stage",
+        "instance": "my_instance",
+        "name": "my_testobject_2",
+    },
+    {
+        "domain": "my_domain",
+        "stage": "my_stage",
+        "instance": "my_instance",
+        "name": "my_testobject_3",
+    },
+    {
+        "domain": "my_domain",
+        "stage": "my_stage",
+        "instance": "my_instance",
+        "name": "my_testobject_4",
+    },
 ]
 
 testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
@@ -34,8 +58,8 @@ domain_config = {
     "specifications_locations": [],
     "testcases": {
         "compare": {"sample_size": 100},
-        "schema": {"compare_datatypes": ["int", "str"]}
-    }
+        "schema": {"compare_datatypes": ["int", "str"]},
+    },
 }
 
 
@@ -48,6 +72,7 @@ def specs(testobject: dict):
     [spec.update({"testobject": testobject["name"]}) for spec in specs]
     return specs
 
+
 MY_UUID = uuid4()
 
 # Refactor testcases to be a list of TestDefinitionDTO, not dicts
@@ -59,13 +84,13 @@ testcases = [
             SpecificationDTO(
                 spec_type=SpecificationType.SCHEMA,
                 location=LocationDTO(path="dict://my_location"),
-                testobject=testobject["name"]
+                testobject=testobject["name"],
             ),
             SpecificationDTO(
                 spec_type=SpecificationType.ROWCOUNT_SQL,
                 location=LocationDTO(path="dict://my_location"),
-                testobject=testobject["name"]
-            )
+                testobject=testobject["name"],
+            ),
         ],
         domain_config=DomainConfigDTO(
             domain="my_domain",
@@ -74,10 +99,10 @@ testcases = [
             testreports_location=LocationDTO("dict://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare=CompareTestCaseConfigDTO(sample_size=100)
-            )
+                compare=CompareTestCaseConfigDTO(sample_size=100),
+            ),
         ),
-        testrun_id=MY_UUID
+        testrun_id=MY_UUID,
     )
     for testobject, testtype in zip(testobjects, testtypes, strict=False)
 ]
@@ -120,7 +145,7 @@ def test_cli_execution_with_dummy_testcases():
         TestType.DUMMY_OK: (TestResult.OK, TestStatus.FINISHED),
         TestType.DUMMY_NOK: (TestResult.NOK, TestStatus.FINISHED),
         TestType.DUMMY_EXCEPTION: (TestResult.NA, TestStatus.ERROR),
-        TestType.UNKNOWN: (TestResult.NA, TestStatus.ERROR)
+        TestType.UNKNOWN: (TestResult.NA, TestStatus.ERROR),
     }
     for testcase_result in result.testcase_results:
         testtype = testcase_result.testtype
@@ -187,10 +212,10 @@ def test_cli_execution_with_invalid_testcase():
             testreports_location=LocationDTO("dict://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare=CompareTestCaseConfigDTO(sample_size=100)
-            )
+                compare=CompareTestCaseConfigDTO(sample_size=100),
+            ),
         ),
-        testrun_id=MY_UUID
+        testrun_id=MY_UUID,
     )
     testrun = TestRunDTO(
         testrun_id=MY_UUID,

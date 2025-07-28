@@ -1,11 +1,15 @@
 from uuid import uuid4
-from src.testcase.core.testcases import RowCountTestCase
+from src.domain.testcase.core.testcases import RowCountTestCase
 from src.dtos import (
-    RowCountSqlDTO, TestObjectDTO, TestType, SpecificationType, TestDefinitionDTO,
-    LocationDTO
+    RowCountSqlDTO,
+    TestObjectDTO,
+    TestType,
+    SpecificationType,
+    TestDefinitionDTO,
+    LocationDTO,
 )
-from src.data_platform import DemoDataPlatformFactory
-from src.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.backend.demo import DemoBackendFactory
+from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 
 
 spec = RowCountSqlDTO(
@@ -25,14 +29,11 @@ spec = RowCountSqlDTO(
         SELECT COUNT(*)
         FROM payments_test.alpha.core_customer_transactions
     )
-    """
+    """,
 )
 
 testobject = TestObjectDTO(
-    domain="payments",
-    stage="test",
-    instance="alpha",
-    name="core_customer_transactions"
+    domain="payments", stage="test", instance="alpha", name="core_customer_transactions"
 )
 
 
@@ -46,8 +47,8 @@ def test_straight_through_execution(domain_config, prepare_local_data):
     )
     testcase = RowCountTestCase(
         definition=definition,
-        backend=DemoDataPlatformFactory().create(domain_config=domain_config),
-        notifiers=[InMemoryNotifier(), StdoutNotifier()]
+        backend=DemoBackendFactory().create(domain_config=domain_config),
+        notifiers=[InMemoryNotifier(), StdoutNotifier()],
     )
 
     testcase.execute()

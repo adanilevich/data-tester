@@ -1,5 +1,5 @@
-from src.domain_config.dependency_injection import DomainConfigDependencyInjector
-from src.domain_config.ports import SaveDomainConfigCommand
+from src.drivers.cli.domain_config_di import DomainConfigDependencyInjector
+from src.domain.domain_config.ports import SaveDomainConfigCommand
 from src.dtos import DomainConfigDTO
 from src.config import Config
 from src.dtos.location import LocationDTO

@@ -27,10 +27,10 @@ from src.dtos.testcase import (
 from src.dtos.report import TestCaseReportDTO, TestRunReportDTO
 from src.dtos.testcase import TestRunDTO
 from src.dtos.location import LocationDTO
-from src.testcase.ports import IDataPlatform
-from src.notifier import InMemoryNotifier, StdoutNotifier
-from src.data_platform import DummyPlatform
-from src.testcase.core.testcases import (
+from src.infrastructure.backend import IBackend
+from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.backend.dummy import DummyBackend
+from src.domain.testcase.core.testcases import (
     AbstractTestCase,
     SchemaTestCase,
     RowCountTestCase,
@@ -39,13 +39,13 @@ from src.testcase.core.testcases import (
     DummyNokTestCase,
     DummyExceptionTestCase,
 )
-from src.testcase.core.precondition_checks import ICheckable
+from src.domain.testcase.core.precondition_checks import ICheckable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
 @pytest.fixture
-def dummy_backend() -> IDataPlatform:
-    return DummyPlatform()
+def dummy_backend() -> IBackend:
+    return DummyBackend()
 
 
 @pytest.fixture
@@ -69,9 +69,7 @@ def domain_config() -> DomainConfigDTO:
         ],
         testreports_location=LocationDTO("dict://testreports"),
         testcases=TestCasesConfigDTO(
-            compare=CompareTestCaseConfigDTO(
-                sample_size=100, sample_size_per_object={}
-            ),
+            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
         ),
     )
@@ -90,7 +88,7 @@ def testobject() -> TestObjectDTO:
 
 
 class DummyCheckable(ICheckable):
-    def __init__(self, testobject: TestObjectDTO, backend: IDataPlatform):
+    def __init__(self, testobject: TestObjectDTO, backend: IBackend):
         self.testobject = testobject
         self.backend = backend
         self.summary = ""
@@ -133,11 +131,8 @@ class ITestCaseCreator(ABC):
 
 @pytest.fixture
 def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
-
     class TestCaseCreator(ITestCaseCreator):
-
         def create(self, ttype: TestType) -> AbstractTestCase:
-
             testcase_class: type[AbstractTestCase]
             if ttype == TestType.SCHEMA:
                 spec_type = SpecificationType.SCHEMA
@@ -182,7 +177,7 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
 
             testcase = testcase_class(
                 definition=definition,
-                backend=DummyPlatform(),
+                backend=DummyBackend(),
                 notifiers=[InMemoryNotifier(), StdoutNotifier()],
             )
 
@@ -233,8 +228,7 @@ def performance_test_data() -> pl.DataFrame:  # type: ignore
             fs.rm_file(target_file)
 
     source_file_ = (
-        "https://d37ci6vzurychx.cloudfront.net/trip-data/"
-        "yellow_tripdata_2015-01.parquet"
+        "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2015-01.parquet"
     )
     target_file_ = "yellow_tripdata_2015-01.parquet"
 
@@ -277,9 +271,7 @@ def testcase_result(testobject, domain_config) -> TestCaseDTO:
 
 @pytest.fixture
 def testrun(testcase_result) -> TestRunDTO:
-    return TestRunDTO.from_testcases(
-        testcases=[testcase_result, testcase_result]
-    )
+    return TestRunDTO.from_testcases(testcases=[testcase_result, testcase_result])
 
 
 @pytest.fixture

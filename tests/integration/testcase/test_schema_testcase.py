@@ -1,24 +1,33 @@
 from uuid import uuid4
-from src.testcase.core.testcases import SchemaTestCase
+from src.domain.testcase.core.testcases import SchemaTestCase
 from src.dtos import (
-    SchemaSpecificationDTO, TestObjectDTO, TestType, SpecificationType,
-    TestDefinitionDTO, LocationDTO
+    SchemaSpecificationDTO,
+    TestObjectDTO,
+    TestType,
+    SpecificationType,
+    TestDefinitionDTO,
+    LocationDTO,
 )
-from src.data_platform import DemoDataPlatformFactory
-from src.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.backend.demo import DemoBackendFactory
+from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 
 spec = SchemaSpecificationDTO(
     location=LocationDTO(path="dummy://this_location"),
     testobject="stage_customers",
     spec_type=SpecificationType.SCHEMA,
     columns={
-        "date": "string", "id": "int", "region": "string", "name": "string",
-        "source_file": "string", "type": "string"
-    }
+        "date": "string",
+        "id": "int",
+        "region": "string",
+        "name": "string",
+        "source_file": "string",
+        "type": "string",
+    },
 )
 
 testobject = TestObjectDTO(
-    domain="payments", stage="test", instance="alpha", name="stage_customers")
+    domain="payments", stage="test", instance="alpha", name="stage_customers"
+)
 
 
 def test_straight_through_execution(domain_config, prepare_local_data):
@@ -31,8 +40,8 @@ def test_straight_through_execution(domain_config, prepare_local_data):
     )
     testcase = SchemaTestCase(
         definition=definition,
-        backend=DemoDataPlatformFactory().create(domain_config=domain_config),
-        notifiers=[InMemoryNotifier(), StdoutNotifier()]
+        backend=DemoBackendFactory().create(domain_config=domain_config),
+        notifiers=[InMemoryNotifier(), StdoutNotifier()],
     )
 
     testcase.execute()

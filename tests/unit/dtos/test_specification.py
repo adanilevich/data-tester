@@ -8,7 +8,7 @@ def test_creating_spec_from_dict():
             "testobject": "doesnt matter",
             "spec_type": SpecificationType.SCHEMA,
             "columns": {"a": "b"},
-            "blub": "a"  # this should not play a role when constructing a schema spec
+            "blub": "a",  # this should not play a role when constructing a schema spec
         }
     )
     assert spec.spec_type == SpecificationType.SCHEMA
@@ -16,7 +16,6 @@ def test_creating_spec_from_dict():
 
 
 class TestSpecFactory:
-
     def test_that_known_spec_type_is_created(self):
         # given a dict with a known spec type
         dict_ = {

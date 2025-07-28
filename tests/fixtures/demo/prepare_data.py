@@ -116,9 +116,7 @@ file_configs: List[FileConfig] = [
     FileConfig(
         xlsx_file=files.customers_1,
         raw=[
-            RawConfig(
-                domain="payments", stage="uat", instace="main", folder="customers"
-            ),
+            RawConfig(domain="payments", stage="uat", instace="main", folder="customers"),
             RawConfig(
                 domain="payments", stage="test", instace="alpha", folder="customers"
             ),
@@ -151,9 +149,7 @@ file_configs: List[FileConfig] = [
             StageConfig(
                 domain="payments", stage="test", instace="alpha", table="customers"
             ),
-            StageConfig(
-                domain="sales", stage="test", instace="main", table="customers"
-            ),
+            StageConfig(domain="sales", stage="test", instace="main", table="customers"),
         ],
     ),
     # configure loading for transactions 1
@@ -197,9 +193,7 @@ core_configs: List[CoreConfig] = [
     CoreConfig(domain="payments", stage="test", instance="beta"),
 ]
 
-load_config: LoadConfig = LoadConfig(
-    file_configs=file_configs, core_configs=core_configs
-)
+load_config: LoadConfig = LoadConfig(file_configs=file_configs, core_configs=core_configs)
 
 
 def setup_raw_layer(
@@ -209,9 +203,9 @@ def setup_raw_layer(
 
     print("\nSETTING UP RAW LAYER:")
 
-    objects: List[Tuple[str, str, str, str]] = (
-        []
-    )  # list of required combos of domain/prject/folder
+    objects: List[
+        Tuple[str, str, str, str]
+    ] = []  # list of required combos of domain/prject/folder
     for file_conf in conf.file_configs:
         for raw_conf in file_conf.raw:
             obj = (raw_conf.domain, raw_conf.stage, raw_conf.instace, raw_conf.folder)
@@ -236,7 +230,6 @@ def setup_raw_layer(
 def setup_databases(
     conf: LoadConfig = load_config, path: Path = DB_PATH, fs: AbstractFileSystem = FS
 ):
-
     print("\nSETTING UP DATABASES:")
 
     objects: List[Tuple[str, str, str, str, str]] = []
@@ -280,7 +273,7 @@ def setup_databases(
         table = layer + "_" + objectname  # table names are <layer>_<objectname>
 
         # create database: duckdb database files are created if not exist
-        duckdb.execute(f"ATTACH IF NOT EXISTS '{str(path/database)}.db' AS {database}")
+        duckdb.execute(f"ATTACH IF NOT EXISTS '{str(path / database)}.db' AS {database}")
 
         # create tables
         if table == "stage_customers":
@@ -331,12 +324,7 @@ def get_csv_raw_path(
         obj = conf.table
 
     csv_path = (
-        raw_layer_base_path
-        / conf.domain
-        / conf.stage
-        / conf.instace
-        / obj
-        / csv_filename
+        raw_layer_base_path / conf.domain / conf.stage / conf.instace / obj / csv_filename
     )
     return str(csv_path)
 
@@ -398,9 +386,7 @@ def load_staging_layer(conf: LoadConfig = load_config):
     print(f"Loaded {customer_count} customers into paymets.alpha.stage_customers")
 
     # check that all 18 transactions are loaded into payments alpha
-    transactions = duckdb.sql(
-        "SELECT * FROM payments_test.alpha.stage_transactions"
-    ).pl()
+    transactions = duckdb.sql("SELECT * FROM payments_test.alpha.stage_transactions").pl()
     transactions_count = count_values(df=transactions, col="id")
     assert transactions_count == 18
     print(
@@ -415,7 +401,6 @@ def count_values(df: pl.DataFrame, col: str) -> int:
 
 
 def load_core_layer(conf: LoadConfig = load_config):
-
     print("\nLOADING CORE LAYER:")
     for core_config in conf.core_configs:
         database = core_config.domain + "_" + core_config.stage
@@ -462,7 +447,6 @@ def prepare_data():
 def clean_up(
     db_path: Path = DB_PATH, raw_path: Path = RAW_PATH, fs: AbstractFileSystem = FS
 ):
-
     print("\nDELETING RAW LAYER")
     if fs.exists(str(raw_path)):
         fs.rm(str(raw_path), recursive=True)

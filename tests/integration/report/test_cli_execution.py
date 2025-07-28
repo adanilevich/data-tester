@@ -4,8 +4,8 @@ from typing import List, Tuple, cast
 
 import pytest
 
-from src.report.drivers import CliReportManager
-from src.report.dependency_injection import ReportDependencyInjector
+from src.drivers.cli.report import CliReportManager
+from src.drivers.cli.report_di import ReportDependencyInjector
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
@@ -18,13 +18,12 @@ from src.dtos import (
     TestRunReportDTO,
     ReportType,
 )
-from src.report.ports import LoadReportCommand
+from src.domain.report.ports import LoadReportCommand
 
 
 @pytest.fixture
 def report_manager(
-    domain_config: DomainConfigDTO,
-    testcase_result: TestCaseDTO
+    domain_config: DomainConfigDTO, testcase_result: TestCaseDTO
 ) -> CliReportManager:
     config = Config()
     config.DATATESTER_ENV = "LOCAL"
@@ -32,37 +31,35 @@ def report_manager(
     di = ReportDependencyInjector(config=config)
     return di.cli_report_manager(domain_config=domain_config)
 
+
 @pytest.fixture
-def testresults(
-    testcase_result: TestCaseDTO
-) -> Tuple[TestRunDTO, List[TestCaseDTO]]:
-        # create 10 random testcase results
-        testcase_results: List[TestCaseDTO] = []
-        for _ in range(10):
-            # assign random testobject names, testtyp   es and results
-            testobjects = [
-                "".join(random.choices(string.ascii_letters, k=5)) for _ in range(100)
-            ]
-            testcase_result_ = testcase_result.copy()
-            testcase_result_.result = random.choice(list(TestResult))
-            testcase_result_.testobject.name = random.choice(testobjects)
-            testcase_result_.testtype = random.choice(list(TestType))
-            testcase_results.append(testcase_result_)
+def testresults(testcase_result: TestCaseDTO) -> Tuple[TestRunDTO, List[TestCaseDTO]]:
+    # create 10 random testcase results
+    testcase_results: List[TestCaseDTO] = []
+    for _ in range(10):
+        # assign random testobject names, testtyp   es and results
+        testobjects = [
+            "".join(random.choices(string.ascii_letters, k=5)) for _ in range(100)
+        ]
+        testcase_result_ = testcase_result.copy()
+        testcase_result_.result = random.choice(list(TestResult))
+        testcase_result_.testobject.name = random.choice(testobjects)
+        testcase_result_.testtype = random.choice(list(TestType))
+        testcase_results.append(testcase_result_)
 
-        # create a corresponding testrun result
-        testrun_result = TestRunDTO.from_testcases(testcases=testcase_results)
+    # create a corresponding testrun result
+    testrun_result = TestRunDTO.from_testcases(testcases=testcase_results)
 
-        return testrun_result, testcase_results
+    return testrun_result, testcase_results
+
 
 def create_and_save_reports(
-    report_manager: CliReportManager,
-    testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
+    report_manager: CliReportManager, testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
 ) -> Tuple[TestRunReportDTO, List[TestCaseReportDTO]]:
-
     testrun_result, testcase_results = testresults
 
     testrun_report: TestRunReportDTO
-    testrun_report = report_manager.create_report(testrun_result) # type: ignore
+    testrun_report = report_manager.create_report(testrun_result)  # type: ignore
     report_manager.save_report_artifacts_for_users(testrun_report)
     report_manager.save_report_in_internal_storage(testrun_report)
 
@@ -75,12 +72,12 @@ def create_and_save_reports(
 
     return testrun_report, testcase_reports
 
-class TestReportE2E:
 
+class TestReportE2E:
     def test_create_and_save_reports(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
         # given a configured report manager and testresults
         report_manager = report_manager
@@ -88,7 +85,8 @@ class TestReportE2E:
 
         # when reports are created and saved
         testrun_report, testcase_reports = create_and_save_reports(
-            report_manager, testresults)
+            report_manager, testresults
+        )
 
         # then created reports are of correct type
         assert isinstance(testrun_report, TestRunReportDTO)
@@ -101,7 +99,7 @@ class TestReportE2E:
     def test_retrieve_from_internal_storage(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
         # given a configured report manager and testresults
         report_manager = report_manager
@@ -110,7 +108,8 @@ class TestReportE2E:
 
         # when reports are created and saved
         testrun_report, testcase_reports = create_and_save_reports(
-            report_manager, testresults)
+            report_manager, testresults
+        )
 
         # then the testrun report can be retrieved from internal storage
         internal_location = report_manager.internal_location
@@ -143,13 +142,11 @@ class TestReportE2E:
             assert report_dto.testobject == testcase_report.testobject
             assert report_dto.testtype == testcase_report.testtype
 
-
     def test_retrieve_from_user_storage(
         self,
         report_manager: CliReportManager,
-        testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
+        testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
-
         # given a configured report manager and testresults
         report_manager = report_manager
         testrun_result, testcase_results = testresults
@@ -157,11 +154,13 @@ class TestReportE2E:
 
         user_location = report_manager.user_location
         user_storage = handler.storage_factory.get_storage(  # type: ignore
-            user_location)
+            user_location
+        )
 
         # when reports are created and saved
         testrun_report, testcase_reports = create_and_save_reports(
-            report_manager, testresults)
+            report_manager, testresults
+        )
 
         # then the testrun report can be retrieved from user storage
         date_str = testrun_report.start_ts.strftime("%Y-%m-%d")
