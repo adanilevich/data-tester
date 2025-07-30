@@ -3,6 +3,18 @@ from abc import ABC, abstractmethod
 from src.dtos import SpecificationType, SpecificationFormat, SpecContent
 
 
+class SpecFormatterError(Exception):
+    """"""
+
+
+class SpecDeserializationError(SpecFormatterError):
+    """"""
+
+
+class SpecSerializationError(SpecFormatterError):
+    """"""
+
+
 class ISpecFormatter(ABC):
     """
     Interface for deserializing specification files from user-specific formats.

@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 
-from src.domain.testset.application.handle_testsets import TestSetCommandHandler
+from src.domain.testset import TestSetCommandHandler
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.location import LocationDTO
 from src.infrastructure.storage import (
@@ -10,7 +10,7 @@ from src.infrastructure.storage import (
     ObjectNotFoundError,
 )
 from src.dtos.testcase import TestType
-from src.domain.testset.ports.drivers.i_testset_handler import (
+from src.domain_ports import (
     SaveTestSetCommand,
     LoadTestSetCommand,
     ListTestSetsCommand,

@@ -2,7 +2,7 @@
 from .in_memory_notifier import InMemoryNotifier
 from .stdout_notifier import StdoutNotifier
 from .map import map_notifier
-from .i_notifier import INotifier
+from src.infrastructure_ports import INotifier
 
 
 __all__ = [

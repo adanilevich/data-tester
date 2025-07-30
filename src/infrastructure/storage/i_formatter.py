@@ -3,6 +3,18 @@ from src.dtos.dto import DTO
 from src.dtos.location import StorageObject
 
 
+class FormatterError(Exception):
+    """"""
+
+
+class DeserializationError(FormatterError):
+    """"""
+
+
+class SerializationError(FormatterError):
+    """"""
+
+
 class IFormatter(ABC):
     """Interface for serializing and deserializing DTO objects."""
 

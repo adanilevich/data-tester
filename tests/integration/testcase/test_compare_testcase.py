@@ -1,5 +1,5 @@
 from uuid import uuid4
-from src.domain.testcase.core.testcases import CompareTestCase
+from src.domain.testcase.testcases import CompareTestCase
 from src.dtos import (
     CompareSqlDTO,
     SchemaSpecificationDTO,

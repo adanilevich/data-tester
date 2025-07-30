@@ -1,7 +1,7 @@
 import pytest
 from uuid import uuid4
 
-from src.domain.testset.core.testset import TestSet
+from src.domain.testset.testset import TestSet
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
 from src.dtos.location import LocationDTO
 from src.infrastructure.storage import (

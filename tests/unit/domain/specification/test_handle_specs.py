@@ -5,17 +5,18 @@ from uuid import uuid4
 from typing import cast
 import polars as pl
 
-from src.domain.specification.application.handle_specs import SpecCommandHandler
-from src.domain.specification.plugins.naming_conventions import NamingConventionsFactory
-from src.domain.specification.plugins.formatter import FormatterFactory
-from src.domain.specification.plugins.requirements import Requirements
+from src.domain import SpecCommandHandler
+from src.domain.specification.plugins import (
+    NamingConventionsFactory,
+    FormatterFactory,
+)
 from src.infrastructure.storage.dict_storage import DictStorage
 from src.infrastructure.storage.formatter_factory import (
     FormatterFactory as StorageFormatterFactory,
 )
 from src.infrastructure.storage.storage_factory import StorageFactory
 from src.config import Config
-from src.domain.specification.ports.drivers.i_handle_specs import (
+from src.domain_ports import (
     FetchSpecsCommand,
     ParseSpecCommand,
 )
@@ -75,24 +76,17 @@ class TestSpecCommandHandler:
         return FormatterFactory()
 
     @pytest.fixture
-    def requirements(self) -> Requirements:
-        """Create a Requirements instance"""
-        return Requirements()
-
-    @pytest.fixture
     def handler(
         self,
         storage_factory: StorageFactory,
         naming_conventions_factory: NamingConventionsFactory,
         formatter_factory: FormatterFactory,
-        requirements: Requirements,
     ) -> SpecCommandHandler:
         """Create a SpecCommandHandler instance with all dependencies"""
         return SpecCommandHandler(
             naming_conventions_factory=naming_conventions_factory,
             storage_factory=storage_factory,
             formatter_factory=formatter_factory,
-            requirements=requirements,
         )
 
     @pytest.fixture
@@ -151,7 +145,6 @@ class TestSpecCommandHandler:
         assert handler.naming_conventions_factory is not None
         assert handler.storage_factory is not None
         assert handler.formatter_factory is not None
-        assert handler.requirements is not None
         assert handler.spec_manager is not None
 
     def test_fetch_specs_single_location_single_testcase(

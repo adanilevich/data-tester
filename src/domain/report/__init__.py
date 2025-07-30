@@ -1,11 +1,10 @@
-from .application import ReportCommandHandler
-from .ports import (
-    IReportCommandHandler,
-    CreateReportCommand,
-    SaveReportCommand,
-    LoadReportCommand,
-    GetReportArtifactCommand,
-    SaveReportArtifactsForUsersCommand,
+from .handle_reports import ReportCommandHandler
+from .report import (
+    Report,
+    ReportError,
+    NoFormatterFoundError,
+    ReportArtifactNotSpecifiedError,
+    WrongReportTypeError,
 )
 from .plugins import (
     IReportFormatter,
@@ -16,12 +15,11 @@ from .plugins import (
 
 __all__: list[str] = [
     "ReportCommandHandler",
-    "IReportCommandHandler",
-    "CreateReportCommand",
-    "SaveReportCommand",
-    "LoadReportCommand",
-    "GetReportArtifactCommand",
-    "SaveReportArtifactsForUsersCommand",
+    "Report",
+    "ReportError",
+    "NoFormatterFoundError",
+    "ReportArtifactNotSpecifiedError",
+    "WrongReportTypeError",
     "IReportFormatter",
     "XlsxTestCaseDiffFormatter",
     "TxtTestCaseReportFormatter",

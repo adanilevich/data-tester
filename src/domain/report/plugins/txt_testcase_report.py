@@ -39,12 +39,10 @@ class TxtTestCaseReportFormatter(IReportFormatter):
         if not isinstance(report, TestCaseReportDTO):
             raise ReportTypeNotSupportedError(f"Txt format not supported for {report}")
 
-        # TODO: this is done as a first simple implementation.
-        # Add specifications information to the report.
+        # TODO: add specifications information to the report.
         # exclude specifications to avoid yaml formatting issue
         exclude = {"specifications", "diff"}
 
-        # exclude specifications to avoid yaml formatting issue
         content_dict = report.to_dict(exclude=exclude, mode="json")
         try:
             yaml_bytes = yaml.safe_dump(

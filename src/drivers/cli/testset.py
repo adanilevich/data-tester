@@ -1,9 +1,21 @@
 from src.dtos.testset import TestSetDTO
 from src.dtos.location import LocationDTO
-from src.domain.testset import (
+from src.domain_ports import (
     ITestSetCommandHandler,
     ListTestSetsCommand,
 )
+
+
+class CliTestSetManagerError(Exception):
+    """
+    Exception raised when a testset manager operation fails.
+    """
+
+
+class TestSetNotFoundError(CliTestSetManagerError):
+    """
+    Exception raised when a testset is not found.
+    """
 
 
 class CliTestSetManager:
@@ -31,4 +43,6 @@ class CliTestSetManager:
         for testset in testsets:
             if testset.name == name:
                 return testset
-        raise ValueError(f"Testset with name '{name}' not found in domain '{domain}'")
+        raise TestSetNotFoundError(
+            f"Testset with name '{name}' not found in domain '{domain}'"
+        )

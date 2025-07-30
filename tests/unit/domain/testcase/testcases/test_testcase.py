@@ -1,4 +1,4 @@
-from src.domain.testcase.core.precondition_checks import IPreconditionChecker, ICheckable
+from src.domain.testcase.precondition_checks import IPreconditionChecker, ICheckable
 from src.dtos import TestCaseDTO, TestType, SpecificationType
 
 

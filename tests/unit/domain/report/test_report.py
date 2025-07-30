@@ -2,11 +2,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from src.domain.report.core.report import (
+from src.domain.report import (
     Report,
     NoFormatterFoundError,
     ReportArtifactNotSpecifiedError,
     WrongReportTypeError,
+    ReportError,
 )
 from src.domain.report.plugins import (
     TxtTestCaseReportFormatter,
@@ -72,7 +73,7 @@ class TestReport:
         ]
 
         # then initialization raises ValueError
-        with pytest.raises(ValueError, match="Formatter.*already registered"):
+        with pytest.raises(ReportError, match="Formatter.*already registered"):
             Report(formatters=duplicate_formatters, storage_factory=storage_factory)  # type: ignore
 
     def test_create_report_from_testcase_result(self, report, testcase_result):

@@ -1,7 +1,11 @@
 import json
 from typing import Dict, Type
 
-from .i_formatter import IFormatter
+from .i_formatter import (
+    IFormatter,
+    FormatterError,
+    DeserializationError,
+)
 from src.dtos.dto import DTO
 from src.dtos.location import StorageObject
 from src.dtos import (
@@ -34,11 +38,24 @@ class JsonFormatter(IFormatter):
     def deserialize(self, data: bytes, object_type: StorageObject) -> DTO:
         """Deserialize JSON bytes back to a DTO object."""
         if object_type not in self._dto_mapping:
-            raise ValueError(f"Unknown object type: {object_type}")
+            raise FormatterError(f"Unknown object type: {object_type}")
 
         dto_class = self._dto_mapping[object_type]
-        json_data = json.loads(data.decode("utf-8"))
-        return dto_class.from_dict(json_data)
+        try:
+            json_data = json.loads(data.decode("utf-8"))
+        except json.JSONDecodeError as err:
+            cls_str = dto_class.__name__
+            raise DeserializationError(
+                f"Error deserializing JSON to {cls_str}: {data.decode('utf-8')}"
+            ) from err
+        try:
+            result = dto_class.from_dict(json_data)
+        except Exception as err:
+            raise DeserializationError(
+                f"Error deserializing JSON to {dto_class.__name__}: {json_data}"
+            ) from err
+
+        return result
 
     def get_object_key(self, object_id: str, object_type: StorageObject) -> str:
         """Get the JSON filename for storing an object."""
@@ -54,7 +71,7 @@ class JsonFormatter(IFormatter):
     def get_object_id(self, object_key: str, object_type: StorageObject) -> str:
         """Extract object ID from object key based on naming convention."""
         if not self.check_filename(object_key, object_type):
-            raise ValueError(
+            raise FormatterError(
                 f"Object key '{object_key}' does not match naming convention "
                 f"for {object_type.value}"
             )

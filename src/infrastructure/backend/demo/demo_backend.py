@@ -9,7 +9,7 @@ from fsspec.implementations.local import LocalFileSystem  # type: ignore
 from .demo_naming_resolver import DemoNamingResolver
 from .demo_query_handler import DemoQueryHandler
 
-from src.infrastructure.backend.i_backend import IBackend
+from src.infrastructure_ports import IBackend, BackendError
 from src.dtos import (
     SchemaSpecificationDTO,
     DomainConfigDTO,
@@ -18,6 +18,12 @@ from src.dtos import (
     SpecificationType,
     LocationDTO,
 )
+
+
+class DemoBackendError(BackendError):
+    """
+    Exception raised when a demo backend operation fails.
+    """
 
 
 class DemoBackend(IBackend):
@@ -159,7 +165,7 @@ class DemoBackend(IBackend):
     def _get_file_rowcount(
         self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
     ) -> int:
-        raise ValueError(
+        raise DemoBackendError(
             "Getting rowcount for file-like testobjects (e.g. raw "
             "layer) is not yet supported."
         )
@@ -183,7 +189,7 @@ class DemoBackend(IBackend):
 
         object_type = self.naming_resolver.get_object_type(testobject)
         if object_type == object_type.FILE:
-            raise ValueError(
+            raise DemoBackendError(
                 "Getting schema for file-like testobjects (e.g. raw "
                 "layer) is not supported."
             )
@@ -297,7 +303,7 @@ class DemoBackend(IBackend):
 
             harmonized_columns.update({column_name: harmonized_dtype})
 
-        harmonized_schema_dto = schema.create_copy()
+        harmonized_schema_dto = schema.copy()
         harmonized_schema_dto.columns = harmonized_columns
 
         return harmonized_schema_dto
@@ -366,7 +372,7 @@ class DemoBackend(IBackend):
         """See interface definition (parent class IBackend)."""
 
         if len(primary_keys) == 0:
-            raise ValueError("Provide a non-empty list of primary keys!")
+            raise DemoBackendError("Provide a non-empty list of primary keys!")
 
         concat_key = self._get_concat_key(primary_keys, cast_to=cast_to)
 
@@ -393,7 +399,9 @@ class DemoBackend(IBackend):
         cast_to: Optional[SchemaSpecificationDTO] = None,
     ) -> pl.DataFrame:
         if len(key_sample) == 0 or len(primary_keys) == 0:
-            raise ValueError("Provide a non-empty list of primary keys and samples!")
+            raise DemoBackendError(
+                "Provide a non-empty list of primary keys and samples!"
+            )
 
         self._setup_test_db(key_sample=key_sample)
         concat_key = self._get_concat_key(primary_keys, cast_to)
@@ -421,11 +429,13 @@ class DemoBackend(IBackend):
         cast_to: Optional[SchemaSpecificationDTO] = None,
     ) -> pl.DataFrame:
         if len(key_sample) == 0 or len(primary_keys) == 0:
-            raise ValueError("Provide a non-empty list of primary keys and samples!")
+            raise DemoBackendError(
+                "Provide a non-empty list of primary keys and samples!"
+            )
 
         testobject_type = self.naming_resolver.get_object_type(testobject)
         if testobject_type == testobject_type.FILE:
-            raise ValueError("Sampling files not yet supported")
+            raise DemoBackendError("Sampling files not yet supported")
 
         db = DBInstanceDTO.from_testobject(testobject)
         catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)

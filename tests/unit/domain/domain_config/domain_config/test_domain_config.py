@@ -2,7 +2,7 @@ import pytest
 
 from src.dtos import DomainConfigDTO, StorageObject
 from src.dtos.location import LocationDTO
-from src.domain.domain_config.core import DomainConfig, DomainConfigAlreadyExistsError
+from src.domain.domain_config import DomainConfig, DomainConfigAlreadyExistsError
 from src.infrastructure.storage.dict_storage import DictStorage
 from src.infrastructure.storage.formatter_factory import FormatterFactory
 
@@ -25,9 +25,9 @@ class TestDomainConfig:
         self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
     ):
         # given two domain configs a and b with different domain names
-        config_a = domain_config.model_copy()
+        config_a = domain_config.copy()
         config_a.domain = "a"
-        config_b = domain_config.model_copy()
+        config_b = domain_config.copy()
         config_b.domain = "b"
 
         # when these configs are saved to the storage
@@ -44,10 +44,10 @@ class TestDomainConfig:
         self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
     ):
         # given two domain configs with the same domain name
-        config_a = domain_config.model_copy()
+        config_a = domain_config.copy()
         config_a.domain = "same_domain"
 
-        config_b = domain_config.model_copy()
+        config_b = domain_config.copy()
         config_b.domain = "same_domain"
 
         # manually place content in storage to simulate two different files with same
@@ -75,7 +75,7 @@ class TestDomainConfig:
         self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
     ):
         location = LocationDTO("dict://test/location/")
-        config = domain_config.model_copy()
+        config = domain_config.copy()
         config.domain = "testdomain"
 
         # when saving config

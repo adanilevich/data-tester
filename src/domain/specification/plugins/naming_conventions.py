@@ -1,5 +1,11 @@
-from src.dtos import TestCaseEntryDTO, LocationDTO, TestType
+from typing import Tuple, List
+
+from src.dtos import TestCaseEntryDTO, LocationDTO, TestType, SpecificationType
 from .i_naming_conventions import INamingConventions, INamingConventionsFactory
+
+
+class SpecNamingConventionsError(Exception):
+    """"""
 
 
 class DefaultNamingConventions(INamingConventions):
@@ -8,7 +14,9 @@ class DefaultNamingConventions(INamingConventions):
     naming pattern.
     """
 
-    def match(self, testcase: TestCaseEntryDTO, file: LocationDTO) -> bool:
+    def match(
+        self, testcase: TestCaseEntryDTO, file: LocationDTO
+    ) -> Tuple[bool, List[SpecificationType]]:
         """
         Match files to testcase by testobject name and testtype. Expects .xlsx files
         for schema and .sql files for rowcount and compare.
@@ -28,21 +36,37 @@ class DefaultNamingConventions(INamingConventions):
             file.filename.endswith(".sql"),
         ]
 
+        match = False
+        spec_types = []
         # for schema testcase, only an .xlsx schema definition file is expected
         if testcase.testtype == TestType.SCHEMA:
-            result = all(schema_xlsx_naming_conditions)
+            match = all(schema_xlsx_naming_conditions)
+            spec_types = [SpecificationType.SCHEMA] if match else []
         # for rowcount testcase, only a .sql file is expected
         elif testcase.testtype == TestType.ROWCOUNT:
-            result = all(rowcount_sql_naming_conditions)
+            match = all(rowcount_sql_naming_conditions)
+            spec_types = [SpecificationType.ROWCOUNT_SQL] if match else []
         # for compare testcase, an .sql file and a schema defintion are expected
         elif testcase.testtype == TestType.COMPARE:
-            result = any(
-                [all(compare_sql_naming_conditions), all(schema_xlsx_naming_conditions)]
-            )
+            if all(compare_sql_naming_conditions):
+                match = True
+                spec_types = [SpecificationType.COMPARE_SQL]
+            if all(schema_xlsx_naming_conditions):
+                match = True
+                spec_types.append(SpecificationType.SCHEMA)
+        elif testcase.testtype in [
+            TestType.DUMMY_OK,
+            TestType.DUMMY_NOK,
+            TestType.DUMMY_EXCEPTION,
+        ]:
+            match = False
+            spec_types = []
         else:
-            raise ValueError(f"Unsupported testtype: {testcase.testtype}")
+            raise SpecNamingConventionsError(
+                f"Unsupported testtype: {testcase.testtype}"
+            )
 
-        return result
+        return match, spec_types
 
 
 class NamingConventionsFactory(INamingConventionsFactory):

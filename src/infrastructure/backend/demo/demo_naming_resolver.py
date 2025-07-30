@@ -3,6 +3,13 @@ from enum import Enum
 from typing import Optional, Tuple, List
 
 from src.dtos import DomainConfigDTO, DBInstanceDTO, TestObjectDTO
+from src.infrastructure_ports import BackendError
+
+
+class DemoNamingResolverError(BackendError):
+    """
+    Exception raised when a demo naming resolver operation fails.
+    """
 
 
 class TestobjectType(Enum):
@@ -18,7 +25,7 @@ class DemoNamingResolver:
         if domain in ["payments", "sales"]:
             return DemoDefaultResolver(domain_config=self.config)
         else:
-            raise NotImplementedError(f"Resolver domain {domain} unknown!")
+            raise DemoNamingResolverError(f"Resolver domain {domain} unknown!")
 
     def get_object_type(self, testobject: TestObjectDTO) -> TestobjectType:
         resolver = self._fetch_resolver(domain=testobject.domain)
@@ -79,7 +86,7 @@ class DemoDefaultResolver:
         if testobject_name is not None:
             if not testobject_name.startswith("raw_"):
                 msg = f"Testobjects in raw_layer must start with raw_: {testobject_name}"
-                raise ValueError(msg)
+                raise DemoNamingResolverError(msg)
             base_path += "/" + testobject_name.removeprefix("raw_") + "/"
         return [base_path]
 

@@ -1,5 +1,5 @@
 from typing import List
-from src.domain.specification import ISpecCommandHandler, FetchSpecsCommand
+from src.domain_ports import ISpecCommandHandler, FetchSpecsCommand
 from src.dtos import TestSetDTO, LocationDTO
 
 

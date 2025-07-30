@@ -1,5 +1,5 @@
 from src.dtos import ReportArtifactFormat, TestReportDTO, TestDTO, LocationDTO
-from src.domain.report import (
+from src.domain_ports import (
     IReportCommandHandler,
     CreateReportCommand,
     SaveReportArtifactsForUsersCommand,

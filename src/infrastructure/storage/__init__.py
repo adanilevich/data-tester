@@ -1,10 +1,10 @@
-from .i_storage import (
+from src.infrastructure_ports import (
     IStorage,
     StorageTypeUnknownError,
     StorageError,
     ObjectNotFoundError,
+    IStorageFactory,
 )
-from .i_storage_factory import IStorageFactory
 from .storage_factory import StorageFactory
 from .formatter_factory import FormatterFactory
 from .i_formatter_factory import IFormatterFactory

@@ -1,6 +1,6 @@
 import pytest
 
-from src.domain.testcase.core.precondition_checks import (
+from src.domain.testcase.precondition_checks import (
     CheckTestObjectNotEmpty,
     ICheckable,
 )
