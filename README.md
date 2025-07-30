@@ -46,10 +46,11 @@ The framework is built to:
 ## Extension Points
 
 - Add new test types by implementing `AbstractTestCase`
-- Add new data platforms via `IDataPlatform` interface
-- Add new specification formats via `ISpecFormatter`
-- Add new report formats via `IReportFormatter`
-- Add new storage backends via `IStorage`
+- Add new data platforms via `IBackend` interface
+- Add new notification target via `INotifier` interface
+- Add new specification formats via `ISpecFormatter` interface
+- Add new report formats via `IReportFormatter` interface
+- Add new storage backends via `IStorage` interface
 
 ---
 
