@@ -1,5 +1,5 @@
 from uuid import uuid4
-from src.domain.testcase.core.testcases import SchemaTestCase
+from src.domain.testcase.testcases import SchemaTestCase
 from src.dtos import (
     SchemaSpecificationDTO,
     TestObjectDTO,

@@ -2,6 +2,7 @@ import pytest
 import json
 
 from src.infrastructure.storage.json_formatter import JsonFormatter
+from src.infrastructure.storage.i_formatter import FormatterError
 from src.dtos import TestSetDTO, StorageObject
 
 
@@ -85,7 +86,7 @@ class TestJsonFormatter:
         ]
 
         for object_key, object_type in invalid_cases:
-            with pytest.raises(ValueError):
+            with pytest.raises(FormatterError):
                 formatter.get_object_id(object_key, object_type)
 
     def test_roundtrip_serialization(
@@ -116,5 +117,5 @@ class TestJsonFormatter:
 
     def test_unknown_object_type_raises(self, formatter: JsonFormatter):
         """Test that unknown object types raise ValueError"""
-        with pytest.raises(ValueError, match="Unknown object type"):
+        with pytest.raises(FormatterError, match="Unknown object type"):
             formatter.deserialize(b"{}", StorageObject.UNKNOWN)

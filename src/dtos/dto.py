@@ -22,7 +22,7 @@ class DTO(BaseModel):
     def to_json(self, exclude: set | None = None) -> str:
         return self.model_dump_json(exclude=exclude)
 
-    def create_copy(self) -> Self:
+    def copy(self) -> Self:  # type: ignore
         return self.model_copy()
 
     @classmethod

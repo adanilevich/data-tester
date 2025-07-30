@@ -2,8 +2,7 @@
 from .demo import DemoBackendFactory, DemoBackend
 from .dummy import DummyBackendFactory, DummyBackend
 from .map import map_platform
-from .i_backend import IBackend
-from .i_backend_factory import IBackendFactory
+from src.infrastructure_ports import IBackend, IBackendFactory
 
 
 __all__ = [

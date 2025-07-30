@@ -5,15 +5,18 @@ from unittest.mock import Mock, patch
 import pytest
 import polars as pl
 
-from src.domain.specification.core.specification import Specification
-from src.domain.specification.plugins.naming_conventions import NamingConventionsFactory
-from src.domain.specification.plugins.formatter import FormatterFactory
-from src.domain.specification.plugins.requirements import Requirements
+from src.domain.specification import Specification
+from src.domain.specification.plugins import (
+    NamingConventionsFactory,
+    FormatterFactory,
+    SpecDeserializationError,
+    SpecNamingConventionsError,
+)
+from src.infrastructure.storage import StorageError, StorageFactory
 from src.infrastructure.storage.dict_storage import DictStorage
 from src.infrastructure.storage.formatter_factory import (
     FormatterFactory as StorageFormatterFactory,
 )
-from src.infrastructure.storage.storage_factory import StorageFactory
 from src.config import Config
 from src.dtos import (
     LocationDTO,
@@ -72,24 +75,17 @@ class TestSpecification:
         return FormatterFactory()
 
     @pytest.fixture
-    def requirements(self) -> Requirements:
-        """Create a Requirements instance"""
-        return Requirements()
-
-    @pytest.fixture
     def specification(
         self,
         storage_factory: StorageFactory,
         naming_conventions_factory: NamingConventionsFactory,
         formatter_factory: FormatterFactory,
-        requirements: Requirements,
     ) -> Specification:
         """Create a Specification instance with all dependencies"""
         return Specification(
             storage_factory=storage_factory,
             naming_conventions_factory=naming_conventions_factory,
             formatter_factory=formatter_factory,
-            requirements=requirements,
         )
 
     def _create_test_xlsx_schema(self) -> bytes:
@@ -115,7 +111,6 @@ class TestSpecification:
         assert specification.storage_factory is not None
         assert specification.naming_conventions_factory is not None
         assert specification.formatter_factory is not None
-        assert specification.requirements is not None
 
     def test_find_specs_schema(self, specification: Specification):
         """Test find_specs for schema test type"""
@@ -175,7 +170,7 @@ class TestSpecification:
 
         # Mock formatter to raise an exception during deserialization
         mock_formatter = Mock()
-        mock_formatter.deserialize.side_effect = Exception("Parse error")
+        mock_formatter.deserialize.side_effect = SpecDeserializationError("Parse error")
 
         with patch.object(
             specification.formatter_factory, "get_formatter", return_value=mock_formatter
@@ -188,9 +183,9 @@ class TestSpecification:
         """Test find_specs with an unsupported test type"""
         location = LocationDTO("dict://specs/")
         # Unsupported type
-        testcase = TestCaseEntryDTO(testobject="table1", testtype=TestType.DUMMY_OK)
+        testcase = TestCaseEntryDTO(testobject="table1", testtype=TestType.UNKNOWN)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(SpecNamingConventionsError):
             specification.find_specs(location, testcase, "test_domain")
 
     def test_parse_spec_file_schema(self, specification: Specification):
@@ -247,7 +242,7 @@ class TestSpecification:
         mock_storage.list_files.return_value = [
             LocationDTO("dict://specs/table1_schema.xlsx")
         ]
-        mock_storage.read_bytes.side_effect = Exception("Read error")
+        mock_storage.read_bytes.side_effect = StorageError("Read error")
 
         with patch.object(
             specification.storage_factory, "get_storage", return_value=mock_storage

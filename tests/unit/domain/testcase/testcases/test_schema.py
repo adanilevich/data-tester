@@ -1,6 +1,6 @@
 import pytest
 
-from src.domain.testcase.core.testcases import AbstractTestCase
+from src.domain.testcase.testcases import AbstractTestCase
 from src.dtos import SchemaSpecificationDTO, TestType, SpecificationType, LocationDTO
 
 

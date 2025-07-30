@@ -1,6 +1,6 @@
 from typing import List
 
-from .i_storage import (
+from src.infrastructure_ports import (
     IStorage,
     StorageError,
     ObjectNotFoundError,

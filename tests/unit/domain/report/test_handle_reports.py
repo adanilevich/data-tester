@@ -17,11 +17,9 @@ from src.dtos import (
 )
 from src.infrastructure.storage import StorageFactory, FormatterFactory
 from src.config import Config
-from src.domain.report.application.handle_reports import (
-    ReportCommandHandler,
-    InvalidReportTypeError,
-)
-from src.domain.report.ports.drivers import (
+from src.domain import ReportCommandHandler
+from src.domain.report.handle_reports import InvalidReportTypeError
+from src.domain_ports import (
     CreateReportCommand,
     SaveReportCommand,
     GetReportArtifactCommand,

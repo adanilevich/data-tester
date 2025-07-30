@@ -1,7 +1,8 @@
 import pytest
 import polars as pl
 
-from src.domain.testcase.core.testcases import AbstractTestCase
+from src.domain.testcase.testcases import AbstractTestCase
+from src.domain.testcase.testcases.rowcount import RowCountTestCaseError
 from src.dtos import RowCountSqlDTO, TestType, SpecificationType, LocationDTO
 
 
@@ -67,11 +68,10 @@ class TestRowCountTestCase:
         self.spec.query = "exception"
         testcase.specs = [self.spec]
 
-        with pytest.raises(ValueError) as err:
+        with pytest.raises(RowCountTestCaseError):
             testcase._execute()
 
         assert testcase.result == testcase.result.NA
-        assert "simulated exception" in str(err)
 
     def test_happy_path(self, testcase):
         self.spec.query = "good"

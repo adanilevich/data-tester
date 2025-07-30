@@ -1,5 +1,5 @@
 from src.dtos import LocationDTO, TestRunDTO, TestRunReportDTO
-from src.domain.testcase import (
+from src.domain_ports import (
     ITestRunCommandHandler,
     ExecuteTestRunCommand,
     SetReportIdsCommand,

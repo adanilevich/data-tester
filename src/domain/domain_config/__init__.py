@@ -1,13 +1,15 @@
-from .application import DomainConfigHandler
-from .ports import (
-    IDomainConfigHandler,
-    FetchDomainConfigsCommand,
-    SaveDomainConfigCommand,
+from .domain_config_handler import DomainConfigHandler
+from .domain_config import (
+    DomainConfig,
+    DomainConfigAlreadyExistsError,
+    DomainConfigSerializationError,
+    DomainConfigParsingError,
 )
 
 __all__ = [
     "DomainConfigHandler",
-    "IDomainConfigHandler",
-    "FetchDomainConfigsCommand",
-    "SaveDomainConfigCommand",
+    "DomainConfig",
+    "DomainConfigAlreadyExistsError",
+    "DomainConfigSerializationError",
+    "DomainConfigParsingError",
 ]

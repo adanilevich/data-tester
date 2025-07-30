@@ -9,7 +9,7 @@ try:
 except ImportError:
     GCSFileSystem = None
 
-from .i_storage import (
+from src.infrastructure_ports import (
     IStorage,
     StorageError,
     ObjectNotFoundError,

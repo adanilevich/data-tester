@@ -5,7 +5,7 @@ from .demo_backend import DemoBackend
 from .demo_naming_resolver import DemoNamingResolver
 from .demo_query_handler import DemoQueryHandler
 
-from src.infrastructure.backend.i_backend_factory import IBackendFactory
+from src.infrastructure_ports import IBackendFactory
 
 # Use project-root-relative paths for test fixtures
 local_raw_data = Path("tests/fixtures/demo/raw")

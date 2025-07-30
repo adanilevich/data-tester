@@ -8,11 +8,13 @@ from src.dtos import (
     CompareSqlContent,
     RowCountSqlContent,
 )
-from src.domain.specification.plugins.formatter import (
+from src.domain.specification.plugins.spec_formatter import (
     XlsxSchemaFormatter,
     RowcountSqlFormatter,
     CompareSqlFormatter,
     FormatterFactory,
+    SpecFormatterError,
+    SpecDeserializationError,
 )
 
 
@@ -147,9 +149,9 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When deserializing the file an error is raised
-        with pytest.raises(ValueError, match="Unknown sql format"):
+        with pytest.raises(SpecDeserializationError, match="Unknown sql format"):
             RowcountSqlFormatter().deserialize(file_content)
-        with pytest.raises(ValueError, match="Unknown sql format"):
+        with pytest.raises(SpecDeserializationError, match="Unknown sql format"):
             CompareSqlFormatter().deserialize(file_content)
 
 
@@ -199,7 +201,7 @@ class TestFormatterFactory:
         unsupported_type = MockSpecType()
 
         # When getting the formatter an error is raised
-        with pytest.raises(ValueError, match="Parsing.*is not supported"):
+        with pytest.raises(SpecFormatterError, match="Parsing.*is not supported"):
             factory.get_formatter(unsupported_type)  # type: ignore
 
     def test_formatter_factory_returns_different_instances(self):

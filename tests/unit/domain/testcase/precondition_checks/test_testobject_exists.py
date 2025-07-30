@@ -1,7 +1,7 @@
 from typing import List
 import pytest
 
-from src.domain.testcase.core.precondition_checks import ICheckable, CheckTestObjectExists
+from src.domain.testcase.precondition_checks import ICheckable, CheckTestObjectExists
 
 
 class TestTestObjectExistsChecker:

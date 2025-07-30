@@ -1,10 +1,10 @@
 from typing import Dict
 
-from src.domain.domain_config import IDomainConfigHandler, FetchDomainConfigsCommand
+from src.domain_ports import IDomainConfigHandler, FetchDomainConfigsCommand
 from src.dtos import DomainConfigDTO, LocationDTO
 
 
-class CLIDomainConfigManager:
+class CliDomainConfigManager:
     def __init__(
         self,
         domain_config_handler: IDomainConfigHandler,

@@ -14,7 +14,7 @@ from src.dtos import (
     LocationDTO,
     StorageObject,
 )
-from src.domain.testcase.core.testrun import TestRun
+from src.domain.testcase.testrun import TestRun
 from src.infrastructure.storage import FormatterFactory, StorageFactory
 from src.infrastructure.backend.dummy import DummyBackend
 from src.infrastructure.notifier import InMemoryNotifier

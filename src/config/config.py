@@ -9,6 +9,12 @@ def env(name: str) -> str | None:
     return os.environ.get(name, None)
 
 
+class ConfigError(Exception):
+    """
+    Exception raised when a config value is not set.
+    """
+
+
 class Config(BaseSettings):
     # ENVIRONMENT CONFIGURATION
     DATATESTER_ENV: str = Field(default="LOCAL")

@@ -1,9 +1,13 @@
 from .i_naming_conventions import INamingConventions, INamingConventionsFactory
-from .i_spec_formatter import ISpecFormatter, ISpecFormatterFactory
-from .i_requirements import IRequirements
-from .naming_conventions import NamingConventionsFactory
-from .formatter import FormatterFactory
-from .requirements import Requirements
+from .i_spec_formatter import (
+    ISpecFormatter,
+    ISpecFormatterFactory,
+    SpecFormatterError,
+    SpecDeserializationError,
+    SpecSerializationError,
+)
+from .naming_conventions import NamingConventionsFactory, SpecNamingConventionsError
+from .spec_formatter import FormatterFactory
 
 
 __all__ = [
@@ -11,8 +15,10 @@ __all__ = [
     "INamingConventionsFactory",
     "ISpecFormatter",
     "ISpecFormatterFactory",
-    "IRequirements",
+    "SpecFormatterError",
+    "SpecDeserializationError",
+    "SpecSerializationError",
     "NamingConventionsFactory",
     "FormatterFactory",
-    "Requirements",
+    "SpecNamingConventionsError",
 ]

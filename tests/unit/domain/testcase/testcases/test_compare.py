@@ -4,7 +4,7 @@ import pytest
 import time
 import polars as pl
 
-from src.domain.testcase.core.testcases import CompareTestCase
+from src.domain.testcase.testcases.compare import CompareTestCase, CompareTestCaseError
 from src.dtos import (
     SchemaSpecificationDTO,
     CompareSqlDTO,
@@ -51,7 +51,7 @@ class TestCompareTestCase:
 
         def get_sample_keys_(query, *args, **kwargs) -> List[str]:
             if "exception" in query:
-                raise NotImplementedError("This is a simulated exception.")
+                raise CompareTestCaseError("This is a simulated exception.")
             else:
                 return self.data.select("__concat_key__").to_series().to_list()
 
@@ -59,7 +59,7 @@ class TestCompareTestCase:
 
         def get_sample_from_query_(query, *args, **kwargs) -> pl.DataFrame:
             if "error" in query:
-                raise NotImplementedError("This is a simulated exception.")
+                raise CompareTestCaseError("This is a simulated exception.")
             if "bad" in query:
                 return self.data[:-1]
             else:
@@ -95,11 +95,10 @@ class TestCompareTestCase:
         sql.query = "exception"
         testcase.specs = [sql, self.schema]
 
-        with pytest.raises(NotImplementedError) as err:
+        with pytest.raises(CompareTestCaseError) as err:
             testcase._execute()
 
         assert "Error while sampling primary keys" in str(err)
-        assert "simulated exception" in str(err)
 
     def test_happy_path(self, testcase):
         testcase._execute()

@@ -1,4 +1,4 @@
-from src.domain.testcase.core.testcases import AbstractTestCase
+from src.domain.testcase.testcases import AbstractTestCase
 from src.dtos import TestType
 
 

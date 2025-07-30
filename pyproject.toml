@@ -25,6 +25,7 @@ dev = [
     "mypy",  # type checker
     "pytest",  # test framework
     "coverage",  # test coverage reports
+    "pygount",  # count lines of code
 ]
 
 [tool.uv]

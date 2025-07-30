@@ -1,6 +1,9 @@
 import pytest
 
-from src.infrastructure.storage.formatter_factory import FormatterFactory
+from src.infrastructure.storage.formatter_factory import (
+    FormatterFactory,
+    StorageFormatterFactoryError,
+)
 from src.infrastructure.storage.json_formatter import JsonFormatter
 from src.dtos import StorageObject
 
@@ -38,7 +41,8 @@ class TestFormatterFactory:
     def test_get_formatter_unknown_object_type_raises(self, factory: FormatterFactory):
         """Test that unknown object types raise ValueError"""
         with pytest.raises(
-            ValueError, match="Cannot get formatter for unknown object type"
+            StorageFormatterFactoryError,
+            match="Cannot get formatter for unknown object type",
         ):
             factory.get_formatter(StorageObject.UNKNOWN)
 

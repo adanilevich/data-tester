@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.domain.testcase.application.handle_testruns import TestRunCommandHandler
+from src.domain import TestRunCommandHandler
 from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.storage.formatter_factory import FormatterFactory
 from src.infrastructure.storage.storage_factory import StorageFactory
@@ -25,13 +25,13 @@ from src.dtos import (
     CompareTestCaseConfigDTO,
     StorageObject,
 )
-from src.domain.testcase.ports import (
+from src.domain_ports import (
     SaveTestRunCommand,
     LoadTestRunCommand,
     SetReportIdsCommand,
     ExecuteTestRunCommand,
 )
-from src.infrastructure.storage.i_storage import (
+from src.infrastructure_ports import (
     StorageTypeUnknownError,
     ObjectNotFoundError,
 )

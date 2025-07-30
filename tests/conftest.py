@@ -27,10 +27,10 @@ from src.dtos.testcase import (
 from src.dtos.report import TestCaseReportDTO, TestRunReportDTO
 from src.dtos.testcase import TestRunDTO
 from src.dtos.location import LocationDTO
-from src.infrastructure.backend import IBackend
+from src.infrastructure_ports import IBackend
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 from src.infrastructure.backend.dummy import DummyBackend
-from src.domain.testcase.core.testcases import (
+from src.domain.testcase.testcases import (
     AbstractTestCase,
     SchemaTestCase,
     RowCountTestCase,
@@ -39,7 +39,7 @@ from src.domain.testcase.core.testcases import (
     DummyNokTestCase,
     DummyExceptionTestCase,
 )
-from src.domain.testcase.core.precondition_checks import ICheckable
+from src.domain.testcase.precondition_checks import ICheckable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 

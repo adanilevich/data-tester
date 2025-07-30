@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 import polars as pl
 
-from src.infrastructure.backend.i_backend import IBackend
+from src.infrastructure_ports import IBackend
 from src.dtos import (
     SchemaSpecificationDTO,
     DBInstanceDTO,

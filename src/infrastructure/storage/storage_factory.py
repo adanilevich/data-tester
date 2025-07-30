@@ -1,5 +1,4 @@
-from .i_storage_factory import IStorageFactory
-from .i_storage import IStorage, StorageTypeUnknownError
+from src.infrastructure_ports import IStorageFactory, IStorage, StorageTypeUnknownError
 from .i_formatter_factory import IFormatterFactory
 from .file_storage import FileStorage
 from .dict_storage import DictStorage
