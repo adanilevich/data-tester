@@ -52,7 +52,7 @@
 | src/domain/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/rowcount.py                                        |       57 |        1 |     98% |        89 |
 | src/domain/testcase/testcases/schema.py                                          |      131 |        3 |     98% |98, 109, 146 |
-| src/domain/testcase/testrun.py                                                   |       64 |        3 |     95% |125, 131, 137 |
+| src/domain/testcase/testrun.py                                                   |       64 |        3 |     95% |121, 127, 133 |
 | src/domain/testset/\_\_init\_\_.py                                               |        2 |        0 |    100% |           |
 | src/domain/testset/handle\_testsets.py                                           |       15 |        0 |    100% |           |
 | src/domain/testset/testset.py                                                    |       28 |        2 |     93% |     54-55 |
@@ -97,12 +97,12 @@
 | src/infrastructure/notifier/stdout\_notifier.py                                  |        4 |        0 |    100% |           |
 | src/infrastructure/storage/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/storage/dict\_storage.py                                      |       66 |        2 |     97% |   118-120 |
-| src/infrastructure/storage/file\_storage.py                                      |      140 |       38 |     73% |57-64, 72-73, 80, 100-101, 120, 127-128, 144-145, 157, 160, 167-168, 182, 189-202, 221-225, 238, 244, 253-254 |
+| src/infrastructure/storage/file\_storage.py                                      |      139 |       38 |     73% |59-66, 74-75, 82, 102-103, 122, 129-130, 146-147, 159, 162, 169-170, 184, 191-204, 223-227, 240, 246, 255-256 |
 | src/infrastructure/storage/formatter\_factory.py                                 |       13 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter.py                                       |        7 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter\_factory.py                              |        4 |        0 |    100% |           |
 | src/infrastructure/storage/json\_formatter.py                                    |       39 |        5 |     87% |46-48, 53-54 |
-| src/infrastructure/storage/storage\_factory.py                                   |       21 |        0 |    100% |           |
+| src/infrastructure/storage/storage\_factory.py                                   |       19 |        0 |    100% |           |
 | src/infrastructure\_ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/backend/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/backend/i\_backend.py                                  |       10 |        0 |    100% |           |
@@ -112,9 +112,9 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-|                                                                        **TOTAL** | **2533** |  **146** | **94%** |           |
+|                                                                        **TOTAL** | **2530** |  **146** | **94%** |           |
 
-2 empty files skipped.
+9 empty files skipped.
 
 
 ## Setup coverage badge
