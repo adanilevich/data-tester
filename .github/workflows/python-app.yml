@@ -58,6 +58,7 @@ jobs:
         MINIMUM_ORANGE: 70
 
     - name: Create-PR
+      if: github.ref != 'refs/heads/main'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # requires GitHub action settings to allow auto-create PRs
