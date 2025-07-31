@@ -58,6 +58,8 @@ jobs:
         MINIMUM_ORANGE: 70
 
     - name: Create-PR
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         gh pr create --title "Auto-PR" --body "Auto-PR" --base main
 
