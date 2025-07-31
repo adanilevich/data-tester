@@ -58,14 +58,14 @@ jobs:
         MINIMUM_ORANGE: 70
 
   pr:
+    on:
+    push:
+      branches-ignore:
+        - main
     name: PR
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write  # required by coverage action to comment coverage on PRs
-    on:
-      push:
-        branches-ignore:
-          - main
     steps:
       - uses: actions/checkout@v4
       - name: Create-PR
