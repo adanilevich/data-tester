@@ -56,3 +56,11 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
+
+    - name: Create-PR
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # requires GitHub action settings to allow auto-create PRs
+      run: |
+        gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
+
