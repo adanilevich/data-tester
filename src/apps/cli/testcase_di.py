@@ -26,7 +26,7 @@ class TestCaseDependencyInjector:
 
         # create formatter factory and storage factory
         formatter_factory = FormatterFactory()
-        self.storage_factory = StorageFactory(self.config, formatter_factory)
+        self.storage_factory = StorageFactory(formatter_factory)
 
         # set storage location
         self.storage_location = LocationDTO(

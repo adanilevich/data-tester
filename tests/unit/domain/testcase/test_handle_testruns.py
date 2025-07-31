@@ -6,7 +6,6 @@ from src.domain import TestRunCommandHandler
 from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.storage.formatter_factory import FormatterFactory
 from src.infrastructure.storage.storage_factory import StorageFactory
-from src.config import Config
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 from src.dtos import (
     TestRunDTO,
@@ -46,9 +45,8 @@ def dummy_platform_factory():
 @pytest.fixture
 def storage_factory():
     """Create a StorageFactory for testing"""
-    config = Config()
     formatter_factory = FormatterFactory()
-    return StorageFactory(config, formatter_factory)
+    return StorageFactory(formatter_factory)
 
 
 @pytest.fixture

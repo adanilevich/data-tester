@@ -17,7 +17,6 @@ from src.infrastructure.storage.dict_storage import DictStorage
 from src.infrastructure.storage.formatter_factory import (
     FormatterFactory as StorageFormatterFactory,
 )
-from src.config import Config
 from src.dtos import (
     LocationDTO,
     TestCaseEntryDTO,
@@ -35,9 +34,8 @@ class TestSpecification:
     @pytest.fixture
     def storage_factory(self) -> StorageFactory:
         """Create a StorageFactory instance"""
-        config = Config()
         storage_formatter_factory = StorageFormatterFactory()
-        storage_factory = StorageFactory(config, storage_formatter_factory)
+        storage_factory = StorageFactory(storage_formatter_factory)
 
         """Create a DictStorage instance with test data"""
         location = LocationDTO("dict://specs/")

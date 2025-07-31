@@ -23,7 +23,7 @@ class SpecDependencyInjector:
         # Create storage formatter factory - this is not used for specifications,
         # but it is needed to create the storage factory
         storage_formatter_factory = StorageFormatterFactory()
-        self.storage_factory = StorageFactory(config, storage_formatter_factory)
+        self.storage_factory = StorageFactory(storage_formatter_factory)
         self.naming_conventions_factory = NamingConventionsFactory()
         self.formatter_factory = FormatterFactory()
 

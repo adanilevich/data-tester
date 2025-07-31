@@ -5,25 +5,18 @@ from src.infrastructure.storage.formatter_factory import FormatterFactory
 from src.infrastructure.storage.file_storage import FileStorage
 from src.infrastructure.storage.dict_storage import DictStorage
 from src.dtos import LocationDTO, Store
-from src.config import Config
 
 
 class TestStorageFactory:
     """Test StorageFactory implementation"""
 
     @pytest.fixture
-    def config(self) -> Config:
-        return Config()
-
-    @pytest.fixture
     def formatter_factory(self) -> FormatterFactory:
         return FormatterFactory()
 
     @pytest.fixture
-    def storage_factory(
-        self, config: Config, formatter_factory: FormatterFactory
-    ) -> StorageFactory:
-        return StorageFactory(config, formatter_factory)
+    def storage_factory(self, formatter_factory: FormatterFactory) -> StorageFactory:
+        return StorageFactory(formatter_factory)
 
     def test_get_storage(self, storage_factory: StorageFactory):
         """Test getting different storage types"""
@@ -67,8 +60,8 @@ class TestStorageFactory:
         storage = storage_factory.get_storage(location)
 
         # FileStorage should have the config
-        assert hasattr(storage, "config")
-        assert storage.config is storage_factory.config
+        assert hasattr(storage, "gcp_project")
+        assert storage.gcp_project is None
 
     def test_unsupported_storage_type_raises(self, storage_factory: StorageFactory):
         """Test that unsupported storage types raise ValueError"""

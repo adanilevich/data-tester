@@ -3,7 +3,6 @@ import pytest
 from src.infrastructure.storage.file_storage import FileStorage, ObjectNotFoundError
 from src.infrastructure.storage.formatter_factory import FormatterFactory
 from src.dtos import LocationDTO, StorageObject, TestSetDTO, Store
-from src.config import Config
 
 
 class TestFileStorage:
@@ -11,10 +10,9 @@ class TestFileStorage:
 
     @pytest.fixture
     def storage(self) -> FileStorage:
-        config = Config()
         formatter_factory = FormatterFactory()
         return FileStorage(
-            config=config, storage_type=Store.MEMORY, formatter_factory=formatter_factory
+            storage_type=Store.MEMORY, formatter_factory=formatter_factory
         )
 
     def test_supported_storage_types(self, storage: FileStorage):

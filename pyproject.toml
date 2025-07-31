@@ -26,10 +26,17 @@ dev = [
     "pytest",  # test framework
     "coverage",  # test coverage reports
     "pygount",  # count lines of code
+    "import-linter"  # enforce import rules for hexagonal architecture
 ]
+
+
+# UV CONFIG
 
 [tool.uv]
 default-groups = ["dev"]  # uv will install dev dependency group by default
+
+
+# PYTEST CONFIG
 
 [tool.pytest.ini_options]
 minversion = "8.1"
@@ -44,11 +51,12 @@ filterwarnings = [
 ]
 
 
+# COVERAGE CONFIG
+
 [tool.coverage.run]
 command_line = "-m pytest -m 'not skip_test and not infrastructure'"
 source = ["src/"]  # only analyze source code in src for coverage
 relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3
-
 
 [tool.coverage.report]
 skip_empty = true  # empty python files like __init__.py are not included in report
@@ -59,15 +67,104 @@ exclude_also = [
 ]
 
 
+# MYPY CONFIG
+
 [tool.mypy]
 check_untyped_defs = true  # check bodies of functions for type hints
 packages = ["src", "tests"]
 
 
+# RUFF CONFIG
+
 [tool.ruff]
 line-length = 90
 src = ["src"]
 
-
 [tool.ruff.lint]
 select = ["E", "F", "W", "B"]
+
+
+# IMPORT-LINTER CONFIG
+
+[tool.importlinter]
+root_package = "src"
+
+[[tool.importlinter.contracts]]
+name = "1. Domain only imports ports"
+type = "forbidden"
+source_modules = ["src.domain"]
+forbidden_modules = [
+    "src.apps",
+    "src.config",
+    "src.drivers",
+    "src.infrastructure"
+]
+
+[[tool.importlinter.contracts]]
+name = "2. Drivers only import domain ports"
+type = "forbidden"
+source_modules = ["src.drivers"]
+forbidden_modules = [
+    "src.apps",
+    "src.config",
+    "src.domain",
+    "src.infrastructure",
+    "src.infrastructure_ports"
+]
+
+[[tool.importlinter.contracts]]
+name = "3. Infra only imports infra ports"
+type = "forbidden"
+source_modules = ["src.infrastructure"]
+forbidden_modules = [
+    "src.apps",
+    "src.config",
+    "src.domain",
+    "src.domain_ports",
+    "src.drivers",
+]
+
+[[tool.importlinter.contracts]]
+name = "4. Ports only import DTOs"
+type = "forbidden"
+source_modules = [
+    "src.domain_ports",
+    "src.infrastructure_ports"
+]
+forbidden_modules = [
+    "src.apps",
+    "src.config",
+    "src.domain",
+    "src.drivers",
+    "src.infrastructure",
+]
+
+[[tool.importlinter.contracts]]
+name = "5. Ports and config are independent"
+type = "independence"
+modules = [
+    "src.domain_ports",
+    "src.infrastructure_ports",
+    "src.config",
+]
+
+[[tool.importlinter.contracts]]
+name = "5. Domain hexagons are independent"
+type = "independence"
+modules = [
+    "src.domain.*"
+]
+
+[[tool.importlinter.contracts]]
+name = "6. Apps are independent"
+type = "independence"
+modules = [
+    "src.apps.*",
+]
+
+[[tool.importlinter.contracts]]
+name = "7. Drivers are independent"
+type = "independence"
+modules = [
+    "src.drivers.*"
+]

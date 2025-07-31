@@ -17,7 +17,7 @@ from src.dtos.location import LocationDTO
 class ReportDependencyInjector:
     def __init__(self, config: Config):
         self.config = config
-        self.storage_factory = StorageFactory(self.config, FormatterFactory())
+        self.storage_factory = StorageFactory(FormatterFactory())
 
         self.internal_location: LocationDTO
         self.user_location: LocationDTO  # to be set in cli_report_manager

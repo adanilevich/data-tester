@@ -14,7 +14,7 @@ class TestSetDependencyInjector:
             self.config.DATATESTER_INTERNAL_TESTSET_LOCATION
         )
         storage_formatter_factory = FormatterFactory()
-        self.storage_factory = StorageFactory(self.config, storage_formatter_factory)
+        self.storage_factory = StorageFactory(storage_formatter_factory)
 
     def cli_testset_manager(self) -> CliTestSetManager:
         # Create the core TestSet handler (implements ITestSetHandler)

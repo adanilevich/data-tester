@@ -12,5 +12,9 @@ echo "Running pytest..."
 pytest
 read -p "Press Enter to continue!"
 
+echo "Running lint-imports..."
+uv run lint-imports
+read -p "Press Enter to continue!"
+
 echo "Counting lines of code..."
 pygount src --format=summary

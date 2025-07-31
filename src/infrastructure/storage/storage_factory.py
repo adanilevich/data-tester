@@ -3,14 +3,12 @@ from .i_formatter_factory import IFormatterFactory
 from .file_storage import FileStorage
 from .dict_storage import DictStorage
 from src.dtos.location import LocationDTO, Store
-from src.config import Config
 
 
 class StorageFactory(IStorageFactory):
     """Factory for creating storage implementations based on location type."""
 
-    def __init__(self, config: Config, formatter_factory: IFormatterFactory):
-        self.config = config
+    def __init__(self, formatter_factory: IFormatterFactory):
         self.formatter_factory = formatter_factory
         self._dict_storage: DictStorage | None = None
 
@@ -30,7 +28,7 @@ class StorageFactory(IStorageFactory):
         """
         match location.store:
             case Store.LOCAL | Store.GCS | Store.MEMORY:
-                return FileStorage(self.config, location.store, self.formatter_factory)
+                return FileStorage(location.store, self.formatter_factory)
             case Store.DICT:
                 if self._dict_storage is None:
                     self._dict_storage = DictStorage(self.formatter_factory)

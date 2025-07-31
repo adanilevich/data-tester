@@ -16,7 +16,6 @@ from src.dtos import (
     ReportType,
 )
 from src.infrastructure.storage import StorageFactory, FormatterFactory
-from src.config import Config
 from src.domain import ReportCommandHandler
 from src.domain.report.handle_reports import InvalidReportTypeError
 from src.domain_ports import (
@@ -46,9 +45,8 @@ def formatters():
 
 @pytest.fixture
 def report_handler(formatters) -> ReportCommandHandler:
-    config = Config()
     formatter_factory = FormatterFactory()
-    storage_factory = StorageFactory(config, formatter_factory)
+    storage_factory = StorageFactory(formatter_factory)
     handler = ReportCommandHandler(formatters=formatters, storage_factory=storage_factory)
     return handler
 
