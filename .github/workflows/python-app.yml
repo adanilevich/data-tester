@@ -59,9 +59,9 @@ jobs:
 
   pr:
     on:
-    push:
-      branches-ignore:
-        - main
+      push:
+        branches-ignore:
+          - main
     name: PR
     runs-on: ubuntu-latest
     permissions:
