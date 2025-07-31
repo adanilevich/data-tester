@@ -17,7 +17,6 @@ from src.infrastructure_ports import (
 )
 from .i_formatter_factory import IFormatterFactory
 from src.dtos import LocationDTO, Store, DTO, StorageObject, ObjectLocationDTO
-from src.config import Config
 
 
 class FileStorageError(
@@ -40,12 +39,15 @@ class FileStorage(IStorage):
     default_encoding: str = "utf-8"
 
     def __init__(
-        self, config: Config, storage_type: Store, formatter_factory: IFormatterFactory
+        self,
+        storage_type: Store,
+        formatter_factory: IFormatterFactory,
+        gcp_project: str | None = None,
     ):
-        self.config = config
         self.storage_type = storage_type
         self.formatter_factory = formatter_factory
         self.fs = self._create_filesystem(storage_type)
+        self.gcp_project = gcp_project
 
     def _create_filesystem(self, storage_type: Store) -> AbstractFileSystem:
         """Create the appropriate filesystem based on storage type."""
@@ -55,11 +57,11 @@ class FileStorage(IStorage):
             case Store.MEMORY:
                 return MemoryFileSystem()
             case Store.GCS:
-                if not self.config.DATATESTER_USE_GCS_STORAGE:
+                if not self.gcp_project:
                     raise StorageTypeUnknownError("GCS storage is not enabled in config")
                 if GCSFileSystem is None:
                     raise ImportError("GCSFileSystem is not installed")
-                return GCSFileSystem(project=self.config.DATATESTER_GCP_PROJECT)
+                return GCSFileSystem(project=self.gcp_project)
             case _:
                 raise StorageTypeUnknownError(
                     f"Storage type {storage_type} not supported"

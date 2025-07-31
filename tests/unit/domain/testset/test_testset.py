@@ -10,14 +10,12 @@ from src.infrastructure.storage import (
     FormatterFactory,
 )
 from src.dtos.testcase import TestType
-from src.config import Config
 
 
 @pytest.fixture
 def storage_factory():
-    config = Config()
     formatter_factory = FormatterFactory()
-    return StorageFactory(config, formatter_factory)
+    return StorageFactory(formatter_factory)
 
 
 @pytest.fixture

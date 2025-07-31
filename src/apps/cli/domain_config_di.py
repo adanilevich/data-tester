@@ -27,7 +27,7 @@ class DomainConfigDependencyInjector:
 
         # create formatter factory and storage factory
         formatter_factory = FormatterFactory()
-        self.storage_factory = StorageFactory(self.config, formatter_factory)
+        self.storage_factory = StorageFactory(formatter_factory)
 
     def cli_domain_config_manager(self) -> CliDomainConfigManager:
         domain_config_handler = DomainConfigHandler(storage_factory=self.storage_factory)

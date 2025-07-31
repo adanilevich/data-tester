@@ -56,7 +56,6 @@ class TestReportDependencyInjector:
         assert injector.config == config
         assert injector.internal_location.path == "dict://reports/"
         assert isinstance(injector.storage_factory, StorageFactory)
-        assert injector.storage_factory.config == config
         assert isinstance(injector.storage_factory.formatter_factory, FormatterFactory)
         assert len(injector.formatters) == 3
         assert isinstance(injector.formatters[0], TxtTestCaseReportFormatter)

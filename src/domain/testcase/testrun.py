@@ -14,10 +14,6 @@ from src.dtos import (
     StorageObject,
 )
 from src.infrastructure_ports import IBackend, INotifier, IStorageFactory
-
-# we need to import all subclasses of TestCase such that they are registered
-# and can be created via TestCaseFactory.create.
-# This is done in testcase.__init__.py which is imported here
 from .testcases import (
     AbstractTestCase,
     SchemaTestCase,

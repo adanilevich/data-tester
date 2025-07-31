@@ -27,7 +27,6 @@ from src.infrastructure.storage import (
     FormatterFactory,
     StorageTypeUnknownError,
 )
-from src.config import Config
 
 
 @pytest.fixture
@@ -42,9 +41,8 @@ def formatters():
 
 @pytest.fixture
 def storage_factory():
-    config = Config()
     formatter_factory = FormatterFactory()
-    return StorageFactory(config, formatter_factory)
+    return StorageFactory(formatter_factory)
 
 
 @pytest.fixture

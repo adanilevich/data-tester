@@ -18,7 +18,6 @@ from src.domain.testcase.testrun import TestRun
 from src.infrastructure.storage import FormatterFactory, StorageFactory
 from src.infrastructure.backend.dummy import DummyBackend
 from src.infrastructure.notifier import InMemoryNotifier
-from src.config import Config
 
 
 class TestTestRun:
@@ -47,9 +46,8 @@ class TestTestRun:
 
     @pytest.fixture
     def storage_factory(self):
-        config = Config()
         formatter_factory = FormatterFactory()
-        return StorageFactory(config, formatter_factory)
+        return StorageFactory(formatter_factory)
 
     @pytest.fixture
     def backend(self):
