@@ -57,19 +57,19 @@ jobs:
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
 
-    pr:
-      name: PR
-      runs-on: ubuntu-latest
-      permissions:
-        pull-requests: write  # required by coverage action to comment coverage on PRs
-      on:
-        push:
-          branches-ignore:
-            - main
-      steps:
-        - uses: actions/checkout@v4
-        - name: Create-PR
-          run: |
-            gh_pr_up() { gh pr create $* || gh pr edit $* }
-            gh_pr_up --title "My pull request" --body "Description"
+  pr:
+    name: PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # required by coverage action to comment coverage on PRs
+    on:
+      push:
+        branches-ignore:
+          - main
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create-PR
+        run: |
+          gh_pr_up() { gh pr create $* || gh pr edit $* }
+          gh_pr_up --title "My pull request" --body "Description"
 
