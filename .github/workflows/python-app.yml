@@ -66,7 +66,6 @@ jobs:
       # requires GitHub action settings to allow auto-create PRs
       run: |
         gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
-        gh pr merge adanilevich:$(git branch --show-current) --auto
 
   merge-pr:
     name: Merge-PR
