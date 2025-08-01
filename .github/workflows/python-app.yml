@@ -41,6 +41,7 @@ jobs:
         uv run mypy
 
     - name: enforce import contracts
+      # lint-imports config is defined in pyproject.toml
       run: |
         uv run lint-imports
 
@@ -65,5 +66,5 @@ jobs:
       # requires GitHub action settings to allow auto-create PRs
       run: |
         gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
-        gh pr merge --auto
+        gh pr merge adanilevich:$(git branch --show-current) --auto
 
