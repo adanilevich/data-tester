@@ -23,4 +23,4 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # requires GitHub action settings to allow auto-merge  PRs
       run: |
-        gh pr merge master --auto
+        gh pr merge adanilevich:$(git branch --show-current) --auto
