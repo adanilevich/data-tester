@@ -1,10 +1,6 @@
-name: Merge-PR
+name: Merge
 
 on: pull_request
-
-permissions:
-  pull-requests: write  
-  contents: write
 
 jobs:
 
@@ -15,10 +11,10 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - name: merge
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # requires GitHub action settings to allow auto-merge PRs
-        run: |
-          gh pr merge --auto --rebase $PR_URL
+    - name: merge
+      env:
+        PR_URL: ${{ github.event.pull_request.html_url }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # requires GitHub action settings to allow auto-merge PRs
+      run: |
+        gh pr merge --auto --rebase $PR_URL
