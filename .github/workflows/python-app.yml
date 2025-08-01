@@ -58,7 +58,7 @@ jobs:
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
 
-    - name: Create-and-merge-PR
+    - name: Create-PR
       # do not create PR if not on master branch
       if: github.ref != 'refs/heads/master'
       env:
@@ -66,5 +66,21 @@ jobs:
       # requires GitHub action settings to allow auto-create PRs
       run: |
         gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
-        gh pr merge $(git branch --show-current) --auto
+        gh pr merge adanilevich:$(git branch --show-current) --auto
 
+  merge-pr:
+    name: Merge-PR
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # required by coverage action to comment coverage on PRs
+      contents: write  # required by coverage action to push to coverage-commend-action branch
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Merge-PR
+        if: github.ref != 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # requires GitHub action settings to allow auto-merge PRs
+        run: |
+          gh pr merge adanilevich:$(git branch --show-current) --auto
