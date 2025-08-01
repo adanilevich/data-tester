@@ -66,22 +66,3 @@ jobs:
       # requires GitHub action settings to allow auto-create PRs
       run: |
         gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
-
-  merge-pr:
-    on: pull_request
-    name: Merge-PR
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write  # required by coverage action to comment coverage on PRs
-      contents: write  # required by coverage action to push to coverage-commend-action branch
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
-      - name: Merge-PR
-        if: github.ref != 'refs/heads/master'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # requires GitHub action settings to allow auto-merge PRs
-        run: |
-          sleep 10
-          gh pr merge master
