@@ -58,6 +58,7 @@ jobs:
         MINIMUM_ORANGE: 70
 
     - name: Create-PR
+      # do not create PR if not on master branch
       if: github.ref != 'refs/heads/master'
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
