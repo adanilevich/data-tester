@@ -17,4 +17,4 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # requires GitHub action settings to allow auto-merge PRs
       run: |
-        gh pr merge --auto --rebase "$PR_URL"
+        gh pr merge master --auto
