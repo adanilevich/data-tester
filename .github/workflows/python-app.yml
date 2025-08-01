@@ -58,7 +58,7 @@ jobs:
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
 
-    - name: Create-PR
+    - name: Create-and-merge-PR
       # do not create PR if not on master branch
       if: github.ref != 'refs/heads/master'
       env:
