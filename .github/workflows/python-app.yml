@@ -68,6 +68,7 @@ jobs:
         gh pr create --title "Auto-PR" --body "Auto-PR" --base master --head adanilevich:$(git branch --show-current)
 
   merge-pr:
+    on: pull_request
     name: Merge-PR
     runs-on: ubuntu-latest
     permissions:
