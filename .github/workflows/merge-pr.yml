@@ -21,6 +21,6 @@ jobs:
       env:
         PR_URL: ${{ github.event.pull_request.html_url }}
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # requires GitHub action settings to allow auto-merge  PRs
+      # requires GitHub action settings to allow auto-merge PRs
       run: |
         gh pr merge restructure-for-apps --auto
