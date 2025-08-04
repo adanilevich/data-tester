@@ -4,6 +4,7 @@
 
 | Name                                                                             |    Stmts |     Miss |   Cover |   Missing |
 |--------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
+| src/apps/cli/app.py                                                              |       35 |       35 |      0% |      1-66 |
 | src/apps/cli/domain\_config\_di.py                                               |       19 |        0 |    100% |           |
 | src/apps/cli/report\_di.py                                                       |       22 |        0 |    100% |           |
 | src/apps/cli/specification\_di.py                                                |       15 |        0 |    100% |           |
@@ -79,8 +80,8 @@
 | src/dtos/location.py                                                             |       61 |        3 |     95% |60, 66, 68 |
 | src/dtos/report.py                                                               |       62 |        0 |    100% |           |
 | src/dtos/specification.py                                                        |       62 |        4 |     94% | 34-37, 95 |
-| src/dtos/testcase.py                                                             |      112 |        2 |     98% |  154, 157 |
-| src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
+| src/dtos/testcase.py                                                             |      132 |        5 |     96% |14, 146, 149, 222, 225 |
+| src/dtos/testset.py                                                              |       41 |        1 |     98% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_backend.py                                 |      171 |       16 |     91% |131, 148-150, 168, 288, 292, 294, 297-302, 402, 432, 438 |
@@ -112,7 +113,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-|                                                                        **TOTAL** | **2530** |  **146** | **94%** |           |
+|                                                                        **TOTAL** | **2592** |  **184** | **93%** |           |
 
 9 empty files skipped.
 
