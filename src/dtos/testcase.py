@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Union, List, Dict, Self
+from typing import Union, List, Dict, Self, TYPE_CHECKING
 from uuid import uuid4
 from datetime import datetime
 
@@ -9,6 +9,9 @@ from pydantic import Field, UUID4
 from src.dtos.dto import DTO
 from src.dtos.domain_config import DomainConfigDTO
 from src.dtos.specification import SpecificationDTO
+
+if TYPE_CHECKING:
+    from src.dtos.testset import TestSetDTO
 
 
 class TestObjectDTO(DTO):
@@ -120,6 +123,71 @@ class TestRunDTO(TestDTO):
     def object_id(self) -> str:
         """Object ID for storage purposes."""
         return str(self.testrun_id)
+
+    @classmethod
+    def from_testset(
+        cls,
+        testset: TestSetDTO,
+        spec_list: List[List[SpecificationDTO]],
+        domain_config: DomainConfigDTO
+    ) -> Self:
+        """
+        Creates a TestRunDTO from a TestSetDTO, a list of specifications and a
+        domain config.
+        """
+
+        if len(spec_list) != len(testset.testcases):
+            raise ValueError("spec_list must be same length as testset.testcases")
+
+        if domain_config.domain != testset.domain:
+            raise ValueError("domain_config.domain must be same as testset.domain")
+
+        if testset.stage is None:
+            raise ValueError("testset.stage must be set")
+
+        if testset.instance is None:
+            raise ValueError("testset.instance must be set")
+
+        testrun_id = uuid4()
+        testdefinitions = []
+
+        testcase_entries = list(testset.testcases.values())
+        for testcase_entry, specs in zip(testcase_entries, spec_list, strict=True):
+            testobject = TestObjectDTO(
+                name=testcase_entry.testobject,
+                domain=testset.domain,
+                stage=testset.stage,
+                instance=testset.instance
+            )
+
+            definition = TestDefinitionDTO(
+                testobject=testobject,
+                testtype=testcase_entry.testtype,
+                scenario=testcase_entry.scenario,
+                specs=specs,
+                labels=testset.labels,
+                testset_id=testset.testset_id,
+                testrun_id=testrun_id,
+                domain_config=domain_config
+            )
+            testdefinitions.append(definition)
+
+        return cls(
+            testrun_id=testrun_id,
+            testset_id=testset.testset_id,
+            testset_name=testset.name,
+            labels=testset.labels,
+            domain=testset.domain,
+            stage=testset.stage,
+            instance=testset.instance,
+            start_ts=datetime.now(),
+            end_ts=None,
+            result=TestResult.NA,
+            status=TestStatus.NOT_STARTED,
+            testdefinitions=testdefinitions,
+            testcase_results=[],
+            domain_config=domain_config
+        )
 
     @classmethod
     def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
