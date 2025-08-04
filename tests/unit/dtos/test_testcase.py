@@ -4,8 +4,6 @@ from uuid import uuid4
 
 from src.dtos.testcase import (
     TestRunDTO,
-    TestCaseDTO,
-    TestObjectDTO,
     TestStatus,
     TestResult,
     TestType,
