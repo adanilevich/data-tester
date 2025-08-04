@@ -34,7 +34,15 @@ class TestSetDTO(DTO):
     domain: str
     default_stage: str  # default stage. not necessarily where testset is executed
     default_instance: str  # default instance. not necessarily where testset is executed
+    stage: str | None = None  # stage where testset is executed
+    instance: str | None = None  # Exectution instance
     testcases: Dict[str, TestCaseEntryDTO]  # dict by identifier
+
+    def model_post_init(self, __context):
+        if self.stage is None:
+            self.stage = self.default_stage
+        if self.instance is None:
+            self.instance = self.default_instance
 
     @property
     def object_id(self) -> str:
