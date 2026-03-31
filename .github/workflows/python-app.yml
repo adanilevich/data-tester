@@ -14,7 +14,7 @@ jobs:
       pull-requests: write  # required by coverage action to comment coverage on PRs
       contents: write  # required by coverage action to push to coverage-commend-action branch
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: set up uv
       uses: astral-sh/setup-uv@v8
