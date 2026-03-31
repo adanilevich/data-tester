@@ -146,10 +146,8 @@ class DemoBackend(IBackend):
         where_clause = "WHERE 1 = 1"
         for column_name, operation in filters_:
             if operation.startswith("="):
-                value = operation.removeprefix("=")
-                where_clause += (
-                    f"\n\tAND {column_name} == {value} FROM {catalog}.{schema}.{table}"
-                )
+                value: str = operation.removeprefix("=")
+                where_clause += f"\n\tAND {column_name} == {value}"
 
         query = f"""
             SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}

@@ -1,4 +1,4 @@
-# Agent Memory Index
+# Memory Index
 
-- [User Profile](user_profile.md) — Senior engineer on data-tester project, Python/hexagonal arch background
-- [Project Context](project_context.md) — data-tester: ETL pipeline validation framework, hexagonal arch, Python
+- [user_profile.md](user_profile.md) — User is an engineer working on a Python ETL validation framework using hexagonal architecture
+- [project_context.md](project_context.md) — Data Tester: hexagonal-arch Python framework for automating business validation tests on ETL pipelines

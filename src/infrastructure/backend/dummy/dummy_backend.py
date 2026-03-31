@@ -16,6 +16,9 @@ class DummyBackend(IBackend):
     """Dummy backend for test purpose only"""
 
     supports_db_comparison = False
+    supports_clustering = False
+    supports_partitions = False
+    supports_primary_keys = False
 
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
         return ["testobject1", "testobject2"]

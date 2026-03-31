@@ -1,7 +1,7 @@
 ---
 name: User Profile
-description: Profile of the user working on data-tester — senior engineer, Python, hexagonal architecture
+description: Engineer building and reviewing the Data Tester Python project — hexagonal architecture, ETL validation, DuckDB backend
 type: user
 ---
 
-The user is a software engineer working on the data-tester project. Based on code quality, architectural decisions (hexagonal architecture, Pydantic, Polars), and the depth of the codebase, they appear to be at a senior or lead level. They request thorough code reviews covering architecture, type safety, error handling, testing, performance, and security. They expect actionable, file-referenced findings rather than vague advice.
+The user is a software engineer working on "Data Tester", a Python framework for automating business validation tests on ETL pipelines. They are comfortable with hexagonal architecture, Pydantic, Polars, DuckDB, and Python type annotations. They requested a thorough, actionable code review with findings organized by severity. Level of detail suggests senior-engineer context.
