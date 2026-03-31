@@ -1,20 +1,24 @@
 #!/bin/bash
 
 echo "Running ruff checks..."
-ruff check --fix
-read -p "Press Enter to continue!"
+uv run ruff check --fix
+read -p "Next: typechecks. Press Enter to continue!"
 
-echo "Running mypy checks..."
-mypy
-read -p "Press Enter to continue!"
-
-echo "Running pytest..."
-pytest
-read -p "Press Enter to continue!"
+echo "Running typechecks ..."
+uv run ty check
+read -p "Next: lint-imports. Press Enter to continue!"
 
 echo "Running lint-imports..."
 uv run lint-imports
-read -p "Press Enter to continue!"
+read -p "Next: tests. Press Enter to continue!"
 
-echo "Counting lines of code..."
-pygount src --format=summary
+echo "Running tests ..."
+uv run coverage run
+read -p "Next: coverage report. Press Enter to continue!"
+
+echo "Printing coverage report..."
+uv run coverage report
+read -p "Next: code line count. Press Enter to continue!"
+
+echo "Running code line count..."
+uv run pygount src --format=summary

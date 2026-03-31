@@ -11,7 +11,7 @@ class TestDomainConfig:
     @pytest.fixture
     def domain_conf(self) -> DomainConfig:
         formatter_factory = FormatterFactory()
-        return DomainConfig(storage=DictStorage(formatter_factory))  # type: ignore
+        return DomainConfig(storage=DictStorage(formatter_factory))
 
     def test_fetching_from_empty_path(self, domain_conf: DomainConfig):
         # given an empty path

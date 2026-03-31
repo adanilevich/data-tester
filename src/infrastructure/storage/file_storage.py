@@ -1,8 +1,8 @@
 from typing import List
 
-from fsspec import AbstractFileSystem  # type: ignore
-from fsspec.implementations.local import LocalFileSystem  # type: ignore
-from fsspec.implementations.memory import MemoryFileSystem  # type: ignore
+from fsspec import AbstractFileSystem
+from fsspec.implementations.local import LocalFileSystem
+from fsspec.implementations.memory import MemoryFileSystem
 
 try:
     from gcsfs import GCSFileSystem  # type: ignore

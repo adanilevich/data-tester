@@ -1,7 +1,7 @@
 from io import BytesIO
 
 import polars as pl
-import xlsxwriter  # type: ignore
+import xlsxwriter
 
 from .i_report_formatter import (
     IReportFormatter,

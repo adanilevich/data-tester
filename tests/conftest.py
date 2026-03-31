@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 import polars as pl
-from fsspec.implementations.local import LocalFileSystem  # type: ignore
+from fsspec.implementations.local import LocalFileSystem
 from urllib import request
 
 from src.dtos.specification import SpecificationDTO, SpecificationType

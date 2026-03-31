@@ -1,5 +1,5 @@
 import pytest
-import yaml  # type: ignore
+import yaml
 
 from src.dtos.domain_config import DomainConfigDTO
 from src.dtos.location import LocationDTO
@@ -13,7 +13,7 @@ class TestDomainConfigDTO:
             LocationDTO("local://here"),
             [LocationDTO("local://there"), LocationDTO("local://anywhere")],
         ]:
-            domain_config.specifications_locations = locations  # type: ignore
+            domain_config.specifications_locations = locations
 
             result = domain_config.specifications_locations_by_instance("stage", "inst")
             assert result == locations if isinstance(locations, list) else [locations]
@@ -25,7 +25,7 @@ class TestDomainConfigDTO:
             "uat.main": [LocationDTO("local://here")],
             "test.alpha": [LocationDTO("local://there")],
         }
-        domain_config.specifications_locations = locations  # type: ignore
+        domain_config.specifications_locations = locations
         for stage, instance in [("uat", "main"), ("test", "alpha")]:
             result = domain_config.specifications_locations_by_instance(stage, instance)
             expected = locations[f"{stage}.{instance}"]
@@ -35,25 +35,25 @@ class TestDomainConfigDTO:
             _ = domain_config.specifications_locations_by_instance("unknown", "inst")
 
     def test_to_dict(self, domain_config: DomainConfigDTO):
-        domain_config.specifications_locations = [LocationDTO("local://here")]  # type: ignore
+        domain_config.specifications_locations = [LocationDTO("local://here")]
         result = domain_config.to_dict()
         expected = result["specifications_locations"]
         assert expected == [LocationDTO("local://here").to_dict()]
 
     def test_to_dict_from_dict(self, domain_config: DomainConfigDTO):
-        domain_config.specifications_locations = [LocationDTO("local://here")]  # type: ignore
+        domain_config.specifications_locations = [LocationDTO("local://here")]
         result = domain_config.to_dict()
         new_domain_config = DomainConfigDTO.from_dict(result)
         assert domain_config == new_domain_config
 
     def test_to_json_from_json(self, domain_config: DomainConfigDTO):
-        domain_config.specifications_locations = [LocationDTO("local://here")]  # type: ignore
+        domain_config.specifications_locations = [LocationDTO("local://here")]
         result = domain_config.to_json()
         new_domain_config = DomainConfigDTO.from_json(result)
         assert domain_config == new_domain_config
 
     def test_to_yaml_from_yaml(self, domain_config: DomainConfigDTO):
-        domain_config.specifications_locations = [LocationDTO("local://here")]  # type: ignore
+        domain_config.specifications_locations = [LocationDTO("local://here")]
         result = domain_config
         as_yaml = yaml.safe_dump(result.to_dict())
         new_domain_config = DomainConfigDTO.from_dict(yaml.safe_load(as_yaml))

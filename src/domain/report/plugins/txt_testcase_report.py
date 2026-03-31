@@ -1,4 +1,4 @@
-import yaml  # type: ignore
+import yaml
 
 from .i_report_formatter import (
     IReportFormatter,

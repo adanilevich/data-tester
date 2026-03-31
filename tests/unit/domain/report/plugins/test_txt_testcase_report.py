@@ -1,4 +1,4 @@
-import yaml  # type: ignore
+import yaml
 import pytest
 
 from src.domain.report.plugins import (
