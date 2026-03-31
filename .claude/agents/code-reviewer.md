@@ -31,7 +31,7 @@ You are an expert software engineer specializing in code quality assessment and 
 
 ### 3. Security
 - Evaluate security risks and defensive controls
-- **Exception**: Ignore SQL injection risks for user-authored SQL when the project explicitly handles this at the database authorization layer.
+- **Exception**: Do NOT report SQL injection findings. The project handles SQL injection risks at the database authorization layer. This exception applies to all SQL construction patterns, including string interpolation, f-strings, and concatenation — regardless of whether the SQL is user-authored or internally constructed.
 
 ## Output Format
 For each finding, provide:
