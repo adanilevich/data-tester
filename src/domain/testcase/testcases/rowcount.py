@@ -1,6 +1,6 @@
 from typing import List, Tuple, Any
 
-from . import AbstractTestCase, TestCaseError, BackendError, SpecNotFoundError
+from . import AbstractTestCase, TestCaseError, SpecNotFoundError
 from src.dtos import RowCountSqlDTO, DBInstanceDTO, TestType
 
 
@@ -10,7 +10,7 @@ class RowCountTestCaseError(TestCaseError):
     """
 
 
-class RowCountQueryExecutionError(RowCountTestCaseError, BackendError):
+class RowCountQueryExecutionError(RowCountTestCaseError):
     """
     Exception raised when a rowcount query execution fails
     """
@@ -83,7 +83,7 @@ class RowCountTestCase(AbstractTestCase):
 
     @property
     def sql(self) -> RowCountSqlDTO:
-        for spec in self.specs:
+        for spec in self.specs or []:
             if isinstance(spec, RowCountSqlDTO):
                 return spec
         raise SpecNotFoundError("Rowcount SQL not found.")

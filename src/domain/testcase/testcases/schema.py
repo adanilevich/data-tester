@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
 from src.dtos import SchemaSpecificationDTO, TestResult, DTO, TestType
@@ -34,9 +34,9 @@ class SchemaTestCase(AbstractTestCase):
         - clustering columnsa are compared if supported by backend (and specified)
     """
 
-    ttype = TestType.SCHEMA
-    required_specs = ["schema"]
-    preconditions = ["specs_are_unique", "testobject_exists"]
+    ttype: Literal[TestType.SCHEMA] = TestType.SCHEMA
+    required_specs: list[str] = ["schema"]
+    preconditions: list[str] = ["specs_are_unique", "testobject_exists"]
 
     def _execute(self):
         self.column_comparison_result: Optional[bool] = None
@@ -44,13 +44,13 @@ class SchemaTestCase(AbstractTestCase):
         self.clustering_comparison_result: Optional[bool] = None
         self.pk_comparison_result: Optional[bool] = None
 
-        expected = self.schema
-        actual = self._get_actual_schema()
+        expected: SchemaSpecificationDTO = self.schema
+        actual: SchemaSpecificationDTO = self._get_actual_schema()
 
         self.add_fact({"Specification": expected.location.path})
 
         # we start by comparing columns and datatypes
-        columns_diff_dto = self._compare_columns(expected, actual)
+        columns_diff_dto: ColumnDiffDTO = self._compare_columns(expected, actual)
         columns_diff_as_list = columns_diff_dto.to_dict()["diffs"]
         self.diff.update({"column_diff": columns_diff_as_list})
         self.add_detail({"Columns Comparison": str(columns_diff_as_list)})
@@ -84,7 +84,7 @@ class SchemaTestCase(AbstractTestCase):
         ]:
             if result is True:
                 self.summary += f" {description}: OK;"
-            if result is False:
+            elif result is False:
                 self.summary += f" {description}: NOK;"
                 self.result = self.result.NOK
             else:  # basically if result is None, e.g. comparison not supported
@@ -103,7 +103,7 @@ class SchemaTestCase(AbstractTestCase):
 
     @property
     def schema(self) -> SchemaSpecificationDTO:
-        for spec in self.specs:
+        for spec in self.specs or []:
             if isinstance(spec, SchemaSpecificationDTO):
                 return spec
         raise SpecNotFoundError("Schema specification not found")

@@ -104,6 +104,8 @@ class CompareTestCase(AbstractTestCase):
             self.notify("Using object specific sample size for comparison")
 
         detail = {"Specified sample size": sample_size}
+        if self.details is None:
+            self.details = []
         if detail not in self.details:
             self.add_detail(detail)
 
@@ -111,14 +113,14 @@ class CompareTestCase(AbstractTestCase):
 
     @property
     def sql(self) -> CompareSqlDTO:
-        for spec in self.specs:
+        for spec in self.specs or []:
             if isinstance(spec, CompareSqlDTO):
                 return spec
         raise SpecNotFoundError("Compare sql not found")
 
     @property
     def schema(self) -> SchemaSpecificationDTO:
-        for spec in self.specs:
+        for spec in self.specs or []:
             if isinstance(spec, SchemaSpecificationDTO):
                 return spec
         raise SpecNotFoundError("Schema spec not found")

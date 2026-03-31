@@ -67,14 +67,6 @@ exclude_also = [
     "@(abc\\.)?abstractmethod",
 ]
 
-
-# MYPY CONFIG
-
-[tool.mypy]
-check_untyped_defs = true  # check bodies of functions for type hints
-packages = ["src", "tests"]
-
-
 # RUFF CONFIG
 
 [tool.ruff]

@@ -197,7 +197,7 @@ class TestTestRun:
         assert results[TestType.DUMMY_EXCEPTION].status.name == "ERROR"
 
         # The overall testrun result should be NA (since not all are OK)
-        assert result.result == TestResult.NA
+        assert result.result == TestResult.NOK
         assert result.status == TestStatus.FINISHED
 
         # And the final state should be persisted correctly
@@ -217,7 +217,7 @@ class TestTestRun:
         assert persisted_dto.testset_name == result.testset_name
         assert persisted_dto.labels == result.labels
         assert persisted_dto.status == TestStatus.FINISHED
-        assert persisted_dto.result == TestResult.NA
+        assert persisted_dto.result == TestResult.NOK
         assert persisted_dto.end_ts is not None  # Should be set after execution
 
         # Verify testcase results are persisted correctly

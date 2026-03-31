@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from src.infrastructure_ports import IBackend
 from src.dtos import TestObjectDTO, SpecificationDTO
@@ -14,10 +14,10 @@ class ICheckable(ABC):
 
     testobject: TestObjectDTO  # checking testobject existence required testobject spec
     backend: IBackend  # precondition checkers orchestrate backend methods
-    required_specs: List[str] = []
-    specs: List[SpecificationDTO] = []
+    required_specs: Optional[List[str]] = None
+    specs: Optional[List[SpecificationDTO]] = None
     summary: str = ""
-    details: List[Dict[str, str | int | float]] = []
+    details: Optional[List[Dict[str, str | int | float]]] = None
 
     @abstractmethod
     def update_summary(self, summary: str):

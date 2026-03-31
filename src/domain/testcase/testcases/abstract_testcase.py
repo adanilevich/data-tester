@@ -51,8 +51,8 @@ class BackendError(TestCaseError):
 
 class AbstractTestCase(ICheckable):
     ttype: TestType = TestType.ABSTRACT
-    preconditions: List[str] = []
-    required_specs: List[str] = []
+    preconditions: Optional[List[str]] = None
+    required_specs: Optional[List[str]] = None
     __test__ = False  # prevents pytest collection
 
     def __init__(
@@ -93,6 +93,8 @@ class AbstractTestCase(ICheckable):
         self.facts.append(fact)
 
     def add_detail(self, detail: Dict[str, Any]):
+        if self.details is None:
+            self.details= []
         self.details.append(detail)
 
     def update_summary(self, summary: str):
@@ -101,10 +103,13 @@ class AbstractTestCase(ICheckable):
     def _check_preconditions(self, checker: IPreconditionChecker) -> bool:
         self.status = TestStatus.PRECONDITIONS
 
+        if self.preconditions is None:
+            return True
+
         for check in self.preconditions:
-            check_name = check.replace("_", " ")
+            check_name: str = check.replace("_", " ")
             self.notify(f"Checking that {check_name} ...")
-            check_result = checker.check(check=check, checkable=self)
+            check_result: bool = checker.check(check=check, checkable=self)
             self.notify(f"{check_name.title()}: {str(check_result)}")
             if not check_result:
                 msg = f"Stopping execution due to failed precondition: {check_name}!"
@@ -127,10 +132,10 @@ class AbstractTestCase(ICheckable):
             status=self.status,
             summary=self.summary,
             facts=self.facts,
-            details=self.details,
+            details=self.details or [],
             result=self.result,
             diff=self.diff,  # must be set by specific implementation
-            specifications=self.specs,
+            specifications=self.specs or [],
             start_ts=self.start_ts,
             end_ts=self.end_ts or datetime.now(),
             domain_config=self.domain_config,

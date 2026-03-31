@@ -19,6 +19,7 @@ from src.domain.specification.plugins import (
     SpecDeserializationError,
 )
 from src.infrastructure_ports import (
+    IStorage,
     IStorageFactory,
     StorageTypeUnknownError,
     StorageError,
@@ -125,25 +126,25 @@ class Specification:
         # here we try parsing each candidate file for each matched spec type
         for file, matched_spec_types in candidates:
             for spec_type in matched_spec_types:
-                formatter = self.formatter_factory.get_formatter(spec_type)
+                formatter= self.formatter_factory.get_formatter(spec_type)
                 try:
-                    storage = self.storage_factory.get_storage(file)
+                    storage: IStorage = self.storage_factory.get_storage(file)
                 except StorageTypeUnknownError as err:
                     raise StorageTypeUnknownError(
                         f"Storage type {file.store} not supported"
                     ) from err
                 # if file can't be read or parsed, skip it
                 try:
-                    file_bytes = storage.read_bytes(file)
+                    file_bytes: bytes = storage.read_bytes(file)
                 except StorageError as err:
                     print(f"Error reading file {file.path}: {err}")
                     continue
                 try:
-                    spec_content = formatter.deserialize(file_bytes)
+                    spec_content: SpecContent = formatter.deserialize(file_bytes)
                 except SpecDeserializationError as err:
                     print(f"Error deserializing file {file.path}: {err}")
                     continue
-                spec_dto = self._spec_from_content(
+                spec_dto: SpecificationDTO = self._spec_from_content(
                     content=spec_content,
                     testobject=testcase.testobject,
                     location=location,
