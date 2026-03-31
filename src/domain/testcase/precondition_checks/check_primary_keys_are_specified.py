@@ -14,7 +14,7 @@ class CheckPrimaryKeysAreSpecified(AbstractCheck):
 
     def _check(self, checkable: ICheckable) -> bool:
         primary_keys: List[str] = []
-        for spec in checkable.specs:
+        for spec in checkable.specs or []:
             if isinstance(spec, SchemaSpecificationDTO) and spec.primary_keys is not None:
                 primary_keys = spec.primary_keys
 

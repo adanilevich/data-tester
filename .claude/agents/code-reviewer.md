@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Reviews code for quality, best practices, performance, scalability
+description: Use this agent proactively to review code for quality, best practices, performance and scalability
 tools: Glob, Grep, Read
 model: sonnet
 color: green

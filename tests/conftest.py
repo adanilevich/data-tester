@@ -99,6 +99,8 @@ class DummyCheckable(ICheckable):
         self.summary += summary
 
     def add_detail(self, detail: Dict[str, str | int | float]):
+        if self.details is None:
+            self.details = []
         self.details.append(detail)
 
     def notify(self, message: str):

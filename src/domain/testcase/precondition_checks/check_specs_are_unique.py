@@ -1,4 +1,5 @@
-from typing import Dict
+from src.dtos.specification import SpecificationDTO
+from typing import Dict, List
 
 from . import AbstractCheck, ICheckable
 
@@ -12,10 +13,10 @@ class CheckSpecsAreUnique(AbstractCheck):
     name = "specs_are_unique"
 
     def _check(self, checkable: ICheckable) -> bool:
-        provided_specs = checkable.specs
+        provided_specs: List[SpecificationDTO] = checkable.specs or []
         provided_spec_type_counts: Dict[str, int] = {}
         for spec in provided_specs:
-            spec_type = spec.spec_type.value
+            spec_type: str = spec.spec_type.value
             if spec_type not in provided_spec_type_counts:
                 provided_spec_type_counts[spec_type] = 1
             else:
@@ -23,8 +24,8 @@ class CheckSpecsAreUnique(AbstractCheck):
 
         result = True
 
-        for required_spec_type in checkable.required_specs:
-            count = provided_spec_type_counts.get(required_spec_type, 0)
+        for required_spec_type in checkable.required_specs or []:
+            count: int = provided_spec_type_counts.get(required_spec_type, 0)
             if count == 0:
                 msg = f"No spec of type {required_spec_type} provided!"
                 checkable.update_summary(msg)

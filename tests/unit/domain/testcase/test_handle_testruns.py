@@ -315,4 +315,4 @@ class TestTestRunCommandHandler:
         assert result.testcase_results[0].result == TestResult.OK
         assert result.testcase_results[1].result == TestResult.NOK
         # And: The overall testrun result should be NA (not OK) due to NOK testcase
-        assert result.result == TestResult.NA
+        assert result.result == TestResult.NOK

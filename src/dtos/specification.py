@@ -31,10 +31,10 @@ class SpecificationDTO(DTO):
     @model_validator(mode="after")
     def set_display_name(self) -> Self:
         if self.display_name == "":
-            if self.location == "":
-                self.display_name = self.testobject
+            if self.location.path == "":
+                self.display_name: str = self.testobject
             else:
-                self.display_name = self.location.filename
+                self.display_name: str = self.location.filename
         return self
 
 
@@ -42,6 +42,7 @@ class SpecContent(DTO):
     spec_type: SpecificationType
 
 
+# TODO: What do we use SchemaContent for if we SpecificationDTO?
 class SchemaContent(SpecContent):
     spec_type: SpecificationType = SpecificationType.SCHEMA
     columns: Dict[str, str]  # schema as dict with keys 'column', 'dtype'
