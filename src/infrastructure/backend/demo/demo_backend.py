@@ -4,7 +4,7 @@ from random import randint
 
 import duckdb
 import polars as pl
-from fsspec.implementations.local import LocalFileSystem  # type: ignore
+from fsspec.implementations.local import LocalFileSystem
 
 from .demo_naming_resolver import DemoNamingResolver
 from .demo_query_handler import DemoQueryHandler

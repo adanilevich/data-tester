@@ -37,11 +37,11 @@ class ITestRunCommandHandler(ABC):
         """Implement this method to execute testcases"""
 
     @abstractmethod
-    def save(self, commands: SaveTestRunCommand) -> None:
+    def save(self, command: SaveTestRunCommand) -> None:
         """Implement this method to save testrun results, e.g. to disk"""
 
     @abstractmethod
-    def load(self, commands: LoadTestRunCommand) -> TestRunDTO:
+    def load(self, command: LoadTestRunCommand) -> TestRunDTO:
         """Implement this method to load testrun results, e.g. from disk"""
 
     @abstractmethod

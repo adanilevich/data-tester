@@ -28,8 +28,8 @@ from dataclasses import dataclass
 
 import polars as pl
 import duckdb
-from fsspec.implementations.local import LocalFileSystem  # type: ignore
-from fsspec import AbstractFileSystem  # type: ignore
+from fsspec.implementations.local import LocalFileSystem
+from fsspec import AbstractFileSystem
 
 
 PATH = Path(__file__).parent

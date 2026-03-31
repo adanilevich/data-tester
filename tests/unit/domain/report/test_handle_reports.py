@@ -143,7 +143,7 @@ class TestReportCommandHandler:
             location=location,
         )
         # ... and then replace the report with our invalid one
-        command.report = mock_report
+        command.report = mock_report  # type: ignore
 
         # When: trying to save an invalid report type
         # Then: an InvalidReportTypeError should be raised

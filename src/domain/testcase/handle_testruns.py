@@ -52,6 +52,7 @@ class TestRunCommandHandler(ITestRunCommandHandler):
             location=command.storage_location,
         )
 
+
     def load(self, command: LoadTestRunCommand) -> TestRunDTO:
         """Loads a testrun, e.g. from disk"""
 

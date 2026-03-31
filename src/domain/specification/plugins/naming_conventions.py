@@ -76,5 +76,5 @@ class NamingConventionsFactory(INamingConventionsFactory):
     the appropriate naming conventions for a given domain.
     """
 
-    def create(self, domain_name: str) -> INamingConventions:
+    def create(self, domain: str) -> INamingConventions:
         return DefaultNamingConventions()

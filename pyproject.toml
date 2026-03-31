@@ -3,7 +3,7 @@ name = "data-tester"
 version = "0.0.1"
 description = "Plattform for testing data and ETL logic"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = [
     "pydantic",  # DTOs and data validation
     "pydantic-settings",  # for reading from ENV vars
@@ -14,6 +14,7 @@ dependencies = [
     "pyyaml",  # read and write yaml files
     "duckdb",  # needed for demo and for e2e tests
     "fsspec",  # needed for demo, 2e2 tests and also for input finders and report storage
+    "pip>=26.0.1",
 ]
 
 [project.optional-dependencies]
@@ -22,11 +23,11 @@ gcs = ["gcsfs"]  # needed if data is stored in GCS
 [dependency-groups]
 dev = [
     "ruff",  # linter / syntax checker and formatter - replaces flake8
-    "mypy",  # type checker
     "pytest",  # test framework
     "coverage",  # test coverage reports
-    "pygount",  # count lines of code
-    "import-linter"  # enforce import rules for hexagonal architecture
+    "pygount",  # count lines of code  # enforce import rules for hexagonal architecture
+    "import-linter",
+    "ty>=0.0.26",  # type checker
 ]
 
 

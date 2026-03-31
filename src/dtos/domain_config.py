@@ -14,7 +14,7 @@ class CompareTestCaseConfigDTO(DTO):
 
 
 class TestCasesConfigDTO(DTO):
-    schema: SchemaTestCaseConfigDTO  # type: ignore
+    schema: SchemaTestCaseConfigDTO
     compare: CompareTestCaseConfigDTO
 
 
