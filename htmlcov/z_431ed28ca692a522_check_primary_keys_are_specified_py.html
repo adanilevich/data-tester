@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_431ed28ca692a522_check_specs_are_unique_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-03-31 21:16 +0000
+            created at 2026-03-31 23:03 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -96,7 +96,7 @@
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="key">def</span> <span class="nam">_check</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">checkable</span><span class="op">:</span> <span class="nam">ICheckable</span><span class="op">)</span> <span class="op">-></span> <span class="nam">bool</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">        <span class="nam">primary_keys</span><span class="op">:</span> <span class="nam">List</span><span class="op">[</span><span class="nam">str</span><span class="op">]</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">        <span class="key">for</span> <span class="nam">spec</span> <span class="key">in</span> <span class="nam">checkable</span><span class="op">.</span><span class="nam">specs</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">        <span class="key">for</span> <span class="nam">spec</span> <span class="key">in</span> <span class="nam">checkable</span><span class="op">.</span><span class="nam">specs</span> <span class="key">or</span> <span class="op">[</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">            <span class="key">if</span> <span class="nam">isinstance</span><span class="op">(</span><span class="nam">spec</span><span class="op">,</span> <span class="nam">SchemaSpecificationDTO</span><span class="op">)</span> <span class="key">and</span> <span class="nam">spec</span><span class="op">.</span><span class="nam">primary_keys</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">                <span class="nam">primary_keys</span> <span class="op">=</span> <span class="nam">spec</span><span class="op">.</span><span class="nam">primary_keys</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -116,7 +116,7 @@
             <a class="nav" href="z_431ed28ca692a522_check_specs_are_unique_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.1">coverage.py v7.13.1</a>,
-            created at 2026-03-31 21:16 +0000
+            created at 2026-03-31 23:03 +0000
         </p>
     </div>
 </footer>
