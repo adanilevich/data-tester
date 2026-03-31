@@ -24,7 +24,7 @@ uv sync --extra gcs
 
 # Individual commands:
 ruff check --fix      # Linting and formatting
-mypy                  # Type checking
+ty checl              # Type checking
 pytest                # Run all tests
 coverage run          # Run tests with coverage (excludes infrastructure tests)
 ```
