@@ -70,6 +70,7 @@ class DomainConfig:
                 DomainConfigSerializationError,
                 DomainConfigParsingError,
             ):
+                # silently skip unreadable configs
                 continue
 
             if config.domain in found_domain_configs:

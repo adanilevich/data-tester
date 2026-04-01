@@ -32,7 +32,6 @@ class TestCaseUnknownError(NotImplementedError):
 
 # TODO: implement notifications
 class TestRun:
-    known_testtypes: Dict[TestType, Callable] = dict()
 
     def __init__(
         self,

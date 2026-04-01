@@ -11,6 +11,7 @@ class StorageFactory(IStorageFactory):
     def __init__(self, formatter_factory: IFormatterFactory):
         self.formatter_factory: IFormatterFactory = formatter_factory
         self._dict_storage: DictStorage | None = None
+        self._mem_storage: FileStorage | None = None
 
     def get_storage(self, location: LocationDTO) -> IStorage:
         """
@@ -27,8 +28,12 @@ class StorageFactory(IStorageFactory):
             StorageTypeUnknownError: If the location type is not supported
         """
         match location.store:
-            case Store.LOCAL | Store.GCS | Store.MEMORY:
+            case Store.LOCAL | Store.GCS:
                 return FileStorage(location.store, self.formatter_factory)
+            case Store.MEMORY:
+                if self._mem_storage is None:
+                    self.mem_storage = FileStorage(location.store, self.formatter_factory)
+                return self.mem_storage
             case Store.DICT:
                 # dict storage is stateful, only assign if not already assigned
                 if self._dict_storage is None:
