@@ -22,7 +22,7 @@
 | src/domain/report/plugins/i\_report\_formatter.py                                |        5 |        0 |    100% |           |
 | src/domain/report/plugins/txt\_testcase\_report.py                               |       24 |        3 |     88% |     52-54 |
 | src/domain/report/plugins/xlsx\_testcase\_diff.py                                |       28 |        0 |    100% |           |
-| src/domain/report/plugins/xlsx\_testrun\_report.py                               |       27 |        3 |     89% |     51-53 |
+| src/domain/report/plugins/xlsx\_testrun\_report.py                               |       27 |        3 |     89% |     50-52 |
 | src/domain/report/report.py                                                      |       75 |        5 |     93% |113, 126-129, 191 |
 | src/domain/specification/\_\_init\_\_.py                                         |        4 |        0 |    100% |           |
 | src/domain/specification/handle\_specs.py                                        |       23 |        0 |    100% |           |
@@ -84,9 +84,9 @@
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                 |      171 |       16 |     91% |131, 148-150, 166, 286, 290, 292, 295-300, 400, 430, 436 |
+| src/infrastructure/backend/demo/demo\_backend.py                                 |      185 |       16 |     91% |140, 164-166, 184, 307, 311, 313, 316-321, 421, 451, 457 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                        |       17 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_naming\_resolver.py                        |       50 |        5 |     90% | 28, 87-90 |
+| src/infrastructure/backend/demo/demo\_naming\_resolver.py                        |       67 |        3 |     96% |28, 112, 114 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                          |       19 |        1 |     95% |        29 |
 | src/infrastructure/backend/dummy/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
 | src/infrastructure/backend/dummy/dummy\_backend.py                               |       29 |        9 |     69% |24, 27, 37, 45, 51, 56, 66, 77, 87 |
@@ -113,7 +113,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2536** |  **186** | **93%** |           |
+| **TOTAL**                                                                        | **2567** |  **184** | **93%** |           |
 
 9 empty files skipped.
 
