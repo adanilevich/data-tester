@@ -1,11 +1,39 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Callable
+from typing import Dict, List, Optional, Callable
 
-from . import ICheckable
+from src.infrastructure_ports import IBackend
+from src.dtos import TestObjectDTO, SpecificationDTO
 
 
-# registry of all known checks -- populated AbstractCheck.__init_cubclasses__
+# registry of all known checks -- populated via AbstractCheck.__init_cubclasses__
 known_checks: Dict[str, Callable] = {}
+
+
+class Checkable(ABC):
+    """
+    Defines the interface which is required by a precondition checker.
+    Since precondition checkers operate on TestCase objects, TestCase inherits
+    from this interface.
+    """
+
+    testobject: TestObjectDTO  # checking testobject existence required testobject spec
+    backend: IBackend  # precondition checkers orchestrate backend methods
+    required_specs: Optional[List[str]] = None
+    specs: Optional[List[SpecificationDTO]] = None
+    summary: str = ""
+    details: Optional[List[Dict[str, str | int | float]]] = None
+
+    @abstractmethod
+    def update_summary(self, summary: str):
+        """Precondition checkers can update summary of the testcase/checkable."""
+
+    @abstractmethod
+    def add_detail(self, detail: Dict[str, str | int | float]):
+        """Checkers can add execution details to checkable to be printed in report"""
+
+    @abstractmethod
+    def notify(self, message: str):
+        """Checkers are free to inform users on their actions"""
 
 
 class AbstractCheck(ABC):
@@ -18,7 +46,7 @@ class AbstractCheck(ABC):
     name: str = "ABSTRACT CHECKER"  # each precondition check has own name
 
     @abstractmethod
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         """Implement actual check logic for each subclass here"""
 
     def __init_subclass__(cls, **kwargs) -> None:
@@ -30,9 +58,9 @@ class AbstractCheck(ABC):
         else:
             known_checks[check_name] = cls
 
-    def check(self, checkable: ICheckable) -> bool:
+    def check(self, checkable: Checkable) -> bool:
         """
-        Implement the actual checking logic in _check. Logic re-used accross checks is
-        implemented here -- e.g. caching of check results.
+        Implement the actual checking logic in _check. Logic re-used accross checks should
+        be implemented here -- e.g. caching of check results.
         """
         return self._check(checkable=checkable)

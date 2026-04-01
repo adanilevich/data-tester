@@ -1,4 +1,4 @@
-from . import AbstractCheck, ICheckable
+from . import AbstractCheck, Checkable
 from src.dtos import DBInstanceDTO
 
 
@@ -10,7 +10,7 @@ class CheckTestObjectExists(AbstractCheck):
 
     name = "testobject_exists"
 
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         db = DBInstanceDTO(
             domain=checkable.testobject.domain,
             stage=checkable.testobject.stage,

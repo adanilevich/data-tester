@@ -1,6 +1,6 @@
 from typing import List
 
-from . import AbstractCheck, ICheckable
+from . import AbstractCheck, Checkable
 from src.dtos import SchemaSpecificationDTO
 
 
@@ -12,7 +12,7 @@ class CheckPrimaryKeysAreSpecified(AbstractCheck):
 
     name = "primary_keys_are_specified"
 
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         primary_keys: List[str] = []
         for spec in checkable.specs or []:
             if isinstance(spec, SchemaSpecificationDTO) and spec.primary_keys is not None:

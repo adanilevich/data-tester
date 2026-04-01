@@ -1,4 +1,4 @@
-from . import AbstractCheck, ICheckable
+from . import AbstractCheck, Checkable
 
 
 class CheckTestObjectNotEmpty(AbstractCheck):
@@ -9,7 +9,7 @@ class CheckTestObjectNotEmpty(AbstractCheck):
 
     name = "testobject_not_empty"
 
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         rowcount: int = checkable.backend.get_rowcount(testobject=checkable.testobject)
 
         if rowcount > 0:

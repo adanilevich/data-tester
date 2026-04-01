@@ -1,9 +1,9 @@
-from src.domain.testcase.precondition_checks import IPreconditionChecker, ICheckable
+from src.domain.testcase.precondition_checks import IPreconditionChecker, Checkable
 from src.dtos import TestCaseDTO, TestType, SpecificationType
 
 
 class DummyChecker(IPreconditionChecker):
-    def check(self, check: str, checkable: ICheckable) -> bool:
+    def check(self, check: str, checkable: Checkable) -> bool:
         if check == "must_fail":
             return False
         else:

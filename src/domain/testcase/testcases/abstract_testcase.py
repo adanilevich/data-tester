@@ -19,7 +19,7 @@ from src.dtos import (
 
 from src.infrastructure_ports import IBackend, INotifier
 from src.domain.testcase.precondition_checks import (
-    ICheckable,
+    Checkable,
     IPreconditionChecker,
     PreConditionChecker,
 )
@@ -49,7 +49,7 @@ class BackendError(TestCaseError):
     """
 
 
-class AbstractTestCase(ICheckable):
+class AbstractTestCase(Checkable):
     ttype: TestType = TestType.ABSTRACT
     preconditions: Optional[List[str]] = None
     required_specs: Optional[List[str]] = None
