@@ -1,12 +1,13 @@
 from __future__ import annotations
-from typing import List, Tuple, Optional
+from types import ModuleType
+from typing import Dict, List, Tuple, Optional
 from random import randint
 
 import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 
-from .demo_naming_resolver import DemoNamingResolver
+from .demo_naming_resolver import DemoNamingResolver, TestobjectType
 from .demo_query_handler import DemoQueryHandler
 
 from src.infrastructure_ports import IBackend, BackendError
@@ -60,7 +61,8 @@ class DemoBackend(IBackend):
 
         Args:
             files_path: path in demo file system where file-like objects are stored,
-                e.g. raw or export layers of demo DWH
+                e.g. raw or export layers of demo DWH. Files are organized in folders:
+                <files_path>/<domain>/<stage>/<instance>/<business_object>/<file>
             db_path: path in demo file system where all duckdb .db files are located
                 on top-level
             domain_config: domain config which is used to configure handlers
@@ -75,16 +77,18 @@ class DemoBackend(IBackend):
         self.naming_resolver: DemoNamingResolver = naming_resolver
         self.query_handler: DemoQueryHandler = query_handler
         self.fs: LocalFileSystem = fs or LocalFileSystem()
-        self.duckdb = db
+        self.duckdb: ModuleType = db
 
         # initialize databases
         self._init_dbs()
 
     def _init_dbs(self):
         """Initialize duckdb databases from .db files in specified location"""
-        db_files = [f for f in self.fs.ls(self.db_path) if f.endswith(".db")]
+        db_files: List[str] = [
+            f for f in self.fs.ls(path=self.db_path) if f.endswith(".db")
+        ]
         for db_file in db_files:
-            db_name = db_file.split("/")[-1].removesuffix(".db")
+            db_name: str = db_file.split(sep="/")[-1].removesuffix(".db")
             self.duckdb.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
 
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
@@ -93,31 +97,34 @@ class DemoBackend(IBackend):
         and existing testobjects from db, e.g. tables and views.
         """
 
-        # FIRST: get file-like testobjects
-        # For that, get base paths to file like objects - these could be several paths,
-        # e.g. <base_path>/raw and <base_path>/export
-        rel_filepaths: List[str] = self.naming_resolver.resolve_files(db=db)
-        abs_filepaths = [self.files_path + "/" + path_ for path_ in rel_filepaths]
+        # FIRST: get file-like testobjects. For that, get base paths to file like objects.
+        # These could be several paths, e.g. <...>/raw and <...>/export
+        rel_filepaths: List[str] = self.naming_resolver.resolve_file_object_path(db=db)
+        abs_filepaths: List[str] = [self.files_path + "/" + p_ for p_ in rel_filepaths]
 
         file_testobjects: List[str] = []
+        all_subpaths: List[str] = []
         for filepath in abs_filepaths:
-            for file_or_dir in self.fs.ls(filepath):
-                if self.fs.isdir(file_or_dir):
-                    # TODO: this is actually bad - naming conventions leak into Backend!
-                    # implement a resolver function 'get_object_name' instead
-                    testobject_name = "raw_" + file_or_dir.split("/")[-1]
-                    file_testobjects.append(testobject_name)
+            all_subpaths.extend(self.fs.ls(path=filepath))
+        all_subdirs: List[str] = [path for path in all_subpaths if self.fs.isdir(path)]
+        for dir in all_subdirs:
+            testobject_name: str = self.naming_resolver.get_file_testobject_name(
+                db=db, path=dir
+            )
+            file_testobjects.append(testobject_name)
 
-        # SECOND, get testobjects from dwh / database layer
-        catalog, schema, _ = self.naming_resolver.resolve_db(db=db)
-        query = f"""
+        # SECOND: get testobjects from dwh / database layer
+        coordinates: Tuple[str, str] = self.naming_resolver.resolve_db_schema(db=db)
+        catalog: str = coordinates[0]
+        schema: str = coordinates[1]
+        query: str = f"""
             SELECT table_name FROM INFORMATION_SCHEMA.TABLES
             WHERE table_catalog = '{catalog}'
             AND table_schema = '{schema}'
         """
-        tables_df = self.duckdb.query(query).pl()
+        tables_df: pl.DataFrame = self.duckdb.query(query=query).pl()
 
-        db_testobject = tables_df.to_dict(as_series=False)["table_name"]
+        db_testobject: List[str] = tables_df.to_dict(as_series=False)["table_name"]
 
         return file_testobjects + db_testobject
 
@@ -126,11 +133,13 @@ class DemoBackend(IBackend):
     ) -> int:
         """See interface definition (parent class IBackend)."""
 
-        object_type = self.naming_resolver.get_object_type(testobject=testobject)
+        object_type: TestobjectType = self.naming_resolver.get_object_type(
+            testobject=testobject
+        )
         if object_type == object_type.FILE:
-            count = self._get_file_rowcount(testobject, filters)
+            count: int = self._get_file_rowcount(testobject=testobject, filters=filters)
         else:
-            count = self._get_db_rowcount(testobject, filters)
+            count: int = self._get_db_rowcount(testobject=testobject, filters=filters)
 
         return count
 
@@ -139,9 +148,16 @@ class DemoBackend(IBackend):
         testobject: TestObjectDTO,
         filters: Optional[List[Tuple[str, str]]] = None,
     ) -> int:
+        """Get rowcount of a database testobject"""
+
         filters_: List[Tuple[str, str]] = filters or []
-        db = DBInstanceDTO.from_testobject(testobject)
-        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
+        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
+        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
+            db=db, testobject_name=testobject.name
+        )
+        catalog: str = coordinates[0]
+        schema: str = coordinates[1]
+        table: str = coordinates[2]
 
         where_clause = "WHERE 1 = 1"
         for column_name, operation in filters_:
@@ -153,30 +169,30 @@ class DemoBackend(IBackend):
             SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}
             {where_clause}
         """
-        count_df = self.duckdb.query(query).pl()
+        count_df: pl.DataFrame = self.duckdb.query(query).pl()
 
-        count_dict = count_df.to_dict(as_series=False)  # dict {colname: [values]}
-        count = count_dict["__cnt__"][0]
+        count_dict: Dict[str, List[int]] = count_df.to_dict(as_series=False)
+        count: int = count_dict["__cnt__"][0]
 
         return count
 
     def _get_file_rowcount(
         self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
     ) -> int:
+        """Get rowcount of a file-like testobject"""
+
         raise DemoBackendError(
             "Getting rowcount for file-like testobjects (e.g. raw "
             "layer) is not yet supported."
         )
 
     def translate_query(self, query: str, db: DBInstanceDTO) -> str:
-        translated_query = self.query_handler.translate(query, db)
+        translated_query: str = self.query_handler.translate(query, db)
         return translated_query
 
     def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         """See interface definition (parent class IBackend)."""
-
-        result_as_df = self.duckdb.query(query).pl()
-
+        result_as_df: pl.DataFrame = self.duckdb.query(query).pl()
         return result_as_df
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
@@ -185,17 +201,22 @@ class DemoBackend(IBackend):
         returns results. Schema retrieval of file objects is not supported.
         """
 
-        object_type = self.naming_resolver.get_object_type(testobject)
+        object_type: TestobjectType = self.naming_resolver.get_object_type(testobject)
         if object_type == object_type.FILE:
             raise DemoBackendError(
                 "Getting schema for file-like testobjects (e.g. raw "
                 "layer) is not supported."
             )
 
-        db = DBInstanceDTO.from_testobject(testobject)
-        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
+        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
+        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
+            db=db, testobject_name=testobject.name
+        )
+        catalog: str = coordinates[0]
+        schema: str = coordinates[1]
+        table: str = coordinates[2]
 
-        schema_query = f"""
+        schema_query: str = f"""
                 SELECT column_name AS col, data_type AS dtype
                 FROM INFORMATION_SCHEMA.COLUMNS
                 WHERE table_catalog = '{catalog}'
@@ -204,16 +225,16 @@ class DemoBackend(IBackend):
             """
 
         # convert to polars dataframe with columns 'col', 'dtype'
-        schema_as_df = self.duckdb.query(schema_query).pl()
+        schema_as_df: pl.DataFrame = self.duckdb.query(schema_query).pl()
         # convert to dict with keys 'col', 'dtype' and value-lists as values
-        schema_as_named_dict = schema_as_df.to_dict(as_series=False)
+        schema_as_named_dict: Dict[str, List[str]] = schema_as_df.to_dict(as_series=False)
         # convert to a dict with column names as keys and dtypes as values
-        schema_as_dict = dict(
+        schema_as_dict: Dict[str, str] = dict(
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
-        location = LocationDTO(
-            f"duckdb://{testobject.domain}_{testobject.stage}"
+        location: LocationDTO = LocationDTO(
+            path=f"duckdb://{testobject.domain}_{testobject.stage}"
             f".{testobject.instance}.{testobject.name}.duck"
         )
         result = SchemaSpecificationDTO(
@@ -230,7 +251,7 @@ class DemoBackend(IBackend):
     ) -> SchemaSpecificationDTO:
         """Gets schema of query. Expects query to be already translated"""
 
-        query = f"""
+        query: str = f"""
             DROP TABLE IF EXISTS __query__;
             CREATE TEMP TABLE __query__ AS (
                 {query}
@@ -240,16 +261,16 @@ class DemoBackend(IBackend):
             FROM INFORMATION_SCHEMA.COLUMNS
             WHERE table_name = '__query__'
         """
-        schema_as_df = self.duckdb.query(query).pl()
-        schema_as_named_dict = schema_as_df.to_dict(as_series=False)
-        schema_as_dict = dict(
+        schema_as_df: pl.DataFrame = self.duckdb.query(query).pl()
+        schema_as_named_dict: Dict[str, List[str]] = schema_as_df.to_dict(as_series=False)
+        schema_as_dict: Dict[str, str] = dict[str, str](
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
-        location = LocationDTO(
-            f"duckdb://{db.domain}_{db.stage}.{db.instance}.user_query.duck"
+        location: LocationDTO = LocationDTO(
+            path=f"duckdb://{db.domain}_{db.stage}.{db.instance}.user_query.duck"
         )
-        result = SchemaSpecificationDTO(
+        result: SchemaSpecificationDTO = SchemaSpecificationDTO(
             location=location,
             testobject="user query",
             columns=schema_as_dict,
@@ -275,34 +296,34 @@ class DemoBackend(IBackend):
                     - 'TEXT', 'STRING', 'VARCHAR(n)' are translated to 'string'
         """
 
-        harmonized_columns = {}
+        harmonized_columns: Dict[str, str] = {}
         for column_name, dtype in schema.columns.items():
-            dtype = dtype.lower()
-            complex_dtypes = ["array", "list", "interval", "struct"]
+            dtype: str = dtype.lower()
+            complex_dtypes: List[str] = ["array", "list", "interval", "struct"]
 
             # if dtype contains one of the complex dtype keywords, we return it as is
             # reason is that comparisons with complex dtypes are not supported
             if any([complex_dtype in dtype for complex_dtype in complex_dtypes]):
-                harmonized_dtype = dtype
+                harmonized_dtype: str = dtype
             elif "int" in dtype:
-                harmonized_dtype = "int"
+                harmonized_dtype: str = "int"
             elif "date" in dtype:
-                harmonized_dtype = "date"
+                harmonized_dtype: str = "date"
             elif "timestamp" in dtype:
-                harmonized_dtype = "timestamp"
+                harmonized_dtype: str = "timestamp"
             elif "string" in dtype or "text" in dtype or "char" in dtype:
-                harmonized_dtype = "string"
+                harmonized_dtype: str = "string"
             elif "numeric" in dtype or "decimal" in dtype:
-                harmonized_dtype = "decimal"
+                harmonized_dtype: str = "decimal"
             elif "float" in dtype or "real" in dtype or "double" in dtype:
-                harmonized_dtype = "float"
+                harmonized_dtype: str = "float"
             else:
-                harmonized_dtype = dtype
+                harmonized_dtype: str = dtype
 
             harmonized_columns.update({column_name: harmonized_dtype})
 
-        harmonized_schema_dto = schema.copy()
-        harmonized_schema_dto.columns = harmonized_columns
+        harmonized_schema_dto: SchemaSpecificationDTO = schema.copy()
+        harmonized_schema_dto.columns: Dict[str, str] = harmonized_columns
 
         return harmonized_schema_dto
 
@@ -311,14 +332,14 @@ class DemoBackend(IBackend):
         primary_keys: List[str], cast_to: Optional[SchemaSpecificationDTO] = None
     ) -> str:
         if cast_to is not None:
-            column_list = [
+            column_list: List[str] = [
                 f"CAST(CAST({col} AS {dtype}) AS STRING)"
                 for col, dtype in cast_to.columns.items()
                 if col in primary_keys
             ]
         else:
-            column_list = [f"CAST({key} AS STRING)" for key in primary_keys]
-        concat_key = ", '|', ".join(column_list)
+            column_list: List[str] = [f"CAST({key} AS STRING)" for key in primary_keys]
+        concat_key: str = ", '|', ".join(column_list)
         return f"CONCAT({concat_key})"
 
     @staticmethod
@@ -328,29 +349,29 @@ class DemoBackend(IBackend):
     ) -> str:
         if columns is None:
             if cast_to is None:
-                cols = ["*"]
+                cols: List[str] = ["*"]
             else:
-                cols = [
+                cols: List[str] = [
                     f"CAST({col} AS {dtype}) AS {col}"
                     for col, dtype in cast_to.columns.items()
                     if col != "__concat_key__"
                 ]
         else:
             if cast_to is None:
-                cols = [col for col in columns if col != "__concat_key__"]
+                cols: List[str] = [col for col in columns if col != "__concat_key__"]
             else:
-                cols = [
+                cols: List[str] = [
                     f"CAST({col} AS {cast_to.columns[col]}) AS {col}"
                     for col in columns
                     if col in cast_to.columns and col != "__concat_key__"
                 ]
 
-        column_selection = ", ".join(cols)
+        column_selection: str = ", ".join(cols)
         return column_selection
 
     def _setup_test_db(self, key_sample: List[str]):
         """Re-creates a database and populates a table with key values"""
-        key_values = ", ".join([f"('{key_value}')" for key_value in key_sample])
+        key_values: str = ", ".join([f"('{key_value}')" for key_value in key_sample])
         create_statement = f"""
             DROP SCHEMA IF EXISTS __test__ CASCADE;
             CREATE SCHEMA __test__;
@@ -372,20 +393,20 @@ class DemoBackend(IBackend):
         if len(primary_keys) == 0:
             raise DemoBackendError("Provide a non-empty list of primary keys!")
 
-        concat_key = self._get_concat_key(primary_keys, cast_to=cast_to)
+        concat_key: str = self._get_concat_key(primary_keys, cast_to=cast_to)
 
-        random_number = randint(0, 100)
-        sample_query = f"""
+        random_number: int = randint(0, 100)
+        sample_query: str = f"""
             {query}
             SELECT DISTINCT({concat_key}) AS __concat_key__
             FROM __expected__
             ORDER BY SHA256(CONCAT('{random_number}', __concat_key__))
             LIMIT {sample_size}
         """
-        result_as_df = self.duckdb.query(sample_query).pl()
-        result_as_dict = result_as_df.to_dict(as_series=False)["__concat_key__"]
+        result_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
+        result_list: List[str] = result_df.to_dict(as_series=False)["__concat_key__"]
 
-        return result_as_dict
+        return result_list
 
     def get_sample_from_query(
         self,
@@ -402,10 +423,10 @@ class DemoBackend(IBackend):
             )
 
         self._setup_test_db(key_sample=key_sample)
-        concat_key = self._get_concat_key(primary_keys, cast_to)
-        column_selection = self._get_column_selection(columns, cast_to)
+        concat_key: str = self._get_concat_key(primary_keys, cast_to)
+        column_selection: str = self._get_column_selection(columns, cast_to)
 
-        sample_query = f"""
+        sample_query: str = f"""
             {query}
             SELECT __obj__.* FROM (
                 SELECT {column_selection}, {concat_key} AS __concat_key__
@@ -414,7 +435,7 @@ class DemoBackend(IBackend):
             INNER JOIN __test__.__concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
-        result_as_df = self.duckdb.query(sample_query).pl()
+        result_as_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
 
         return result_as_df
 
@@ -431,17 +452,23 @@ class DemoBackend(IBackend):
                 "Provide a non-empty list of primary keys and samples!"
             )
 
-        testobject_type = self.naming_resolver.get_object_type(testobject)
+        testobject_type: TestobjectType = self.naming_resolver.get_object_type(testobject)
         if testobject_type == testobject_type.FILE:
             raise DemoBackendError("Sampling files not yet supported")
 
-        db = DBInstanceDTO.from_testobject(testobject)
-        catalog, schema, table = self.naming_resolver.resolve_db(db, testobject.name)
-        column_selection = self._get_column_selection(columns, cast_to)
-        self._setup_test_db(key_sample=key_sample)
-        concat_key = self._get_concat_key(primary_keys, cast_to)
+        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
+        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
+            db=db, testobject_name=testobject.name
+        )
+        catalog: str = coordinates[0]
+        schema: str = coordinates[1]
+        table: str = coordinates[2]
 
-        sample_query = f"""
+        column_selection: str = self._get_column_selection(columns, cast_to)
+        self._setup_test_db(key_sample=key_sample)
+        concat_key: str = self._get_concat_key(primary_keys, cast_to)
+
+        sample_query: str = f"""
             SELECT __obj__.* FROM (
                 SELECT {column_selection}, {concat_key} AS __concat_key__
                 FROM {catalog}.{schema}.{table}
@@ -449,6 +476,6 @@ class DemoBackend(IBackend):
             INNER JOIN __test__.__concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
-        result_as_df = self.duckdb.query(sample_query).pl()
+        result_as_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
 
         return result_as_df

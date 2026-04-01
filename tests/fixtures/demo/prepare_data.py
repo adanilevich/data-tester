@@ -32,9 +32,9 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec import AbstractFileSystem
 
 
-PATH = Path(__file__).parent
-RAW_PATH = PATH / "raw"  # path in demo filesystem where raw layer of DWH is stored
-DB_PATH = PATH / "dbs"  # path in demo filesystem where duckdb files are stored
+PATH: Path = Path(__file__).parent
+RAW_PATH: Path = PATH / "raw"  # path in demo filesystem where raw layer of DWH is stored
+DB_PATH: Path = PATH / "dbs"  # path in demo filesystem where duckdb files are stored
 FS = LocalFileSystem()  # demo filesystem handler
 
 
@@ -268,9 +268,9 @@ def setup_databases(
     # create databases and tables:
     for domain, stage, instance, objectname, layer in objects:
         # database files are <domain>_<stage>.db, e.g. payments_test.db
-        database = domain + "_" + stage
-        schema = instance  # schema always corresponds to instance
-        table = layer + "_" + objectname  # table names are <layer>_<objectname>
+        database: str = domain + "_" + stage
+        schema: str = instance  # schema always corresponds to instance
+        table: str = layer + "_" + objectname  # table names are <layer>_<objectname>
 
         # create database: duckdb database files are created if not exist
         duckdb.execute(f"ATTACH IF NOT EXISTS '{str(path / database)}.db' AS {database}")
@@ -431,7 +431,7 @@ def load_core_layer(conf: LoadConfig = load_config):
     customer_transactions = duckdb.sql(
         "SELECT * FROM payments_test.alpha.core_customer_transactions"
     ).pl()
-    count = count_values(df=customer_transactions, col="id")
+    count: int = count_values(df=customer_transactions, col="id")
     assert count == 12
     print(f"Loaded {count} transactions into paymets.alpha.core_customer_transactions")
 

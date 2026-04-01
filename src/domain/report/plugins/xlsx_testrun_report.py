@@ -42,7 +42,6 @@ class XlsxTestRunReportFormatter(IReportFormatter):
 
         testcase_results = [result.to_dict() for result in report.testcase_results]
 
-        # TODO: report column selection and writing to different sheets
         try:
             df = pl.DataFrame(testcase_results)
             excel_io = BytesIO()
