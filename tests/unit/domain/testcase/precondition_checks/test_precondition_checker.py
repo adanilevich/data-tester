@@ -1,17 +1,11 @@
 from typing import Dict
 import pytest
 
-from src.domain.testcase.precondition_checks import (
-    ICheckable,
-    PreConditionChecker,
-    CheckTestObjectExists,
-    CheckAlwaysOk,
-    CheckAlwaysNok,
-)
+from src.domain.testcase.precondition_checks import Checkable, PreConditionChecker
 from src.dtos import TestObjectDTO
 
 
-class DummyCheckable(ICheckable):
+class DummyCheckable(Checkable):
     def __init__(self):
         self.testobject = TestObjectDTO(
             name="any",
@@ -31,30 +25,21 @@ class DummyCheckable(ICheckable):
         pass
 
 
-def test_fetching_existing_checkers():
-    factory = PreConditionChecker()
+def test_using_existing_checks():
+    checker = PreConditionChecker()
+    checkable = DummyCheckable()
 
-    expected = {
-        "testobject_exists": CheckTestObjectExists,
-        "check_always_ok": CheckAlwaysOk,
-        "check_always_nok": CheckAlwaysNok,
-    }
-
-    for check, expected_checker in expected.items():
-        fetched_checker = factory._checker_factory(check)
-        assert isinstance(fetched_checker, expected_checker)
+    result = checker.check(check="check_always_ok", checkable=checkable)
+    assert result is True
+    result = checker.check(check="check_always_nok", checkable=checkable)
+    assert result is False
 
 
-def test_fetching_non_existing_checkers():
-    factory = PreConditionChecker()
+def test_using_non_existing_checks():
+    checker = PreConditionChecker()
+    checkable = DummyCheckable()
 
     with pytest.raises(NotImplementedError) as err:
-        _ = factory._checker_factory("check_3")
+        _ = checker.check(check="check_3", checkable=checkable)
 
     assert "Unknown checker name" in str(err)
-
-
-def test_that_factory_correctly_passes_results():
-    factory = PreConditionChecker()
-    assert factory.check("check_always_ok", DummyCheckable()) is True
-    assert factory.check("check_always_nok", DummyCheckable()) is False

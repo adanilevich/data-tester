@@ -1,4 +1,4 @@
-from . import AbstractCheck, ICheckable
+from . import AbstractCheck, Checkable
 
 
 class CheckAlwaysNok(AbstractCheck):
@@ -8,5 +8,5 @@ class CheckAlwaysNok(AbstractCheck):
 
     name = "check_always_nok"
 
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         return False

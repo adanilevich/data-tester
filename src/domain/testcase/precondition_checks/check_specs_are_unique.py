@@ -1,7 +1,7 @@
 from src.dtos.specification import SpecificationDTO
 from typing import Dict, List
 
-from . import AbstractCheck, ICheckable
+from . import AbstractCheck, Checkable
 
 
 class CheckSpecsAreUnique(AbstractCheck):
@@ -12,7 +12,7 @@ class CheckSpecsAreUnique(AbstractCheck):
 
     name = "specs_are_unique"
 
-    def _check(self, checkable: ICheckable) -> bool:
+    def _check(self, checkable: Checkable) -> bool:
         provided_specs: List[SpecificationDTO] = checkable.specs or []
         provided_spec_type_counts: Dict[str, int] = {}
         for spec in provided_specs:

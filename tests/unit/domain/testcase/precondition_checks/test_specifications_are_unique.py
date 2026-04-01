@@ -1,12 +1,12 @@
 import pytest
 
-from src.domain.testcase.precondition_checks import CheckSpecsAreUnique, ICheckable
+from src.domain.testcase.precondition_checks import CheckSpecsAreUnique, Checkable
 from src.dtos import SpecificationDTO, SpecificationType, LocationDTO
 
 
 class TestTestObjectNotEmptyChecker:
     @pytest.fixture
-    def checkable(self, checkable_creator) -> ICheckable:
+    def checkable(self, checkable_creator) -> Checkable:
         checkable = checkable_creator.create()
         return checkable
 

@@ -39,7 +39,7 @@ from src.domain.testcase.testcases import (
     DummyNokTestCase,
     DummyExceptionTestCase,
 )
-from src.domain.testcase.precondition_checks import ICheckable
+from src.domain.testcase.precondition_checks import Checkable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
@@ -87,7 +87,7 @@ def testobject() -> TestObjectDTO:
     return testobject
 
 
-class DummyCheckable(ICheckable):
+class DummyCheckable(Checkable):
     def __init__(self, testobject: TestObjectDTO, backend: IBackend):
         self.testobject = testobject
         self.backend = backend
@@ -109,14 +109,14 @@ class DummyCheckable(ICheckable):
 
 class ICheckableCreator(ABC):
     @abstractmethod
-    def create(self) -> ICheckable:
+    def create(self) -> Checkable:
         """Creates a checkable"""
 
 
 @pytest.fixture
 def checkable_creator(testobject, dummy_backend) -> ICheckableCreator:
     class CheckableCreator(ICheckableCreator):
-        def create(self) -> ICheckable:
+        def create(self) -> Checkable:
             checkable = DummyCheckable(backend=dummy_backend, testobject=testobject)
             return checkable
 

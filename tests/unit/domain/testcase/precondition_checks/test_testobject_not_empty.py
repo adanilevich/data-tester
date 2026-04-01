@@ -2,14 +2,14 @@ import pytest
 
 from src.domain.testcase.precondition_checks import (
     CheckTestObjectNotEmpty,
-    ICheckable,
+    Checkable,
 )
 from src.dtos import TestObjectDTO
 
 
 class TestTestObjectNotEmptyChecker:
     @pytest.fixture
-    def checkable(self, checkable_creator) -> ICheckable:
+    def checkable(self, checkable_creator) -> Checkable:
         checkable = checkable_creator.create()
 
         def get_rowcount_(testobject: TestObjectDTO, *args, **kwargs) -> int:

@@ -1,12 +1,12 @@
 from typing import List
 import pytest
 
-from src.domain.testcase.precondition_checks import ICheckable, CheckTestObjectExists
+from src.domain.testcase.precondition_checks import Checkable, CheckTestObjectExists
 
 
 class TestTestObjectExistsChecker:
     @pytest.fixture
-    def checkable(self, checkable_creator) -> ICheckable:
+    def checkable(self, checkable_creator) -> Checkable:
         checkable = checkable_creator.create()
 
         def get_testobjects_(*args, **kwargs) -> List[str]:
