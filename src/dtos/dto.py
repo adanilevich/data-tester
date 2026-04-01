@@ -9,7 +9,7 @@ class DTO(BaseModel):
         raise NotImplementedError("Subclasses must implement object_id property")
 
     @classmethod
-    def from_dict(cls, dict_: dict) -> Self:  # mytype: ignore-error
+    def from_dict(cls, dict_: dict) -> Self:
         return cls(**dict_)
 
     def to_dict(

@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple, cast
+from typing import List, Dict, Tuple
 
 from src.infrastructure_ports import IStorageFactory
 from src.domain.report.plugins import IReportFormatter
@@ -118,17 +118,11 @@ class Report:
             location=location,
         )
 
-        try:
-            if report_type == ReportType.TESTCASE:
-                return cast(TestCaseReportDTO, report_dto)
-            elif report_type == ReportType.TESTRUN:
-                return cast(TestRunReportDTO, report_dto)
-        except Exception:
-            pass
-
-        raise ReportNotRetrievableError(
-            f"Couldn't retrieve report {report_id} as {report_type}"
-        )
+        if not isinstance(report_dto, (TestCaseReportDTO, TestReportDTO)):
+            raise ReportNotRetrievableError(
+                f"Couldn't retrieve report {report_id} as {report_type}"
+            )
+        return report_dto
 
     def create_artifact(
         self,

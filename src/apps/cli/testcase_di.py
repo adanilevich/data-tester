@@ -13,7 +13,7 @@ from src.domain import TestRunCommandHandler
 
 class TestCaseDependencyInjector:
     def __init__(self, config: Config):
-        self.config = config
+        self.config: Config = config
         self.notifiers: List[INotifier] = []
         self.data_platform_factory: IBackendFactory
         self.storage_factory: IStorageFactory
