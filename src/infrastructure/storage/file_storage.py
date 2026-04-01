@@ -122,9 +122,7 @@ class FileStorage(IStorage):
             raise ObjectIsNotAFileError(str(file_location))
 
         try:
-            with self.fs.open(
-                file_location.path, mode="rb", encoding=self.default_encoding
-            ) as file:
+            with self.fs.open(file_location.path, mode="rb") as file:
                 content = file.read()
         except Exception as err:
             raise FileStorageError() from err
@@ -162,9 +160,7 @@ class FileStorage(IStorage):
             raise ObjectIsNotAFileError(str(location))
 
         try:
-            with self.fs.open(
-                location.path, mode="rb", encoding=self.default_encoding
-            ) as file:
+            with self.fs.open(location.path, mode="rb") as file:
                 content = file.read()
         except Exception as err:
             raise FileStorageError() from err

@@ -23,6 +23,9 @@ class DefaultNamingConventions(INamingConventions):
         """
         testobject_ = testcase.testobject
 
+        if file.filename is None:
+            raise SpecNamingConventionsError(f"Spec without filename: {file}")
+
         schema_xlsx_naming_conditions = [
             file.filename.startswith(f"{testobject_}_"),
             file.filename.endswith(".xlsx"),

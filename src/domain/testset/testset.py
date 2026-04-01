@@ -1,7 +1,7 @@
 from typing import List, cast
 from datetime import datetime
 
-from src.infrastructure_ports import IStorageFactory
+from src.infrastructure_ports import IStorageFactory, StorageError
 from src.dtos import TestSetDTO, LocationDTO, StorageObject
 
 
@@ -51,6 +51,6 @@ class TestSet:
                 testset = cast(TestSetDTO, dto)
                 if testset.domain == domain:
                     result.append(testset)
-            except Exception:
+            except StorageError:
                 continue  # skip objects that can't be read
         return result

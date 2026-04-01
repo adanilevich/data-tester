@@ -133,16 +133,11 @@ class Specification:
                     raise StorageTypeUnknownError(
                         f"Storage type {file.store} not supported"
                     ) from err
-                # if file can't be read or parsed, skip it
                 try:
                     file_bytes: bytes = storage.read_bytes(file)
-                except StorageError as err:
-                    print(f"Error reading file {file.path}: {err}")
-                    continue
-                try:
                     spec_content: SpecContent = formatter.deserialize(file_bytes)
-                except SpecDeserializationError as err:
-                    print(f"Error deserializing file {file.path}: {err}")
+                except (StorageError, SpecDeserializationError):
+                    # if file can't be read or parsed, silently skip it
                     continue
                 spec_dto: SpecificationDTO = self._spec_from_content(
                     content=spec_content,
