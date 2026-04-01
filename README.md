@@ -14,7 +14,7 @@
 | src/config/config.py                                                             |       27 |        1 |     96% |         9 |
 | src/domain/\_\_init\_\_.py                                                       |        6 |        0 |    100% |           |
 | src/domain/domain\_config/\_\_init\_\_.py                                        |        3 |        0 |    100% |           |
-| src/domain/domain\_config/domain\_config.py                                      |       28 |        4 |     86% |57-58, 68-73 |
+| src/domain/domain\_config/domain\_config.py                                      |       28 |        4 |     86% |57-58, 68-74 |
 | src/domain/domain\_config/domain\_config\_handler.py                             |       17 |        0 |    100% |           |
 | src/domain/report/\_\_init\_\_.py                                                |        4 |        0 |    100% |           |
 | src/domain/report/handle\_reports.py                                             |       57 |        1 |     98% |       146 |
@@ -23,28 +23,26 @@
 | src/domain/report/plugins/txt\_testcase\_report.py                               |       24 |        3 |     88% |     52-54 |
 | src/domain/report/plugins/xlsx\_testcase\_diff.py                                |       28 |        0 |    100% |           |
 | src/domain/report/plugins/xlsx\_testrun\_report.py                               |       27 |        3 |     89% |     50-52 |
-| src/domain/report/report.py                                                      |       75 |        5 |     93% |113, 126-129, 191 |
+| src/domain/report/report.py                                                      |       70 |        3 |     96% |113, 122, 185 |
 | src/domain/specification/\_\_init\_\_.py                                         |        4 |        0 |    100% |           |
 | src/domain/specification/handle\_specs.py                                        |       23 |        0 |    100% |           |
 | src/domain/specification/plugins/\_\_init\_\_.py                                 |        5 |        0 |    100% |           |
 | src/domain/specification/plugins/i\_naming\_conventions.py                       |        5 |        0 |    100% |           |
 | src/domain/specification/plugins/i\_spec\_formatter.py                           |        7 |        0 |    100% |           |
-| src/domain/specification/plugins/naming\_conventions.py                          |       33 |        2 |     94% |     62-63 |
+| src/domain/specification/plugins/naming\_conventions.py                          |       35 |        3 |     91% | 27, 65-66 |
 | src/domain/specification/plugins/spec\_formatter.py                              |       44 |        0 |    100% |           |
-| src/domain/specification/specification.py                                        |       67 |        4 |     94% |70, 111, 132-133 |
+| src/domain/specification/specification.py                                        |       62 |        4 |     94% |70, 111, 132-133 |
 | src/domain/testcase/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/domain/testcase/handle\_testruns.py                                          |       28 |        0 |    100% |           |
-| src/domain/testcase/precondition\_checks/\_\_init\_\_.py                         |       10 |        0 |    100% |           |
-| src/domain/testcase/precondition\_checks/abstract\_check.py                      |        6 |        0 |    100% |           |
+| src/domain/testcase/precondition\_checks/\_\_init\_\_.py                         |        8 |        0 |    100% |           |
+| src/domain/testcase/precondition\_checks/abstract\_check.py                      |       20 |        1 |     95% |        57 |
 | src/domain/testcase/precondition\_checks/check\_always\_nok.py                   |        5 |        0 |    100% |           |
 | src/domain/testcase/precondition\_checks/check\_always\_ok.py                    |        5 |        0 |    100% |           |
 | src/domain/testcase/precondition\_checks/check\_primary\_keys\_are\_specified.py |       15 |        2 |     87% |     22-23 |
 | src/domain/testcase/precondition\_checks/check\_specs\_are\_unique.py            |       25 |        0 |    100% |           |
 | src/domain/testcase/precondition\_checks/check\_testobject\_exists.py            |       11 |        0 |    100% |           |
 | src/domain/testcase/precondition\_checks/check\_testobject\_not\_empty.py        |        9 |        0 |    100% |           |
-| src/domain/testcase/precondition\_checks/i\_checkable.py                         |        9 |        0 |    100% |           |
-| src/domain/testcase/precondition\_checks/i\_precondition\_checker.py             |        3 |        0 |    100% |           |
-| src/domain/testcase/precondition\_checks/precondition\_checker.py                |       14 |        0 |    100% |           |
+| src/domain/testcase/precondition\_checks/precondition\_checker.py                |        9 |        0 |    100% |           |
 | src/domain/testcase/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
 | src/domain/testcase/testcases/abstract\_testcase.py                              |      108 |        2 |     98% |   97, 107 |
 | src/domain/testcase/testcases/compare.py                                         |      131 |       21 |     84% |108, 119, 126, 132-133, 140-142, 175-176, 192-193, 204-212 |
@@ -53,7 +51,7 @@
 | src/domain/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/rowcount.py                                        |       57 |        1 |     98% |        89 |
 | src/domain/testcase/testcases/schema.py                                          |      131 |        3 |     98% |98, 109, 146 |
-| src/domain/testcase/testrun.py                                                   |       65 |        3 |     95% |123, 129, 135 |
+| src/domain/testcase/testrun.py                                                   |       64 |        3 |     95% |122, 128, 134 |
 | src/domain/testset/\_\_init\_\_.py                                               |        2 |        0 |    100% |           |
 | src/domain/testset/handle\_testsets.py                                           |       15 |        0 |    100% |           |
 | src/domain/testset/testset.py                                                    |       28 |        2 |     93% |     54-55 |
@@ -98,12 +96,12 @@
 | src/infrastructure/notifier/stdout\_notifier.py                                  |        4 |        0 |    100% |           |
 | src/infrastructure/storage/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/storage/dict\_storage.py                                      |       66 |        2 |     97% |   118-120 |
-| src/infrastructure/storage/file\_storage.py                                      |      139 |       38 |     73% |59-66, 74-75, 82, 102-103, 122, 129-130, 146-147, 159, 162, 169-170, 184, 191-204, 223-227, 240, 246, 255-256 |
+| src/infrastructure/storage/file\_storage.py                                      |      139 |       38 |     73% |59-66, 74-75, 82, 102-103, 122, 127-128, 144-145, 157, 160, 165-166, 180, 187-200, 219-223, 236, 242, 251-252 |
 | src/infrastructure/storage/formatter\_factory.py                                 |       13 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter.py                                       |        7 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter\_factory.py                              |        4 |        0 |    100% |           |
 | src/infrastructure/storage/json\_formatter.py                                    |       39 |        5 |     87% |46-48, 53-54 |
-| src/infrastructure/storage/storage\_factory.py                                   |       19 |        0 |    100% |           |
+| src/infrastructure/storage/storage\_factory.py                                   |       24 |        0 |    100% |           |
 | src/infrastructure\_ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/backend/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/backend/i\_backend.py                                  |        6 |        0 |    100% |           |
@@ -113,7 +111,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2567** |  **184** | **93%** |           |
+| **TOTAL**                                                                        | **2558** |  **184** | **93%** |           |
 
 9 empty files skipped.
 
