@@ -44,10 +44,10 @@ class FileStorage(IStorage):
         formatter_factory: IFormatterFactory,
         gcp_project: str | None = None,
     ):
-        self.storage_type = storage_type
-        self.formatter_factory = formatter_factory
-        self.fs = self._create_filesystem(storage_type)
-        self.gcp_project = gcp_project
+        self.storage_type: Store = storage_type
+        self.formatter_factory: IFormatterFactory = formatter_factory
+        self.fs: AbstractFileSystem = self._create_filesystem(storage_type)
+        self.gcp_project: str | None = gcp_project
 
     def _create_filesystem(self, storage_type: Store) -> AbstractFileSystem:
         """Create the appropriate filesystem based on storage type."""

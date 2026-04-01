@@ -9,7 +9,7 @@ class StorageFactory(IStorageFactory):
     """Factory for creating storage implementations based on location type."""
 
     def __init__(self, formatter_factory: IFormatterFactory):
-        self.formatter_factory = formatter_factory
+        self.formatter_factory: IFormatterFactory = formatter_factory
         self._dict_storage: DictStorage | None = None
 
     def get_storage(self, location: LocationDTO) -> IStorage:
@@ -30,6 +30,7 @@ class StorageFactory(IStorageFactory):
             case Store.LOCAL | Store.GCS | Store.MEMORY:
                 return FileStorage(location.store, self.formatter_factory)
             case Store.DICT:
+                # dict storage is stateful, only assign if not already assigned
                 if self._dict_storage is None:
                     self._dict_storage = DictStorage(self.formatter_factory)
                 return self._dict_storage

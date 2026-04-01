@@ -1,10 +1,8 @@
-from typing import Dict, Callable
-
-
 from . import (
     IPreconditionChecker,
     ICheckable,
     AbstractCheck,
+    known_checks
 )
 
 
@@ -20,13 +18,10 @@ class PreConditionChecker(IPreconditionChecker):
         return check_result
 
     def _checker_factory(self, check: str) -> AbstractCheck:
-        self.known_checks: Dict[str, Callable] = {}
-        for cls_ in AbstractCheck.__subclasses__():
-            self.known_checks.update({cls_.name: cls_})
 
-        if check not in self.known_checks:
+        if check not in known_checks:
             raise NotImplementedError(f"Unknown checker name: {check}")
 
-        checker: AbstractCheck = self.known_checks[check]()
+        checker: AbstractCheck = known_checks[check]()
 
         return checker
