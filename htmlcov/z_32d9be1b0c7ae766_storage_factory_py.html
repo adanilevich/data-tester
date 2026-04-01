@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_a73e62c5d051ecea___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-01 22:48 +0000
+            created at 2026-04-01 23:29 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -114,17 +114,18 @@
     <p class="run"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">                <span class="key">return</span> <span class="nam">FileStorage</span><span class="op">(</span><span class="nam">location</span><span class="op">.</span><span class="nam">store</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">formatter_factory</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">            <span class="key">case</span> <span class="nam">Store</span><span class="op">.</span><span class="nam">MEMORY</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_mem_storage</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">mem_storage</span> <span class="op">=</span> <span class="nam">FileStorage</span><span class="op">(</span><span class="nam">location</span><span class="op">.</span><span class="nam">store</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">formatter_factory</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">                <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">mem_storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">            <span class="key">case</span> <span class="nam">Store</span><span class="op">.</span><span class="nam">DICT</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">                <span class="com"># dict storage is stateful, only assign if not already assigned</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span> <span class="op">=</span> <span class="nam">DictStorage</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">formatter_factory</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">            <span class="key">case</span> <span class="nam">_</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">                <span class="key">raise</span> <span class="nam">StorageTypeUnknownError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Storage type </span><span class="op">{</span><span class="nam">location</span><span class="op">.</span><span class="nam">store</span><span class="op">}</span><span class="fst"> not supported</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">_mem_storage</span> <span class="op">=</span> <span class="nam">FileStorage</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">                        <span class="nam">location</span><span class="op">.</span><span class="nam">store</span><span class="op">,</span> <span class="nam">self</span><span class="op">.</span><span class="nam">formatter_factory</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">                <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_mem_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">            <span class="key">case</span> <span class="nam">Store</span><span class="op">.</span><span class="nam">DICT</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">                <span class="com"># dict storage is stateful, only assign if not already assigned</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">                <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">                    <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span> <span class="op">=</span> <span class="nam">DictStorage</span><span class="op">(</span><span class="nam">self</span><span class="op">.</span><span class="nam">formatter_factory</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">                <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_dict_storage</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">            <span class="key">case</span> <span class="nam">_</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">                <span class="key">raise</span> <span class="nam">StorageTypeUnknownError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">                    <span class="fst">f"</span><span class="fst">Storage type </span><span class="op">{</span><span class="nam">location</span><span class="op">.</span><span class="nam">store</span><span class="op">}</span><span class="fst"> not supported</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -134,7 +135,7 @@
             <a class="nav" href="z_a73e62c5d051ecea___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-01 22:48 +0000
+            created at 2026-04-01 23:29 +0000
         </p>
     </div>
 </footer>

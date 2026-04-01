@@ -30,7 +30,7 @@
 | src/domain/specification/plugins/i\_naming\_conventions.py                       |        5 |        0 |    100% |           |
 | src/domain/specification/plugins/i\_spec\_formatter.py                           |        7 |        0 |    100% |           |
 | src/domain/specification/plugins/naming\_conventions.py                          |       35 |        3 |     91% | 27, 65-66 |
-| src/domain/specification/plugins/spec\_formatter.py                              |       44 |        0 |    100% |           |
+| src/domain/specification/plugins/spec\_formatter.py                              |       50 |        0 |    100% |           |
 | src/domain/specification/specification.py                                        |       62 |        4 |     94% |70, 111, 132-133 |
 | src/domain/testcase/\_\_init\_\_.py                                              |        2 |        0 |    100% |           |
 | src/domain/testcase/handle\_testruns.py                                          |       28 |        0 |    100% |           |
@@ -78,7 +78,7 @@
 | src/dtos/location.py                                                             |       61 |        3 |     95% |60, 66, 68 |
 | src/dtos/report.py                                                               |       62 |        0 |    100% |           |
 | src/dtos/specification.py                                                        |       62 |        4 |     94% | 34-37, 96 |
-| src/dtos/testcase.py                                                             |      130 |        4 |     97% |146, 149, 222, 225 |
+| src/dtos/testcase.py                                                             |      131 |        4 |     97% |146, 149, 223, 225 |
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
@@ -111,7 +111,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2558** |  **184** | **93%** |           |
+| **TOTAL**                                                                        | **2565** |  **184** | **93%** |           |
 
 9 empty files skipped.
 
