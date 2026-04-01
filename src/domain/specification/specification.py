@@ -167,6 +167,6 @@ class Specification:
                 )
                 results.append(spec_dto)
             # if parsing or reading fails, try next spec type
-            except Exception:
+            except SpecDeserializationError:
                 continue
         return results

@@ -32,8 +32,9 @@ class StorageFactory(IStorageFactory):
                 return FileStorage(location.store, self.formatter_factory)
             case Store.MEMORY:
                 if self._mem_storage is None:
-                    self.mem_storage = FileStorage(location.store, self.formatter_factory)
-                return self.mem_storage
+                    self._mem_storage = FileStorage(
+                        location.store, self.formatter_factory)
+                return self._mem_storage
             case Store.DICT:
                 # dict storage is stateful, only assign if not already assigned
                 if self._dict_storage is None:

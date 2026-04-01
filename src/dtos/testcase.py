@@ -218,11 +218,11 @@ class TestRunDTO(TestDTO):
 
     @staticmethod
     def _get_testrun_id(testrun_ids: List[UUID4]) -> UUID4:
-        if not len(set(testrun_ids)) == 1:
-            raise ValueError("All testcases must belong to same testrun_id!")
-
-        if len(testrun_ids) == 0:
+        number_of_different_testrun_ids = len(set(testrun_ids))
+        if number_of_different_testrun_ids == 0:
             raise ValueError("At least one testcase must be provided!")
+        elif number_of_different_testrun_ids > 1:
+            raise ValueError("All testcases must belong to same testrun_id!")
 
         return testrun_ids[0]
 

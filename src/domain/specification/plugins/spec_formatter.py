@@ -77,7 +77,10 @@ class RowcountSqlFormatter(ISpecFormatter):
     """
 
     def deserialize(self, file: bytes) -> SpecContent:
-        content = file.decode("utf-8")
+        try:
+            content = file.decode("utf-8")
+        except Exception as err:
+            raise SpecDeserializationError("Error decoding spec file") from err
         result: SpecContent
 
         if "__EXPECTED_ROWCOUNT__" in content:
@@ -100,7 +103,10 @@ class CompareSqlFormatter(ISpecFormatter):
     """
 
     def deserialize(self, file: bytes) -> SpecContent:
-        content = file.decode("utf-8")
+        try:
+            content = file.decode("utf-8")
+        except Exception as err:
+            raise SpecDeserializationError("Error decoding spec file") from err
         result: SpecContent
 
         if "__EXPECTED__" in content:

@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Use this agent proactively to review code for quality, best practices, performance and scalability
 tools: Glob, Grep, Read
-model: sonnet
+model: inherit
 color: green
 memory: project
 ---
