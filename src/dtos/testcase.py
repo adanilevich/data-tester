@@ -192,17 +192,25 @@ class TestRunDTO(TestDTO):
     @classmethod
     def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
         result = TestResult.OK
-        for testcase in testcases:
-            if testcase.result != TestResult.OK:
-                result = TestResult.NOK
+        if all([tc.result == TestResult.OK for tc in testcases]):
+            result = TestResult.OK
+        elif any([tc.result == TestResult.NOK for tc in testcases]):
+            result = TestResult.NOK
+        else:
+            result = TestResult.NA
 
         testrun_id = cls._get_testrun_id([testcase.testrun_id for testcase in testcases])
         testdefinitions = cls._get_testdefinitions(testcases)
 
+        if all([tc.end_ts is None for tc in testcases]):
+            end_ts = datetime.now()
+        else:
+            end_ts = max([tc.end_ts for tc in testcases if tc.end_ts is not None])
+
         return cls(
             testrun_id=testrun_id,
             start_ts=min([tc.start_ts for tc in testcases]),
-            end_ts=max([tc.end_ts for tc in testcases if tc.end_ts is not None]),
+            end_ts=end_ts,
             result=result,
             testset_id=testcases[0].testset_id,
             labels=testcases[0].labels,

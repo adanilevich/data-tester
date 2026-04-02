@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Dict, List, Optional, Self
+from typing import Callable, Dict, List, Optional, Self
 from pydantic import model_validator, Field
 
 from src.dtos.dto import DTO
@@ -17,6 +17,9 @@ class SpecificationFormat(Enum):
     SQL = "sql"
     XLSX = "xlsx"
 
+# registry of known spec types. Populated by SpecificationDTO.__init_subclass__
+known_spec_types: Dict[str, Callable] = {}
+
 
 class SpecificationDTO(DTO):
     location: LocationDTO
@@ -28,13 +31,19 @@ class SpecificationDTO(DTO):
     class Config:
         validate_assignment = True
 
+    def __init_subclass__(cls, **kwargs) -> None:
+        """Registers all implemented subclasses of AbstractCheck in known_checks"""
+        super().__init_subclass__(**kwargs)
+        spec_type = cls.spec_type.value.lower()
+        known_spec_types[spec_type] = cls
+
     @model_validator(mode="after")
     def set_display_name(self) -> Self:
-        if self.display_name == "":
+        if self.display_name == "" or self.display_name is None:
             if self.location.path == "":
                 self.display_name: str = self.testobject
             else:
-                self.display_name: str = self.location.filename
+                self.display_name: str = self.location.filename or self.testobject
         return self
 
 
@@ -82,15 +91,11 @@ class CompareSqlDTO(SpecificationDTO):
 class SpecFactory:
     def create_from_dict(self, spec_as_dict: dict) -> SpecificationDTO:
         requested_spec_type = spec_as_dict["spec_type"]
-        known_spec_types = {
-            cls_.model_fields["spec_type"].default.value: cls_
-            for cls_ in SpecificationDTO.__subclasses__()
-        }
-        if (
-            requested_spec_type in known_spec_types
-            or requested_spec_type.lower() in known_spec_types
-        ):
-            spec_as_dict.pop("spec_type")
-            return known_spec_types[requested_spec_type.lower()].from_dict(spec_as_dict)
+
+        if requested_spec_type.lower() in known_spec_types:
+            spec_as_dict_copy = spec_as_dict.copy()
+            spec_as_dict_copy.pop("spec_type")
+            spec_dto_class = known_spec_types[requested_spec_type.lower()]
+            return spec_dto_class.from_dict(spec_as_dict_copy)  # type: ignore
         else:
             raise ValueError(f"Unknown spec type: {requested_spec_type}")

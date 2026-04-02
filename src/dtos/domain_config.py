@@ -1,5 +1,7 @@
 from typing import List, Dict
 
+from pydantic import Field
+
 from src.dtos.dto import DTO
 from src.dtos.location import LocationDTO
 
@@ -10,7 +12,7 @@ class SchemaTestCaseConfigDTO(DTO):
 
 class CompareTestCaseConfigDTO(DTO):
     sample_size: int
-    sample_size_per_object: Dict[str, int] = dict()
+    sample_size_per_object: Dict[str, int] = Field(default_factory=dict)
 
 
 class TestCasesConfigDTO(DTO):

@@ -86,7 +86,7 @@ class SchemaTestCase(AbstractTestCase):
                 self.summary += f" {description}: OK;"
             elif result is False:
                 self.summary += f" {description}: NOK;"
-                self.result = self.result.NOK
+                self.result = TestResult.NOK
             else:  # basically if result is None, e.g. comparison not supported
                 pass
 

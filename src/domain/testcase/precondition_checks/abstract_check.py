@@ -50,7 +50,7 @@ class AbstractCheck(ABC):
         """Implement actual check logic for each subclass here"""
 
     def __init_subclass__(cls, **kwargs) -> None:
-        """Registers all implemented subclasses of AbstractCheck in cls.known_checks"""
+        """Registers all implemented subclasses of AbstractCheck in known_checks"""
         super().__init_subclass__(**kwargs)
         check_name = cls.name
         if check_name in known_checks:
