@@ -73,12 +73,12 @@
 | src/drivers/cli/testcase.py                                                      |       13 |        2 |     85% |     31-37 |
 | src/drivers/cli/testset.py                                                       |       16 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                         |        8 |        0 |    100% |           |
-| src/dtos/domain\_config.py                                                       |       26 |        1 |     96% |        49 |
+| src/dtos/domain\_config.py                                                       |       27 |        1 |     96% |        51 |
 | src/dtos/dto.py                                                                  |       17 |        0 |    100% |           |
-| src/dtos/location.py                                                             |       61 |        3 |     95% |60, 66, 68 |
+| src/dtos/location.py                                                             |       61 |        2 |     97% |    66, 68 |
 | src/dtos/report.py                                                               |       62 |        0 |    100% |           |
-| src/dtos/specification.py                                                        |       62 |        4 |     94% | 34-37, 96 |
-| src/dtos/testcase.py                                                             |      131 |        4 |     97% |146, 149, 223, 225 |
+| src/dtos/specification.py                                                        |       68 |        2 |     97% |   44, 101 |
+| src/dtos/testcase.py                                                             |      136 |        6 |     96% |146, 149, 200, 206, 231, 233 |
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
@@ -111,7 +111,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2565** |  **184** | **93%** |           |
+| **TOTAL**                                                                        | **2577** |  **183** | **93%** |           |
 
 9 empty files skipped.
 
