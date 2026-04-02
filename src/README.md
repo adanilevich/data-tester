@@ -31,7 +31,7 @@ The codebase implements hexagonal architecture with the following layers:
 
 ## Key Design Patterns
 
-- **Dependency Injection**: Each domain module has DI containers in `apps/`
+- **Dependency Injection**: Happens via `_di.py` modules in `apps/`
 - **Plugin Architecture**: Extensible via interfaces for test cases, formatters, and backends
 - **Port-Adapter Pattern**: Clean separation between domain logic and infrastructure concerns
 - **Factory Pattern**: Dynamic creation of storage, backend, and formatter instances

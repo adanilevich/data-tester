@@ -4,8 +4,8 @@ from typing import List, Tuple, cast
 
 import pytest
 
-from src.apps.cli.report_di import ReportDependencyInjector
-from src.drivers.cli import CliReportManager
+from src.apps.cli_di import CliDependencyInjector
+from src.drivers import ReportDriver
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
@@ -24,12 +24,12 @@ from src.domain_ports import LoadReportCommand
 @pytest.fixture
 def report_manager(
     domain_config: DomainConfigDTO, testcase_result: TestCaseDTO
-) -> CliReportManager:
+) -> ReportDriver:
     config = Config()
     config.DATATESTER_ENV = "LOCAL"
     domain_config.testreports_location = LocationDTO("dict://user_reports")
-    di = ReportDependencyInjector(config=config)
-    return di.cli_report_manager(domain_config=domain_config)
+    di = CliDependencyInjector(config=config)
+    return di.report_driver(domain_config=domain_config)
 
 
 @pytest.fixture
@@ -54,7 +54,7 @@ def testresults(testcase_result: TestCaseDTO) -> Tuple[TestRunDTO, List[TestCase
 
 
 def create_and_save_reports(
-    report_manager: CliReportManager, testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
+    report_manager: ReportDriver, testresults: Tuple[TestRunDTO, List[TestCaseDTO]]
 ) -> Tuple[TestRunReportDTO, List[TestCaseReportDTO]]:
     testrun_result, testcase_results = testresults
 
@@ -76,7 +76,7 @@ def create_and_save_reports(
 class TestReportE2E:
     def test_create_and_save_reports(
         self,
-        report_manager: CliReportManager,
+        report_manager: ReportDriver,
         testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
         # given a configured report manager and testresults
@@ -98,7 +98,7 @@ class TestReportE2E:
 
     def test_retrieve_from_internal_storage(
         self,
-        report_manager: CliReportManager,
+        report_manager: ReportDriver,
         testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
         # given a configured report manager and testresults
@@ -144,7 +144,7 @@ class TestReportE2E:
 
     def test_retrieve_from_user_storage(
         self,
-        report_manager: CliReportManager,
+        report_manager: ReportDriver,
         testresults: Tuple[TestRunDTO, List[TestCaseDTO]],
     ):
         # given a configured report manager and testresults

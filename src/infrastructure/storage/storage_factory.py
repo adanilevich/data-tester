@@ -2,9 +2,11 @@ from src.infrastructure_ports import IStorageFactory, IStorage, StorageTypeUnkno
 from .i_formatter_factory import IFormatterFactory
 from .file_storage import FileStorage
 from .dict_storage import DictStorage
-from src.dtos.location import LocationDTO, StorageType
+from src.dtos.storage import LocationDTO, StorageType
 
 
+# TODO: make this a singleton to hold one Storage object of each type only
+# HOWTO: https://stackoverflow.com/questions/6760685/what-is-the-best-way-of-implementing-a-singleton-in-python
 class StorageFactory(IStorageFactory):
     """Factory for creating storage implementations based on location type."""
 

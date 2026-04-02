@@ -3,7 +3,7 @@ from typing import List
 
 from src.dtos import DTO
 from src.dtos.testset import TestSetDTO
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 
 
 class SaveTestSetCommand(DTO):

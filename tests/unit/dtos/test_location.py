@@ -1,6 +1,6 @@
 import pytest
 
-from src.dtos.location import LocationDTO, StorageType
+from src.dtos.storage import LocationDTO, StorageType
 
 
 def test_location_dto():

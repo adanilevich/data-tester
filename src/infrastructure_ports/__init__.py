@@ -5,15 +5,16 @@ This module defines the contracts between the domain/application layers and the
 infrastructure layer, ensuring proper dependency inversion.
 """
 
-from .backend import IBackend, IBackendFactory, BackendError
-from .storage import (
+from .i_backend import IBackend, BackendError
+from .i_backend_factory import IBackendFactory
+from .i_storage import (
     IStorage,
-    IStorageFactory,
     StorageError,
     StorageTypeUnknownError,
     ObjectNotFoundError,
 )
-from .notifier import INotifier
+from .i_storage_factory import IStorageFactory
+from .i_notifier import INotifier
 
 __all__ = [
     "IBackend",

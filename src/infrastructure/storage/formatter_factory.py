@@ -1,7 +1,7 @@
 from .i_formatter_factory import IFormatterFactory
 from .i_formatter import IFormatter
 from .json_formatter import JsonFormatter
-from src.dtos.location import ObjectType
+from src.dtos.storage import ObjectType
 
 
 class StorageFormatterFactoryError(Exception):

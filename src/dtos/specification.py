@@ -4,7 +4,7 @@ from typing import Callable, Dict, List, Optional, Self
 from pydantic import model_validator, Field
 
 from src.dtos.dto import DTO
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 
 
 class SpecificationType(Enum):

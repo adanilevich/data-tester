@@ -4,7 +4,7 @@ from src.domain_ports import IDomainConfigHandler, FetchDomainConfigsCommand
 from src.dtos import DomainConfigDTO, LocationDTO
 
 
-class CliDomainConfigManager:
+class DomainConfigDriver:
     def __init__(
         self,
         domain_config_handler: IDomainConfigHandler,

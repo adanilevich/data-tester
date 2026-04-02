@@ -26,7 +26,7 @@ from src.dtos.testcase import (
 )
 from src.dtos.report import TestCaseReportDTO, TestRunReportDTO
 from src.dtos.testcase import TestRunDTO
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 from src.infrastructure_ports import IBackend
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 from src.infrastructure.backend.dummy import DummyBackend

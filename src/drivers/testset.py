@@ -1,28 +1,27 @@
 from src.dtos.testset import TestSetDTO
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 from src.domain_ports import (
     ITestSetCommandHandler,
     ListTestSetsCommand,
 )
 
 
-class CliTestSetManagerError(Exception):
+class TestSetDriverError(Exception):
     """
     Exception raised when a testset manager operation fails.
     """
 
 
-class TestSetNotFoundError(CliTestSetManagerError):
+class TestSetNotFoundError(TestSetDriverError):
     """
     Exception raised when a testset is not found.
     """
 
 
-class CliTestSetManager:
+class TestSetDriver:
     """
-    Testset manager for non-interactive cli execution. Loads a testset for a given
-    domain and testset name (which in cli execution is passed as argument or from
-    environment).
+    Testset manager for non-interactive execution. Loads a testset for a given
+    domain and testset name (which is passed as argument or from environment).
     """
 
     def __init__(

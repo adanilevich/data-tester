@@ -1,7 +1,7 @@
 import pytest
 
 from src.dtos import DomainConfigDTO, ObjectType
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 from src.domain.domain_config import DomainConfig, DomainConfigAlreadyExistsError
 from src.infrastructure.storage.dict_storage import DictStorage
 from src.infrastructure.storage.formatter_factory import FormatterFactory

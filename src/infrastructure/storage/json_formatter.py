@@ -7,7 +7,7 @@ from .i_formatter import (
     DeserializationError,
 )
 from src.dtos.dto import DTO
-from src.dtos.location import ObjectType
+from src.dtos.storage import ObjectType
 from src.dtos import (
     DomainConfigDTO,
     SpecificationDTO,

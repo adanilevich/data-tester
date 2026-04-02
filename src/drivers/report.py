@@ -7,7 +7,7 @@ from src.domain_ports import (
 )
 
 
-class CliReportManager:
+class ReportDriver:
     def __init__(
         self,
         report_handler: IReportCommandHandler,
