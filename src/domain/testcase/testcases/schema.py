@@ -1,4 +1,5 @@
 from typing import List, Optional, Dict, Literal
+from pydantic import Field
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
 from src.dtos import SchemaSpecificationDTO, TestResult, DTO, TestType
@@ -21,7 +22,7 @@ class ColumnDiffEntryDTO(DTO):
 
 
 class ColumnDiffDTO(DTO):
-    diffs: List[ColumnDiffEntryDTO] = []
+    diffs: List[ColumnDiffEntryDTO] = Field(default=[])
 
 
 class SchemaTestCase(AbstractTestCase):

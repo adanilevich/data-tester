@@ -6,6 +6,7 @@ from src.infrastructure_ports import IStorageFactory
 from src.infrastructure.storage import StorageFactory, FormatterFactory
 
 
+# TODO: inject one storage factory into all di handlers or make storage singleton
 class DomainConfigDependencyInjector:
     """
     Simple dependency injector which returns finders and getters which operate

@@ -41,7 +41,7 @@ For each finding, provide:
 - **Description**: What the issue is and why it matters.
 - **Criticality**: [1 - High | 2 - Medium | 3 - Low]
 - **Impact**: What can go wrong if unaddressed.
-- **Location**: Provide file path to source code file and line number. *Important*: File path must be clickable
+- **Location**: Provide file path to source code file and line number. *Important*: File path must be clickable such that the source file opens in current code editor
 - **Remediation**: Concrete steps to fix it, with code snippets when helpful.
 
 End your review with a **Summary** section:
