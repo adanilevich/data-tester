@@ -27,7 +27,8 @@ class Config(BaseSettings):
     DATATESTER_DATA_PLATFORM: str = Field(default="DUMMY")
 
     # NOTIFIERS CONFIGURATION
-    DATATESTER_NOTIFIERS: List[str] = Field(default=["IN_MEMORY", "STDOUT"])
+    DATATESTER_NOTIFIERS: List[str] = Field(
+        default_factory=lambda: ["IN_MEMORY", "STDOUT"])
 
     # CONFIGRATION OF USER STORAGE
     DATATESTER_USER_STORAGE_ENGINE: str = Field(default="LOCAL")
