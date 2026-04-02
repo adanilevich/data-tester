@@ -45,7 +45,7 @@
 | src/domain/testcase/precondition\_checks/precondition\_checker.py                |        9 |        0 |    100% |           |
 | src/domain/testcase/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
 | src/domain/testcase/testcases/abstract\_testcase.py                              |      108 |        2 |     98% |   97, 107 |
-| src/domain/testcase/testcases/compare.py                                         |      131 |       21 |     84% |108, 119, 126, 132-133, 140-142, 175-176, 192-193, 204-212 |
+| src/domain/testcase/testcases/compare.py                                         |      135 |       23 |     83% |113, 124, 131, 137-138, 145-147, 180-181, 197-198, 209-212, 214-222 |
 | src/domain/testcase/testcases/dummy\_exception.py                                |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
@@ -75,14 +75,14 @@
 | src/dtos/\_\_init\_\_.py                                                         |        8 |        0 |    100% |           |
 | src/dtos/domain\_config.py                                                       |       27 |        1 |     96% |        51 |
 | src/dtos/dto.py                                                                  |       17 |        0 |    100% |           |
-| src/dtos/location.py                                                             |       61 |        2 |     97% |    66, 68 |
+| src/dtos/location.py                                                             |       76 |        7 |     91% |42, 55, 66, 81, 84, 90, 97 |
 | src/dtos/report.py                                                               |       62 |        0 |    100% |           |
 | src/dtos/specification.py                                                        |       68 |        2 |     97% |   44, 101 |
 | src/dtos/testcase.py                                                             |      136 |        6 |     96% |146, 149, 200, 206, 231, 233 |
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                 |      185 |       16 |     91% |140, 164-166, 184, 307, 311, 313, 316-321, 421, 451, 457 |
+| src/infrastructure/backend/demo/demo\_backend.py                                 |      201 |       16 |     92% |139, 163-165, 185, 313, 317, 319, 322-327, 429, 461, 467 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                        |       17 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_naming\_resolver.py                        |       67 |        3 |     96% |28, 112, 114 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                          |       19 |        1 |     95% |        29 |
@@ -111,9 +111,9 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2577** |  **183** | **93%** |           |
+| **TOTAL**                                                                        | **2612** |  **190** | **93%** |           |
 
-9 empty files skipped.
+8 empty files skipped.
 
 
 ## Setup coverage badge
