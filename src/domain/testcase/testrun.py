@@ -11,7 +11,7 @@ from src.dtos import (
     TestCaseDTO,
     TestStatus,
     LocationDTO,
-    StorageObject,
+    ObjectType,
 )
 from src.infrastructure_ports import IBackend, INotifier, IStorageFactory
 from .testcases import (
@@ -180,4 +180,4 @@ class TestRun:
             dto = self.to_dto()
 
         storage = self.storage_factory.get_storage(self.storage_location)
-        storage.write(dto, StorageObject.TESTRUN, self.storage_location)
+        storage.write(dto, ObjectType.TESTRUN, self.storage_location)

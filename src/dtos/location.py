@@ -6,25 +6,15 @@ from pydantic import field_validator
 from src.dtos.dto import DTO
 
 
-class Store(Enum):
+class StorageType(Enum):
     LOCAL = "local"
-    GCS = "gcs"
-    S3 = "s3"
     DICT = "dict"
     MEMORY = "memory"
-    BQ = "bq"
-    UNKNOWN = "unknown"
-    UPLOAD = "upload"
-    DUCKDB = "duckdb"
-    DUMMY = "dummy"
+    GCS = "gcs"
+    UNSUPPORTED = "unsupported"
 
 
-class StorageObject(Enum):
-    """
-    Object types which can be stored in internal storage. Correspond to the defined
-    DTO objects.
-    """
-
+class ObjectType(Enum):
     TESTRUN = "testrun"
     TESTCASE_REPORT = "testcase_report"
     TESTRUN_REPORT = "testrun_report"
@@ -44,45 +34,70 @@ class LocationDTO(DTO):
     @classmethod
     def validate_path(cls, v):
         if len(v.split("://")) != 2:
-            raise ValueError("Invalid path")
+            raise ValueError(f"Invalid path: one storage qualifier '://' expected: {v}")
+        if len(v.split(".")) > 2:
+            if v.startswith("duckdb://"):  # database paths are separated by '.'
+                pass
+            else:
+                raise ValueError(f"Invalid path: only one '.' allowed in path: {v}")
         return v
 
     def model_post_init(self, __context):
-        self.path = self._format(self.path)
+        self._format_path()
 
     @property
-    def store(self):
-        return Store(self.path.split("://")[0])
+    def storage_type(self) -> StorageType:
+        return StorageType(self.path.split("://")[0])
 
     @property
-    def filename(self):
-        if "." not in self.path:
+    def is_file(self) -> bool:
+        if self.is_db:
+            return False
+        elif "." in self.path:  # assume than non-db paths with "." are files
+            return True
+        else:  # assume that non-db paths without "." are folders
+            return False
+
+    @property
+    def is_dir(self) -> bool:
+        if not self.is_file and not self.is_db:
+            return True
+        else:
+            return False
+
+    @property
+    def is_db(self) -> bool:
+        return True if self.path.startswith(("duckdb:://")) else False
+
+    @property
+    def filename(self) -> str | None:
+        if not self.is_file:
             return None
         else:
             return self.path.split("/")[-1]
 
     def append(self, subpath: str) -> LocationDTO:
-        if "." in self.path:
-            raise ValueError("File location cannot be extended")
+        if self.is_file or self.is_db:
+            raise ValueError("File and DB locations cannot be extended")
+
         while subpath.startswith("/"):
             subpath = subpath[1:]
-        else:
-            path_ = self._format(self.path)
-            path_ = self._format(path_ + subpath)
-        return LocationDTO(path_)
 
-    def _format(self, path: str):
-        # in case of a file, we don't need to add a trailing slash
-        if "." in path:
+        return LocationDTO(self.path + subpath)
+
+    def _format_path(self):
+        if self.is_db:
             pass
-        # in case of a directory, we need to add a trailing slash
+        elif self.is_file:
+            pass
+        elif self.is_dir:
+            if not self.path.endswith("/"):
+                self.path += "/"
         else:
-            if not path.endswith("/"):
-                path += "/"
-        return path
+            raise ValueError(f"Unkown location path type: {self.path}")
 
 
 class ObjectLocationDTO(DTO):
     location: LocationDTO
     located_object_id: str
-    object_type: StorageObject
+    object_type: ObjectType

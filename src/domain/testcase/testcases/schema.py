@@ -90,9 +90,9 @@ class SchemaTestCase(AbstractTestCase):
             else:  # basically if result is None, e.g. comparison not supported
                 pass
 
-        if self.result == self.result.OK:
+        if self.result == TestResult.OK:
             self.summary = "Schema corresponds to specification:" + self.summary
-        elif self.result == self.result.NOK:
+        elif self.result == TestResult.NOK:
             self.summary = "Schema deviates from specification:" + self.summary
         else:
             raise SchemaTestCaseError(

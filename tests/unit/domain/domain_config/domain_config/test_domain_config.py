@@ -1,6 +1,6 @@
 import pytest
 
-from src.dtos import DomainConfigDTO, StorageObject
+from src.dtos import DomainConfigDTO, ObjectType
 from src.dtos.location import LocationDTO
 from src.domain.domain_config import DomainConfig, DomainConfigAlreadyExistsError
 from src.infrastructure.storage.dict_storage import DictStorage
@@ -53,7 +53,7 @@ class TestDomainConfig:
         # manually place content in storage to simulate two different files with same
         # domain - this bypasses normal save_config which would use domain as object_id
         formatter = domain_conf.storage.formatter_factory.get_formatter(  # type: ignore
-            StorageObject.DOMAIN_CONFIG
+            ObjectType.DOMAIN_CONFIG
         )
 
         # write first config with filename suffix _1

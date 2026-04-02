@@ -1,7 +1,7 @@
 from typing import Dict, cast
 
 from src.infrastructure_ports import IStorage, StorageError
-from src.dtos import DomainConfigDTO, LocationDTO, StorageObject
+from src.dtos import DomainConfigDTO, LocationDTO, ObjectType
 
 
 class DomainConfigAlreadyExistsError(Exception):
@@ -52,7 +52,7 @@ class DomainConfig:
 
         try:
             config_locations = self.storage.list(
-                location=location, object_type=StorageObject.DOMAIN_CONFIG
+                location=location, object_type=ObjectType.DOMAIN_CONFIG
             )
         except StorageError as err:
             raise StorageError(f"Failed to list domain configs in {location}") from err
@@ -60,7 +60,7 @@ class DomainConfig:
         for config_location in config_locations:
             try:
                 config_dto = self.storage.read(
-                    object_type=StorageObject.DOMAIN_CONFIG,
+                    object_type=ObjectType.DOMAIN_CONFIG,
                     object_id=config_location.located_object_id,
                     location=location,
                 )
@@ -93,4 +93,4 @@ class DomainConfig:
             DomainConfigAlreadyExistsError: If a domain config for the same domain
         """
 
-        self.storage.write(config, StorageObject.DOMAIN_CONFIG, location)
+        self.storage.write(config, ObjectType.DOMAIN_CONFIG, location)

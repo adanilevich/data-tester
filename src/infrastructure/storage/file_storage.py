@@ -16,7 +16,7 @@ from src.infrastructure_ports import (
     StorageTypeUnknownError,
 )
 from .i_formatter_factory import IFormatterFactory
-from src.dtos import LocationDTO, Store, DTO, StorageObject, ObjectLocationDTO
+from src.dtos import LocationDTO, StorageType, DTO, ObjectType, ObjectLocationDTO
 
 
 class FileStorageError(
@@ -40,23 +40,23 @@ class FileStorage(IStorage):
 
     def __init__(
         self,
-        storage_type: Store,
+        storage_type: StorageType,
         formatter_factory: IFormatterFactory,
         gcp_project: str | None = None,
     ):
-        self.storage_type: Store = storage_type
+        self.storage_type: StorageType = storage_type
         self.formatter_factory: IFormatterFactory = formatter_factory
         self.fs: AbstractFileSystem = self._create_filesystem(storage_type)
         self.gcp_project: str | None = gcp_project
 
-    def _create_filesystem(self, storage_type: Store) -> AbstractFileSystem:
+    def _create_filesystem(self, storage_type: StorageType) -> AbstractFileSystem:
         """Create the appropriate filesystem based on storage type."""
         match storage_type:
-            case Store.LOCAL:
+            case StorageType.LOCAL:
                 return LocalFileSystem(auto_mkdir=True)
-            case Store.MEMORY:
+            case StorageType.MEMORY:
                 return MemoryFileSystem()
-            case Store.GCS:
+            case StorageType.GCS:
                 if not self.gcp_project:
                     raise StorageTypeUnknownError("GCS storage is not enabled in config")
                 if GCSFileSystem is None:
@@ -78,13 +78,13 @@ class FileStorage(IStorage):
 
     def _validate_storage_type(self, path: LocationDTO) -> None:
         """Validate that the path's storage type matches this instance."""
-        if path.store != self.storage_type:
+        if path.storage_type != self.storage_type:
             raise StorageTypeUnknownError(
-                f"Path storage type {path.store} does not match "
+                f"Path storage type {path.storage_type} does not match "
                 f"FileStorage type {self.storage_type}"
             )
 
-    def write(self, dto: DTO, object_type: StorageObject, location: LocationDTO):
+    def write(self, dto: DTO, object_type: ObjectType, location: LocationDTO):
         """
         Stores a DTO object to storage, serialized according to internal format.
         """
@@ -103,7 +103,7 @@ class FileStorage(IStorage):
             raise FileStorageError() from err
 
     def read(
-        self, object_type: StorageObject, object_id: str, location: LocationDTO
+        self, object_type: ObjectType, object_id: str, location: LocationDTO
     ) -> DTO:
         """
         Retrieves and deserializes a DTO object from (internal) storage.
@@ -168,7 +168,7 @@ class FileStorage(IStorage):
         return content
 
     def list(
-        self, location: LocationDTO, object_type: StorageObject
+        self, location: LocationDTO, object_type: ObjectType
     ) -> List[ObjectLocationDTO]:
         """
         Lists all objects of the specified type in the given location. This is meant for
@@ -254,6 +254,6 @@ class FileStorage(IStorage):
         return file_locations
 
     @property
-    def supported_storage_types(self) -> List[Store]:
+    def supported_storage_types(self) -> List[StorageType]:
         """See interface definition."""
         return [self.storage_type]

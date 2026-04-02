@@ -13,7 +13,7 @@ from src.dtos import (
     ReportType,
     TestReportDTO,
     LocationDTO,
-    StorageObject,
+    ObjectType,
 )
 
 
@@ -106,9 +106,9 @@ class Report:
         storage = self.storage_factory.get_storage(location)
 
         if report_type == ReportType.TESTCASE:
-            object_type = StorageObject.TESTCASE_REPORT
+            object_type = ObjectType.TESTCASE_REPORT
         elif report_type == ReportType.TESTRUN:
-            object_type = StorageObject.TESTRUN_REPORT
+            object_type = ObjectType.TESTRUN_REPORT
         else:
             raise UnknownReportTypeError(f"Invalid report type: {report_type}")
 
@@ -178,9 +178,9 @@ class Report:
 
         # Determine object type based on report type
         if isinstance(report, TestCaseReportDTO):
-            object_type = StorageObject.TESTCASE_REPORT
+            object_type = ObjectType.TESTCASE_REPORT
         elif isinstance(report, TestRunReportDTO):
-            object_type = StorageObject.TESTRUN_REPORT
+            object_type = ObjectType.TESTRUN_REPORT
         else:
             raise WrongReportTypeError(f"Unsupported report type: {type(report)}")
 

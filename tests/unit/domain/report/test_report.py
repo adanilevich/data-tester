@@ -158,7 +158,7 @@ class TestReport:
 
     def test_retrieve_report_with_unsupported_storage(self, report, testcase_report):
         # given an unsupported storage type
-        location = LocationDTO("unknown://test_reports/")
+        location = LocationDTO("unsupported://test_reports/")
 
         # then retrieving raises StorageTypeUnknownError
         with pytest.raises(StorageTypeUnknownError):
@@ -246,7 +246,7 @@ class TestReport:
 
     def test_save_artifact_with_unsupported_storage(self, report):
         # given an unsupported storage type
-        location = LocationDTO("unknown://test_artifact.txt")
+        location = LocationDTO("unsupported://test_artifact.txt")
         artifact_content = b"test artifact content"
 
         # then saving raises StorageTypeUnknownError

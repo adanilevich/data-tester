@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from src.dtos.dto import DTO
-from src.dtos.location import StorageObject
+from src.dtos.location import ObjectType
 
 
 class FormatterError(Exception):
@@ -31,7 +31,7 @@ class IFormatter(ABC):
         """
 
     @abstractmethod
-    def deserialize(self, data: bytes, object_type: StorageObject) -> DTO:
+    def deserialize(self, data: bytes, object_type: ObjectType) -> DTO:
         """
         Deserialize bytes back to a DTO object.
 
@@ -44,7 +44,7 @@ class IFormatter(ABC):
         """
 
     @abstractmethod
-    def get_object_key(self, object_id: str, object_type: StorageObject) -> str:
+    def get_object_key(self, object_id: str, object_type: ObjectType) -> str:
         """
         Get the key/filename for storing an object.
 
@@ -57,7 +57,7 @@ class IFormatter(ABC):
         """
 
     @abstractmethod
-    def check_filename(self, filename: str, object_type: StorageObject) -> bool:
+    def check_filename(self, filename: str, object_type: ObjectType) -> bool:
         """
         Check if a filename corresponds to the naming convention for given object type.
 
@@ -70,7 +70,7 @@ class IFormatter(ABC):
         """
 
     @abstractmethod
-    def get_object_id(self, object_key: str, object_type: StorageObject) -> str:
+    def get_object_id(self, object_key: str, object_type: ObjectType) -> str:
         """
         Extract object ID from object key based on naming convention.
 

@@ -6,7 +6,7 @@ from src.infrastructure.storage.dict_storage import (
     ObjectNotFoundError,
 )
 from src.infrastructure.storage.formatter_factory import FormatterFactory
-from src.dtos import LocationDTO, Store, StorageObject, TestSetDTO
+from src.dtos import LocationDTO, StorageType, ObjectType, TestSetDTO
 
 
 class TestDictStorage:
@@ -20,7 +20,7 @@ class TestDictStorage:
     def test_supported_storage_types(self, storage: DictStorage):
         """Test that DictStorage reports correct supported storage types"""
         supported_types = storage.supported_storage_types
-        assert Store.DICT in supported_types
+        assert StorageType.DICT in supported_types
         assert len(supported_types) == 1
 
     def test_write_read_dto_roundtrip(self, storage: DictStorage):
@@ -37,9 +37,9 @@ class TestDictStorage:
         location = LocationDTO("dict://test")
 
         # when writing and reading the DTO
-        storage.write(dto=test_dto, object_type=StorageObject.TESTSET, location=location)
+        storage.write(dto=test_dto, object_type=ObjectType.TESTSET, location=location)
         result = storage.read(
-            object_type=StorageObject.TESTSET, object_id=str(test_id), location=location
+            object_type=ObjectType.TESTSET, object_id=str(test_id), location=location
         )
 
         # then the result should match the original
@@ -54,7 +54,7 @@ class TestDictStorage:
 
         with pytest.raises(ObjectNotFoundError):
             storage.read(
-                object_type=StorageObject.TESTSET,
+                object_type=ObjectType.TESTSET,
                 object_id="nonexistent",
                 location=location,
             )
@@ -88,7 +88,7 @@ class TestDictStorage:
             )
             test_ids.append(str(test_dto.testset_id))
             storage.write(
-                dto=test_dto, object_type=StorageObject.TESTSET, location=location
+                dto=test_dto, object_type=ObjectType.TESTSET, location=location
             )
 
         # write an object in subfolder that should NOT be listed
@@ -101,12 +101,12 @@ class TestDictStorage:
         )
         storage.write(
             dto=subfolder_dto,
-            object_type=StorageObject.TESTSET,
+            object_type=ObjectType.TESTSET,
             location=subfolder_location,
         )
 
         # when listing objects
-        objects = storage.list(location=location, object_type=StorageObject.TESTSET)
+        objects = storage.list(location=location, object_type=ObjectType.TESTSET)
 
         # then we should get back only the top-level objects, not the subfolder one
         assert len(objects) == 3  # Should NOT include the subfolder object
@@ -156,11 +156,11 @@ class TestDictStorage:
 
         with pytest.raises(StorageTypeUnknownError):
             storage.write(
-                dto=test_dto, object_type=StorageObject.TESTSET, location=location
+                dto=test_dto, object_type=ObjectType.TESTSET, location=location
             )
         with pytest.raises(StorageTypeUnknownError):
             storage.read(
-                object_type=StorageObject.TESTSET, object_id="test", location=location
+                object_type=ObjectType.TESTSET, object_id="test", location=location
             )
         with pytest.raises(StorageTypeUnknownError):
-            storage.list(location=location, object_type=StorageObject.TESTSET)
+            storage.list(location=location, object_type=ObjectType.TESTSET)

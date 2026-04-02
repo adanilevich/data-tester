@@ -12,7 +12,7 @@ from src.dtos import (
     TestStatus,
     TestResult,
     LocationDTO,
-    StorageObject,
+    ObjectType,
 )
 from src.domain.testcase.testrun import TestRun
 from src.infrastructure.storage import FormatterFactory, StorageFactory
@@ -150,7 +150,7 @@ class TestTestRun:
         # And the initial state should be persisted
         storage = storage_factory.get_storage(storage_location)
         persisted_dto = storage.read(
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             object_id=str(testrun_dto.testrun_id),
             location=storage_location,
         )
@@ -203,7 +203,7 @@ class TestTestRun:
         # And the final state should be persisted correctly
         storage = storage_factory.get_storage(storage_location)
         persisted_dto = storage.read(
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             object_id=str(testrun_dto.testrun_id),
             location=storage_location,
         )
@@ -259,7 +259,7 @@ class TestTestRun:
         # Then the file should exist in storage and all attributes should match
         storage = storage_factory.get_storage(storage_location)
         persisted_dto = storage.read(
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             object_id=str(testrun_dto.testrun_id),
             location=storage_location,
         )

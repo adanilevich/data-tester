@@ -8,7 +8,7 @@ from src.domain_ports import (
     SetReportIdsCommand,
 )
 from src.infrastructure_ports import IBackendFactory, INotifier
-from src.dtos import TestRunDTO, StorageObject
+from src.dtos import TestRunDTO, ObjectType
 from .testrun import TestRun
 from src.infrastructure_ports import IStorageFactory
 
@@ -48,7 +48,7 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         storage = self.storage_factory.get_storage(command.storage_location)
         storage.write(
             dto=testrun,
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             location=command.storage_location,
         )
 
@@ -58,7 +58,7 @@ class TestRunCommandHandler(ITestRunCommandHandler):
 
         storage = self.storage_factory.get_storage(command.storage_location)
         dto = storage.read(
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             object_id=command.testrun_id,
             location=command.storage_location,
         )
@@ -73,6 +73,6 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         storage = self.storage_factory.get_storage(command.storage_location)
         storage.write(
             dto=testrun,
-            object_type=StorageObject.TESTRUN,
+            object_type=ObjectType.TESTRUN,
             location=command.storage_location,
         )

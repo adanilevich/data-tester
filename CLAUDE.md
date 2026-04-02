@@ -1,133 +1,42 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+# Project: Data Tester
 
 ## Overview
+Data Tester is a flexible, extensible framework for automating business validation tests for ETL pipelines via testing the data objects (files, tables) created by ETL pipelines.
 
-Data Tester is a flexible framework for automating business validation tests for ETL pipelines. It uses hexagonal architecture with clear separation between domain logic, application services, and adapters.
+## Tech Stack
+- Python
+- pydantic for data validation
+- fsspec for file system interaction
 
-## Development Commands
-
-**Setup and Dependencies:**
-```bash
-# Install dependencies (uses uv package manager)
-uv sync
-
-# Install with optional GCS dependencies
-uv sync --extra gcs
-```
-
-**Code Quality and Testing:**
-```bash
-# Run all checks interactively
-./run_checks.sh
-
-# Individual commands:
-ruff check --fix      # Linting and formatting
-ty check              # Type checking
-pytest                # Run all tests
-coverage run          # Run tests with coverage (excludes infrastructure tests)
-```
-
-**Test Execution:**
-```bash
-# Run tests excluding infrastructure tests (default coverage config)
-pytest -m 'not skip_test and not infrastructure'
-
-# Run specific test categories
-pytest -m infrastructure    # Infrastructure tests only
-pytest tests/unit/          # Unit tests only
-pytest tests/integration/   # Integration tests only
-```
-
-## Architecture
-
-The codebase follows hexagonal architecture principles with these key patterns:
-
-### Core Domain Structure
-- **Core Logic**: Business rules and entities (e.g., `testrun.py`, `specification.py`)
-- **Application Services**: Use cases that orchestrate domain logic (e.g., `handle_testruns.py`, `handle_specs.py`)
-- **Ports**: Interfaces defining contracts between layers (in `ports/` directories)
-- **Adapters**: Infrastructure implementations of ports (in `adapters/` directories)
-- **Drivers**: External entry points like CLI commands (in `drivers/` directories)
-
-### Main Domain Modules
-
-1. **testcase/**: Core testing execution engine
-   - Executes different test types (SCHEMA, ROWCOUNT, COMPARE)
-   - Manages test runs and precondition checks
-   - Plugin architecture for different test case implementations
-
-2. **specification/**: Handles test specification discovery and parsing
-   - Finds specification files based on naming conventions
-   - Supports multiple formats (SQL, XLSX) via formatter plugins
-   - Matches specifications to test cases
-
-3. **report/**: Test result reporting and formatting
-   - Generates reports in multiple formats (JSON, TXT, XLSX)
-   - Plugin architecture for custom report formats
-
-4. **domain_config/**: Domain-specific configuration management
-   - YAML-based configuration for different business domains
-   - Defines data platform connections, storage locations
-
-5. **testset/**: Test organization and batch execution
-   - Groups related tests for execution
-   - Manages test scenarios and environments
-
-### Dependency Injection Pattern
-Each domain module has a `dependency_injection.py` file that wires together:
-- Storage backends (file system, cloud storage)
-- Data platform adapters (DuckDB, demo platforms)
-- Notifiers for test execution updates
-- Formatters and naming conventions
-
-### Key Interfaces
-- `IDataPlatform`: Abstraction for different data platforms
-- `IStorage`: File/blob or database storage abstraction
-- `IStorageFactory`: abstraction for dynamic creation of IStorage instances based on the
-   required storagge location
-- `INotifier`: Test execution notifications
-- `ISpecFormatter`: Specification format parsers
-- `INamingConventions`: File naming pattern matchers
-
-## Configuration
-
-Application configuration is handled via `src/config/config.py` using Pydantic settings:
-- Environment variables prefixed with `DATATESTER_`
-- Support for local file storage and cloud storage (GCS via optional dependency)
-- Configurable data platforms, notifiers, and storage engines
-
-Business-related configuration is handled via `src/domain_config` where users can define
-business-related config parameters, e.g. storage paths for test reports 
-
-## Testing Strategy
-
-- **Unit Tests**: Test individual components in isolation (`tests/unit/`)
-- **Integration Tests**: Test component interactions (`tests/integration/`)
-- **Infrastructure Marker**: Tests marked with `@pytest.mark.infrastructure` require external dependencies
-- **Coverage**: Configured to exclude abstract methods and infrastructure tests from coverage reports
-
-## Key DTOs
-All data transfer objects are defined in `src/dtos/`:
-- `TestRunDTO`: Complete test execution results
-- `TestCaseDTO`: Individual test case results  
-- `SpecificationDTO`: Test specifications
-- `LocationDTO`: Storage location abstraction
-- `DomainConfigDTO`: Domain configuration data
-- `ReportDTO`: Test case or testrun report data
-- `TestSetDTO`: Definition of test suites
-
-## Extension Points
-- Add new test types by implementing `AbstractTestCase`
-- Add new data platforms via `IDataPlatform` interface
-- Add new specification formats via `ISpecFormatter`
-- Add new report formats via `IReportFormatter`
-- Add new storage backends via `IStorage`
-
-## Code Quality Standards
+## Code Style and Quality Standards
 Claude must follow these rules when implementing code changes
 - All code must pass linter and formatter checks. Claude can automatically apply
 formatting without asking for permission
 - All code must pass typechecks. "... is defined" here messages from MyPy can be ignored
 unless Claude is promted explicitely to address them
+- Type hints are used in all signatures and function bodies
+
+## Architecture
+The project uses hexagonal architecture with clear separation between domain logic, application services and adapters
+- `src/apps`: contains applications (cli client, http backend, etc.) which assemble drivers, ports, adapters and domain logic using dependency injection (`..._di.py` modules)
+- `src/config`: contains the application configuration
+- `src/domain`: contains the domain logic with the main domain objects being `domain_config`, `report`, `specification`, `testcase`, `testset`
+- `src/domain_ports`: defines ports (interfaces) of the domain objects. These ports are used by drivers to execute business logic
+- `src/drivers`: contains drivers for each app (cli, http) which define business use cases
+- `src/dtos`: contains data objects which are used in whole codebase
+- `src/infrastructure_ports`: contains driven (infrastructure) ports (interfaces) which are used as contracts by drivers and domain logic
+- `src/infrastructure`: contains implementations of the infrastructure ports, the most important are `storage`, `notifiers`, `backend` (aka `data_platform`)
+
+## Commands
+- `uv sync`: install dependencies
+- `uv sync --extra gcs`: install with optional GCS dependencies
+- `uv run ruff check --fix`: Linting and formatting
+- `uv run ty check`: Type checking
+- `uv run pytest`: Run all tests
+- `uv run pytest -m infrastructure`: Run infrastructure-dependent tests only
+- `uv run pytest tests/unit/`: Run unit tests only
+- `uv run pytest tests/integration/`: Run integration tests only
+- `./run_checks.sh`: Run all checks: linting, formatting, typechecks, tests
+
+## Important Notes
+- always execute tests, formatter and linter checks and typechecks before finalizing code. Fix any occuring issues

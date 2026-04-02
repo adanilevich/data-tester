@@ -37,6 +37,6 @@ from .report import (
     TestCaseReportDTO,
     TestRunReportDTO,
 )
-from .location import LocationDTO, Store, StorageObject, ObjectLocationDTO
+from .location import LocationDTO, StorageType, ObjectType, ObjectLocationDTO
 from .testset import TestSetDTO, TestCaseEntryDTO
 from .testcase import TestRunDTO

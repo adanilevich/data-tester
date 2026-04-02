@@ -22,7 +22,7 @@ from src.dtos import (
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
-    StorageObject,
+    ObjectType,
 )
 from src.domain_ports import (
     SaveTestRunCommand,
@@ -238,7 +238,7 @@ class TestTestRunCommandHandler:
         # Then: The testrun should be updated with report ID and persisted
         storage = storage_factory.get_storage(storage_location)
         saved_testrun = storage.read(
-            StorageObject.TESTRUN, str(testrun.testrun_id), storage_location
+            ObjectType.TESTRUN, str(testrun.testrun_id), storage_location
         )
         assert saved_testrun.report_id == report_id
 
@@ -262,7 +262,7 @@ class TestTestRunCommandHandler:
     ):
         """Test that save raises error with unsupported storage type"""
         # Given: An unsupported storage location (S3 is in enum but not supported)
-        unsupported_location = LocationDTO("s3://testruns/")
+        unsupported_location = LocationDTO("unsupported://testruns/")
         save_command = SaveTestRunCommand(
             testrun=testrun,
             storage_location=unsupported_location,

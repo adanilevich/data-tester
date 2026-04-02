@@ -1,10 +1,11 @@
 import pytest
 
+from src.infrastructure.storage import StorageTypeUnknownError
 from src.infrastructure.storage.storage_factory import StorageFactory
 from src.infrastructure.storage.formatter_factory import FormatterFactory
 from src.infrastructure.storage.file_storage import FileStorage
 from src.infrastructure.storage.dict_storage import DictStorage
-from src.dtos import LocationDTO, Store
+from src.dtos import LocationDTO, StorageType
 
 
 class TestStorageFactory:
@@ -24,13 +25,13 @@ class TestStorageFactory:
         local_location = LocationDTO("local://test/path")
         local_storage = storage_factory.get_storage(local_location)
         assert isinstance(local_storage, FileStorage)
-        assert local_storage.storage_type == Store.LOCAL
+        assert local_storage.storage_type == StorageType.LOCAL
 
         # Test memory file storage
         memory_location = LocationDTO("memory://test/path")
         memory_storage = storage_factory.get_storage(memory_location)
         assert isinstance(memory_storage, FileStorage)
-        assert memory_storage.storage_type == Store.MEMORY
+        assert memory_storage.storage_type == StorageType.MEMORY
 
         # Test dict storage
         dict_location = LocationDTO("dict://test/path")
@@ -63,9 +64,9 @@ class TestStorageFactory:
         assert hasattr(storage, "gcp_project")
         assert storage.gcp_project is None
 
-    def test_unsupported_storage_type_raises(self, storage_factory: StorageFactory):
+    def test_unknown_storage_type_raises(self, storage_factory: StorageFactory):
         """Test that unsupported storage types raise ValueError"""
         # The error comes from Store enum validation when accessing .store property
         location = LocationDTO("unsupported://test/path")
-        with pytest.raises(ValueError, match="is not a valid Store"):
+        with pytest.raises(StorageTypeUnknownError, match="not supported"):
             storage_factory.get_storage(location)
