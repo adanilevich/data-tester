@@ -4,12 +4,8 @@
 
 | Name                                                                             |    Stmts |     Miss |   Cover |   Missing |
 |--------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
-| src/apps/cli/app.py                                                              |       35 |       35 |      0% |      1-66 |
-| src/apps/cli/domain\_config\_di.py                                               |       19 |        0 |    100% |           |
-| src/apps/cli/report\_di.py                                                       |       22 |        0 |    100% |           |
-| src/apps/cli/specification\_di.py                                                |       15 |        0 |    100% |           |
-| src/apps/cli/testcase\_di.py                                                     |       24 |        0 |    100% |           |
-| src/apps/cli/testset\_di.py                                                      |       14 |        0 |    100% |           |
+| src/apps/cli\_app.py                                                             |       27 |       27 |      0% |      1-58 |
+| src/apps/cli\_di.py                                                              |       62 |        0 |    100% |           |
 | src/config/\_\_init\_\_.py                                                       |        2 |        0 |    100% |           |
 | src/config/config.py                                                             |       27 |        1 |     96% |         9 |
 | src/domain/\_\_init\_\_.py                                                       |        6 |        0 |    100% |           |
@@ -56,31 +52,26 @@
 | src/domain/testset/handle\_testsets.py                                           |       15 |        0 |    100% |           |
 | src/domain/testset/testset.py                                                    |       28 |        2 |     93% |     54-55 |
 | src/domain\_ports/\_\_init\_\_.py                                                |        6 |        0 |    100% |           |
-| src/domain\_ports/domain\_config/\_\_init\_\_.py                                 |        2 |        0 |    100% |           |
-| src/domain\_ports/domain\_config/i\_domain\_config\_handler.py                   |        6 |        0 |    100% |           |
-| src/domain\_ports/report/\_\_init\_\_.py                                         |        2 |        0 |    100% |           |
-| src/domain\_ports/report/i\_report\_handler.py                                   |       10 |        0 |    100% |           |
-| src/domain\_ports/specification/\_\_init\_\_.py                                  |        2 |        0 |    100% |           |
-| src/domain\_ports/specification/i\_spec\_handler.py                              |        6 |        0 |    100% |           |
-| src/domain\_ports/testcase/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
-| src/domain\_ports/testcase/i\_testrun\_handler.py                                |        7 |        0 |    100% |           |
-| src/domain\_ports/testset/\_\_init\_\_.py                                        |        2 |        0 |    100% |           |
-| src/domain\_ports/testset/i\_testset\_handler.py                                 |        9 |        0 |    100% |           |
-| src/drivers/cli/\_\_init\_\_.py                                                  |        6 |        0 |    100% |           |
-| src/drivers/cli/domain\_config.py                                                |       11 |        0 |    100% |           |
-| src/drivers/cli/report.py                                                        |       20 |        0 |    100% |           |
-| src/drivers/cli/specification.py                                                 |        9 |        0 |    100% |           |
-| src/drivers/cli/testcase.py                                                      |       13 |        2 |     85% |     31-37 |
-| src/drivers/cli/testset.py                                                       |       16 |        0 |    100% |           |
+| src/domain\_ports/domain\_config.py                                              |        6 |        0 |    100% |           |
+| src/domain\_ports/report.py                                                      |       10 |        0 |    100% |           |
+| src/domain\_ports/specification.py                                               |        6 |        0 |    100% |           |
+| src/domain\_ports/testcase.py                                                    |        7 |        0 |    100% |           |
+| src/domain\_ports/testset.py                                                     |        9 |        0 |    100% |           |
+| src/drivers/\_\_init\_\_.py                                                      |        6 |        0 |    100% |           |
+| src/drivers/domain\_config.py                                                    |       11 |        0 |    100% |           |
+| src/drivers/report.py                                                            |       20 |        0 |    100% |           |
+| src/drivers/specification.py                                                     |        9 |        0 |    100% |           |
+| src/drivers/testcase.py                                                          |       13 |        2 |     85% |     31-37 |
+| src/drivers/testset.py                                                           |       16 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                         |        8 |        0 |    100% |           |
 | src/dtos/domain\_config.py                                                       |       27 |        1 |     96% |        51 |
 | src/dtos/dto.py                                                                  |       17 |        0 |    100% |           |
-| src/dtos/location.py                                                             |       76 |        7 |     91% |42, 55, 66, 81, 84, 90, 97 |
 | src/dtos/report.py                                                               |       62 |        0 |    100% |           |
 | src/dtos/specification.py                                                        |       68 |        2 |     97% |   44, 101 |
+| src/dtos/storage.py                                                              |       76 |        7 |     91% |42, 55, 66, 81, 84, 90, 97 |
 | src/dtos/testcase.py                                                             |      136 |        6 |     96% |146, 149, 200, 206, 231, 233 |
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
-| src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
+| src/infrastructure/backend/\_\_init\_\_.py                                       |        4 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_backend.py                                 |      201 |       16 |     92% |139, 163-165, 185, 313, 317, 319, 322-327, 430, 462, 468 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                        |       17 |        0 |    100% |           |
@@ -89,10 +80,8 @@
 | src/infrastructure/backend/dummy/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
 | src/infrastructure/backend/dummy/dummy\_backend.py                               |       29 |        9 |     69% |24, 27, 37, 45, 51, 56, 66, 77, 87 |
 | src/infrastructure/backend/dummy/dummy\_backend\_factory.py                      |        6 |        0 |    100% |           |
-| src/infrastructure/backend/map.py                                                |        8 |        2 |     75% |     7, 11 |
-| src/infrastructure/notifier/\_\_init\_\_.py                                      |        5 |        0 |    100% |           |
+| src/infrastructure/notifier/\_\_init\_\_.py                                      |        3 |        0 |    100% |           |
 | src/infrastructure/notifier/in\_memory\_notifier.py                              |        7 |        0 |    100% |           |
-| src/infrastructure/notifier/map.py                                               |        8 |        1 |     88% |        11 |
 | src/infrastructure/notifier/stdout\_notifier.py                                  |        4 |        0 |    100% |           |
 | src/infrastructure/storage/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/storage/dict\_storage.py                                      |       66 |        2 |     97% |   118-120 |
@@ -102,18 +91,15 @@
 | src/infrastructure/storage/i\_formatter\_factory.py                              |        4 |        0 |    100% |           |
 | src/infrastructure/storage/json\_formatter.py                                    |       39 |        5 |     87% |46-48, 53-54 |
 | src/infrastructure/storage/storage\_factory.py                                   |       24 |        0 |    100% |           |
-| src/infrastructure\_ports/\_\_init\_\_.py                                        |        4 |        0 |    100% |           |
-| src/infrastructure\_ports/backend/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
-| src/infrastructure\_ports/backend/i\_backend.py                                  |        6 |        0 |    100% |           |
-| src/infrastructure\_ports/backend/i\_backend\_factory.py                         |        4 |        0 |    100% |           |
-| src/infrastructure\_ports/notifier/\_\_init\_\_.py                               |        2 |        0 |    100% |           |
-| src/infrastructure\_ports/notifier/i\_notifier.py                                |        2 |        0 |    100% |           |
-| src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
-| src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
-| src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2614** |  **189** | **93%** |           |
+| src/infrastructure\_ports/\_\_init\_\_.py                                        |        6 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_backend.py                                          |        6 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_backend\_factory.py                                 |        4 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_notifier.py                                         |        2 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_storage.py                                          |        7 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_storage\_factory.py                                 |        4 |        0 |    100% |           |
+| **TOTAL**                                                                        | **2539** |  **178** | **93%** |           |
 
-8 empty files skipped.
+3 empty files skipped.
 
 
 ## Setup coverage badge
