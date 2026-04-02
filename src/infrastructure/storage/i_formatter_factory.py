@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 from .i_formatter import IFormatter
-from src.dtos.location import StorageObject
+from src.dtos.location import ObjectType
 
 
 class IFormatterFactory(ABC):
     """Interface for formatter factory implementations."""
 
     @abstractmethod
-    def get_formatter(self, object_type: StorageObject) -> IFormatter:
+    def get_formatter(self, object_type: ObjectType) -> IFormatter:
         """
         Get the appropriate formatter for the given object type.
 

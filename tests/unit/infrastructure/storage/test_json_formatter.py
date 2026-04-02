@@ -3,7 +3,7 @@ import json
 
 from src.infrastructure.storage.json_formatter import JsonFormatter
 from src.infrastructure.storage.i_formatter import FormatterError
-from src.dtos import TestSetDTO, StorageObject
+from src.dtos import TestSetDTO, ObjectType
 
 
 class TestJsonFormatter:
@@ -26,7 +26,7 @@ class TestJsonFormatter:
     def test_get_object_key(self, formatter: JsonFormatter):
         """Test generating object keys for storage"""
         object_id = "test-id-123"
-        object_type = StorageObject.TESTSET
+        object_type = ObjectType.TESTSET
 
         result = formatter.get_object_key(object_id, object_type)
 
@@ -43,11 +43,11 @@ class TestJsonFormatter:
         ]
 
         for filename in valid_filenames:
-            object_type = StorageObject.TESTSET  # Use consistent type for test
+            object_type = ObjectType.TESTSET  # Use consistent type for test
             if "domain_config" in filename:
-                object_type = StorageObject.DOMAIN_CONFIG
+                object_type = ObjectType.DOMAIN_CONFIG
             elif "testrun_report" in filename:
-                object_type = StorageObject.TESTRUN_REPORT
+                object_type = ObjectType.TESTRUN_REPORT
 
             result = formatter.check_filename(filename, object_type)
             assert result is True
@@ -55,10 +55,10 @@ class TestJsonFormatter:
     def test_check_filename_invalid(self, formatter: JsonFormatter):
         """Test checking invalid filenames"""
         invalid_cases = [
-            ("testset_abc123.txt", StorageObject.TESTSET),  # Wrong extension
-            ("wrongtype_abc123.json", StorageObject.TESTSET),  # Wrong prefix
-            ("testset.json", StorageObject.TESTSET),  # Missing ID
-            ("abc123.json", StorageObject.TESTSET),  # Missing prefix
+            ("testset_abc123.txt", ObjectType.TESTSET),  # Wrong extension
+            ("wrongtype_abc123.json", ObjectType.TESTSET),  # Wrong prefix
+            ("testset.json", ObjectType.TESTSET),  # Missing ID
+            ("abc123.json", ObjectType.TESTSET),  # Missing prefix
         ]
 
         for filename, object_type in invalid_cases:
@@ -68,9 +68,9 @@ class TestJsonFormatter:
     def test_get_object_id_valid(self, formatter: JsonFormatter):
         """Test extracting object ID from valid object keys"""
         test_cases = [
-            ("testset_abc123.json", StorageObject.TESTSET, "abc123"),
-            ("domain_config_my-domain.json", StorageObject.DOMAIN_CONFIG, "my-domain"),
-            ("testrun_report_uuid-here.json", StorageObject.TESTRUN_REPORT, "uuid-here"),
+            ("testset_abc123.json", ObjectType.TESTSET, "abc123"),
+            ("domain_config_my-domain.json", ObjectType.DOMAIN_CONFIG, "my-domain"),
+            ("testrun_report_uuid-here.json", ObjectType.TESTRUN_REPORT, "uuid-here"),
         ]
 
         for object_key, object_type, expected_id in test_cases:
@@ -80,9 +80,9 @@ class TestJsonFormatter:
     def test_get_object_id_invalid(self, formatter: JsonFormatter):
         """Test extracting object ID from invalid object keys raises ValueError"""
         invalid_cases = [
-            ("testset_abc123.txt", StorageObject.TESTSET),  # Wrong extension
-            ("wrongtype_abc123.json", StorageObject.TESTSET),  # Wrong prefix
-            ("invalid.json", StorageObject.TESTSET),  # No matching pattern
+            ("testset_abc123.txt", ObjectType.TESTSET),  # Wrong extension
+            ("wrongtype_abc123.json", ObjectType.TESTSET),  # Wrong prefix
+            ("invalid.json", ObjectType.TESTSET),  # No matching pattern
         ]
 
         for object_key, object_type in invalid_cases:
@@ -105,7 +105,7 @@ class TestJsonFormatter:
         assert data["domain"] == "test-domain"
 
         # Deserialize
-        deserialized = formatter.deserialize(serialized, StorageObject.TESTSET)
+        deserialized = formatter.deserialize(serialized, ObjectType.TESTSET)
 
         # Should match original
         assert isinstance(deserialized, TestSetDTO)
@@ -118,4 +118,4 @@ class TestJsonFormatter:
     def test_unknown_object_type_raises(self, formatter: JsonFormatter):
         """Test that unknown object types raise ValueError"""
         with pytest.raises(FormatterError, match="Unknown object type"):
-            formatter.deserialize(b"{}", StorageObject.UNKNOWN)
+            formatter.deserialize(b"{}", ObjectType.UNKNOWN)

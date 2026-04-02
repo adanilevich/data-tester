@@ -1,13 +1,13 @@
 import pytest
 
-from src.dtos.location import LocationDTO, Store
+from src.dtos.location import LocationDTO, StorageType
 
 
 def test_location_dto():
     loc = LocationDTO("local://test")
     assert isinstance(loc, LocationDTO)
     assert loc.path == "local://test/"
-    assert loc.store.value == "local"
+    assert loc.storage_type.value == "local"
 
 
 def test_location_dto_invalid_path():
@@ -17,8 +17,8 @@ def test_location_dto_invalid_path():
 
 def test_location_dto_store():
     loc = LocationDTO("local://test")
-    assert loc.store.value == "local"
-    assert loc.store == Store.LOCAL
+    assert loc.storage_type.value == "local"
+    assert loc.storage_type == StorageType.LOCAL
 
 
 def test_location_dto_append():

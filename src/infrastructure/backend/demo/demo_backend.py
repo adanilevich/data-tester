@@ -1,5 +1,4 @@
 from __future__ import annotations
-from types import ModuleType
 from typing import Dict, List, Tuple, Optional
 from random import randint
 
@@ -54,7 +53,6 @@ class DemoBackend(IBackend):
         naming_resolver: DemoNamingResolver,
         query_handler: DemoQueryHandler,
         fs: Optional[LocalFileSystem] = None,
-        db=duckdb,
     ):
         """
         Initialize backend.
@@ -77,19 +75,18 @@ class DemoBackend(IBackend):
         self.naming_resolver: DemoNamingResolver = naming_resolver
         self.query_handler: DemoQueryHandler = query_handler
         self.fs: LocalFileSystem = fs or LocalFileSystem()
-        self.duckdb: ModuleType = db
 
-        # initialize databases
-        self._init_dbs()
-
-    def _init_dbs(self):
+    @property
+    def attach_data_statement(self) -> str:
         """Initialize duckdb databases from .db files in specified location"""
+        statement = ""
         db_files: List[str] = [
             f for f in self.fs.ls(path=self.db_path) if f.endswith(".db")
         ]
         for db_file in db_files:
             db_name: str = db_file.split(sep="/")[-1].removesuffix(".db")
-            self.duckdb.execute(f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name}")
+            statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name};\n"
+        return statement
 
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
         """
@@ -122,9 +119,11 @@ class DemoBackend(IBackend):
             WHERE table_catalog = '{catalog}'
             AND table_schema = '{schema}'
         """
-        tables_df: pl.DataFrame = self.duckdb.query(query=query).pl()
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
+        tables_df = con.query(query=query).pl()
 
-        db_testobject: List[str] = tables_df.to_dict(as_series=False)["table_name"]
+        db_testobject = tables_df.to_dict(as_series=False)["table_name"]
 
         return file_testobjects + db_testobject
 
@@ -169,7 +168,9 @@ class DemoBackend(IBackend):
             SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}
             {where_clause}
         """
-        count_df: pl.DataFrame = self.duckdb.query(query).pl()
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
+        count_df = con.query(query).pl()
 
         count_dict: Dict[str, List[int]] = count_df.to_dict(as_series=False)
         count: int = count_dict["__cnt__"][0]
@@ -192,7 +193,9 @@ class DemoBackend(IBackend):
 
     def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         """See interface definition (parent class IBackend)."""
-        result_as_df: pl.DataFrame = self.duckdb.query(query).pl()
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
+        result_as_df = con.query(query).pl()
         return result_as_df
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
@@ -223,9 +226,10 @@ class DemoBackend(IBackend):
                 AND table_schema = '{schema}'
                 AND table_name = '{table}'
             """
-
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
         # convert to polars dataframe with columns 'col', 'dtype'
-        schema_as_df: pl.DataFrame = self.duckdb.query(schema_query).pl()
+        schema_as_df = con.query(schema_query).pl()
         # convert to dict with keys 'col', 'dtype' and value-lists as values
         schema_as_named_dict: Dict[str, List[str]] = schema_as_df.to_dict(as_series=False)
         # convert to a dict with column names as keys and dtypes as values
@@ -261,16 +265,18 @@ class DemoBackend(IBackend):
             FROM INFORMATION_SCHEMA.COLUMNS
             WHERE table_name = '__query__'
         """
-        schema_as_df: pl.DataFrame = self.duckdb.query(query).pl()
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
+        schema_as_df = con.query(query).pl()
         schema_as_named_dict: Dict[str, List[str]] = schema_as_df.to_dict(as_series=False)
         schema_as_dict: Dict[str, str] = dict[str, str](
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
-        location: LocationDTO = LocationDTO(
+        location= LocationDTO(
             path=f"duckdb://{db.domain}_{db.stage}.{db.instance}.user_query.duck"
         )
-        result: SchemaSpecificationDTO = SchemaSpecificationDTO(
+        result = SchemaSpecificationDTO(
             location=location,
             testobject="user query",
             columns=schema_as_dict,
@@ -369,16 +375,16 @@ class DemoBackend(IBackend):
         column_selection: str = ", ".join(cols)
         return column_selection
 
-    def _setup_test_db(self, key_sample: List[str]):
-        """Re-creates a database and populates a table with key values"""
+    def _setup_test_db_statement(self, key_sample: List[str]) -> str:
+        """SQL statement to re-create a database, populate a table with key values"""
         key_values: str = ", ".join([f"('{key_value}')" for key_value in key_sample])
-        create_statement = f"""
+        statement = f"""
             DROP SCHEMA IF EXISTS __test__ CASCADE;
             CREATE SCHEMA __test__;
             CREATE TABLE __test__.__concat_keys__ (__concat_key__ STRING);
             INSERT INTO __test__.__concat_keys__ VALUES {key_values}
         """
-        self.duckdb.execute(create_statement)
+        return statement
 
     def get_sample_keys(
         self,
@@ -403,8 +409,10 @@ class DemoBackend(IBackend):
             ORDER BY SHA256(CONCAT('{random_number}', __concat_key__))
             LIMIT {sample_size}
         """
-        result_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
-        result_list: List[str] = result_df.to_dict(as_series=False)["__concat_key__"]
+        con = duckdb.connect()
+        con.execute(self.attach_data_statement)
+        result_df = con.query(sample_query).pl()
+        result_list = result_df.to_dict(as_series=False)["__concat_key__"]
 
         return result_list
 
@@ -422,7 +430,6 @@ class DemoBackend(IBackend):
                 "Provide a non-empty list of primary keys and samples!"
             )
 
-        self._setup_test_db(key_sample=key_sample)
         concat_key: str = self._get_concat_key(primary_keys, cast_to)
         column_selection: str = self._get_column_selection(columns, cast_to)
 
@@ -435,7 +442,10 @@ class DemoBackend(IBackend):
             INNER JOIN __test__.__concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
-        result_as_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
+        con = duckdb.connect()
+        con.execute(self._setup_test_db_statement(key_sample=key_sample))
+        con.execute(self.attach_data_statement)
+        result_as_df = con.query(sample_query).pl()
 
         return result_as_df
 
@@ -465,7 +475,6 @@ class DemoBackend(IBackend):
         table: str = coordinates[2]
 
         column_selection: str = self._get_column_selection(columns, cast_to)
-        self._setup_test_db(key_sample=key_sample)
         concat_key: str = self._get_concat_key(primary_keys, cast_to)
 
         sample_query: str = f"""
@@ -476,6 +485,9 @@ class DemoBackend(IBackend):
             INNER JOIN __test__.__concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
-        result_as_df: pl.DataFrame = self.duckdb.query(sample_query).pl()
+        con = duckdb.connect()
+        con.execute(self._setup_test_db_statement(key_sample=key_sample))
+        con.execute(self.attach_data_statement)
+        result_as_df = con.query(sample_query).pl()
 
         return result_as_df

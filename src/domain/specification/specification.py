@@ -131,7 +131,7 @@ class Specification:
                     storage: IStorage = self.storage_factory.get_storage(file)
                 except StorageTypeUnknownError as err:
                     raise StorageTypeUnknownError(
-                        f"Storage type {file.store} not supported"
+                        f"Storage type {file.storage_type} not supported"
                     ) from err
                 try:
                     file_bytes: bytes = storage.read_bytes(file)

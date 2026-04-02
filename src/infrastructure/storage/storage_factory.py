@@ -2,7 +2,7 @@ from src.infrastructure_ports import IStorageFactory, IStorage, StorageTypeUnkno
 from .i_formatter_factory import IFormatterFactory
 from .file_storage import FileStorage
 from .dict_storage import DictStorage
-from src.dtos.location import LocationDTO, Store
+from src.dtos.location import LocationDTO, StorageType
 
 
 class StorageFactory(IStorageFactory):
@@ -27,20 +27,21 @@ class StorageFactory(IStorageFactory):
         Raises:
             StorageTypeUnknownError: If the location type is not supported
         """
-        match location.store:
-            case Store.LOCAL | Store.GCS:
-                return FileStorage(location.store, self.formatter_factory)
-            case Store.MEMORY:
+        match location.storage_type:
+            case StorageType.LOCAL | StorageType.GCS:
+                return FileStorage(location.storage_type, self.formatter_factory)
+            case StorageType.MEMORY:
+                # memory storage is stateful, only assign if not already assigned
                 if self._mem_storage is None:
                     self._mem_storage = FileStorage(
-                        location.store, self.formatter_factory)
+                        location.storage_type, self.formatter_factory)
                 return self._mem_storage
-            case Store.DICT:
+            case StorageType.DICT:
                 # dict storage is stateful, only assign if not already assigned
                 if self._dict_storage is None:
                     self._dict_storage = DictStorage(self.formatter_factory)
                 return self._dict_storage
             case _:
                 raise StorageTypeUnknownError(
-                    f"Storage type {location.store} not supported"
+                    f"Storage type {location.storage_type} not supported"
                 )

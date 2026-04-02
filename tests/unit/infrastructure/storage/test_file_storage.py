@@ -2,7 +2,7 @@ import pytest
 
 from src.infrastructure.storage.file_storage import FileStorage, ObjectNotFoundError
 from src.infrastructure.storage.formatter_factory import FormatterFactory
-from src.dtos import LocationDTO, StorageObject, TestSetDTO, Store
+from src.dtos import LocationDTO, ObjectType, TestSetDTO, StorageType
 
 
 class TestFileStorage:
@@ -12,14 +12,14 @@ class TestFileStorage:
     def storage(self) -> FileStorage:
         formatter_factory = FormatterFactory()
         return FileStorage(
-            storage_type=Store.MEMORY, formatter_factory=formatter_factory
+            storage_type=StorageType.MEMORY, formatter_factory=formatter_factory
         )
 
     def test_supported_storage_types(self, storage: FileStorage):
         """Test that FileStorage reports correct supported storage types"""
         supported_types = storage.supported_storage_types
         # Note: Only MEMORY is supported since that's what we configured
-        assert Store.MEMORY in supported_types
+        assert StorageType.MEMORY in supported_types
 
     def test_write_read_dto_roundtrip(self, storage: FileStorage):
         """Test writing and reading a DTO object"""
@@ -35,9 +35,9 @@ class TestFileStorage:
         location = LocationDTO("memory://test")
 
         # when writing and reading the DTO
-        storage.write(dto=test_dto, object_type=StorageObject.TESTSET, location=location)
+        storage.write(dto=test_dto, object_type=ObjectType.TESTSET, location=location)
         result = storage.read(
-            object_type=StorageObject.TESTSET, object_id=str(test_id), location=location
+            object_type=ObjectType.TESTSET, object_id=str(test_id), location=location
         )
 
         # then the result should match the original
@@ -52,7 +52,7 @@ class TestFileStorage:
 
         with pytest.raises(ObjectNotFoundError):
             storage.read(
-                object_type=StorageObject.TESTSET,
+                object_type=ObjectType.TESTSET,
                 object_id="nonexistent",
                 location=location,
             )
@@ -86,7 +86,7 @@ class TestFileStorage:
             )
             test_ids.append(str(test_dto.testset_id))
             storage.write(
-                dto=test_dto, object_type=StorageObject.TESTSET, location=location
+                dto=test_dto, object_type=ObjectType.TESTSET, location=location
             )
 
         # write an object in subfolder that should NOT be listed
@@ -99,12 +99,12 @@ class TestFileStorage:
         )
         storage.write(
             dto=subfolder_dto,
-            object_type=StorageObject.TESTSET,
+            object_type=ObjectType.TESTSET,
             location=subfolder_location,
         )
 
         # when listing objects
-        objects = storage.list(location=location, object_type=StorageObject.TESTSET)
+        objects = storage.list(location=location, object_type=ObjectType.TESTSET)
 
         # then we should get back only the top-level objects, not the subfolder one
         assert len(objects) == 3  # Should NOT include the subfolder object

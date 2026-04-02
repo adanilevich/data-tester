@@ -7,7 +7,7 @@ from .i_formatter import (
     DeserializationError,
 )
 from src.dtos.dto import DTO
-from src.dtos.location import StorageObject
+from src.dtos.location import ObjectType
 from src.dtos import (
     DomainConfigDTO,
     SpecificationDTO,
@@ -22,20 +22,20 @@ class JsonFormatter(IFormatter):
     """JSON formatter for serializing and deserializing DTO objects."""
 
     def __init__(self):
-        self._dto_mapping: Dict[StorageObject, Type[DTO]] = {
-            StorageObject.DOMAIN_CONFIG: DomainConfigDTO,
-            StorageObject.SPECIFICATION: SpecificationDTO,
-            StorageObject.TESTRUN: TestRunDTO,
-            StorageObject.TESTCASE_REPORT: TestCaseReportDTO,
-            StorageObject.TESTRUN_REPORT: TestRunReportDTO,
-            StorageObject.TESTSET: TestSetDTO,
+        self._dto_mapping: Dict[ObjectType, Type[DTO]] = {
+            ObjectType.DOMAIN_CONFIG: DomainConfigDTO,
+            ObjectType.SPECIFICATION: SpecificationDTO,
+            ObjectType.TESTRUN: TestRunDTO,
+            ObjectType.TESTCASE_REPORT: TestCaseReportDTO,
+            ObjectType.TESTRUN_REPORT: TestRunReportDTO,
+            ObjectType.TESTSET: TestSetDTO,
         }
 
     def serialize(self, dto: DTO) -> bytes:
         """Serialize a DTO object to JSON bytes."""
         return dto.to_json().encode("utf-8")
 
-    def deserialize(self, data: bytes, object_type: StorageObject) -> DTO:
+    def deserialize(self, data: bytes, object_type: ObjectType) -> DTO:
         """Deserialize JSON bytes back to a DTO object."""
         if object_type not in self._dto_mapping:
             raise FormatterError(f"Unknown object type: {object_type}")
@@ -57,18 +57,18 @@ class JsonFormatter(IFormatter):
 
         return result
 
-    def get_object_key(self, object_id: str, object_type: StorageObject) -> str:
+    def get_object_key(self, object_id: str, object_type: ObjectType) -> str:
         """Get the JSON filename for storing an object."""
         object_prefix = object_type.value.lower()
         return f"{object_prefix}_{object_id}.json"
 
-    def check_filename(self, filename: str, object_type: StorageObject) -> bool:
+    def check_filename(self, filename: str, object_type: ObjectType) -> bool:
         """Check if filename corresponds to naming convention for given object type."""
         object_prefix = object_type.value.lower()
         expected_pattern = f"{object_prefix}_"
         return filename.startswith(expected_pattern) and filename.endswith(".json")
 
-    def get_object_id(self, object_key: str, object_type: StorageObject) -> str:
+    def get_object_id(self, object_key: str, object_type: ObjectType) -> str:
         """Extract object ID from object key based on naming convention."""
         if not self.check_filename(object_key, object_type):
             raise FormatterError(

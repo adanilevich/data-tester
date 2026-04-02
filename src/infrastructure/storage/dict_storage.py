@@ -7,7 +7,7 @@ from src.infrastructure_ports import (
     StorageTypeUnknownError,
 )
 from .i_formatter_factory import IFormatterFactory
-from src.dtos import LocationDTO, Store, DTO, StorageObject, ObjectLocationDTO
+from src.dtos import LocationDTO, StorageType, DTO, ObjectType, ObjectLocationDTO
 
 
 class DictStorageError(
@@ -30,10 +30,10 @@ class DictStorage(IStorage):
 
     def _check_storage_type(self, path: LocationDTO) -> None:
         """Check if the storage type is supported"""
-        if path.store != Store.DICT:
+        if path.storage_type != StorageType.DICT:
             raise StorageTypeUnknownError(f"Storage type not supported: {path}")
 
-    def write(self, dto: DTO, object_type: StorageObject, location: LocationDTO):
+    def write(self, dto: DTO, object_type: ObjectType, location: LocationDTO):
         """
         Stores a DTO object in memory, serialized according to internal format.
         This should only be used for storing application-internal objects.
@@ -49,7 +49,7 @@ class DictStorage(IStorage):
         self._storage[full_path] = serialized_data
 
     def read(
-        self, object_type: StorageObject, object_id: str, location: LocationDTO
+        self, object_type: ObjectType, object_id: str, location: LocationDTO
     ) -> DTO:
         """
         Retrieves and deserializes a DTO object from memory.
@@ -87,7 +87,7 @@ class DictStorage(IStorage):
         return self._storage[location.path]
 
     def list(
-        self, location: LocationDTO, object_type: StorageObject
+        self, location: LocationDTO, object_type: ObjectType
     ) -> List[ObjectLocationDTO]:
         """
         Lists all objects of the specified type in memory. This is meant for
@@ -142,6 +142,6 @@ class DictStorage(IStorage):
         return file_locations
 
     @property
-    def supported_storage_types(self) -> List[Store]:
+    def supported_storage_types(self) -> List[StorageType]:
         """Returns supported storage types"""
-        return [Store.DICT]
+        return [StorageType.DICT]

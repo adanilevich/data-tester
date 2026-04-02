@@ -2,7 +2,7 @@ from typing import List, cast
 from datetime import datetime
 
 from src.infrastructure_ports import IStorageFactory, StorageError
-from src.dtos import TestSetDTO, LocationDTO, StorageObject
+from src.dtos import TestSetDTO, LocationDTO, ObjectType
 
 
 class TestSet:
@@ -19,7 +19,7 @@ class TestSet:
         """
         testset.last_updated = datetime.now()
         storage = self.storage_factory.get_storage(location)
-        storage.write(dto=testset, object_type=StorageObject.TESTSET, location=location)
+        storage.write(dto=testset, object_type=ObjectType.TESTSET, location=location)
 
     def retrieve_testset(self, testset_id: str, location: LocationDTO) -> TestSetDTO:
         """
@@ -27,7 +27,7 @@ class TestSet:
         """
         storage = self.storage_factory.get_storage(location)
         dto = storage.read(
-            object_type=StorageObject.TESTSET, object_id=testset_id, location=location
+            object_type=ObjectType.TESTSET, object_id=testset_id, location=location
         )
         return cast(TestSetDTO, dto)
 
@@ -38,13 +38,13 @@ class TestSet:
         """
         storage = self.storage_factory.get_storage(location)
         object_locations = storage.list(
-            location=location, object_type=StorageObject.TESTSET
+            location=location, object_type=ObjectType.TESTSET
         )
         result = []
         for obj_loc in object_locations:
             try:
                 dto = storage.read(
-                    object_type=StorageObject.TESTSET,
+                    object_type=ObjectType.TESTSET,
                     object_id=obj_loc.located_object_id,
                     location=location,
                 )

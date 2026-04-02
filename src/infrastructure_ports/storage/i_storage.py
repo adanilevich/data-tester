@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from src.dtos import LocationDTO, Store, StorageObject, ObjectLocationDTO, DTO
+from src.dtos import LocationDTO, StorageType, ObjectType, ObjectLocationDTO, DTO
 
 
 class StorageError(Exception):
@@ -21,7 +21,7 @@ class IStorage(ABC):
     """
 
     @abstractmethod
-    def write(self, dto: DTO, object_type: StorageObject, location: LocationDTO):
+    def write(self, dto: DTO, object_type: ObjectType, location: LocationDTO):
         """
         Stores a DTO object to (application-internal) storage, serialized according
         to internal format which is handled by the specific storage implementation.
@@ -38,7 +38,7 @@ class IStorage(ABC):
 
     @abstractmethod
     def read(
-        self, object_type: StorageObject, object_id: str, location: LocationDTO
+        self, object_type: ObjectType, object_id: str, location: LocationDTO
     ) -> DTO:
         """
         Retrieves and deserializes a DTO object from storage. Implementation must handle
@@ -94,7 +94,7 @@ class IStorage(ABC):
 
     @abstractmethod
     def list(
-        self, location: LocationDTO, object_type: StorageObject
+        self, location: LocationDTO, object_type: ObjectType
     ) -> List[ObjectLocationDTO]:
         """
         Lists all objects of the specified type in the given location. This is meant for
@@ -125,7 +125,7 @@ class IStorage(ABC):
 
     @property
     @abstractmethod
-    def supported_storage_types(self) -> List[Store]:
+    def supported_storage_types(self) -> List[StorageType]:
         """
         Returns a list of supported storage types, e.g. ['local', 'gcs'].
         """

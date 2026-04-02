@@ -5,7 +5,7 @@ from src.infrastructure.storage.formatter_factory import (
     StorageFormatterFactoryError,
 )
 from src.infrastructure.storage.json_formatter import JsonFormatter
-from src.dtos import StorageObject
+from src.dtos import ObjectType
 
 
 class TestFormatterFactory:
@@ -18,12 +18,12 @@ class TestFormatterFactory:
     def test_get_formatter_returns_json_formatter(self, factory: FormatterFactory):
         """Test that get_formatter returns JsonFormatter for all supported object types"""
         supported_types = [
-            StorageObject.DOMAIN_CONFIG,
-            StorageObject.SPECIFICATION,
-            StorageObject.TESTRUN,
-            StorageObject.TESTCASE_REPORT,
-            StorageObject.TESTRUN_REPORT,
-            StorageObject.TESTSET,
+            ObjectType.DOMAIN_CONFIG,
+            ObjectType.SPECIFICATION,
+            ObjectType.TESTRUN,
+            ObjectType.TESTCASE_REPORT,
+            ObjectType.TESTRUN_REPORT,
+            ObjectType.TESTSET,
         ]
 
         for object_type in supported_types:
@@ -32,8 +32,8 @@ class TestFormatterFactory:
 
     def test_get_formatter_same_instance(self, factory: FormatterFactory):
         """Test that get_formatter returns the same JsonFormatter instance"""
-        formatter1 = factory.get_formatter(StorageObject.TESTSET)
-        formatter2 = factory.get_formatter(StorageObject.DOMAIN_CONFIG)
+        formatter1 = factory.get_formatter(ObjectType.TESTSET)
+        formatter2 = factory.get_formatter(ObjectType.DOMAIN_CONFIG)
 
         # Should return the same instance (singleton pattern)
         assert formatter1 is formatter2
@@ -44,15 +44,15 @@ class TestFormatterFactory:
             StorageFormatterFactoryError,
             match="Cannot get formatter for unknown object type",
         ):
-            factory.get_formatter(StorageObject.UNKNOWN)
+            factory.get_formatter(ObjectType.UNKNOWN)
 
     def test_factory_creates_json_formatter_once(self, factory: FormatterFactory):
         """Test that the factory creates the JsonFormatter only once"""
         # Access the private attribute to verify singleton behavior
         assert hasattr(factory, "_json_formatter")
 
-        formatter1 = factory.get_formatter(StorageObject.TESTSET)
-        formatter2 = factory.get_formatter(StorageObject.TESTRUN)
+        formatter1 = factory.get_formatter(ObjectType.TESTSET)
+        formatter2 = factory.get_formatter(ObjectType.TESTRUN)
 
         # Both should be the same instance and the same as the private attribute
         assert formatter1 is formatter2

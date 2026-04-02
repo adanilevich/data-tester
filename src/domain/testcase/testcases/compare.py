@@ -34,6 +34,11 @@ class QueryExecutionError(CompareTestCaseError):
     Exception raised when a query execution fails
     """
 
+class SchemaMismatchError(CompareTestCaseError):
+    """
+    Raised when query and testobject have different number of columns.
+    """
+
 
 class CompareTestCase(AbstractTestCase):
     """
@@ -200,6 +205,11 @@ class CompareTestCase(AbstractTestCase):
         self, expected: pl.DataFrame, actual: pl.DataFrame
     ) -> Tuple[pl.DataFrame, pl.DataFrame]:
         # try to same-cast to expected schema or to string - this is slow!
+        if not all([col in actual.schema for col in expected.schema]):
+            self.add_fact(
+                {"Schema Error": "Expected schema has other columns than testobject"}
+                )
+            raise SchemaMismatchError("Expected schema has cols not in actual schema")
         if expected.schema != actual.schema:
             self.notify("Schemas of query sample and testobject are different.")
             self.add_fact({"Warning": "Schema differs between query and testobject"})
