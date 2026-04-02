@@ -109,10 +109,7 @@ class CompareTestCase(AbstractTestCase):
             self.notify("Using object specific sample size for comparison")
 
         detail = {"Specified sample size": sample_size}
-        if self.details is None:
-            self.details = []
-        if detail not in self.details:
-            self.add_detail(detail)
+        self.add_detail(detail)
 
         return sample_size
 

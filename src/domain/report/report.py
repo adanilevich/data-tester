@@ -118,10 +118,13 @@ class Report:
             location=location,
         )
 
-        if not isinstance(report_dto, (TestCaseReportDTO, TestReportDTO)):
-            raise ReportNotRetrievableError(
-                f"Couldn't retrieve report {report_id} as {report_type}"
-            )
+        if report_type == ReportType.TESTCASE:
+            expected_type = TestCaseReportDTO
+        else:
+            expected_type = TestRunReportDTO
+        if not isinstance(report_dto, expected_type):
+            raise ReportNotRetrievableError(f"Couldn't retrieve report {report_id}")
+
         return report_dto
 
     def create_artifact(

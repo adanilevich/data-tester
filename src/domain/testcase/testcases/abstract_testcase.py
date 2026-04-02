@@ -95,7 +95,8 @@ class AbstractTestCase(Checkable):
     def add_detail(self, detail: Dict[str, Any]):
         if self.details is None:
             self.details= []
-        self.details.append(detail)
+        if detail not in self.details:
+            self.details.append(detail)
 
     def update_summary(self, summary: str):
         self.summary = summary

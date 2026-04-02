@@ -1,5 +1,5 @@
 # flake8: noqa
-from typing import List, Dict, Callable, Literal
+from typing import List
 from datetime import datetime
 from uuid import uuid4
 
@@ -98,9 +98,9 @@ class TestRun:
 
         # testrun result is only OK if all testcases are OK
         if all(result.result == TestResult.OK for result in self.testcase_results):
-            self.testrun.result: Literal[TestResult.OK] = TestResult.OK
+            self.testrun.result = TestResult.OK
         elif any(result.result == TestResult.NOK for result in self.testcase_results):
-            self.testrun.result: Literal[TestResult.NOK] = TestResult.NOK
+            self.testrun.result = TestResult.NOK
         else:
             self.testrun.result = TestResult.NA
 

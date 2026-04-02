@@ -29,6 +29,7 @@ class ObjectIsNotAFileError(FileStorageError):
     """Raised when a directory is accessed as a file."""
 
 
+#TODO: Cache results of list_files by location
 class FileStorage(IStorage):
     """
     Handles files in Google Cloud Storage or local file system. Can handle objects in
