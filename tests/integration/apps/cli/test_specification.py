@@ -5,8 +5,8 @@ from uuid import uuid4
 from typing import List, cast
 import polars as pl
 
-from src.apps.cli.specification_di import SpecDependencyInjector
-from src.drivers.cli import CliSpecManager
+from src.apps.cli_di import CliDependencyInjector
+from src.drivers import SpecDriver
 from src.domain import SpecCommandHandler
 from src.config import Config
 from src.dtos import (
@@ -31,10 +31,10 @@ def config():
 
 
 @pytest.fixture
-def spec_manager(config: Config) -> CliSpecManager:
+def spec_manager(config: Config) -> SpecDriver:
     """Create a CliSpecManager instance with all dependencies injected"""
-    injector = SpecDependencyInjector(config)
-    manager = injector.cli_spec_manager()
+    injector = CliDependencyInjector(config)
+    manager = injector.specification_driver()
 
     # Setup test data in the dict storage
     location = LocationDTO("dict://specs/")
@@ -171,7 +171,7 @@ class TestCliSpecManagerE2E:
     """End-to-end integration tests for CliSpecManager"""
 
     def test_find_specifications_single_testcase(
-        self, spec_manager: CliSpecManager, testset_dto: TestSetDTO
+        self, spec_manager: SpecDriver, testset_dto: TestSetDTO
     ):
         """Test finding specifications for a single testcase"""
         # Given a testset with only one testcase
@@ -198,7 +198,7 @@ class TestCliSpecManagerE2E:
         assert "email" in result[0][0].columns
 
     def test_find_specifications_multiple_testcases(
-        self, spec_manager: CliSpecManager, testset_dto: TestSetDTO
+        self, spec_manager: SpecDriver, testset_dto: TestSetDTO
     ):
         """Test finding specifications for multiple testcases"""
         locations = [LocationDTO("dict://specs/")]
@@ -233,7 +233,7 @@ class TestCliSpecManagerE2E:
         assert result[3][0].testobject == "products"
 
     def test_find_specifications_multiple_locations(
-        self, spec_manager: CliSpecManager, testset_dto: TestSetDTO
+        self, spec_manager: SpecDriver, testset_dto: TestSetDTO
     ):
         """Test finding specifications from multiple locations"""
         # Setup backup location with duplicate schema files
@@ -274,7 +274,7 @@ class TestCliSpecManagerE2E:
         assert all(isinstance(spec, SchemaSpecificationDTO) for spec in result[0])
         assert all(spec.testobject == "customers" for spec in result[0])
 
-    def test_find_specifications_no_specs_found(self, spec_manager: CliSpecManager):
+    def test_find_specifications_no_specs_found(self, spec_manager: SpecDriver):
         """Test behavior when no specifications are found"""
         # Given a testset with testcase that has no corresponding specs
         testcase = TestCaseEntryDTO(
@@ -302,7 +302,7 @@ class TestCliSpecManagerE2E:
         assert len(result[0]) == 0  # No specs found
 
     def test_find_specifications_preserves_testcase_order(
-        self, spec_manager: CliSpecManager
+        self, spec_manager: SpecDriver
     ):
         """Test that find_specifications preserves the order of testcases"""
         # Given a testset with specific testcase order
@@ -347,7 +347,7 @@ class TestCliSpecManagerE2E:
                 )
 
     def test_find_specifications_complex_scenario(
-        self, spec_manager: CliSpecManager, testset_dto: TestSetDTO
+        self, spec_manager: SpecDriver, testset_dto: TestSetDTO
     ):
         """Test complex scenario with multiple testcases, types, and locations"""
         # Setup additional location with some overlapping specs

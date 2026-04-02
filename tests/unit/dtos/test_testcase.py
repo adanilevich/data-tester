@@ -16,7 +16,7 @@ from src.dtos.domain_config import (
     CompareTestCaseConfigDTO,
     SchemaTestCaseConfigDTO,
 )
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 
 
 @pytest.fixture

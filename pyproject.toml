@@ -149,14 +149,7 @@ modules = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "6. Apps are independent"
-type = "independence"
-modules = [
-    "src.apps.*",
-]
-
-[[tool.importlinter.contracts]]
-name = "7. Drivers are independent"
+name = "6. Drivers are independent"
 type = "independence"
 modules = [
     "src.drivers.*"

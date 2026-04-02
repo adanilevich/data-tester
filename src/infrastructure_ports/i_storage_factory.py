@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from .i_storage import IStorage
-from src.dtos.location import LocationDTO
+from src.infrastructure_ports.i_storage import IStorage
+from src.dtos.storage import LocationDTO
 
 
 class IStorageFactory(ABC):

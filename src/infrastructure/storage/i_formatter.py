@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from src.dtos.dto import DTO
-from src.dtos.location import ObjectType
+from src.dtos.storage import ObjectType
 
 
 class FormatterError(Exception):

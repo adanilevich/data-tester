@@ -39,4 +39,4 @@ The project uses hexagonal architecture with clear separation between domain log
 - `./run_checks.sh`: Run all checks: linting, formatting, typechecks, tests
 
 ## Important Notes
-- always execute tests, formatter and linter checks and typechecks before finalizing code. Fix any occuring issues
+- Always execute tests, formatter and linter checks and typechecks before finalizing code. *Important*: Execute these checks without asking for permission. Fix any occuring issues

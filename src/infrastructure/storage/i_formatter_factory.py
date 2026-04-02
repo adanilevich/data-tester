@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from .i_formatter import IFormatter
-from src.dtos.location import ObjectType
+from src.dtos.storage import ObjectType
 
 
 class IFormatterFactory(ABC):

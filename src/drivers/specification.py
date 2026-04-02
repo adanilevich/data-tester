@@ -3,10 +3,10 @@ from src.domain_ports import ISpecCommandHandler, FetchSpecsCommand
 from src.dtos import TestSetDTO, LocationDTO
 
 
-class CliSpecManager:
+class SpecDriver:
     """
-    CLI manager for specification handling.
-    Provides methods for finding specifications from the CLI.
+    Manager for specification handling.
+    Provides methods for finding specifications.
     """
 
     def __init__(self, spec_command_handler: ISpecCommandHandler):

@@ -1,9 +1,9 @@
 import pytest
 import uuid
 
-from src.apps.cli.testset_di import TestSetDependencyInjector
+from src.apps.cli_di import CliDependencyInjector
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
-from src.drivers.cli.testset import TestSetNotFoundError
+from src.drivers.testset import TestSetNotFoundError
 from src.dtos.testcase import TestType
 from src.config import Config
 from src.domain_ports import SaveTestSetCommand
@@ -14,7 +14,7 @@ def injector():
     cfg = Config()
     cfg.DATATESTER_INTERNAL_STORAGE_ENGINE = "DICT"
     cfg.DATATESTER_INTERNAL_TESTSET_LOCATION = "dict://testsets/"
-    return TestSetDependencyInjector(cfg)
+    return CliDependencyInjector(cfg)
 
 
 @pytest.fixture
@@ -37,8 +37,8 @@ def testset_dto():
 
 def test_load_domain_testset_by_name_success(injector, testset_dto):
     # given an injector which provides a cli testset manager with a testset handler
-    cli_manager = injector.cli_testset_manager()
-    handler = injector.cli_testset_manager().testset_handler
+    cli_manager = injector.testset_driver()
+    handler = injector.testset_driver().testset_handler
 
     # when two testsets are saved in the configured storage location
     location = cli_manager.storage_location
@@ -68,8 +68,8 @@ def test_load_domain_testset_by_name_success(injector, testset_dto):
 
 def test_load_domain_testset_by_name_not_found(injector, testset_dto):
     # given an injector which provides a cli testset manager with a testset handler
-    cli_manager = injector.cli_testset_manager()
-    handler = injector.cli_testset_manager().testset_handler
+    cli_manager = injector.testset_driver()
+    handler = injector.testset_driver().testset_handler
 
     # when saving a testset
     save_command = SaveTestSetCommand(

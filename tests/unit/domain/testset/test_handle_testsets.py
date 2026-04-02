@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from src.domain.testset import TestSetCommandHandler
 from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 from src.infrastructure.storage import (
     StorageFactory,
     FormatterFactory,

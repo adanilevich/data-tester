@@ -1,8 +1,8 @@
-from src.apps.cli.domain_config_di import DomainConfigDependencyInjector
+from src.apps.cli_di import CliDependencyInjector
 from src.domain_ports import SaveDomainConfigCommand
 from src.dtos import DomainConfigDTO
 from src.config import Config
-from src.dtos.location import LocationDTO
+from src.dtos.storage import LocationDTO
 
 
 class TestDomainConfigIntegration:
@@ -11,8 +11,8 @@ class TestDomainConfigIntegration:
         PATH = "dict://my/path"
         config = Config()
         config.DATATESTER_DOMAIN_CONFIGS_LOCATION = PATH
-        di = DomainConfigDependencyInjector(config=config)
-        manager = di.cli_domain_config_manager()
+        di = CliDependencyInjector(config=config)
+        manager = di.domain_config_driver()
         handler = manager.domain_config_handler
         location = LocationDTO(PATH)
 

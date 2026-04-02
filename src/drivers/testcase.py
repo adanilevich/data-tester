@@ -6,8 +6,8 @@ from src.domain_ports import (
 )
 
 
-class CliTestRunManager:
-    """Runs testcases in batch mode from CLI"""
+class TestRunDriver:
+    """Runs testcases in batch mode"""
 
     def __init__(self, handler: ITestRunCommandHandler, storage_location: LocationDTO):
         self.handler = handler
