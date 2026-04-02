@@ -23,7 +23,7 @@
 | src/domain/report/plugins/txt\_testcase\_report.py                               |       24 |        3 |     88% |     52-54 |
 | src/domain/report/plugins/xlsx\_testcase\_diff.py                                |       28 |        0 |    100% |           |
 | src/domain/report/plugins/xlsx\_testrun\_report.py                               |       27 |        3 |     89% |     50-52 |
-| src/domain/report/report.py                                                      |       70 |        3 |     96% |113, 122, 185 |
+| src/domain/report/report.py                                                      |       73 |        3 |     96% |113, 126, 188 |
 | src/domain/specification/\_\_init\_\_.py                                         |        4 |        0 |    100% |           |
 | src/domain/specification/handle\_specs.py                                        |       23 |        0 |    100% |           |
 | src/domain/specification/plugins/\_\_init\_\_.py                                 |        5 |        0 |    100% |           |
@@ -44,13 +44,13 @@
 | src/domain/testcase/precondition\_checks/check\_testobject\_not\_empty.py        |        9 |        0 |    100% |           |
 | src/domain/testcase/precondition\_checks/precondition\_checker.py                |        9 |        0 |    100% |           |
 | src/domain/testcase/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
-| src/domain/testcase/testcases/abstract\_testcase.py                              |      108 |        2 |     98% |   97, 107 |
-| src/domain/testcase/testcases/compare.py                                         |      135 |       23 |     83% |113, 124, 131, 137-138, 145-147, 180-181, 197-198, 209-212, 214-222 |
+| src/domain/testcase/testcases/abstract\_testcase.py                              |      109 |        2 |     98% |   97, 108 |
+| src/domain/testcase/testcases/compare.py                                         |      132 |       22 |     83% |121, 128, 134-135, 142-144, 177-178, 194-195, 206-209, 211-219 |
 | src/domain/testcase/testcases/dummy\_exception.py                                |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
 | src/domain/testcase/testcases/rowcount.py                                        |       57 |        1 |     98% |        89 |
-| src/domain/testcase/testcases/schema.py                                          |      131 |        3 |     98% |98, 109, 146 |
+| src/domain/testcase/testcases/schema.py                                          |      132 |        3 |     98% |99, 110, 147 |
 | src/domain/testcase/testrun.py                                                   |       64 |        3 |     95% |122, 128, 134 |
 | src/domain/testset/\_\_init\_\_.py                                               |        2 |        0 |    100% |           |
 | src/domain/testset/handle\_testsets.py                                           |       15 |        0 |    100% |           |
@@ -82,7 +82,7 @@
 | src/dtos/testset.py                                                              |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                  |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                 |      201 |       16 |     92% |139, 163-165, 185, 313, 317, 319, 322-327, 429, 461, 467 |
+| src/infrastructure/backend/demo/demo\_backend.py                                 |      201 |       16 |     92% |139, 163-165, 185, 313, 317, 319, 322-327, 430, 462, 468 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                        |       17 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_naming\_resolver.py                        |       67 |        3 |     96% |28, 112, 114 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                          |       19 |        1 |     95% |        29 |
@@ -96,7 +96,7 @@
 | src/infrastructure/notifier/stdout\_notifier.py                                  |        4 |        0 |    100% |           |
 | src/infrastructure/storage/\_\_init\_\_.py                                       |        5 |        0 |    100% |           |
 | src/infrastructure/storage/dict\_storage.py                                      |       66 |        2 |     97% |   118-120 |
-| src/infrastructure/storage/file\_storage.py                                      |      139 |       38 |     73% |59-66, 74-75, 82, 102-103, 122, 127-128, 144-145, 157, 160, 165-166, 180, 187-200, 219-223, 236, 242, 251-252 |
+| src/infrastructure/storage/file\_storage.py                                      |      139 |       38 |     73% |60-67, 75-76, 83, 103-104, 123, 128-129, 145-146, 158, 161, 166-167, 181, 188-201, 220-224, 237, 243, 252-253 |
 | src/infrastructure/storage/formatter\_factory.py                                 |       13 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter.py                                       |        7 |        0 |    100% |           |
 | src/infrastructure/storage/i\_formatter\_factory.py                              |        4 |        0 |    100% |           |
@@ -111,7 +111,7 @@
 | src/infrastructure\_ports/storage/\_\_init\_\_.py                                |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage.py                                  |        7 |        0 |    100% |           |
 | src/infrastructure\_ports/storage/i\_storage\_factory.py                         |        4 |        0 |    100% |           |
-| **TOTAL**                                                                        | **2612** |  **190** | **93%** |           |
+| **TOTAL**                                                                        | **2614** |  **189** | **93%** |           |
 
 8 empty files skipped.
 
