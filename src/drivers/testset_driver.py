@@ -27,19 +27,19 @@ class TestSetDriver:
 
     def __init__(
         self,
-        testset_handler: ITestSet,
+        testset_adapter: ITestSet,
     ):
-        self.testset_handler = testset_handler
+        self.adapter = testset_adapter
 
     def load_testset(self, testset_id: str) -> TestSetDTO:
         """Loads a testset by ID."""
         command = LoadTestSetCommand(testset_id=testset_id)
-        return self.testset_handler.load_testset(command=command)
+        return self.adapter.load_testset(command=command)
 
     def list_testsets(self, domain: str) -> List[TestSetDTO]:
         """Lists all testsets for the given domain."""
         command = ListTestSetsCommand(domain=domain)
-        return self.testset_handler.list_testsets(command=command)
+        return self.adapter.list_testsets(command=command)
 
     def load_domain_testset_by_name(
         self, domain: str, name: str
@@ -50,7 +50,7 @@ class TestSetDriver:
         Raises ValueError if not found.
         """
         command = ListTestSetsCommand(domain=domain)
-        testsets = self.testset_handler.list_testsets(
+        testsets = self.adapter.list_testsets(
             command=command
         )
         for testset in testsets:

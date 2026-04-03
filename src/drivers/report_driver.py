@@ -25,23 +25,23 @@ from src.domain_ports import (
 
 
 class ReportDriver:
-    def __init__(self, report_handler: IReport):
-        self.report_handler = report_handler
+    def __init__(self, report_adapter: IReport):
+        self.adapter = report_adapter
 
     def create_testcase_report(self, result: TestCaseDTO) -> TestCaseReportDTO:
         """Creates a report from a testcase result."""
         command = CreateTestCaseReportCommand(result=result)
-        return self.report_handler.create_testcase_report(command=command)
+        return self.adapter.create_testcase_report(command=command)
 
     def create_testrun_report(self, result: TestRunDTO) -> TestRunReportDTO:
         """Creates a report from a testrun result."""
         command = CreateTestRunReportCommand(result=result)
-        return self.report_handler.create_testrun_report(command=command)
+        return self.adapter.create_testrun_report(command=command)
 
     def save_report(self, report: TestReportDTO) -> None:
         """Saves report to internal storage."""
         command = SaveReportCommand(report=report)
-        self.report_handler.save_report(command=command)
+        self.adapter.save_report(command=command)
 
     def list_testcase_reports(
         self,
@@ -53,14 +53,14 @@ class ReportDriver:
         command = ListTestCaseReportsCommand(
             domain=domain, testrun_id=testrun_id, date=date
         )
-        return self.report_handler.list_testcase_reports(command=command)
+        return self.adapter.list_testcase_reports(command=command)
 
     def list_testrun_reports(
         self, domain: str, date: str | None = None
     ) -> List[TestRunReportDTO]:
         """Lists testrun reports by domain."""
         command = ListTestRunReportsCommand(domain=domain, date=date)
-        return self.report_handler.list_testrun_reports(command=command)
+        return self.adapter.list_testrun_reports(command=command)
 
     def create_testcase_report_artifact(
         self,
@@ -74,7 +74,7 @@ class ReportDriver:
             artifact=artifact,
             artifact_format=artifact_format,
         )
-        return self.report_handler.create_testcase_report_artifact(command=command)
+        return self.adapter.create_testcase_report_artifact(command=command)
 
     def create_testrun_report_artifact(
         self, report_id: UUID4, artifact_format: ReportArtifactFormat
@@ -83,9 +83,9 @@ class ReportDriver:
         command = CreateTestRunReportArtifactCommand(
             report_id=report_id, artifact_format=artifact_format
         )
-        return self.report_handler.create_testrun_report_artifact(command=command)
+        return self.adapter.create_testrun_report_artifact(command=command)
 
     def create_and_save_all_reports(self, testrun: TestRunDTO) -> TestRunReportDTO:
         """Creates and saves all reports for a testrun and its testcases."""
         command = CreateAndSaveAllReportsCommand(testrun=testrun)
-        return self.report_handler.create_and_save_all_reports(command=command)
+        return self.adapter.create_and_save_all_reports(command=command)

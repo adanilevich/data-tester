@@ -80,11 +80,11 @@ class CliDependencyInjector:
 
     def domain_config_driver(self) -> DomainConfigDriver:
         handler = DomainConfigAdapter(dto_storage=self.dto_storage)
-        return DomainConfigDriver(domain_config_handler=handler)
+        return DomainConfigDriver(domain_config_adapter=handler)
 
     def testset_driver(self) -> TestSetDriver:
         handler = TestSetAdapter(dto_storage=self.dto_storage)
-        return TestSetDriver(testset_handler=handler)
+        return TestSetDriver(testset_adapter=handler)
 
     def specification_driver(self) -> SpecDriver:
         handler = SpecAdapter(
@@ -92,7 +92,7 @@ class CliDependencyInjector:
             naming_conventions_factory=self.spec_naming_conventions_factory,
             formatter_factory=self.spec_formatter_factory,
         )
-        return SpecDriver(spec_command_handler=handler)
+        return SpecDriver(spec_adapter=handler)
 
     def testrun_driver(self) -> TestRunDriver:
         handler = TestRunAdapter(
@@ -100,11 +100,11 @@ class CliDependencyInjector:
             notifiers=self.notifiers,
             dto_storage=self.dto_storage,
         )
-        return TestRunDriver(handler=handler)
+        return TestRunDriver(testrun_adapter=handler)
 
     def report_driver(self) -> ReportDriver:
         handler = ReportAdapter(
             formatters=self.testreport_formatters,
             dto_storage=self.dto_storage,
         )
-        return ReportDriver(report_handler=handler)
+        return ReportDriver(report_adapter=handler)

@@ -9,14 +9,14 @@ class SpecDriver:
     Provides methods for finding specifications.
     """
 
-    def __init__(self, spec_command_handler: ISpec):
-        self.spec_command_handler = spec_command_handler
+    def __init__(self, spec_adapter: ISpec):
+        self.adapter = spec_adapter
 
     def find_specifications(self, testset: TestSetDTO, locations: List[LocationDTO]):
         """
         Receives a TestSetDTO and returns a TestRunDTO after finding specifications.
         """
-        specs = self.spec_command_handler.list_specs(
+        specs = self.adapter.list_specs(
             ListSpecsCommand(
                 testset=testset,
                 locations=locations,
