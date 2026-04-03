@@ -1,5 +1,4 @@
 from src.dtos.testset import TestSetDTO
-from src.dtos.storage import LocationDTO
 from src.domain_ports import (
     ITestSetCommandHandler,
     ListTestSetsCommand,
@@ -24,24 +23,31 @@ class TestSetDriver:
     domain and testset name (which is passed as argument or from environment).
     """
 
+    #TODO: implement load_testset (by id) method
+    #TODO: implement list_testsets method
+
     def __init__(
         self,
         testset_handler: ITestSetCommandHandler,
-        storage_location: LocationDTO,
     ):
-        self.storage_location = storage_location
         self.testset_handler = testset_handler
 
-    def load_domain_testset_by_name(self, domain: str, name: str) -> TestSetDTO:
+    def load_domain_testset_by_name(
+        self, domain: str, name: str
+    ) -> TestSetDTO:
         """
-        Lists all testsets for the given domain and loads the one with the requested name.
+        Lists all testsets for the given domain and loads
+        the one with the requested name.
         Raises ValueError if not found.
         """
-        command = ListTestSetsCommand(location=self.storage_location, domain=domain)
-        testsets = self.testset_handler.list_testsets(command=command)
+        command = ListTestSetsCommand(domain=domain)
+        testsets = self.testset_handler.list_testsets(
+            command=command
+        )
         for testset in testsets:
             if testset.name == name:
                 return testset
         raise TestSetNotFoundError(
-            f"Testset with name '{name}' not found in domain '{domain}'"
+            f"Testset with name '{name}' not found "
+            f"in domain '{domain}'"
         )

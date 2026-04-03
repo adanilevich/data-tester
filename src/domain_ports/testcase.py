@@ -2,51 +2,56 @@ from abc import ABC, abstractmethod
 
 from src.dtos import (
     DTO,
-    LocationDTO,
     TestRunDTO,
     TestRunReportDTO,
 )
 
 
 class ExecuteTestRunCommand(DTO):
-    testrun: TestRunDTO  # defition of testrun to be executed
-    storage_location: LocationDTO  # location to store (intermediate) testrun results
+    testrun: TestRunDTO
 
 
 class SaveTestRunCommand(DTO):
-    testrun: TestRunDTO  # defition of testrun to be executed
-    storage_location: LocationDTO  # location to store (intermediate) testrun results
+    testrun: TestRunDTO
 
 
 class LoadTestRunCommand(DTO):
-    testrun_id: str  # id of testrun to be loaded
-    storage_location: LocationDTO  # location to load testrun results from
+    testrun_id: str
 
 
 class SetReportIdsCommand(DTO):
-    testrun_report: TestRunReportDTO  # testreport to extract ids from
-    testrun: TestRunDTO  # testrun to be updated with report ids
-    storage_location: LocationDTO  # location to store testrun results
+    testrun_report: TestRunReportDTO
+    testrun: TestRunDTO
 
+#TODO: implement a ListTestRunsCommand to list by domain and optionally date
+#TODO implement list_test_runs method
 
 class ITestRunCommandHandler(ABC):
     """Abstract interface to execute testcases"""
 
     @abstractmethod
-    def run(self, command: ExecuteTestRunCommand) -> TestRunDTO:
+    def execute_testrun(
+        self, command: ExecuteTestRunCommand
+    ) -> TestRunDTO:
         """Implement this method to execute testcases"""
 
     @abstractmethod
-    def save(self, command: SaveTestRunCommand) -> None:
-        """Implement this method to save testrun results, e.g. to disk"""
+    def save_testrun(
+        self, command: SaveTestRunCommand
+    ) -> None:
+        """Implement this method to save testrun results"""
 
     @abstractmethod
-    def load(self, command: LoadTestRunCommand) -> TestRunDTO:
-        """Implement this method to load testrun results, e.g. from disk"""
+    def load_testrun(
+        self, command: LoadTestRunCommand
+    ) -> TestRunDTO:
+        """Implement this method to load testrun results"""
 
     @abstractmethod
-    def set_report_ids(self, command: SetReportIdsCommand) -> None:
+    def set_report_ids(
+        self, command: SetReportIdsCommand
+    ) -> None:
         """
-        Implement this method to set report ids from testrun report and testcase reports
-        and persist testrun. This is done for cross-reference between testrun and reports.
+        Set report ids from testrun report and testcase reports
+        and persist testrun.
         """

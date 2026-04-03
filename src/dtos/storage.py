@@ -6,6 +6,7 @@ from pydantic import field_validator
 from src.dtos.dto import DTO
 
 
+#TODO: change enum strings to upper case
 class StorageType(Enum):
     LOCAL = "local"
     DICT = "dict"

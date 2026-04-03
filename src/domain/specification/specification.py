@@ -19,9 +19,7 @@ from src.domain.specification.plugins import (
     SpecDeserializationError,
 )
 from src.infrastructure_ports import (
-    IStorage,
-    IStorageFactory,
-    StorageTypeUnknownError,
+    IUserStorage,
     StorageError,
 )
 
@@ -41,35 +39,45 @@ class UnknownSpecificationTypeError(SpecificationError):
 class Specification:
     """
     Core logic for finding, matching, and parsing specifications.
-    Uses IStorage, INamingConventions, and a list of IFormatter.
+    Uses IUserStorage, INamingConventions, and ISpecFormatterFactory.
     """
 
     def __init__(
         self,
-        storage_factory: IStorageFactory,
+        user_storage: IUserStorage,
         naming_conventions_factory: INamingConventionsFactory,
         formatter_factory: ISpecFormatterFactory,
     ):
-        self.storage_factory = storage_factory
+        self.user_storage = user_storage
         self.naming_conventions_factory = naming_conventions_factory
         self.formatter_factory = formatter_factory
 
     def _find_candidates(
-        self, location: LocationDTO, testcase: TestCaseEntryDTO, domain: str
+        self,
+        location: LocationDTO,
+        testcase: TestCaseEntryDTO,
+        domain: str,
     ) -> List[Tuple[LocationDTO, List[SpecificationType]]]:
         """
         Find all files in the location that match the naming convention
         """
-        naming_conventions = self.naming_conventions_factory.create(domain)
-        candidates: List[Tuple[LocationDTO, List[SpecificationType]]] = []
-        storage = self.storage_factory.get_storage(location)
-        files: List[LocationDTO] = storage.list_files(location)
+        naming_conventions = (
+            self.naming_conventions_factory.create(domain)
+        )
+        candidates: List[
+            Tuple[LocationDTO, List[SpecificationType]]
+        ] = []
+        files: List[LocationDTO] = self.user_storage.list_objects(
+            location
+        )
         for file in files:
             # skip if location is not a file
             if not file.filename:
                 continue
             # skip if file does not match the naming convention
-            match, matched_spec_types = naming_conventions.match(testcase, file)
+            match, matched_spec_types = naming_conventions.match(
+                testcase, file
+            )
             if not match:
                 continue
             candidates.append((file, matched_spec_types))
@@ -77,10 +85,13 @@ class Specification:
         return candidates
 
     def _spec_from_content(
-        self, content: SpecContent, testobject: str, location: LocationDTO
+        self,
+        content: SpecContent,
+        testobject: str,
+        location: LocationDTO,
     ) -> SpecificationDTO:
         """
-        Create a SpecificationDTO from a SpecContent object, testobject name and location.
+        Create a SpecificationDTO from a SpecContent object.
         """
         result: SpecificationDTO
         if isinstance(content, SchemaContent):
@@ -109,35 +120,41 @@ class Specification:
             )
         else:
             raise UnknownSpecificationTypeError(
-                f"Unsupported specification type: {content.spec_type}"
+                f"Unsupported specification type: "
+                f"{content.spec_type}"
             )
         return result
 
+    # rename in list_specs
     def find_specs(
-        self, location: LocationDTO, testcase: TestCaseEntryDTO, domain: str
+        self,
+        location: LocationDTO,
+        testcase: TestCaseEntryDTO,
+        domain: str,
     ) -> List[SpecificationDTO]:
         """
-        Find specification files for a given testcase in the provided location
+        Find specification files for a given testcase in the
+        provided location.
         """
         results: List[SpecificationDTO] = []
-        # Find all files in the location that match the naming convention
-        candidates = self._find_candidates(location, testcase, domain)
+        candidates = self._find_candidates(
+            location, testcase, domain
+        )
 
-        # here we try parsing each candidate file for each matched spec type
         for file, matched_spec_types in candidates:
             for spec_type in matched_spec_types:
-                formatter= self.formatter_factory.get_formatter(spec_type)
+                formatter = self.formatter_factory.get_formatter(
+                    spec_type
+                )
                 try:
-                    storage: IStorage = self.storage_factory.get_storage(file)
-                except StorageTypeUnknownError as err:
-                    raise StorageTypeUnknownError(
-                        f"Storage type {file.storage_type} not supported"
-                    ) from err
-                try:
-                    file_bytes: bytes = storage.read_bytes(file)
-                    spec_content: SpecContent = formatter.deserialize(file_bytes)
+                    file_bytes: bytes = self.user_storage.read_object(
+                        file
+                    )
+                    spec_content: SpecContent = (
+                        formatter.deserialize(file_bytes)
+                    )
                 except (StorageError, SpecDeserializationError):
-                    # if file can't be read or parsed, silently skip it
+                    # if file can't be read or parsed, silently skip
                     continue
                 spec_dto: SpecificationDTO = self._spec_from_content(
                     content=spec_content,
@@ -148,25 +165,30 @@ class Specification:
 
         return results
 
-    def parse_spec_file(self, file: bytes, testobject: str) -> List[SpecificationDTO]:
+    def parse_spec_file(
+        self, file: bytes, testobject: str
+    ) -> List[SpecificationDTO]:
         """
-        Tries parsing a specification file using all available formatters
-        and returns all successfully parsed SpecificationDTOs.
+        Tries parsing a specification file using all available
+        formatters and returns all successfully parsed
+        SpecificationDTOs.
         """
         results = []
         for spec_type in SpecificationType:
-            formatter = self.formatter_factory.get_formatter(spec_type)
+            formatter = self.formatter_factory.get_formatter(
+                spec_type
+            )
             try:
                 spec_content = formatter.deserialize(file)
                 spec_dto = self._spec_from_content(
                     content=spec_content,
                     testobject=testobject,
                     location=LocationDTO(
-                        path=f"upload://{testobject}_{spec_type.value}.file"
+                        path=f"upload://{testobject}_"
+                        f"{spec_type.value}.file"
                     ),
                 )
                 results.append(spec_dto)
-            # if parsing or reading fails, try next spec type
             except SpecDeserializationError:
                 continue
         return results

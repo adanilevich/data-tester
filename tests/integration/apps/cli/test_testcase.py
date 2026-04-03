@@ -54,7 +54,7 @@ testtypes = ["DUMMY_OK", "DUMMY_NOK", "DUMMY_EXCEPTION", "UNKNOWN"]
 domain_config = {
     "domain": "my_domain",
     "instances": {},
-    "testreports_location": {"path": "dict://my_location"},
+    "testreports_location": {"path": "memory://my_location"},
     "specifications_locations": [],
     "testcases": {
         "compare": {"sample_size": 100},
@@ -83,12 +83,12 @@ testcases = [
         specs=[
             SpecificationDTO(
                 spec_type=SpecificationType.SCHEMA,
-                location=LocationDTO(path="dict://my_location"),
+                location=LocationDTO(path="memory://my_location"),
                 testobject=testobject["name"],
             ),
             SpecificationDTO(
                 spec_type=SpecificationType.ROWCOUNT_SQL,
-                location=LocationDTO(path="dict://my_location"),
+                location=LocationDTO(path="memory://my_location"),
                 testobject=testobject["name"],
             ),
         ],
@@ -96,7 +96,7 @@ testcases = [
             domain="my_domain",
             instances={},
             specifications_locations=[],
-            testreports_location=LocationDTO("dict://my_location"),
+            testreports_location=LocationDTO("memory://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
                 compare=CompareTestCaseConfigDTO(sample_size=100),
@@ -209,7 +209,7 @@ def test_cli_execution_with_invalid_testcase():
             domain="my_domain",
             instances={},
             specifications_locations=[],
-            testreports_location=LocationDTO("dict://my_location"),
+            testreports_location=LocationDTO("memory://my_location"),
             testcases=TestCasesConfigDTO(
                 schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
                 compare=CompareTestCaseConfigDTO(sample_size=100),

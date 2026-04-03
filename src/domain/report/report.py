@@ -1,6 +1,6 @@
 from typing import List, Dict, Tuple
 
-from src.infrastructure_ports import IStorageFactory
+from src.infrastructure_ports import IDtoStorage
 from src.domain.report.plugins import IReportFormatter
 from src.dtos import (
     TestCaseReportDTO,
@@ -12,7 +12,6 @@ from src.dtos import (
     ReportArtifactFormat,
     ReportType,
     TestReportDTO,
-    LocationDTO,
     ObjectType,
 )
 
@@ -56,21 +55,28 @@ class ReportNotRetrievableError(ReportError):
 
 class Report:
     """
-    Abstact report class from which TestRunReport and TestCaseReport inherit.
-    Bundles common functions like creating and saving artifacts.
+    Handles report creation, storage and retrieval.
     """
 
     formatters_by_type_artifact_and_format: Dict[
-        Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
+        Tuple[
+            ReportType, ReportArtifact, ReportArtifactFormat
+        ],
+        IReportFormatter,
     ]
 
     def __init__(
-        self, formatters: List[IReportFormatter], storage_factory: IStorageFactory
+        self,
+        formatters: List[IReportFormatter],
+        dto_storage: IDtoStorage,
     ):
         self.formatters = formatters
-        self.storage_factory = storage_factory
+        self.dto_storage = dto_storage
         self.formatters_by_type_artifact_and_format: Dict[
-            Tuple[ReportType, ReportArtifact, ReportArtifactFormat], IReportFormatter
+            Tuple[
+                ReportType, ReportArtifact, ReportArtifactFormat
+            ],
+            IReportFormatter,
         ] = {}
 
         for formatter in self.formatters:
@@ -80,15 +86,18 @@ class Report:
                 formatter.artifact_format,
             )
             if key in self.formatters_by_type_artifact_and_format:
-                raise ReportError(f"Formatter {formatter} already registered")
+                raise ReportError(
+                    f"Formatter {formatter} already registered"
+                )
             self.formatters_by_type_artifact_and_format[key] = formatter
 
+    # TODO: split in create_testcase_report and create_testrun_report
     def create_report(self, result: TestDTO) -> TestReportDTO:
         """Creates a report for a given result"""
 
         report: TestCaseReportDTO | TestRunReportDTO
         if isinstance(result, TestRunDTO):
-            report = TestRunReportDTO.from_testrun(result)
+            report = TestRunReportDTO.from_testrun_result(result)
             result.report_id = report.report_id
             return report
         elif isinstance(result, TestCaseDTO):
@@ -96,26 +105,28 @@ class Report:
             result.report_id = report.report_id
             return report
         else:
-            raise WrongReportTypeError(f"Wrong report type: {type(result)}")
+            raise WrongReportTypeError(
+                f"Wrong report type: {type(result)}"
+            )
 
+    #TODO: split in load_testcase_report and load_testrun_report
     def retrieve_report(
-        self, location: LocationDTO, report_id: str, report_type: ReportType
+        self, report_id: str, report_type: ReportType
     ) -> TestReportDTO:
-        """Retrieves a testcase or testrun report from internal structured storage"""
-
-        storage = self.storage_factory.get_storage(location)
+        """Retrieves a testcase or testrun report from internal storage"""
 
         if report_type == ReportType.TESTCASE:
             object_type = ObjectType.TESTCASE_REPORT
         elif report_type == ReportType.TESTRUN:
             object_type = ObjectType.TESTRUN_REPORT
         else:
-            raise UnknownReportTypeError(f"Invalid report type: {report_type}")
+            raise UnknownReportTypeError(
+                f"Invalid report type: {report_type}"
+            )
 
-        report_dto = storage.read(
+        report_dto = self.dto_storage.read_dto(
             object_type=object_type,
-            object_id=report_id,
-            location=location,
+            id=report_id,
         )
 
         if report_type == ReportType.TESTCASE:
@@ -123,10 +134,13 @@ class Report:
         else:
             expected_type = TestRunReportDTO
         if not isinstance(report_dto, expected_type):
-            raise ReportNotRetrievableError(f"Couldn't retrieve report {report_id}")
+            raise ReportNotRetrievableError(
+                f"Couldn't retrieve report {report_id}"
+            )
 
         return report_dto
 
+    # TODO: split in create_testcase_report_artifact and create_testrun_report_artifact
     def create_artifact(
         self,
         report: TestReportDTO,
@@ -135,23 +149,6 @@ class Report:
     ) -> bytes:
         """
         Formats a report artifact for a given report.
-
-        Args:
-            report: TestReportDTO can be either TestRunReportDTO or TestCaseReportDTO
-            artifact_format: ReportArtifactFormat
-            artifact: ReportArtifact | None = None must be specified as diff or report
-                in order to create a testcase report artifact. For TestRunReportDTO,
-                artifact is not required and will be set to ReportArtifact.REPORT.
-
-        Returns:
-            bytes: The formatted artifact
-
-        Raises:
-            ReportArtifactNotSpecifiedError: When artifact (report or diff) is not
-            specified for TestCaseReportDTO
-                WrongReportTypeError: When report is not of the expected type
-            NoFormatterFoundError: When no formatter is found for a given
-                report type, artifact and format
         """
 
         if isinstance(report, TestRunReportDTO):
@@ -160,13 +157,20 @@ class Report:
         elif isinstance(report, TestCaseReportDTO):
             report_type = ReportType.TESTCASE
             if artifact is None:
-                msg = "Artifact (report or diff) must be specified for TestCaseReportDTO"
+                msg = (
+                    "Artifact (report or diff) must be specified "
+                    "for TestCaseReportDTO"
+                )
                 raise ReportArtifactNotSpecifiedError(msg)
         else:
-            raise WrongReportTypeError(f"Wrong report type: {type(report)}")
+            raise WrongReportTypeError(
+                f"Wrong report type: {type(report)}"
+            )
 
         key = (report_type, artifact, artifact_format)
-        formatter = self.formatters_by_type_artifact_and_format.get(key)
+        formatter = (
+            self.formatters_by_type_artifact_and_format.get(key)
+        )
         if formatter is None:
             msg = f"Formatter for {key} not registered"
             raise NoFormatterFoundError(msg)
@@ -174,25 +178,14 @@ class Report:
 
         return artifact_bytes
 
-    def save_report(self, location: LocationDTO, report: TestReportDTO) -> None:
+    def save_report(self, report: TestReportDTO) -> None:
         """Saves an internal report to structured storage"""
 
-        storage = self.storage_factory.get_storage(location)
+        if not isinstance(
+            report, (TestCaseReportDTO, TestRunReportDTO)
+        ):
+            raise WrongReportTypeError(
+                f"Unsupported report type: {type(report)}"
+            )
 
-        # Determine object type based on report type
-        if isinstance(report, TestCaseReportDTO):
-            object_type = ObjectType.TESTCASE_REPORT
-        elif isinstance(report, TestRunReportDTO):
-            object_type = ObjectType.TESTRUN_REPORT
-        else:
-            raise WrongReportTypeError(f"Unsupported report type: {type(report)}")
-
-        storage.write(dto=report, object_type=object_type, location=location)
-
-    def save_artifact(self, location: LocationDTO, artifact: bytes) -> None:
-        """Saves a user report artifact as bytes"""
-
-        storage = self.storage_factory.get_storage(location)
-        storage.write_bytes(content=artifact, location=location)
-
-        return None
+        self.dto_storage.write_dto(dto=report)

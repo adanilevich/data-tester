@@ -13,17 +13,22 @@ class CliApp:
     def run_tests(self, domain: str, testset_name: str):
 
         # fetch domain config
-        domain_config_manager = self.di.domain_config_driver()
-        domain_configs = domain_config_manager.fetch_domain_configs()
+        domain_config_manager = (
+            self.di.domain_config_driver()
+        )
+        domain_configs = (
+            domain_config_manager.list_domain_configs()
+        )
         domain_config = domain_configs.get(domain)
         if domain_config is None:
-            raise ValueError(f"Domain {domain} not found in domain configs")
+            raise ValueError(
+                f"Domain {domain} not found in domain configs"
+            )
 
         # fetch testset
         testset_manager = self.di.testset_driver()
         testset = testset_manager.load_domain_testset_by_name(
-            domain=domain,
-            name=testset_name
+            domain=domain, name=testset_name
         )
 
         # fetch specifications
@@ -32,8 +37,9 @@ class CliApp:
             testset=testset,
             locations=domain_config.specifications_locations_by_instance(
                 stage=testset.stage or testset.default_stage,
-                instance=testset.instance or testset.default_instance
-            )
+                instance=testset.instance
+                or testset.default_instance,
+            ),
         )
 
         # execute testrun
@@ -41,18 +47,19 @@ class CliApp:
         testrun = TestRunDTO.from_testset(
             testset=testset,
             spec_list=specs,
-            domain_config=domain_config
+            domain_config=domain_config,
         )
         testrun = testrun_manager.execute_testrun(testrun)
 
         # generate report
-        report_manager = self.di.report_driver(domain_config=domain_config)
+        report_manager = self.di.report_driver()
         report = report_manager.create_report(testrun)
         report = cast(TestRunReportDTO, report)
 
         # update testrun with report ids and save testrun
-        testrun_manager.set_report_ids(testrun=testrun, report=report)
+        testrun_manager.set_report_ids(
+            testrun=testrun, report=report
+        )
 
         # save report
-        report_manager.save_report_artifacts_for_users(report)
-        report_manager.save_report_in_internal_storage(report)
+        report_manager.save_report(report)
