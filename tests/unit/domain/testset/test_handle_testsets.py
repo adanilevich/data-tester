@@ -1,13 +1,13 @@
 import pytest
 from uuid import uuid4
 
-from src.domain.testset import TestSetAdapter
+from src.domain_adapters import TestSetAdapter
 from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
 from src.dtos import LocationDTO
 from src.infrastructure.storage import ObjectNotFoundError
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.dtos.testcase_dtos import TestType
+from src.dtos.testrun_dtos import TestType
 from src.domain_ports import (
     SaveTestSetCommand,
     LoadTestSetCommand,

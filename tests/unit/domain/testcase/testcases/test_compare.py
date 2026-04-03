@@ -4,7 +4,7 @@ import pytest
 import time
 import polars as pl
 
-from src.domain.testcase.testcases.compare import CompareTestCase, CompareTestCaseError
+from src.domain.testrun.testcases.compare import CompareTestCase, CompareTestCaseError
 from src.dtos import (
     SchemaSpecificationDTO,
     CompareSqlDTO,

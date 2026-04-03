@@ -19,7 +19,7 @@ from .specification_dtos import (
     RowCountSqlContent,
     CompareSqlContent,
 )
-from .testcase_dtos import (
+from .testrun_dtos import (
     TestObjectDTO,
     DBInstanceDTO,
     TestStatus,
@@ -39,4 +39,4 @@ from .report_dtos import (
 )
 from .storage import LocationDTO, StorageType, ObjectType, ObjectLocationDTO
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO
-from .testcase_dtos import TestRunDTO
+from .testrun_dtos import TestRunDTO

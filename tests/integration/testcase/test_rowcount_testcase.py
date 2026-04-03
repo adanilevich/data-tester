@@ -1,5 +1,5 @@
 from uuid import uuid4
-from src.domain.testcase.testcases import RowCountTestCase
+from src.domain.testrun.testcases import RowCountTestCase
 from src.dtos import (
     RowCountSqlDTO,
     TestObjectDTO,

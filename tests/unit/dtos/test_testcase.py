@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.dtos.testcase_dtos import (
+from src.dtos.testrun_dtos import (
     TestRunDTO,
     TestStatus,
     TestResult,

@@ -15,7 +15,7 @@ from src.dtos import (
     LocationDTO,
     ObjectType,
 )
-from src.domain.testcase.testrun import TestRun
+from src.domain.testrun.testrun import TestRun
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
 from src.infrastructure.backend.dummy import DummyBackend

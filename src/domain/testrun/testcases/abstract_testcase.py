@@ -18,7 +18,7 @@ from src.dtos import (
 )
 
 from src.infrastructure_ports import IBackend, INotifier
-from src.domain.testcase.precondition_checks import (
+from src.domain.testrun.precondition_checks import (
     Checkable,
     IPreconditionChecker,
     PreConditionChecker,

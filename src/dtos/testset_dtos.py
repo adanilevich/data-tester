@@ -6,7 +6,7 @@ from pydantic import Field, computed_field
 from pydantic import UUID4
 
 from src.dtos.dto import DTO
-from src.dtos.testcase_dtos import TestType
+from src.dtos.testrun_dtos import TestType
 
 
 class TestCaseEntryDTO(DTO):

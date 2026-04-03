@@ -11,8 +11,7 @@ from src.dtos import (
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
 from src.dtos import LocationDTO
-from src.domain import ReportAdapter
-from src.domain.report.report_adapter import InvalidReportTypeError
+from src.domain_adapters import ReportAdapter, InvalidReportTypeError
 from src.domain_ports import (
     CreateTestCaseReportCommand,
     CreateTestRunReportCommand,

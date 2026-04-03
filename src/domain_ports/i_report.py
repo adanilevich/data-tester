@@ -3,7 +3,7 @@ from typing import List
 
 from pydantic import UUID4
 
-from src.dtos.testcase_dtos import TestCaseDTO, TestRunDTO
+from src.dtos.testrun_dtos import TestCaseDTO, TestRunDTO
 from src.dtos import (
     DTO,
     TestCaseReportDTO,

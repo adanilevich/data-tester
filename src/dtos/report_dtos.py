@@ -8,8 +8,8 @@ from pydantic import UUID4
 
 from src.dtos.dto import DTO
 from src.dtos.specification_dtos import SpecificationDTO
-from src.dtos.testcase_dtos import TestCaseDTO
-from src.dtos.testcase_dtos import TestRunDTO
+from src.dtos.testrun_dtos import TestCaseDTO
+from src.dtos.testrun_dtos import TestRunDTO
 
 
 class ReportArtifactFormat(Enum):

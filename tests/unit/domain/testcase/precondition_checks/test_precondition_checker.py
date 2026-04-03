@@ -1,7 +1,7 @@
 from typing import Dict
 import pytest
 
-from src.domain.testcase.precondition_checks import Checkable, PreConditionChecker
+from src.domain.testrun.precondition_checks import Checkable, PreConditionChecker
 from src.dtos import TestObjectDTO
 
 

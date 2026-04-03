@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 import polars as pl
 
-from src.domain import SpecAdapter
+from src.domain_adapters import SpecAdapter
 from src.domain.specification.plugins import (
     NamingConventionsFactory,
     FormatterFactory,
