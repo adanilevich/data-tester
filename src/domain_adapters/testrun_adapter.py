@@ -9,7 +9,7 @@ from src.domain_ports import (
 )
 from src.infrastructure_ports import IBackendFactory, INotifier, IDtoStorage
 from src.dtos import TestRunDTO
-from .testrun import TestRun, TestRunLoader
+from src.domain.testrun.testrun import TestRun, TestRunLoader
 
 
 class TestRunAdapter(ITestRun):

@@ -6,7 +6,7 @@ from src.domain_ports import (
     SaveDomainConfigCommand,
 )
 from src.infrastructure_ports import IDtoStorage
-from .domain_config import DomainConfig
+from src.domain.domain_config.domain_config import DomainConfig
 from src.dtos import DomainConfigDTO
 
 

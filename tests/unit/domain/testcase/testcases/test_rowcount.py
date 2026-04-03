@@ -1,8 +1,8 @@
 import pytest
 import polars as pl
 
-from src.domain.testcase.testcases import AbstractTestCase
-from src.domain.testcase.testcases.rowcount import RowCountTestCaseError
+from src.domain.testrun.testcases import AbstractTestCase
+from src.domain.testrun.testcases.rowcount import RowCountTestCaseError
 from src.dtos import RowCountSqlDTO, TestType, SpecificationType, LocationDTO
 
 

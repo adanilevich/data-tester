@@ -19,7 +19,7 @@ from src.domain_ports import (
 )
 from src.domain.report.plugins import IReportFormatter
 from src.infrastructure_ports import IDtoStorage
-from .report import Report
+from src.domain.report.report import Report
 
 
 class InvalidReportTypeError(Exception):

@@ -2,7 +2,7 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.domain import TestRunAdapter
+from src.domain_adapters import TestRunAdapter
 from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer

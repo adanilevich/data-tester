@@ -11,7 +11,7 @@ from src.domain.specification.plugins import (
     ISpecFormatterFactory,
 )
 from src.dtos import SpecificationDTO
-from .specification import Specification
+from src.domain.specification.specification import Specification
 
 
 class SpecAdapter(ISpec):

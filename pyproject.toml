@@ -89,8 +89,9 @@ source_modules = ["src.domain"]
 forbidden_modules = [
     "src.apps",
     "src.config",
+    "src.domain_adapters",
     "src.drivers",
-    "src.infrastructure"
+    "src.infrastructure",
 ]
 
 [[tool.importlinter.contracts]]
@@ -101,8 +102,9 @@ forbidden_modules = [
     "src.apps",
     "src.config",
     "src.domain",
+    "src.domain_adapters",
     "src.infrastructure",
-    "src.infrastructure_ports"
+    "src.infrastructure_ports",
 ]
 
 [[tool.importlinter.contracts]]
@@ -113,6 +115,7 @@ forbidden_modules = [
     "src.apps",
     "src.config",
     "src.domain",
+    "src.domain_adapters",
     "src.domain_ports",
     "src.drivers",
 ]
@@ -128,6 +131,7 @@ forbidden_modules = [
     "src.apps",
     "src.config",
     "src.domain",
+    "src.domain_adapters",
     "src.drivers",
     "src.infrastructure",
 ]
@@ -142,15 +146,49 @@ modules = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "5. Domain hexagons are independent"
+name = "6. Domain hexagons are independent"
 type = "independence"
 modules = [
     "src.domain.*"
 ]
 
 [[tool.importlinter.contracts]]
-name = "6. Drivers are independent"
+name = "7. Drivers are independent"
 type = "independence"
 modules = [
     "src.drivers.*"
+]
+
+[[tool.importlinter.contracts]]
+name = "8. Adapters are independent"
+type = "independence"
+modules = [
+    "src.domain_adapters.*"
+]
+
+[[tool.importlinter.contracts]]
+name = "9. Adapters only import their domain objects and their interfaces"
+type = "forbidden"
+source_modules = ["src.domain_adapters"]
+forbidden_modules = [
+    "src.apps",
+    "src.config",
+    "src.drivers",
+    "src.infrastructure",
+]
+
+[[tool.importlinter.contracts]]
+name = "10. Only apps import adapters"
+type = "forbidden"
+source_modules = [
+    "src.domain",
+    "src.domain_ports",
+    "src.drivers",
+    "src.infrastructure",
+    "src.infrastructure_ports",
+    "src.dtos",
+    "src.config",
+]
+forbidden_modules = [
+    "src.domain_adapters",
 ]

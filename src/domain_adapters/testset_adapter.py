@@ -1,5 +1,5 @@
 from typing import List
-from .testset import TestSet
+from src.domain.testset.testset import TestSet
 from src.domain_ports import (
     ITestSet,
     SaveTestSetCommand,

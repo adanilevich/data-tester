@@ -1,18 +1,22 @@
 from typing import List
 
 from src.config import Config
-from src.domain import (
+from src.domain_adapters import (
     DomainConfigAdapter,
     TestRunAdapter,
-    IReportFormatter,
     ReportAdapter,
+    SpecAdapter,
+    TestSetAdapter,
+)
+from src.domain.report.plugins import (
+    IReportFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
+)
+from src.domain.specification.plugins import (
     NamingConventionsFactory,
-    SpecAdapter,
     FormatterFactory as SpecFormatterFactory,
-    TestSetAdapter,
 )
 from src.drivers import (
     DomainConfigDriver,

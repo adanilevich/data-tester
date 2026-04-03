@@ -2,14 +2,18 @@ import pytest
 
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
-from src.domain import (
+from src.domain_adapters import (
     DomainConfigAdapter,
     ReportAdapter,
     SpecAdapter,
     TestRunAdapter,
+)
+from src.domain.report.plugins import (
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
+)
+from src.domain.specification.plugins import (
     FormatterFactory as SpecFormatterFactory,
     NamingConventionsFactory,
 )

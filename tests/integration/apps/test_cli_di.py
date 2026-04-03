@@ -15,7 +15,7 @@ import polars as pl
 
 from src.apps.cli_di import CliDependencyInjector as CliDi
 from src.config import Config
-from src.domain import SpecAdapter
+from src.domain_adapters import SpecAdapter
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,

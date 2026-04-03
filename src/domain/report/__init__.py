@@ -1,4 +1,3 @@
-from .report_adapter import ReportAdapter
 from .report import (
     Report,
     ReportError,
@@ -13,7 +12,6 @@ from .plugins import (
 )
 
 __all__: list[str] = [
-    "ReportAdapter",
     "Report",
     "ReportError",
     "NoFormatterFoundError",

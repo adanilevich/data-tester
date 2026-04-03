@@ -1,6 +1,6 @@
 import pytest
 
-from src.domain.testcase.precondition_checks import CheckSpecsAreUnique, Checkable
+from src.domain.testrun.precondition_checks import CheckSpecsAreUnique, Checkable
 from src.dtos import SpecificationDTO, SpecificationType, LocationDTO
 
 

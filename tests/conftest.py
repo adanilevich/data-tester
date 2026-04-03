@@ -16,7 +16,7 @@ from src.dtos.domain_config_dtos import (
     DomainConfigDTO,
     TestCasesConfigDTO,
 )
-from src.dtos.testcase_dtos import (
+from src.dtos.testrun_dtos import (
     TestObjectDTO,
     TestCaseDTO,
     TestResult,
@@ -25,12 +25,12 @@ from src.dtos.testcase_dtos import (
     TestDefinitionDTO,
 )
 from src.dtos.report_dtos import TestCaseReportDTO, TestRunReportDTO
-from src.dtos.testcase_dtos import TestRunDTO
+from src.dtos.testrun_dtos import TestRunDTO
 from src.dtos.storage import LocationDTO
 from src.infrastructure_ports import IBackend
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 from src.infrastructure.backend.dummy import DummyBackend
-from src.domain.testcase.testcases import (
+from src.domain.testrun.testcases import (
     AbstractTestCase,
     SchemaTestCase,
     RowCountTestCase,
@@ -39,7 +39,7 @@ from src.domain.testcase.testcases import (
     DummyNokTestCase,
     DummyExceptionTestCase,
 )
-from src.domain.testcase.precondition_checks import Checkable
+from src.domain.testrun.precondition_checks import Checkable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
