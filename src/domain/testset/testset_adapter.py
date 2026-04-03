@@ -1,7 +1,7 @@
 from typing import List
 from .testset import TestSet
 from src.domain_ports import (
-    ITestSetCommandHandler,
+    ITestSet,
     SaveTestSetCommand,
     LoadTestSetCommand,
     ListTestSetsCommand,
@@ -10,7 +10,7 @@ from src.dtos import TestSetDTO
 from src.infrastructure_ports import IDtoStorage
 
 
-class TestSetCommandHandler(ITestSetCommandHandler):
+class TestSetAdapter(ITestSet):
     def __init__(self, dto_storage: IDtoStorage):
         self.testset = TestSet(dto_storage)
 

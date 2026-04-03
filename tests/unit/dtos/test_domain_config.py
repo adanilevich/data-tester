@@ -1,7 +1,7 @@
 import pytest
 import yaml
 
-from src.dtos.domain_config import DomainConfigDTO
+from src.dtos.domain_config_dtos import DomainConfigDTO
 from src.dtos.storage import LocationDTO
 
 

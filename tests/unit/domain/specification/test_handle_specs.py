@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 import polars as pl
 
-from src.domain import SpecCommandHandler
+from src.domain import SpecAdapter
 from src.domain.specification.plugins import (
     NamingConventionsFactory,
     FormatterFactory,
@@ -13,7 +13,7 @@ from src.infrastructure.storage.user_storage import (
     MemoryUserStorage,
 )
 from src.domain_ports import (
-    FetchSpecsCommand,
+    ListSpecsCommand,
     ParseSpecCommand,
 )
 from src.dtos import (
@@ -35,8 +35,8 @@ def _put(
         f.write(data)
 
 
-class TestSpecCommandHandler:
-    """Test suite for the SpecCommandHandler class"""
+class TestSpecAdapter:
+    """Test suite for the SpecAdapter class"""
 
     @pytest.fixture
     def user_storage(self) -> MemoryUserStorage:
@@ -99,9 +99,9 @@ class TestSpecCommandHandler:
         user_storage: MemoryUserStorage,
         naming_conventions_factory: NamingConventionsFactory,
         formatter_factory: FormatterFactory,
-    ) -> SpecCommandHandler:
-        """Create a SpecCommandHandler instance"""
-        return SpecCommandHandler(
+    ) -> SpecAdapter:
+        """Create a SpecAdapter instance"""
+        return SpecAdapter(
             naming_conventions_factory=naming_conventions_factory,
             user_storage=user_storage,
             formatter_factory=formatter_factory,
@@ -159,20 +159,20 @@ class TestSpecCommandHandler:
         df.write_excel(buffer, worksheet="schema")
         return buffer.getvalue()
 
-    def test_init(self, handler: SpecCommandHandler):
-        """Test that SpecCommandHandler initializes correctly"""
+    def test_init(self, handler: SpecAdapter):
+        """Test that SpecAdapter initializes correctly"""
         assert (
             handler.naming_conventions_factory is not None
         )
         assert handler.user_storage is not None
         assert handler.formatter_factory is not None
 
-    def test_fetch_specs_single_location_single_testcase(
+    def test_list_specs_single_location_single_testcase(
         self,
-        handler: SpecCommandHandler,
+        handler: SpecAdapter,
         test_testset: TestSetDTO,
     ):
-        """Test fetch_specs with single location and single testcase"""
+        """Test list_specs with single location and single testcase"""
         single_testcase_testset = TestSetDTO(
             testset_id=test_testset.testset_id,
             name=test_testset.name,
@@ -186,12 +186,12 @@ class TestSpecCommandHandler:
             },
         )
 
-        command = FetchSpecsCommand(
+        command = ListSpecsCommand(
             locations=[LocationDTO("memory://specs/")],
             testset=single_testcase_testset,
         )
 
-        result = handler.fetch_specs(command)
+        result = handler.list_specs(command)
 
         assert len(result) == 1
         assert len(result[0]) == 1
@@ -200,12 +200,12 @@ class TestSpecCommandHandler:
         )
         assert result[0][0].testobject == "table1"
 
-    def test_fetch_specs_multiple_locations(
+    def test_list_specs_multiple_locations(
         self,
-        handler: SpecCommandHandler,
+        handler: SpecAdapter,
         test_testset: TestSetDTO,
     ):
-        """Test fetch_specs with multiple locations"""
+        """Test list_specs with multiple locations"""
         single_testcase_testset = TestSetDTO(
             testset_id=test_testset.testset_id,
             name=test_testset.name,
@@ -219,7 +219,7 @@ class TestSpecCommandHandler:
             },
         )
 
-        command = FetchSpecsCommand(
+        command = ListSpecsCommand(
             locations=[
                 LocationDTO("memory://specs/"),
                 LocationDTO("memory://backup/"),
@@ -227,7 +227,7 @@ class TestSpecCommandHandler:
             testset=single_testcase_testset,
         )
 
-        result = handler.fetch_specs(command)
+        result = handler.list_specs(command)
 
         assert len(result) == 1
         assert len(result[0]) == 2
@@ -240,18 +240,18 @@ class TestSpecCommandHandler:
             for spec in result[0]
         )
 
-    def test_fetch_specs_multiple_testcases(
+    def test_list_specs_multiple_testcases(
         self,
-        handler: SpecCommandHandler,
+        handler: SpecAdapter,
         test_testset: TestSetDTO,
     ):
-        """Test fetch_specs with multiple testcases"""
-        command = FetchSpecsCommand(
+        """Test list_specs with multiple testcases"""
+        command = ListSpecsCommand(
             locations=[LocationDTO("memory://specs/")],
             testset=test_testset,
         )
 
-        result = handler.fetch_specs(command)
+        result = handler.list_specs(command)
 
         assert len(result) == 3
 
@@ -275,10 +275,10 @@ class TestSpecCommandHandler:
         assert SpecificationType.COMPARE_SQL in spec_types
         assert SpecificationType.SCHEMA in spec_types
 
-    def test_fetch_specs_no_specs_found(
-        self, handler: SpecCommandHandler
+    def test_list_specs_no_specs_found(
+        self, handler: SpecAdapter
     ):
-        """Test fetch_specs when no specifications are found"""
+        """Test list_specs when no specifications are found"""
         testcase = TestCaseEntryDTO(
             testobject="nonexistent_table",
             testtype=TestType.SCHEMA,
@@ -294,18 +294,18 @@ class TestSpecCommandHandler:
             testcases={"nonexistent_SCHEMA": testcase},
         )
 
-        command = FetchSpecsCommand(
+        command = ListSpecsCommand(
             locations=[LocationDTO("memory://specs/")],
             testset=testset,
         )
 
-        result = handler.fetch_specs(command)
+        result = handler.list_specs(command)
 
         assert len(result) == 1
         assert len(result[0]) == 0
 
     def test_parse_spec_schema_file(
-        self, handler: SpecCommandHandler
+        self, handler: SpecAdapter
     ):
         """Test parse_spec with schema Excel file"""
         schema_data = self._create_test_xlsx_schema()
@@ -329,10 +329,10 @@ class TestSpecCommandHandler:
         assert "id" in schema_specs[0].columns
         assert "name" in schema_specs[0].columns
 
-    def test_fetch_specs_preserves_testcase_order(
-        self, handler: SpecCommandHandler
+    def test_list_specs_preserves_testcase_order(
+        self, handler: SpecAdapter
     ):
-        """Test that fetch_specs preserves the order of testcases"""
+        """Test that list_specs preserves the order of testcases"""
         testcases = {
             "z_table": TestCaseEntryDTO(
                 testobject="table1",
@@ -357,12 +357,12 @@ class TestSpecCommandHandler:
             testcases=testcases,
         )
 
-        command = FetchSpecsCommand(
+        command = ListSpecsCommand(
             locations=[LocationDTO("memory://specs/")],
             testset=testset,
         )
 
-        result = handler.fetch_specs(command)
+        result = handler.list_specs(command)
 
         assert len(result) == 3
 

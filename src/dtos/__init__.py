@@ -1,12 +1,12 @@
 # flake8: noqa
 from .dto import DTO
-from .domain_config import (
+from .domain_config_dtos import (
     DomainConfigDTO,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
 )
-from .specification import (
+from .specification_dtos import (
     SpecificationDTO,
     SpecificationType,
     SchemaSpecificationDTO,
@@ -19,7 +19,7 @@ from .specification import (
     RowCountSqlContent,
     CompareSqlContent,
 )
-from .testcase import (
+from .testcase_dtos import (
     TestObjectDTO,
     DBInstanceDTO,
     TestStatus,
@@ -29,7 +29,7 @@ from .testcase import (
     TestDTO,
     TestCaseDTO,
 )
-from .report import (
+from .report_dtos import (
     ReportArtifactFormat,
     ReportArtifact,
     ReportType,
@@ -38,5 +38,5 @@ from .report import (
     TestRunReportDTO,
 )
 from .storage import LocationDTO, StorageType, ObjectType, ObjectLocationDTO
-from .testset import TestSetDTO, TestCaseEntryDTO
-from .testcase import TestRunDTO
+from .testset_dtos import TestSetDTO, TestCaseEntryDTO
+from .testcase_dtos import TestRunDTO

@@ -1,6 +1,6 @@
-from .handle_testruns import TestRunCommandHandler
+from .testrun_adapter import TestRunAdapter
 
 
 __all__: list[str] = [
-    "TestRunCommandHandler",
+    "TestRunAdapter",
 ]

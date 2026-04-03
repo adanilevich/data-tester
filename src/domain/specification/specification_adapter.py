@@ -2,8 +2,8 @@ from typing import List
 
 from src.infrastructure_ports import IUserStorage
 from src.domain_ports import (
-    ISpecCommandHandler,
-    FetchSpecsCommand,
+    ISpec,
+    ListSpecsCommand,
     ParseSpecCommand,
 )
 from src.domain.specification.plugins import (
@@ -14,7 +14,7 @@ from src.dtos import SpecificationDTO
 from .specification import Specification
 
 
-class SpecCommandHandler(ISpecCommandHandler):
+class SpecAdapter(ISpec):
     """Application service for handling specification artifacts."""
 
     def __init__(
@@ -27,9 +27,8 @@ class SpecCommandHandler(ISpecCommandHandler):
         self.user_storage = user_storage
         self.formatter_factory = formatter_factory
 
-    # TODO: rename in list_specs
-    def fetch_specs(
-        self, command: FetchSpecsCommand
+    def list_specs(
+        self, command: ListSpecsCommand
     ) -> List[List[SpecificationDTO]]:
         """
         Find and fetch specifications for the given testcases

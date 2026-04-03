@@ -1,10 +1,9 @@
-from .handle_reports import ReportCommandHandler
+from .report_adapter import ReportAdapter
 from .report import (
     Report,
     ReportError,
     NoFormatterFoundError,
-    ReportArtifactNotSpecifiedError,
-    WrongReportTypeError,
+    ReportNotRetrievableError,
 )
 from .plugins import (
     IReportFormatter,
@@ -14,12 +13,11 @@ from .plugins import (
 )
 
 __all__: list[str] = [
-    "ReportCommandHandler",
+    "ReportAdapter",
     "Report",
     "ReportError",
     "NoFormatterFoundError",
-    "ReportArtifactNotSpecifiedError",
-    "WrongReportTypeError",
+    "ReportNotRetrievableError",
     "IReportFormatter",
     "XlsxTestCaseDiffFormatter",
     "TxtTestCaseReportFormatter",

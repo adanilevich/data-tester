@@ -1,4 +1,4 @@
-from src.dtos.specification import SpecificationDTO
+from src.dtos.specification_dtos import SpecificationDTO
 from typing import Dict, List
 
 from . import AbstractCheck, Checkable

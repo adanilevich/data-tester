@@ -19,7 +19,7 @@ from src.dtos import (
     CompareTestCaseConfigDTO,
     TestDefinitionDTO,
 )
-from src.dtos.testcase import TestRunDTO
+from src.dtos.testcase_dtos import TestRunDTO
 
 
 testobjects = [

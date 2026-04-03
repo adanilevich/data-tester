@@ -1,5 +1,5 @@
 # flake8: noqa
-from typing import List
+from typing import List, Dict, cast
 from datetime import datetime
 from uuid import uuid4
 
@@ -10,6 +10,7 @@ from src.dtos import (
     TestResult,
     TestCaseDTO,
     TestStatus,
+    ObjectType,
 )
 from src.infrastructure_ports import IBackend, INotifier, IDtoStorage
 from .testcases import (
@@ -28,7 +29,31 @@ class TestCaseUnknownError(NotImplementedError):
     pass
 
 
-#TODO: implement a new additional class with load_testrun and list_testruns methods
+class TestRunLoader:
+    """Loads and lists TestRunDTO objects from storage."""
+
+    def __init__(self, dto_storage: IDtoStorage):
+        self.dto_storage = dto_storage
+
+    def load_testrun(self, testrun_id: str) -> TestRunDTO:
+        """Load a testrun by ID."""
+        dto = self.dto_storage.read_dto(
+            object_type=ObjectType.TESTRUN,
+            id=testrun_id,
+        )
+        return cast(TestRunDTO, dto)
+
+    def list_testruns(self, domain: str, date: str | None = None) -> List[TestRunDTO]:
+        """List testruns by domain and optionally by date."""
+        filters: Dict[str, str] = {"domain": domain}
+        if date is not None:
+            filters["date"] = date
+        dtos = self.dto_storage.list_dtos(
+            object_type=ObjectType.TESTRUN,
+            filters=filters,
+        )
+        return [cast(TestRunDTO, dto) for dto in dtos]
+
 
 # TODO: implement notifications. Claude ignore this
 class TestRun:

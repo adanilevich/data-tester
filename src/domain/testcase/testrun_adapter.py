@@ -1,21 +1,19 @@
-from typing import List, cast
+from typing import List
 
 from src.domain_ports import (
-    ITestRunCommandHandler,
+    ITestRun,
     ExecuteTestRunCommand,
     SaveTestRunCommand,
     LoadTestRunCommand,
-    SetReportIdsCommand,
+    ListTestRunsCommand,
 )
 from src.infrastructure_ports import IBackendFactory, INotifier, IDtoStorage
-from src.dtos import TestRunDTO, ObjectType
-from .testrun import TestRun
+from src.dtos import TestRunDTO
+from .testrun import TestRun, TestRunLoader
 
 
-class TestRunCommandHandler(ITestRunCommandHandler):
+class TestRunAdapter(ITestRun):
     """Receives a command and executes testcases"""
-
-    # TODO: implement list_testruns method
 
     def __init__(
         self,
@@ -26,6 +24,7 @@ class TestRunCommandHandler(ITestRunCommandHandler):
         self.backend_factory: IBackendFactory = backend_factory
         self.notifiers: List[INotifier] = notifiers
         self.dto_storage: IDtoStorage = dto_storage
+        self.loader = TestRunLoader(dto_storage)
 
     def execute_testrun(self, command: ExecuteTestRunCommand) -> TestRunDTO:
         testrun = TestRun(
@@ -47,15 +46,8 @@ class TestRunCommandHandler(ITestRunCommandHandler):
 
     def load_testrun(self, command: LoadTestRunCommand) -> TestRunDTO:
         """Loads a testrun, e.g. from disk"""
-        dto = self.dto_storage.read_dto(
-            object_type=ObjectType.TESTRUN,
-            id=command.testrun_id,
-        )
-        return cast(TestRunDTO, dto)
+        return self.loader.load_testrun(command.testrun_id)
 
-    def set_report_ids(self, command: SetReportIdsCommand) -> None:
-        """Sets report ids for testrun report and testcase reports
-        and persists testrun"""
-        testrun = command.testrun
-        testrun.report_id = command.testrun_report.report_id
-        self.dto_storage.write_dto(dto=testrun)
+    def list_testruns(self, command: ListTestRunsCommand) -> List[TestRunDTO]:
+        """Lists testruns by domain and optionally date."""
+        return self.loader.list_testruns(domain=command.domain, date=command.date)

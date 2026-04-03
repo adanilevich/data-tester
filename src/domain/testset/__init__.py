@@ -1,6 +1,6 @@
-from .handle_testsets import TestSetCommandHandler
+from .testset_adapter import TestSetAdapter
 
 
 __all__: list[str] = [
-    "TestSetCommandHandler",
+    "TestSetAdapter",
 ]

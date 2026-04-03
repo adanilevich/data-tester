@@ -7,7 +7,7 @@ import polars as pl
 
 from src.apps.cli_di import CliDependencyInjector
 from src.drivers import SpecDriver
-from src.domain import SpecCommandHandler
+from src.domain import SpecAdapter
 from src.config import Config
 from src.dtos import (
     LocationDTO,
@@ -48,7 +48,7 @@ def spec_manager(config: Config) -> SpecDriver:
 
     # Setup test data in the memory user storage
     handler = cast(
-        SpecCommandHandler, manager.spec_command_handler
+        SpecAdapter, manager.spec_command_handler
     )
     storage = cast(
         MemoryUserStorage, handler.user_storage
@@ -304,7 +304,7 @@ class TestCliSpecManagerE2E:
     ):
         """Test finding specs from multiple locations"""
         handler = cast(
-            SpecCommandHandler,
+            SpecAdapter,
             spec_manager.spec_command_handler,
         )
         storage = cast(
@@ -443,7 +443,7 @@ class TestCliSpecManagerE2E:
         """Test complex scenario with multiple testcases,
         types, and locations"""
         handler = cast(
-            SpecCommandHandler,
+            SpecAdapter,
             spec_manager.spec_command_handler,
         )
         storage = cast(

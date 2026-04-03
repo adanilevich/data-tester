@@ -2,17 +2,17 @@ from typing import List
 
 from src.config import Config
 from src.domain import (
-    DomainConfigHandler,
-    TestRunCommandHandler,
+    DomainConfigAdapter,
+    TestRunAdapter,
     IReportFormatter,
-    ReportCommandHandler,
+    ReportAdapter,
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
     NamingConventionsFactory,
-    SpecCommandHandler,
+    SpecAdapter,
     FormatterFactory as SpecFormatterFactory,
-    TestSetCommandHandler,
+    TestSetAdapter,
 )
 from src.drivers import (
     DomainConfigDriver,
@@ -79,15 +79,15 @@ class CliDependencyInjector:
         self.spec_formatter_factory = SpecFormatterFactory()
 
     def domain_config_driver(self) -> DomainConfigDriver:
-        handler = DomainConfigHandler(dto_storage=self.dto_storage)
+        handler = DomainConfigAdapter(dto_storage=self.dto_storage)
         return DomainConfigDriver(domain_config_handler=handler)
 
     def testset_driver(self) -> TestSetDriver:
-        handler = TestSetCommandHandler(dto_storage=self.dto_storage)
+        handler = TestSetAdapter(dto_storage=self.dto_storage)
         return TestSetDriver(testset_handler=handler)
 
     def specification_driver(self) -> SpecDriver:
-        handler = SpecCommandHandler(
+        handler = SpecAdapter(
             user_storage=self.user_storage,
             naming_conventions_factory=self.spec_naming_conventions_factory,
             formatter_factory=self.spec_formatter_factory,
@@ -95,7 +95,7 @@ class CliDependencyInjector:
         return SpecDriver(spec_command_handler=handler)
 
     def testrun_driver(self) -> TestRunDriver:
-        handler = TestRunCommandHandler(
+        handler = TestRunAdapter(
             backend_factory=self.backend_factory,
             notifiers=self.notifiers,
             dto_storage=self.dto_storage,
@@ -103,7 +103,7 @@ class CliDependencyInjector:
         return TestRunDriver(handler=handler)
 
     def report_driver(self) -> ReportDriver:
-        handler = ReportCommandHandler(
+        handler = ReportAdapter(
             formatters=self.testreport_formatters,
             dto_storage=self.dto_storage,
         )

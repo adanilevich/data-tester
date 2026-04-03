@@ -3,10 +3,10 @@ import pytest
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
 from src.domain import (
-    DomainConfigHandler,
-    ReportCommandHandler,
-    SpecCommandHandler,
-    TestRunCommandHandler,
+    DomainConfigAdapter,
+    ReportAdapter,
+    SpecAdapter,
+    TestRunAdapter,
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
@@ -103,7 +103,7 @@ class TestCliDependencyInjectorDrivers:
         driver = injector.domain_config_driver()
         assert isinstance(
             driver.domain_config_handler,
-            DomainConfigHandler,
+            DomainConfigAdapter,
         )
         assert driver.domain_config_handler.dto_storage is injector.dto_storage
 
@@ -122,7 +122,7 @@ class TestCliDependencyInjectorDrivers:
         driver = injector.specification_driver()
         assert isinstance(
             driver.spec_command_handler,
-            SpecCommandHandler,
+            SpecAdapter,
         )
         assert driver.spec_command_handler.user_storage is injector.user_storage
 
@@ -135,20 +135,20 @@ class TestCliDependencyInjectorDrivers:
         config.DATATESTER_DATA_PLATFORM = "DEMO"
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunCommandHandler)
+        assert isinstance(driver.handler, TestRunAdapter)
         assert driver.handler.backend_factory is injector.backend_factory
 
     def test_testrun_driver_uses_configured_notifiers(self, config: Config):
         config.DATATESTER_NOTIFIERS = ["IN_MEMORY"]
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunCommandHandler)
+        assert isinstance(driver.handler, TestRunAdapter)
         assert driver.handler.notifiers is injector.notifiers
 
     def test_testrun_driver_uses_shared_dto_storage(self, config: Config):
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunCommandHandler)
+        assert isinstance(driver.handler, TestRunAdapter)
         assert driver.handler.dto_storage is injector.dto_storage
 
     def test_report_driver_returns_correct_type(self, config: Config):
@@ -159,5 +159,5 @@ class TestCliDependencyInjectorDrivers:
     def test_report_driver_uses_shared_dto_storage(self, config: Config):
         injector = CliDependencyInjector(config)
         driver = injector.report_driver()
-        assert isinstance(driver.report_handler, ReportCommandHandler)
+        assert isinstance(driver.report_handler, ReportAdapter)
         assert driver.report_handler.dto_storage is injector.dto_storage

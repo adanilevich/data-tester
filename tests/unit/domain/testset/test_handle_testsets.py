@@ -1,13 +1,13 @@
 import pytest
 from uuid import uuid4
 
-from src.domain.testset import TestSetCommandHandler
-from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
+from src.domain.testset import TestSetAdapter
+from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
 from src.dtos import LocationDTO
 from src.infrastructure.storage import ObjectNotFoundError
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.dtos.testcase import TestType
+from src.dtos.testcase_dtos import TestType
 from src.domain_ports import (
     SaveTestSetCommand,
     LoadTestSetCommand,
@@ -24,8 +24,8 @@ def dto_storage() -> MemoryDtoStorage:
 
 
 @pytest.fixture
-def handler(dto_storage: MemoryDtoStorage) -> TestSetCommandHandler:
-    return TestSetCommandHandler(dto_storage)
+def handler(dto_storage: MemoryDtoStorage) -> TestSetAdapter:
+    return TestSetAdapter(dto_storage)
 
 
 @pytest.fixture

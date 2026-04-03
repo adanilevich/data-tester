@@ -1,7 +1,9 @@
-from src.dtos.testset import TestSetDTO
+from typing import List
+from src.dtos.testset_dtos import TestSetDTO
 from src.domain_ports import (
-    ITestSetCommandHandler,
+    ITestSet,
     ListTestSetsCommand,
+    LoadTestSetCommand,
 )
 
 
@@ -23,14 +25,21 @@ class TestSetDriver:
     domain and testset name (which is passed as argument or from environment).
     """
 
-    #TODO: implement load_testset (by id) method
-    #TODO: implement list_testsets method
-
     def __init__(
         self,
-        testset_handler: ITestSetCommandHandler,
+        testset_handler: ITestSet,
     ):
         self.testset_handler = testset_handler
+
+    def load_testset(self, testset_id: str) -> TestSetDTO:
+        """Loads a testset by ID."""
+        command = LoadTestSetCommand(testset_id=testset_id)
+        return self.testset_handler.load_testset(command=command)
+
+    def list_testsets(self, domain: str) -> List[TestSetDTO]:
+        """Lists all testsets for the given domain."""
+        command = ListTestSetsCommand(domain=domain)
+        return self.testset_handler.list_testsets(command=command)
 
     def load_domain_testset_by_name(
         self, domain: str, name: str
