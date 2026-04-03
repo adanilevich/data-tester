@@ -102,10 +102,10 @@ class TestCliDependencyInjectorDrivers:
         injector = CliDependencyInjector(config)
         driver = injector.domain_config_driver()
         assert isinstance(
-            driver.domain_config_handler,
+            driver.adapter,
             DomainConfigAdapter,
         )
-        assert driver.domain_config_handler.dto_storage is injector.dto_storage
+        assert driver.adapter.dto_storage is injector.dto_storage
 
     def test_testset_driver_returns_correct_type(self, config: Config):
         injector = CliDependencyInjector(config)
@@ -121,10 +121,10 @@ class TestCliDependencyInjectorDrivers:
         injector = CliDependencyInjector(config)
         driver = injector.specification_driver()
         assert isinstance(
-            driver.spec_command_handler,
+            driver.adapter,
             SpecAdapter,
         )
-        assert driver.spec_command_handler.user_storage is injector.user_storage
+        assert driver.adapter.user_storage is injector.user_storage
 
     def test_testrun_driver_returns_correct_type(self, config: Config):
         injector = CliDependencyInjector(config)
@@ -135,21 +135,21 @@ class TestCliDependencyInjectorDrivers:
         config.DATATESTER_DATA_PLATFORM = "DEMO"
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunAdapter)
-        assert driver.handler.backend_factory is injector.backend_factory
+        assert isinstance(driver.adapter, TestRunAdapter)
+        assert driver.adapter.backend_factory is injector.backend_factory
 
     def test_testrun_driver_uses_configured_notifiers(self, config: Config):
         config.DATATESTER_NOTIFIERS = ["IN_MEMORY"]
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunAdapter)
-        assert driver.handler.notifiers is injector.notifiers
+        assert isinstance(driver.adapter, TestRunAdapter)
+        assert driver.adapter.notifiers is injector.notifiers
 
     def test_testrun_driver_uses_shared_dto_storage(self, config: Config):
         injector = CliDependencyInjector(config)
         driver = injector.testrun_driver()
-        assert isinstance(driver.handler, TestRunAdapter)
-        assert driver.handler.dto_storage is injector.dto_storage
+        assert isinstance(driver.adapter, TestRunAdapter)
+        assert driver.adapter.dto_storage is injector.dto_storage
 
     def test_report_driver_returns_correct_type(self, config: Config):
         injector = CliDependencyInjector(config)
@@ -159,5 +159,5 @@ class TestCliDependencyInjectorDrivers:
     def test_report_driver_uses_shared_dto_storage(self, config: Config):
         injector = CliDependencyInjector(config)
         driver = injector.report_driver()
-        assert isinstance(driver.report_handler, ReportAdapter)
-        assert driver.report_handler.dto_storage is injector.dto_storage
+        assert isinstance(driver.adapter, ReportAdapter)
+        assert driver.adapter.dto_storage is injector.dto_storage
