@@ -1,48 +1,62 @@
-from .domain_config import (
-    IDomainConfigHandler,
-    FetchDomainConfigsCommand,
+from .i_domain_config import (
+    IDomainConfig,
+    ListDomainConfigsCommand,
+    LoadDomainConfigCommand,
     SaveDomainConfigCommand,
 )
-from .report import (
-    IReportCommandHandler,
-    CreateReportCommand,
+from .i_report import (
+    IReport,
+    CreateTestCaseReportCommand,
+    CreateTestRunReportCommand,
     SaveReportCommand,
-    LoadReportCommand,
-    GetReportArtifactCommand,
+    LoadTestCaseReportCommand,
+    LoadTestRunReportCommand,
+    ListTestCaseReportsCommand,
+    ListTestRunReportsCommand,
+    CreateTestCaseReportArtifactCommand,
+    CreateTestRunReportArtifactCommand,
+    CreateAndSaveAllReportsCommand,
 )
-from .specification import ISpecCommandHandler, FetchSpecsCommand, ParseSpecCommand
-from .testcase import (
-    ITestRunCommandHandler,
+from .i_specification import ISpec, ListSpecsCommand, ParseSpecCommand
+from .i_testrun import (
+    ITestRun,
     ExecuteTestRunCommand,
     SaveTestRunCommand,
     LoadTestRunCommand,
-    SetReportIdsCommand,
+    ListTestRunsCommand,
 )
-from .testset import (
-    ITestSetCommandHandler,
+from .i_testset import (
+    ITestSet,
     SaveTestSetCommand,
     LoadTestSetCommand,
     ListTestSetsCommand,
 )
 
 __all__ = [
-    "IDomainConfigHandler",
-    "FetchDomainConfigsCommand",
+    "IDomainConfig",
+    "ListDomainConfigsCommand",
+    "LoadDomainConfigCommand",
     "SaveDomainConfigCommand",
-    "IReportCommandHandler",
-    "CreateReportCommand",
+    "IReport",
+    "CreateTestCaseReportCommand",
+    "CreateTestRunReportCommand",
     "SaveReportCommand",
-    "LoadReportCommand",
-    "GetReportArtifactCommand",
-    "ISpecCommandHandler",
-    "FetchSpecsCommand",
+    "LoadTestCaseReportCommand",
+    "LoadTestRunReportCommand",
+    "ListTestCaseReportsCommand",
+    "ListTestRunReportsCommand",
+    "CreateTestCaseReportArtifactCommand",
+    "CreateTestRunReportArtifactCommand",
+    "CreateAndSaveAllReportsCommand",
+    "ISpec",
+    "ListSpecsCommand",
     "ParseSpecCommand",
-    "ITestRunCommandHandler",
+    "ITestRun",
     "ExecuteTestRunCommand",
     "SaveTestRunCommand",
     "LoadTestRunCommand",
-    "SetReportIdsCommand",
-    "ITestSetCommandHandler",
+    "ListTestRunsCommand",
+    "ITestSet",
     "SaveTestSetCommand",
     "LoadTestSetCommand",
     "ListTestSetsCommand",

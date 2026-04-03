@@ -1,15 +1,8 @@
-from .domain_config_handler import DomainConfigHandler
-from .domain_config import (
-    DomainConfig,
-    DomainConfigAlreadyExistsError,
-    DomainConfigSerializationError,
-    DomainConfigParsingError,
-)
+from .domain_config_adapter import DomainConfigAdapter
+from .domain_config import DomainConfig, DomainConfigNotUniqueError
 
 __all__ = [
-    "DomainConfigHandler",
+    "DomainConfigAdapter",
     "DomainConfig",
-    "DomainConfigAlreadyExistsError",
-    "DomainConfigSerializationError",
-    "DomainConfigParsingError",
+    "DomainConfigNotUniqueError",
 ]

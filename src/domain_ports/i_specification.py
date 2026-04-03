@@ -3,8 +3,7 @@ from typing import List
 
 from src.dtos import LocationDTO, DTO, SpecificationDTO, TestSetDTO
 
-# TODO: rename to ListSpecsCommand
-class FetchSpecsCommand(DTO):
+class ListSpecsCommand(DTO):
     locations: List[LocationDTO]
     testset: TestSetDTO
 
@@ -14,13 +13,13 @@ class ParseSpecCommand(DTO):
     testobject: str
 
 
-class ISpecCommandHandler(ABC):
+class ISpec(ABC):
     """
     Interface for handling specification commands.
     """
-    # TODO: rename to list_specs
+
     @abstractmethod
-    def fetch_specs(self, command: FetchSpecsCommand) -> List[List[SpecificationDTO]]:
+    def list_specs(self, command: ListSpecsCommand) -> List[List[SpecificationDTO]]:
         """
         Fetch specifications for a given testset in given locations. For each testcase
         in command.testset.testcases, corresponding specifications are searched

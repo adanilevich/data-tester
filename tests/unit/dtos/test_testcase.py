@@ -2,15 +2,15 @@ import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.dtos.testcase import (
+from src.dtos.testcase_dtos import (
     TestRunDTO,
     TestStatus,
     TestResult,
     TestType,
 )
-from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
-from src.dtos.specification import SpecificationDTO, SpecificationType
-from src.dtos.domain_config import (
+from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
+from src.dtos.specification_dtos import SpecificationDTO, SpecificationType
+from src.dtos.domain_config_dtos import (
     DomainConfigDTO,
     TestCasesConfigDTO,
     CompareTestCaseConfigDTO,

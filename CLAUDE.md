@@ -15,6 +15,7 @@ formatting without asking for permission
 - All code must pass typechecks. "... is defined" here messages from MyPy can be ignored
 unless Claude is promted explicitely to address them
 - Type hints are used in all signatures and function bodies
+- Code Formatting: Format code with ruff. Then try to put statements in one line, if not possible use next best approach for readability.
 
 ## Architecture
 The project uses hexagonal architecture with clear separation between domain logic, application services and adapters
@@ -39,4 +40,6 @@ The project uses hexagonal architecture with clear separation between domain log
 - `./run_checks.sh`: Run all checks: linting, formatting, typechecks, tests
 
 ## Important Notes
-- Always execute tests, formatter and linter checks and typechecks before finalizing code. *Important*: Execute these checks without asking for permission. Fix any occuring issues
+- Execute all checks before finalizing code. Fix any occuring issues
+- *Important*: Execute these checks without asking for permission.
+- *Important*: Use read-only tools and commands without asking for permission

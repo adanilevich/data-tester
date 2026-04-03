@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from src.dtos import DTO
-from src.dtos.testset import TestSetDTO
+from src.dtos.testset_dtos import TestSetDTO
 
 
 class SaveTestSetCommand(DTO):
@@ -17,7 +17,7 @@ class ListTestSetsCommand(DTO):
     domain: str
 
 
-class ITestSetCommandHandler(ABC):
+class ITestSet(ABC):
     @abstractmethod
     def save_testset(
         self, command: SaveTestSetCommand

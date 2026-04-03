@@ -2,9 +2,9 @@ import pytest
 import uuid
 
 from src.apps.cli_di import CliDependencyInjector
-from src.dtos.testset import TestSetDTO, TestCaseEntryDTO
-from src.drivers.testset import TestSetNotFoundError
-from src.dtos.testcase import TestType
+from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
+from src.drivers.testset_driver import TestSetNotFoundError
+from src.dtos.testcase_dtos import TestType
 from src.config import Config
 from src.domain_ports import SaveTestSetCommand
 

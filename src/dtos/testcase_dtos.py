@@ -7,11 +7,11 @@ from datetime import datetime
 from pydantic import Field, UUID4
 
 from src.dtos.dto import DTO
-from src.dtos.domain_config import DomainConfigDTO
-from src.dtos.specification import SpecificationDTO
+from src.dtos.domain_config_dtos import DomainConfigDTO
+from src.dtos.specification_dtos import SpecificationDTO
 
 if TYPE_CHECKING:
-    from src.dtos.testset import TestSetDTO
+    from src.dtos.testset_dtos import TestSetDTO
 
 
 class TestObjectDTO(DTO):

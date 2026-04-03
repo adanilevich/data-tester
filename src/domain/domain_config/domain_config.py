@@ -4,31 +4,31 @@ from src.infrastructure_ports import IDtoStorage, StorageError
 from src.dtos import DomainConfigDTO, ObjectType
 
 
-class DomainConfigAlreadyExistsError(Exception):
+class DomainConfigNotUniqueError(Exception):
     """
     Exception raised when a domain config for the same domain already exists.
     """
 
 
-class DomainConfigSerializationError(Exception):
-    """
-    Exception raised when a domain config cannot be serialized or deserialized.
-    """
-
-
-class DomainConfigParsingError(Exception):
-    """
-    Exception raised when a domain config cannot be parsed.
-    """
-
-
 class DomainConfig:
-    # TODO: implement read_config method
     def __init__(self, storage: IDtoStorage):
         self.storage: IDtoStorage = storage
 
-    # TODO: rename to list_configs
-    def fetch_configs(self) -> Dict[str, DomainConfigDTO]:
+    def load(self, domain: str) -> DomainConfigDTO:
+        """Loads a single domain config by domain name."""
+        dto = self.storage.read_dto(object_type=ObjectType.DOMAIN_CONFIG, id=domain)
+        return cast(DomainConfigDTO, dto)
+
+    def save(self, config: DomainConfigDTO) -> None:
+        """
+        Saves a domain config to internal storage.
+
+        Args:
+            config (DomainConfigDTO): The domain config to save.
+        """
+        self.storage.write_dto(config)
+
+    def list(self) -> Dict[str, DomainConfigDTO]:
         """
         Lists all domain configs from internal storage and returns them
         as a dictionary keyed by domain name. Unparseable configs are
@@ -46,31 +46,15 @@ class DomainConfig:
         found_domain_configs: Dict[str, DomainConfigDTO] = {}
 
         try:
-            config_dtos = self.storage.list_dtos(
-                object_type=ObjectType.DOMAIN_CONFIG
-            )
+            config_dtos = self.storage.list_dtos(object_type=ObjectType.DOMAIN_CONFIG)
         except StorageError as err:
-            raise StorageError(
-                "Failed to list domain configs"
-            ) from err
+            raise StorageError("Failed to list domain configs") from err
 
         for dto in config_dtos:
             config = cast(DomainConfigDTO, dto)
             if config.domain in found_domain_configs:
-                msg = (
-                    f"Domain config for {config.domain} already exists"
-                )
-                raise DomainConfigAlreadyExistsError(msg)
+                raise DomainConfigNotUniqueError(config.domain)
             else:
                 found_domain_configs[config.domain] = config
 
         return found_domain_configs
-
-    def save_config(self, config: DomainConfigDTO) -> None:
-        """
-        Saves a domain config to internal storage.
-
-        Args:
-            config (DomainConfigDTO): The domain config to save.
-        """
-        self.storage.write_dto(config)

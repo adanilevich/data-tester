@@ -9,14 +9,14 @@ import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 from urllib import request
 
-from src.dtos.specification import SpecificationDTO, SpecificationType
-from src.dtos.domain_config import (
+from src.dtos.specification_dtos import SpecificationDTO, SpecificationType
+from src.dtos.domain_config_dtos import (
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
     TestCasesConfigDTO,
 )
-from src.dtos.testcase import (
+from src.dtos.testcase_dtos import (
     TestObjectDTO,
     TestCaseDTO,
     TestResult,
@@ -24,8 +24,8 @@ from src.dtos.testcase import (
     TestType,
     TestDefinitionDTO,
 )
-from src.dtos.report import TestCaseReportDTO, TestRunReportDTO
-from src.dtos.testcase import TestRunDTO
+from src.dtos.report_dtos import TestCaseReportDTO, TestRunReportDTO
+from src.dtos.testcase_dtos import TestRunDTO
 from src.dtos.storage import LocationDTO
 from src.infrastructure_ports import IBackend
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier

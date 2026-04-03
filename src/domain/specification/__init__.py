@@ -1,9 +1,9 @@
-from .handle_specs import SpecCommandHandler
+from .specification_adapter import SpecAdapter
 from .plugins import NamingConventionsFactory, FormatterFactory
 from .specification import Specification
 
 __all__: list[str] = [
-    "SpecCommandHandler",
+    "SpecAdapter",
     "NamingConventionsFactory",
     "FormatterFactory",
     "Specification",

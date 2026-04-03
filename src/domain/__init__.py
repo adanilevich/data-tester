@@ -1,29 +1,29 @@
-from .domain_config import DomainConfigHandler
+from .domain_config import DomainConfigAdapter
 from .report import (
-    ReportCommandHandler,
+    ReportAdapter,
     IReportFormatter,
     XlsxTestCaseDiffFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestRunReportFormatter,
 )
 from .specification import (
-    SpecCommandHandler,
+    SpecAdapter,
     NamingConventionsFactory,
     FormatterFactory,
 )
-from .testcase import TestRunCommandHandler
-from .testset import TestSetCommandHandler
+from .testcase import TestRunAdapter
+from .testset import TestSetAdapter
 
 __all__ = [
-    "DomainConfigHandler",
-    "ReportCommandHandler",
+    "DomainConfigAdapter",
+    "ReportAdapter",
     "IReportFormatter",
     "XlsxTestCaseDiffFormatter",
     "TxtTestCaseReportFormatter",
     "XlsxTestRunReportFormatter",
-    "SpecCommandHandler",
+    "SpecAdapter",
     "NamingConventionsFactory",
     "FormatterFactory",
-    "TestRunCommandHandler",
-    "TestSetCommandHandler",
+    "TestRunAdapter",
+    "TestSetAdapter",
 ]
