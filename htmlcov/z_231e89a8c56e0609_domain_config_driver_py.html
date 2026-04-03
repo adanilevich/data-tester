@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_231e89a8c56e0609_report_driver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-03 21:05 +0000
+            created at 2026-04-03 22:17 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -92,23 +92,23 @@
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t"><span class="key">class</span> <span class="nam">DomainConfigDriver</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">domain_config_handler</span><span class="op">:</span> <span class="nam">IDomainConfig</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">domain_config_handler</span> <span class="op">=</span> <span class="nam">domain_config_handler</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="key">def</span> <span class="nam">__init__</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">domain_config_adapter</span><span class="op">:</span> <span class="nam">IDomainConfig</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">adapter</span> <span class="op">=</span> <span class="nam">domain_config_adapter</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="key">def</span> <span class="nam">list_domain_configs</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">Dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">DomainConfigDTO</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">        <span class="str">"""Fetches all domain configs."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">        <span class="nam">command</span> <span class="op">=</span> <span class="nam">ListDomainConfigsCommand</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">domain_config_handler</span><span class="op">.</span><span class="nam">list_domain_configs</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">adapter</span><span class="op">.</span><span class="nam">list_domain_configs</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="key">def</span> <span class="nam">save_domain_config</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">config</span><span class="op">:</span> <span class="nam">DomainConfigDTO</span><span class="op">)</span> <span class="op">-></span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">        <span class="str">"""Saves a domain config."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">        <span class="nam">command</span> <span class="op">=</span> <span class="nam">SaveDomainConfigCommand</span><span class="op">(</span><span class="nam">config</span><span class="op">=</span><span class="nam">config</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">domain_config_handler</span><span class="op">.</span><span class="nam">save_domain_config</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">adapter</span><span class="op">.</span><span class="nam">save_domain_config</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">    <span class="key">def</span> <span class="nam">load_domain_config</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">domain</span><span class="op">:</span> <span class="nam">str</span><span class="op">)</span> <span class="op">-></span> <span class="nam">DomainConfigDTO</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">        <span class="str">"""Loads a single domain config by domain name."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">        <span class="nam">command</span> <span class="op">=</span> <span class="nam">LoadDomainConfigCommand</span><span class="op">(</span><span class="nam">domain</span><span class="op">=</span><span class="nam">domain</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">domain_config_handler</span><span class="op">.</span><span class="nam">load_domain_config</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">        <span class="key">return</span> <span class="nam">self</span><span class="op">.</span><span class="nam">adapter</span><span class="op">.</span><span class="nam">load_domain_config</span><span class="op">(</span><span class="nam">command</span><span class="op">=</span><span class="nam">command</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -118,7 +118,7 @@
             <a class="nav" href="z_231e89a8c56e0609_report_driver_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-03 21:05 +0000
+            created at 2026-04-03 22:17 +0000
         </p>
     </div>
 </footer>
