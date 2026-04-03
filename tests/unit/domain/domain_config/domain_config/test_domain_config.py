@@ -1,94 +1,101 @@
 import pytest
 
-from src.dtos import DomainConfigDTO, ObjectType
-from src.dtos.storage import LocationDTO
-from src.domain.domain_config import DomainConfig, DomainConfigAlreadyExistsError
-from src.infrastructure.storage.dict_storage import DictStorage
-from src.infrastructure.storage.formatter_factory import FormatterFactory
+from src.dtos import DomainConfigDTO, LocationDTO
+from src.domain.domain_config import (
+    DomainConfig,
+    DomainConfigAlreadyExistsError,
+)
+from src.infrastructure.storage.dto_storage_file import (
+    MemoryDtoStorage,
+)
+from src.infrastructure.storage.dto_storage_file import JsonSerializer
 
 
 class TestDomainConfig:
     @pytest.fixture
     def domain_conf(self) -> DomainConfig:
-        formatter_factory = FormatterFactory()
-        return DomainConfig(storage=DictStorage(formatter_factory))
+        return DomainConfig(
+            storage=MemoryDtoStorage(
+                serializer=JsonSerializer(),
+                storage_location=LocationDTO("memory://test/"),
+            )
+        )
 
-    def test_fetching_from_empty_path(self, domain_conf: DomainConfig):
-        # given an empty path
-        empty_path = LocationDTO("dict://empty")
-        # when fetching domain configs from this path
-        result = domain_conf.fetch_configs(location=empty_path)
-        # then result set is empty
+    def test_fetching_from_empty_storage(
+        self, domain_conf: DomainConfig
+    ):
+        result = domain_conf.fetch_configs()
         assert len(result) == 0
 
     def test_matching_objects_are_fetched(
-        self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
+        self,
+        domain_config: DomainConfigDTO,
+        domain_conf: DomainConfig,
     ):
-        # given two domain configs a and b with different domain names
         config_a = domain_config.copy()
         config_a.domain = "a"
         config_b = domain_config.copy()
         config_b.domain = "b"
 
-        # when these configs are saved to the storage
-        domain_conf.save_config(LocationDTO("dict://"), config_a)
-        domain_conf.save_config(LocationDTO("dict://"), config_b)
+        domain_conf.save_config(config_a)
+        domain_conf.save_config(config_b)
 
-        # when fetching domain configs from this path
-        result = domain_conf.fetch_configs(location=LocationDTO("dict://"))
-        # then two domain configs are returned
+        result = domain_conf.fetch_configs()
         assert len(result) == 2
         assert set(result.keys()) == {"a", "b"}
 
     def test_exception_if_config_already_exists(
-        self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
+        self,
+        domain_config: DomainConfigDTO,
+        domain_conf: DomainConfig,
     ):
-        # given two domain configs with the same domain name
+        # Save two configs with the same domain by manipulating
+        # storage internals
         config_a = domain_config.copy()
         config_a.domain = "same_domain"
 
-        config_b = domain_config.copy()
-        config_b.domain = "same_domain"
+        storage = domain_conf.storage
+        serializer = JsonSerializer()
 
-        # manually place content in storage to simulate two different files with same
-        # domain - this bypasses normal save_config which would use domain as object_id
-        formatter = domain_conf.storage.formatter_factory.get_formatter(  # type: ignore
-            ObjectType.DOMAIN_CONFIG
-        )
-
-        # write first config with filename suffix _1
-        content_a = formatter.serialize(config_a)
-        domain_conf.storage._storage[  # type: ignore
-            "dict://domain_config_file1.json"
-        ] = content_a
-
-        # write second config with filename suffix _2
-        content_b = formatter.serialize(config_b)
-        domain_conf.storage._storage[  # type: ignore
-            "dict://domain_config_file2.json"
-        ] = content_b
+        # Manually write two files with same domain content but different keys
+        # TODO: remove type:ignore
+        content = serializer.serialize(config_a)
+        with storage.fs.open(  # type: ignore
+            "test/domain_configs/domain_config_dup1.json",
+            "wb",
+        ) as f:
+            f.write(content)
+        with storage.fs.open(  # type: ignore
+            "test/domain_configs/domain_config_dup2.json",
+            "wb",
+        ) as f:
+            f.write(content)
 
         with pytest.raises(DomainConfigAlreadyExistsError):
-            _ = domain_conf.fetch_configs(location=LocationDTO("dict://"))
+            domain_conf.fetch_configs()
 
     def test_save_and_fetch(
-        self, domain_config: DomainConfigDTO, domain_conf: DomainConfig
+        self,
+        domain_config: DomainConfigDTO,
+        domain_conf: DomainConfig,
     ):
-        location = LocationDTO("dict://test/location/")
         config = domain_config.copy()
         config.domain = "testdomain"
 
-        # when saving config
-        domain_conf.save_config(location, config)
+        domain_conf.save_config(config)
 
-        # then the config can be fetched back
-        fetched_configs = domain_conf.fetch_configs(location)
+        fetched_configs = domain_conf.fetch_configs()
 
-        # and the fetched config matches the original
         assert "testdomain" in fetched_configs
         fetched_config = fetched_configs["testdomain"]
         assert fetched_config.domain == config.domain
         assert fetched_config.instances == config.instances
-        assert fetched_config.specifications_locations == config.specifications_locations
-        assert fetched_config.testreports_location == config.testreports_location
+        assert (
+            fetched_config.specifications_locations
+            == config.specifications_locations
+        )
+        assert (
+            fetched_config.testreports_location
+            == config.testreports_location
+        )
         assert fetched_config.testcases == config.testcases

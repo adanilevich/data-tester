@@ -10,10 +10,8 @@ from src.dtos import (
     TestResult,
     TestCaseDTO,
     TestStatus,
-    LocationDTO,
-    ObjectType,
 )
-from src.infrastructure_ports import IBackend, INotifier, IStorageFactory
+from src.infrastructure_ports import IBackend, INotifier, IDtoStorage
 from .testcases import (
     AbstractTestCase,
     SchemaTestCase,
@@ -30,7 +28,9 @@ class TestCaseUnknownError(NotImplementedError):
     pass
 
 
-# TODO: implement notifications
+#TODO: implement a new additional class with load_testrun and list_testruns methods
+
+# TODO: implement notifications. Claude ignore this
 class TestRun:
 
     def __init__(
@@ -38,14 +38,12 @@ class TestRun:
         testrun: TestRunDTO,
         backend: IBackend,
         notifiers: List[INotifier],
-        storage_factory: IStorageFactory,
-        storage_location: LocationDTO,
+        dto_storage: IDtoStorage,
     ):
         self.testrun = testrun
         self.backend = backend
         self.notifiers = notifiers
-        self.storage_factory = storage_factory
-        self.storage_location = storage_location
+        self.dto_storage = dto_storage
 
         # set dynamic fields
         self.testrun.start_ts = datetime.now()
@@ -178,6 +176,4 @@ class TestRun:
     def persist(self, dto: TestRunDTO | None = None) -> None:
         if dto is None:
             dto = self.to_dto()
-
-        storage = self.storage_factory.get_storage(self.storage_location)
-        storage.write(dto, ObjectType.TESTRUN, self.storage_location)
+        self.dto_storage.write_dto(dto)

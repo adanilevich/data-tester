@@ -1,56 +1,36 @@
 from typing import List, cast
 from datetime import datetime
 
-from src.infrastructure_ports import IStorageFactory, StorageError
-from src.dtos import TestSetDTO, LocationDTO, ObjectType
+from src.infrastructure_ports import IDtoStorage
+from src.dtos import TestSetDTO, ObjectType
 
 
 class TestSet:
     """
-    Handles creation, retrieval, saving, and listing of TestSetDTOs using a Storage.
+    Handles creation, retrieval, saving, and listing of TestSetDTOs.
     """
 
-    def __init__(self, storage_factory: IStorageFactory):
-        self.storage_factory = storage_factory
+    def __init__(self, storage: IDtoStorage):
+        self.storage = storage
 
-    def save_testset(self, testset: TestSetDTO, location: LocationDTO) -> None:
-        """
-        Saves a TestSetDTO to the specified location using structured storage.
-        """
+    def save_testset(self, testset: TestSetDTO) -> None:
+        """Saves a TestSetDTO to internal storage."""
         testset.last_updated = datetime.now()
-        storage = self.storage_factory.get_storage(location)
-        storage.write(dto=testset, object_type=ObjectType.TESTSET, location=location)
+        self.storage.write_dto(dto=testset)
 
-    def retrieve_testset(self, testset_id: str, location: LocationDTO) -> TestSetDTO:
-        """
-        Retrieves a TestSetDTO by testset_id from the specified location.
-        """
-        storage = self.storage_factory.get_storage(location)
-        dto = storage.read(
-            object_type=ObjectType.TESTSET, object_id=testset_id, location=location
+    def load_testset(self, testset_id: str) -> TestSetDTO:
+        """Retrieves a TestSetDTO by testset_id."""
+        dto = self.storage.read_dto(
+            object_type=ObjectType.TESTSET, id=testset_id
         )
         return cast(TestSetDTO, dto)
 
-    def list_testsets(self, location: LocationDTO, domain: str) -> List[TestSetDTO]:
+    def list_testsets(self, domain: str) -> List[TestSetDTO]:
         """
-        Lists all TestSetDTOs in the specified location that match the provided
-        domain name.
+        Lists all TestSetDTOs that match the provided domain name.
         """
-        storage = self.storage_factory.get_storage(location)
-        object_locations = storage.list(
-            location=location, object_type=ObjectType.TESTSET
+        dtos = self.storage.list_dtos(
+            object_type=ObjectType.TESTSET,
+            filters={"domain": domain},
         )
-        result = []
-        for obj_loc in object_locations:
-            try:
-                dto = storage.read(
-                    object_type=ObjectType.TESTSET,
-                    object_id=obj_loc.located_object_id,
-                    location=location,
-                )
-                testset = cast(TestSetDTO, dto)
-                if testset.domain == domain:
-                    result.append(testset)
-            except StorageError:
-                continue  # skip objects that can't be read
-        return result
+        return [cast(TestSetDTO, dto) for dto in dtos]

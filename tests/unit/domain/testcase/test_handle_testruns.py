@@ -1,11 +1,12 @@
 import pytest
 from datetime import datetime
+from typing import cast
 from uuid import uuid4
 
 from src.domain import TestRunCommandHandler
 from src.infrastructure.backend.dummy import DummyBackendFactory
-from src.infrastructure.storage.formatter_factory import FormatterFactory
-from src.infrastructure.storage.storage_factory import StorageFactory
+from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
+from src.infrastructure.storage.dto_storage_file import JsonSerializer
 from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
 from src.dtos import (
     TestRunDTO,
@@ -30,10 +31,7 @@ from src.domain_ports import (
     SetReportIdsCommand,
     ExecuteTestRunCommand,
 )
-from src.infrastructure_ports import (
-    StorageTypeUnknownError,
-    ObjectNotFoundError,
-)
+from src.infrastructure_ports import ObjectNotFoundError
 
 
 @pytest.fixture
@@ -43,10 +41,12 @@ def dummy_platform_factory():
 
 
 @pytest.fixture
-def storage_factory():
-    """Create a StorageFactory for testing"""
-    formatter_factory = FormatterFactory()
-    return StorageFactory(formatter_factory)
+def dto_storage() -> MemoryDtoStorage:
+    """Create a MemoryDtoStorage for testing"""
+    return MemoryDtoStorage(
+        serializer=JsonSerializer(),
+        storage_location=LocationDTO("memory://test/"),
+    )
 
 
 @pytest.fixture
@@ -56,12 +56,14 @@ def notifiers():
 
 
 @pytest.fixture
-def testrun_command_handler(dummy_platform_factory, storage_factory, notifiers):
+def testrun_command_handler(
+    dummy_platform_factory, dto_storage, notifiers
+):
     """Create a TestRunCommandHandler with test dependencies"""
     return TestRunCommandHandler(
         backend_factory=dummy_platform_factory,
         notifiers=notifiers,
-        storage_factory=storage_factory,
+        dto_storage=dto_storage,
     )
 
 
@@ -71,11 +73,15 @@ def domain_config():
     return DomainConfigDTO(
         domain="test_domain",
         instances={"test_stage": ["test_instance"]},
-        specifications_locations=LocationDTO("dict://specs/"),
-        testreports_location=LocationDTO("dict://reports/"),
+        specifications_locations=LocationDTO("memory://specs/"),
+        testreports_location=LocationDTO("memory://reports/"),
         testcases=TestCasesConfigDTO(
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
+            schema=SchemaTestCaseConfigDTO(
+                compare_datatypes=["int", "string"]
+            ),
+            compare=CompareTestCaseConfigDTO(
+                sample_size=100, sample_size_per_object={}
+            ),
         ),
     )
 
@@ -100,7 +106,7 @@ def test_definition(test_object, domain_config):
         specs=[
             SpecificationDTO(
                 spec_type=SpecificationType.SCHEMA,
-                location=LocationDTO(path="dict://specs/"),
+                location=LocationDTO(path="memory://specs/"),
                 testobject=test_object.name,
             )
         ],
@@ -131,51 +137,34 @@ def testrun(test_definition):
     )
 
 
-@pytest.fixture
-def storage_location():
-    """Create a storage location for testing"""
-    return LocationDTO("dict://testruns/")
-
-
 class TestTestRunCommandHandler:
     """Test suite for TestRunCommandHandler"""
 
     def test_init(
         self,
         dummy_platform_factory,
-        storage_factory,
+        dto_storage,
         notifiers,
-        testrun,
-        storage_location,
     ):
-        """Test TestRunCommandHandler initialization and basic functionality"""
-        # Given: DummyBackendFactory, StorageFactory, and notifiers
-        # When: Creating a TestRunCommandHandler
+        """Test TestRunCommandHandler initialization"""
         handler = TestRunCommandHandler(
             backend_factory=dummy_platform_factory,
             notifiers=notifiers,
-            storage_factory=storage_factory,
+            dto_storage=dto_storage,
         )
 
-        # Then: The handler should be properly initialized
         assert handler.backend_factory == dummy_platform_factory
         assert handler.notifiers == notifiers
-        assert handler.storage_factory == storage_factory
+        assert handler.dto_storage == dto_storage
 
     def test_run_executes_testrun_successfully(
-        self, testrun_command_handler, testrun, storage_location
+        self, testrun_command_handler, testrun
     ):
         """Test that run method executes a testrun successfully"""
-        # Given: A testrun and storage location
-        command = ExecuteTestRunCommand(
-            testrun=testrun,
-            storage_location=storage_location,
-        )
+        command = ExecuteTestRunCommand(testrun=testrun)
 
-        # When: Executing the testrun
-        result = testrun_command_handler.run(command)
+        result = testrun_command_handler.execute_testrun(command)
 
-        # Then: The result should be a TestRunDTO with expected properties
         assert isinstance(result, TestRunDTO)
         assert result.testrun_id == testrun.testrun_id
         assert result.status == TestStatus.FINISHED
@@ -184,42 +173,41 @@ class TestTestRunCommandHandler:
         assert result.testcase_results[0].result == TestResult.OK
 
     def test_save_load_roundtrip(
-        self, testrun_command_handler, testrun, storage_location, storage_factory
+        self, testrun_command_handler, testrun
     ):
-        """Test that save and load work together for a complete roundtrip"""
-        # Given: A testrun to save and load
-        save_command = SaveTestRunCommand(
-            testrun=testrun,
-            storage_location=storage_location,
-        )
+        """Test that save and load work together"""
+        save_command = SaveTestRunCommand(testrun=testrun)
         load_command = LoadTestRunCommand(
             testrun_id=str(testrun.testrun_id),
-            storage_location=storage_location,
         )
 
-        # When: Saving and then loading the testrun
-        testrun_command_handler.save(save_command)
-        loaded_testrun = testrun_command_handler.load(load_command)
+        testrun_command_handler.save_testrun(save_command)
+        loaded_testrun = testrun_command_handler.load_testrun(load_command)
 
-        # Then: The loaded testrun should be identical to the original
         assert loaded_testrun.testrun_id == testrun.testrun_id
         assert loaded_testrun.testset_name == testrun.testset_name
         assert loaded_testrun.domain == testrun.domain
         assert loaded_testrun.stage == testrun.stage
         assert loaded_testrun.instance == testrun.instance
-        assert len(loaded_testrun.testdefinitions) == len(testrun.testdefinitions)
-        assert len(loaded_testrun.testcase_results) == len(testrun.testcase_results)
+        assert len(loaded_testrun.testdefinitions) == len(
+            testrun.testdefinitions
+        )
+        assert len(loaded_testrun.testcase_results) == len(
+            testrun.testcase_results
+        )
 
     def test_set_report_ids_updates_testrun_and_persists(
-        self, testrun_command_handler, testrun, storage_location, storage_factory
+        self, testrun_command_handler, testrun, dto_storage
     ):
         """Test that set_report_ids updates testrun with report ID and persists it"""
-        # Given: A testrun and testrun report
         report_id = uuid4()
         testrun_report = TestRunReportDTO(
             report_id=report_id,
             testrun_id=testrun.testrun_id,
             testset_id=testrun.testset_id,
+            domain=testrun.domain,
+            stage=testrun.stage,
+            instance=testrun.instance,
             labels=testrun.labels,
             result=TestResult.OK.value,
             start_ts=datetime.now(),
@@ -229,67 +217,43 @@ class TestTestRunCommandHandler:
         command = SetReportIdsCommand(
             testrun=testrun,
             testrun_report=testrun_report,
-            storage_location=storage_location,
         )
 
-        # When: Setting report IDs
         testrun_command_handler.set_report_ids(command)
 
-        # Then: The testrun should be updated with report ID and persisted
-        storage = storage_factory.get_storage(storage_location)
-        saved_testrun = storage.read(
-            ObjectType.TESTRUN, str(testrun.testrun_id), storage_location
+        saved_testrun = cast(
+            TestRunDTO,
+            dto_storage.read_dto(
+                object_type=ObjectType.TESTRUN,
+                id=str(testrun.testrun_id),
+            ),
         )
         assert saved_testrun.report_id == report_id
 
     def test_load_raises_error_when_testrun_not_found(
-        self, testrun_command_handler, storage_location
+        self, testrun_command_handler
     ):
         """Test that load raises error when testrun is not found"""
-        # Given: A non-existent testrun ID
         non_existent_id = str(uuid4())
         command = LoadTestRunCommand(
             testrun_id=non_existent_id,
-            storage_location=storage_location,
         )
 
-        # When/Then: Loading should raise ObjectNotFoundError
         with pytest.raises(ObjectNotFoundError):
-            testrun_command_handler.load(command)
-
-    def test_unsupported_storage_type_raises_error(
-        self, testrun_command_handler, testrun
-    ):
-        """Test that save raises error with unsupported storage type"""
-        # Given: An unsupported storage location (S3 is in enum but not supported)
-        unsupported_location = LocationDTO("unsupported://testruns/")
-        save_command = SaveTestRunCommand(
-            testrun=testrun,
-            storage_location=unsupported_location,
-        )
-        load_command = LoadTestRunCommand(
-            testrun_id=str(uuid4()),
-            storage_location=unsupported_location,
-        )
-
-        # Then: Saving or loading should raise StorageTypeUnknownError
-        with pytest.raises(StorageTypeUnknownError):
-            testrun_command_handler.save(save_command)
-
-        with pytest.raises(StorageTypeUnknownError):
-            testrun_command_handler.load(load_command)
+            testrun_command_handler.load_testrun(command)
 
     def test_run_with_multiple_testcases(
-        self, testrun_command_handler, testrun, storage_location
+        self, testrun_command_handler, testrun
     ):
-        """Test that run method handles multiple testcases correctly"""
-        # Given: A testrun with multiple test definitions
+        """Test that run method handles multiple testcases"""
         testrun.testdefinitions = [
             TestDefinitionDTO(
                 testobject=testrun.testdefinitions[0].testobject,
                 testtype=TestType.DUMMY_OK,
                 specs=testrun.testdefinitions[0].specs,
-                domain_config=testrun.testdefinitions[0].domain_config,
+                domain_config=testrun.testdefinitions[
+                    0
+                ].domain_config,
                 testrun_id=testrun.testrun_id,
                 labels=["test_label"],
             ),
@@ -297,22 +261,18 @@ class TestTestRunCommandHandler:
                 testobject=testrun.testdefinitions[0].testobject,
                 testtype=TestType.DUMMY_NOK,
                 specs=testrun.testdefinitions[0].specs,
-                domain_config=testrun.testdefinitions[0].domain_config,
+                domain_config=testrun.testdefinitions[
+                    0
+                ].domain_config,
                 testrun_id=testrun.testrun_id,
                 labels=["test_label"],
             ),
         ]
-        command = ExecuteTestRunCommand(
-            testrun=testrun,
-            storage_location=storage_location,
-        )
+        command = ExecuteTestRunCommand(testrun=testrun)
 
-        # When: Executing the testrun
-        result = testrun_command_handler.run(command)
+        result = testrun_command_handler.execute_testrun(command)
 
-        # Then: The result should contain results for all testcases
         assert len(result.testcase_results) == 2
         assert result.testcase_results[0].result == TestResult.OK
         assert result.testcase_results[1].result == TestResult.NOK
-        # And: The overall testrun result should be NA (not OK) due to NOK testcase
         assert result.result == TestResult.NOK

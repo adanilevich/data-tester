@@ -33,6 +33,9 @@ class TestReportDTO(DTO):
     report_id: UUID4
     testrun_id: UUID4
     testset_id: UUID4
+    domain: str
+    stage: str
+    instance: str
     labels: List[str]
     result: str
     start_ts: datetime
@@ -61,6 +64,9 @@ class TestCaseReportDTO(TestReportDTO):
             report_id=uuid4(),
             testrun_id=testcase_result.testrun_id,
             testset_id=testcase_result.testset_id,
+            domain=testcase_result.domain,
+            stage=testcase_result.stage,
+            instance=testcase_result.instance,
             labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
@@ -88,6 +94,9 @@ class TestRunReportTestCaseEntryDTO(TestReportDTO):
             report_id=uuid4(),
             testrun_id=testcase_result.testrun_id,
             testset_id=testcase_result.testset_id,
+            domain=testcase_result.domain,
+            stage=testcase_result.stage,
+            instance=testcase_result.instance,
             labels=testcase_result.labels,
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
@@ -108,17 +117,20 @@ class TestRunReportDTO(TestReportDTO):
         return str(self.report_id)
 
     @classmethod
-    def from_testrun(cls, testrun: TestRunDTO) -> Self:
+    def from_testrun_result(cls, testrun: TestRunDTO) -> Self:
         return cls(
             report_id=uuid4(),
             testrun_id=testrun.testrun_id,
             testset_id=testrun.testset_id,
+            domain=testrun.domain,
+            stage=testrun.stage,
+            instance=testrun.instance,
             labels=testrun.labels,
             result=testrun.result.value,
             start_ts=testrun.start_ts,
             end_ts=testrun.end_ts or datetime.now(),
             testcase_results=[
-                TestRunReportTestCaseEntryDTO.from_testcase_result(testcase_result)
-                for testcase_result in testrun.testcase_results
+                TestRunReportTestCaseEntryDTO.from_testcase_result(tc)
+                for tc in testrun.testcase_results
             ],
         )

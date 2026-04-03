@@ -43,6 +43,16 @@ from src.domain.testcase.precondition_checks import Checkable
 from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
+@pytest.fixture(autouse=True)
+def _clear_memory_filesystem():
+    """Clear MemoryFileSystem shared state before and after each test."""
+    from fsspec.implementations.memory import MemoryFileSystem
+
+    MemoryFileSystem.store.clear()
+    yield
+    MemoryFileSystem.store.clear()
+
+
 @pytest.fixture
 def dummy_backend() -> IBackend:
     return DummyBackend()
@@ -64,10 +74,10 @@ def domain_config() -> DomainConfigDTO:
         domain="payments",
         instances={"test": ["alpha", "beta"], "uat": ["main"]},
         specifications_locations=[
-            LocationDTO("dict://sqls"),
-            LocationDTO("dict://specs"),
+            LocationDTO("memory://sqls"),
+            LocationDTO("memory://specs"),
         ],
-        testreports_location=LocationDTO("dict://testreports"),
+        testreports_location=LocationDTO("memory://testreports"),
         testcases=TestCasesConfigDTO(
             compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
             schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
@@ -163,12 +173,12 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 specs=[
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location=LocationDTO("dict://my_location"),
+                        location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
                     ),
                     SpecificationDTO(
                         spec_type=spec_type,
-                        location=LocationDTO("dict://my_location"),
+                        location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
                     ),
                 ],
@@ -283,4 +293,4 @@ def testcase_report(testcase_result) -> TestCaseReportDTO:
 
 @pytest.fixture
 def testrun_report(testrun) -> TestRunReportDTO:
-    return TestRunReportDTO.from_testrun(testrun)
+    return TestRunReportDTO.from_testrun_result(testrun)

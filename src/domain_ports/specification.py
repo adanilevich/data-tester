@@ -3,7 +3,7 @@ from typing import List
 
 from src.dtos import LocationDTO, DTO, SpecificationDTO, TestSetDTO
 
-
+# TODO: rename to ListSpecsCommand
 class FetchSpecsCommand(DTO):
     locations: List[LocationDTO]
     testset: TestSetDTO
@@ -18,7 +18,7 @@ class ISpecCommandHandler(ABC):
     """
     Interface for handling specification commands.
     """
-
+    # TODO: rename to list_specs
     @abstractmethod
     def fetch_specs(self, command: FetchSpecsCommand) -> List[List[SpecificationDTO]]:
         """

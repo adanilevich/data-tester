@@ -7,23 +7,20 @@ from src.domain_ports import (
     ListTestSetsCommand,
 )
 from src.dtos import TestSetDTO
-from src.infrastructure_ports import IStorageFactory
+from src.infrastructure_ports import IDtoStorage
 
 
 class TestSetCommandHandler(ITestSetCommandHandler):
-    def __init__(self, storage_factory: IStorageFactory):
-        self.storage_factory = storage_factory
-        self.testset = TestSet(storage_factory)
+    def __init__(self, dto_storage: IDtoStorage):
+        self.testset = TestSet(dto_storage)
 
     def save_testset(self, command: SaveTestSetCommand) -> None:
-        self.testset.save_testset(testset=command.testset, location=command.location)
+        self.testset.save_testset(testset=command.testset)
 
     def load_testset(self, command: LoadTestSetCommand) -> TestSetDTO:
-        return self.testset.retrieve_testset(
-            testset_id=command.testset_id, location=command.location
+        return self.testset.load_testset(
+            testset_id=command.testset_id
         )
 
     def list_testsets(self, command: ListTestSetsCommand) -> List[TestSetDTO]:
-        return self.testset.list_testsets(
-            location=command.location, domain=command.domain
-        )
+        return self.testset.list_testsets(domain=command.domain)

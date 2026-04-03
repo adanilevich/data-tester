@@ -9,7 +9,6 @@ from .report import (
     SaveReportCommand,
     LoadReportCommand,
     GetReportArtifactCommand,
-    SaveReportArtifactsForUsersCommand,
 )
 from .specification import ISpecCommandHandler, FetchSpecsCommand, ParseSpecCommand
 from .testcase import (
@@ -35,7 +34,6 @@ __all__ = [
     "SaveReportCommand",
     "LoadReportCommand",
     "GetReportArtifactCommand",
-    "SaveReportArtifactsForUsersCommand",
     "ISpecCommandHandler",
     "FetchSpecsCommand",
     "ParseSpecCommand",
