@@ -16,7 +16,7 @@
 | src/domain/report/plugins/i\_report\_formatter.py                               |        5 |        0 |    100% |           |
 | src/domain/report/plugins/txt\_testcase\_report.py                              |       24 |        3 |     88% |     52-54 |
 | src/domain/report/plugins/xlsx\_testcase\_diff.py                               |       28 |        0 |    100% |           |
-| src/domain/report/plugins/xlsx\_testrun\_report.py                              |       27 |        3 |     89% |     50-52 |
+| src/domain/report/plugins/xlsx\_testrun\_report.py                              |       31 |        3 |     90% |     54-56 |
 | src/domain/report/report.py                                                     |       73 |        7 |     90% |75, 84, 98, 100, 113, 139, 145 |
 | src/domain/specification/\_\_init\_\_.py                                        |        3 |        0 |    100% |           |
 | src/domain/specification/plugins/\_\_init\_\_.py                                |        5 |        0 |    100% |           |
@@ -37,7 +37,7 @@
 | src/domain/testrun/precondition\_checks/precondition\_checker.py                |        9 |        0 |    100% |           |
 | src/domain/testrun/testcases/\_\_init\_\_.py                                    |        8 |        0 |    100% |           |
 | src/domain/testrun/testcases/abstract\_testcase.py                              |      109 |        2 |     98% |   97, 108 |
-| src/domain/testrun/testcases/compare.py                                         |      132 |       22 |     83% |121, 128, 134-135, 142-144, 177-178, 194-195, 206-209, 211-219 |
+| src/domain/testrun/testcases/compare.py                                         |      133 |       22 |     83% |122, 129, 135-136, 143-145, 178-179, 195-196, 207-210, 212-220 |
 | src/domain/testrun/testcases/dummy\_exception.py                                |       11 |        0 |    100% |           |
 | src/domain/testrun/testcases/dummy\_nok.py                                      |       11 |        0 |    100% |           |
 | src/domain/testrun/testcases/dummy\_ok.py                                       |       11 |        0 |    100% |           |
@@ -74,7 +74,7 @@
 | src/dtos/testset\_dtos.py                                                       |       34 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                      |        4 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                |      201 |       13 |     94% |139, 163-165, 185, 313, 317, 319, 323, 327, 430, 462, 468 |
+| src/infrastructure/backend/demo/demo\_backend.py                                |      199 |       14 |     93% |93, 153, 177-179, 196, 316, 320, 322, 326, 330, 430, 459, 465 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                       |       17 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_naming\_resolver.py                       |       67 |        3 |     96% |28, 112, 114 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                         |       19 |        1 |     95% |        29 |
@@ -98,7 +98,7 @@
 | src/infrastructure\_ports/i\_notifier.py                                        |        2 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage.py                                   |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage\_factory.py                          |        4 |        0 |    100% |           |
-| **TOTAL**                                                                       | **2507** |  **155** | **94%** |           |
+| **TOTAL**                                                                       | **2510** |  **156** | **94%** |           |
 
 3 empty files skipped.
 
