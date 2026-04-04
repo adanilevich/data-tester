@@ -43,6 +43,10 @@ class XlsxTestRunReportFormatter(IReportFormatter):
         testcase_results = [result.to_dict() for result in report.testcase_results]
 
         try:
+            for row in testcase_results:
+                for k, v in row.items():
+                    if not isinstance(v, (str, int, float, bool, type(None), list)):
+                        row[k] = str(v)
             df = pl.DataFrame(testcase_results)
             excel_io = BytesIO()
             df.write_excel(excel_io)
