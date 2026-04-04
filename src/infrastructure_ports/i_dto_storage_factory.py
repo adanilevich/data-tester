@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 from src.infrastructure_ports.i_dto_storage import IDtoStorage
 
 

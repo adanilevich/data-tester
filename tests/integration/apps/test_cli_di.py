@@ -34,8 +34,8 @@ from src.dtos import (
     DomainConfigDTO,
     LocationDTO,
     SchemaTestCaseConfigDTO,
-    SpecificationType,
-    SpecificationDTO,
+    SpecType,
+    SpecDTO,
     TestCaseEntryDTO,
     TestCasesConfigDTO,
     TestDefinitionDTO,
@@ -49,7 +49,7 @@ from src.dtos import (
 )
 from src.drivers.testset_driver import TestSetNotFoundError
 from src.infrastructure.backend import DemoBackendFactory, DummyBackendFactory
-from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.notifier import InMemoryNotifier, LogNotifier
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.user_storage import MemoryUserStorage
 
@@ -84,6 +84,7 @@ def _create_test_xlsx_schema(
     df.write_excel(buffer, worksheet="schema")
     return buffer.getvalue()
 
+
 @pytest.fixture
 def di() -> CliDi:
     return CliDi(Config())
@@ -100,7 +101,7 @@ class TestCliDependencyInjection:
         assert isinstance(di.backend_factory, DummyBackendFactory)
         assert len(di.notifiers) == 2
         assert any(isinstance(n, InMemoryNotifier) for n in di.notifiers)
-        assert any(isinstance(n, StdoutNotifier) for n in di.notifiers)
+        assert any(isinstance(n, LogNotifier) for n in di.notifiers)
         assert len(di.testreport_formatters) == 3
 
         assert isinstance(di.domain_config_driver(), DomainConfigDriver)
@@ -159,8 +160,11 @@ class TestTestSetDriverIntegration:
                 domain="ts_domain",
                 default_stage="dev",
                 default_instance="inst1",
-                testcases={"t1_SCHEMA": TestCaseEntryDTO(
-                    testobject="t1", testtype=TestType.SCHEMA
+                testcases={
+                    "t1_SCHEMA": TestCaseEntryDTO(
+                        testobject="t1",
+                        testtype=TestType.SCHEMA,
+                        domain="test_domain",
                     )
                 },
             )
@@ -182,7 +186,11 @@ class TestTestSetDriverIntegration:
             default_stage="dev",
             default_instance="inst1",
             testcases={
-                "t1_SCHEMA": TestCaseEntryDTO(testobject="t1", testtype=TestType.SCHEMA)
+                "t1_SCHEMA": TestCaseEntryDTO(
+                    testobject="t1",
+                    testtype=TestType.SCHEMA,
+                    domain="test_domain",
+                )
             },
         )
         adapter.save_testset(SaveTestSetCommand(testset=ts))
@@ -236,7 +244,9 @@ class TestSpecDriverIntegration:
             default_instance="i",
             testcases={
                 "nonexistent_SCHEMA": TestCaseEntryDTO(
-                    testobject="nonexistent", testtype=TestType.SCHEMA
+                    testobject="nonexistent",
+                    testtype=TestType.SCHEMA,
+                    domain="test_domain",
                 )
             },
         )
@@ -265,7 +275,9 @@ class TestSpecDriverIntegration:
             default_instance="i",
             testcases={
                 "customers_SCHEMA": TestCaseEntryDTO(
-                    testobject="customers", testtype=TestType.SCHEMA
+                    testobject="customers",
+                    testtype=TestType.SCHEMA,
+                    domain="test_domain",
                 )
             },
         )
@@ -304,8 +316,8 @@ class TestTestRunDriverIntegration:
             ),
             testtype=testtype,
             specs=[
-                SpecificationDTO(
-                    spec_type=SpecificationType.SCHEMA,
+                SpecDTO(
+                    spec_type=SpecType.SCHEMA,
                     location=LocationDTO(path="memory://my_location"),
                     testobject=testobject_name,
                 ),

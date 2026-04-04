@@ -1,7 +1,7 @@
 from typing import List
 
 from . import AbstractCheck, Checkable
-from src.dtos import SchemaSpecificationDTO
+from src.dtos import SchemaSpecDTO
 
 
 class CheckPrimaryKeysAreSpecified(AbstractCheck):
@@ -15,7 +15,7 @@ class CheckPrimaryKeysAreSpecified(AbstractCheck):
     def _check(self, checkable: Checkable) -> bool:
         primary_keys: List[str] = []
         for spec in checkable.specs or []:
-            if isinstance(spec, SchemaSpecificationDTO) and spec.primary_keys is not None:
+            if isinstance(spec, SchemaSpecDTO) and spec.primary_keys is not None:
                 primary_keys = spec.primary_keys
 
         if len(primary_keys) == 0:

@@ -1,7 +1,7 @@
 import pytest
 
 from src.domain.testrun.precondition_checks import CheckSpecsAreUnique, Checkable
-from src.dtos import SpecificationDTO, SpecificationType, LocationDTO
+from src.dtos import SpecDTO, SpecType, LocationDTO
 
 
 class TestTestObjectNotEmptyChecker:
@@ -11,15 +11,15 @@ class TestTestObjectNotEmptyChecker:
         return checkable
 
     @pytest.fixture
-    def spec(self) -> SpecificationDTO:
-        return SpecificationDTO(
+    def spec(self) -> SpecDTO:
+        return SpecDTO(
             location=LocationDTO(path="dummy://my_location"),
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
             testobject="doesnt_matter",
         )
 
     def test_check_fails_if_several_specs_provided(self, checkable, spec):
-        checkable.required_specs = [SpecificationType.SCHEMA.value]
+        checkable.required_specs = [SpecType.SCHEMA.value]
         checkable.specs = [spec, spec]
         checker = CheckSpecsAreUnique()
 
@@ -29,7 +29,7 @@ class TestTestObjectNotEmptyChecker:
         assert "several (2) specifications were provided" in checkable.summary
 
     def test_check_fails_if_no_specs_are_provided(self, checkable):
-        checkable.required_specs = [SpecificationType.SCHEMA.value]
+        checkable.required_specs = [SpecType.SCHEMA.value]
         checkable.specs = []
         checker = CheckSpecsAreUnique()
 
@@ -40,11 +40,11 @@ class TestTestObjectNotEmptyChecker:
 
     def test_check_is_ok_if_unique_spec_provided(self, checkable, spec):
         checkable.required_specs = [
-            SpecificationType.SCHEMA.value,
-            SpecificationType.ROWCOUNT_SQL.value,
+            SpecType.SCHEMA.value,
+            SpecType.ROWCOUNT.value,
         ]
-        new_spec = SpecificationDTO.from_dict(spec.to_dict())
-        new_spec.spec_type = SpecificationType.ROWCOUNT_SQL
+        new_spec = SpecDTO.from_dict(spec.to_dict())
+        new_spec.spec_type = SpecType.ROWCOUNT
         checkable.specs = [spec, new_spec]
         checker = CheckSpecsAreUnique()
 

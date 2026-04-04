@@ -1,35 +1,41 @@
 from __future__ import annotations
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Self
+from typing import Callable, Dict, List, Optional, Self, Type
 from pydantic import model_validator, Field
 
 from src.dtos.dto import DTO
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 
 
-class SpecificationType(Enum):
+class SpecType(Enum):
+    """
+    Specification Type is by purpose different from TestType: a testcase might require
+    several specifications of different types, e.g. GENERAL and SCHEMA
+    """
     SCHEMA = "schema"
-    ROWCOUNT_SQL = "rowcount_sql"
-    COMPARE_SQL = "compare_sql"
+    ROWCOUNT = "rowcount"
+    COMPARE = "compare"
+    ABSTRACT = "abstract"
 
-
-class SpecificationFormat(Enum):
-    SQL = "sql"
-    XLSX = "xlsx"
 
 # registry of known spec types. Populated by SpecificationDTO.__init_subclass__
 known_spec_types: Dict[str, Callable] = {}
 
 
-class SpecificationDTO(DTO):
+class SpecDTO(DTO):
     location: LocationDTO
     testobject: str
-    spec_type: SpecificationType
+    spec_type: SpecType = SpecType.ABSTRACT
     url: str | None = Field(default=None)  # clickable path to URL
     display_name: str | None = Field(default=None)
+    message: str | None = Field(default=None)
 
     class Config:
         validate_assignment = True
+
+    @property
+    def empty(self) -> bool:
+        return True
 
     def __init_subclass__(cls, **kwargs) -> None:
         """Registers all implemented subclasses of AbstractCheck in known_checks"""
@@ -47,49 +53,38 @@ class SpecificationDTO(DTO):
         return self
 
 
-class SpecContent(DTO):
-    spec_type: SpecificationType
-
-
-# TODO: What do we use SchemaContent for if we SpecificationDTO?
-class SchemaContent(SpecContent):
-    spec_type: SpecificationType = SpecificationType.SCHEMA
-    columns: Dict[str, str]  # schema as dict with keys 'column', 'dtype'
+class SchemaSpecDTO(SpecDTO):
+    spec_type: SpecType = SpecType.SCHEMA
+    columns: Optional[Dict[str, str]] = None  # schema as dict with keys 'column', 'dtype'
     primary_keys: Optional[List[str]] = None  # list of primary keys (if supported)
     partition_columns: Optional[List[str]] = None  # list of table partition keys
     clustering_columns: Optional[List[str]] = None  # lsit of table clustering keys
 
-
-class RowCountSqlContent(SpecContent):
-    spec_type: SpecificationType = SpecificationType.ROWCOUNT_SQL
-    query: str
-
-
-class CompareSqlContent(SpecContent):
-    spec_type: SpecificationType = SpecificationType.COMPARE_SQL
-    query: str
+    @property
+    def empty(self) -> bool:
+        return True if self.columns is None else False
 
 
-class SchemaSpecificationDTO(SpecificationDTO):
-    spec_type: SpecificationType = SpecificationType.SCHEMA
-    columns: Dict[str, str]  # schema as dict with keys 'column', 'dtype'
-    primary_keys: Optional[List[str]] = None  # list of primary keys (if supported)
-    partition_columns: Optional[List[str]] = None  # list of table partition keys
-    clustering_columns: Optional[List[str]] = None  # lsit of table clustering keys
+class RowcountSpecDTO(SpecDTO):
+    spec_type: SpecType = SpecType.ROWCOUNT
+    query: Optional[str] = None
+
+    @property
+    def empty(self) -> bool:
+        return True if self.query is None else False
 
 
-class RowCountSqlDTO(SpecificationDTO):
-    spec_type: SpecificationType = SpecificationType.ROWCOUNT_SQL
-    query: str
+class CompareSpecDTO(SpecDTO):
+    spec_type: SpecType = SpecType.COMPARE
+    query: Optional[str] = None
 
-
-class CompareSqlDTO(SpecificationDTO):
-    spec_type: SpecificationType = SpecificationType.COMPARE_SQL
-    query: str
+    @property
+    def empty(self) -> bool:
+        return True if self.query is None else False
 
 
 class SpecFactory:
-    def create_from_dict(self, spec_as_dict: dict) -> SpecificationDTO:
+    def create_from_dict(self, spec_as_dict: dict) -> SpecDTO:
         requested_spec_type = spec_as_dict["spec_type"]
 
         if requested_spec_type.lower() in known_spec_types:
@@ -99,3 +94,14 @@ class SpecFactory:
             return spec_dto_class.from_dict(spec_as_dict_copy)  # type: ignore
         else:
             raise ValueError(f"Unknown spec type: {requested_spec_type}")
+
+
+def spec_class_by_type(spec_type: SpecType) -> Type[SpecDTO]:
+    if spec_type == SpecType.COMPARE:
+        return CompareSpecDTO
+    elif spec_type == SpecType.ROWCOUNT:
+        return RowcountSpecDTO
+    elif spec_type == SpecType.SCHEMA:
+        return SchemaSpecDTO
+    else:
+        raise ValueError(f"Unknown spec type {spec_type}")

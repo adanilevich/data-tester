@@ -1,5 +1,4 @@
 import io
-import pathlib
 
 import pytest
 import polars as pl
@@ -15,6 +14,25 @@ from src.dtos import (
     ReportArtifact,
     ReportType,
 )
+
+EXPECTED_COLUMNS = [
+    "domain",
+    "stage",
+    "instance",
+    "testobject",
+    "testtype",
+    "result",
+    "summary",
+]
+
+EXCLUDED_COLUMNS = [
+    "report_id",
+    "testrun_id",
+    "testset_id",
+    "labels",
+    "start_ts",
+    "end_ts",
+]
 
 
 class TestXlsxTestRunReportFormatter:
@@ -39,29 +57,22 @@ class TestXlsxTestRunReportFormatter:
         assert isinstance(result, bytes)
         assert len(result) > 0
 
-        # Use BytesIO to avoid writing to disk
         excel_io = io.BytesIO(result)
         df = pl.read_excel(excel_io)
 
-        # Then it should have the correct columns from TestRunReportTestCaseEntryDTO
-        expected_columns = [
-            "testrun_id",
-            "result",
-            "start_ts",
-            "end_ts",
-            "testobject",
-            "testtype",
-            "summary",
-        ]
-        for col in expected_columns:
+        # then it should have only the important columns
+        for col in EXPECTED_COLUMNS:
             assert col in df.columns
 
-        # And it should have the correct number of rows
+        # and should NOT have excluded columns
+        for col in EXCLUDED_COLUMNS:
+            assert col not in df.columns
+
+        # and it should have the correct number of rows
         assert df.shape[0] == len(testrun_report.testcase_results)
 
-        # And the data should match the original testcase results
+        # and the data should match the original testcase results
         for i, testcase_result in enumerate(testrun_report.testcase_results):
-            assert str(df["testrun_id"][i]) == str(testcase_result.testrun_id)
             assert df["result"][i] == str(testcase_result.result)
             assert df["testtype"][i] == str(testcase_result.testtype)
             assert df["summary"][i] == testcase_result.summary
@@ -77,11 +88,6 @@ class TestXlsxTestRunReportFormatter:
         assert isinstance(result, bytes)
         assert len(result) > 0
 
-        TEST_DIR = pathlib.Path(__file__).parent
-        OUTPUT_FILE = TEST_DIR / "test_artifact.xlsx"
-        with open(OUTPUT_FILE, "wb") as f:
-            f.write(result)
-            pathlib.Path.unlink(OUTPUT_FILE)
 
     def test_create_artifact_with_testcase_report_raises_error(
         self, testcase_report: TestCaseReportDTO
@@ -118,16 +124,7 @@ class TestXlsxTestRunReportFormatter:
             return
 
         # Should have expected columns but no rows
-        expected_columns = [
-            "testrun_id",
-            "result",
-            "start_ts",
-            "end_ts",
-            "testobject",
-            "testtype",
-            "summary",
-        ]
-        for col in expected_columns:
+        for col in EXPECTED_COLUMNS:
             assert col in df.columns
         assert df.shape[0] == 0
 
@@ -142,12 +139,8 @@ class TestXlsxTestRunReportFormatter:
         df = pl.read_excel(excel_io)
 
         # Verify data types and structure
-        assert df["testrun_id"].dtype == pl.Utf8  # UUIDs are converted to strings
-        assert df["result"].dtype == pl.Utf8  # Enum values are converted to strings
-        assert df["testtype"].dtype == pl.Utf8  # Enum values are converted to strings
-        assert df["summary"].dtype == pl.Utf8  # String values
-
-        # Verify that all rows have the same testrun_id
-        unique_testrun_ids = df["testrun_id"].unique()
-        assert len(unique_testrun_ids) == 1
-        assert str(unique_testrun_ids[0]) == str(testrun_report.testrun_id)
+        assert df["result"].dtype == pl.Utf8
+        assert df["testtype"].dtype == pl.Utf8
+        assert df["summary"].dtype == pl.Utf8
+        assert df["domain"].dtype == pl.Utf8
+        assert df["testobject"].dtype == pl.Utf8

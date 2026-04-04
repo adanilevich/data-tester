@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Tuple, List
 
-from src.dtos import TestCaseEntryDTO, LocationDTO, SpecificationType
+from src.dtos import TestCaseEntryDTO, LocationDTO, SpecType
 
 
 class INamingConventions(ABC):
@@ -14,7 +14,7 @@ class INamingConventions(ABC):
     @abstractmethod
     def match(
         self, testcase: TestCaseEntryDTO, file: LocationDTO
-    ) -> Tuple[bool, List[SpecificationType]]:
+    ) -> Tuple[bool, List[SpecType]]:
         """
         Check if a filename matches the naming convention for the given testobject
         and testtype. Returns a tuple of a boolean indicating if the filename matches

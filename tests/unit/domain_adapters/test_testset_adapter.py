@@ -33,6 +33,7 @@ def testset_dto():
     testcase = TestCaseEntryDTO(
         testobject="table1",
         testtype=TestType.ROWCOUNT,
+        domain="any_domain",
         comment="A test case",
     )
     return TestSetDTO(

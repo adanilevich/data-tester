@@ -1,20 +1,24 @@
 from uuid import uuid4
+import pytest
+from tests.fixtures.demo.prepare_demo_data import (
+    prepare_demo_data, clean_up_demo_data,
+)
 from src.domain.testrun.testcases import SchemaTestCase
 from src.dtos import (
-    SchemaSpecificationDTO,
+    SchemaSpecDTO,
     TestObjectDTO,
     TestType,
-    SpecificationType,
+    SpecType,
     TestDefinitionDTO,
     LocationDTO,
 )
 from src.infrastructure.backend.demo import DemoBackendFactory
-from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.notifier import InMemoryNotifier
 
-spec = SchemaSpecificationDTO(
+spec = SchemaSpecDTO(
     location=LocationDTO(path="dummy://this_location"),
     testobject="stage_customers",
-    spec_type=SpecificationType.SCHEMA,
+    spec_type=SpecType.SCHEMA,
     columns={
         "date": "string",
         "id": "int",
@@ -30,7 +34,14 @@ testobject = TestObjectDTO(
 )
 
 
-def test_straight_through_execution(domain_config, prepare_local_data):
+@pytest.fixture(scope="module")
+def prepare_demo_data_fixture():
+    prepare_demo_data()
+    yield
+    clean_up_demo_data()
+
+
+def test_straight_through_execution(domain_config, prepare_demo_data_fixture):
     definition = TestDefinitionDTO(
         testobject=testobject,
         testtype=TestType.SCHEMA,
@@ -41,7 +52,7 @@ def test_straight_through_execution(domain_config, prepare_local_data):
     testcase = SchemaTestCase(
         definition=definition,
         backend=DemoBackendFactory().create(domain_config=domain_config),
-        notifiers=[InMemoryNotifier(), StdoutNotifier()],
+        notifiers=[InMemoryNotifier()],
     )
 
     testcase.execute()

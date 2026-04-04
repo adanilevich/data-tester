@@ -15,7 +15,7 @@ from src.infrastructure_ports import (
     ObjectNotFoundError,
     StorageTypeUnknownError,
 )
-from src.dtos.storage import LocationDTO, StorageType
+from src.dtos.storage_dtos import LocationDTO, StorageType
 
 
 class UserStorageFileError(StorageError):
@@ -45,17 +45,13 @@ class UserStorageFile(IUserStorage):
         except ObjectNotFoundError:
             raise
         except Exception as err:
-            raise UserStorageFileError(
-                f"Error checking existence: {location}"
-            ) from err
+            raise UserStorageFileError(f"Error checking existence: {location}") from err
 
         try:
             with self.fs.open(location.path, mode="rb") as f:
                 return f.read()
         except Exception as err:
-            raise UserStorageFileError(
-                f"Error reading from: {location}"
-            ) from err
+            raise UserStorageFileError(f"Error reading from: {location}") from err
 
     def list_objects(self, location: LocationDTO) -> List[LocationDTO]:
         self._validate_storage_type(location)
@@ -66,9 +62,7 @@ class UserStorageFile(IUserStorage):
         except ObjectNotFoundError:
             raise
         except Exception as err:
-            raise UserStorageFileError(
-                f"Error checking existence: {location}"
-            ) from err
+            raise UserStorageFileError(f"Error checking existence: {location}") from err
 
         if self.fs.isfile(location.path):
             return [location]
@@ -77,9 +71,7 @@ class UserStorageFile(IUserStorage):
         try:
             objects = self.fs.ls(location.path, detail=False)
         except Exception as err:
-            raise UserStorageFileError(
-                f"Error listing: {location}"
-            ) from err
+            raise UserStorageFileError(f"Error listing: {location}") from err
 
         protocol = self.storage_type.value.lower() + "://"
         for obj_path in objects:
@@ -105,7 +97,5 @@ class LocalUserStorage(UserStorageFile):
 class GcsUserStorage(UserStorageFile):
     def __init__(self, gcp_project: str) -> None:
         if GCSFileSystem is None:
-            raise ImportError(
-                "gcsfs is not installed. Install with: uv sync --extra gcs"
-            )
+            raise ImportError("gcsfs is not installed. Install with: uv sync --extra gcs")
         super().__init__(GCSFileSystem(project=gcp_project), StorageType.GCS)

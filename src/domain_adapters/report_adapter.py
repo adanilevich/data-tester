@@ -18,7 +18,7 @@ from src.domain_ports import (
     ListTestRunReportsCommand,
 )
 from src.domain.report.plugins import IReportFormatter
-from src.infrastructure_ports import IDtoStorage
+from src.infrastructure_ports import IDtoStorage, INotifier
 from src.domain.report.report import Report
 
 
@@ -33,9 +33,14 @@ class ReportAdapter(IReport):
         self,
         formatters: List[IReportFormatter],
         dto_storage: IDtoStorage,
+        notifiers: List[INotifier] | None = None,
     ):
         self.dto_storage = dto_storage
-        self.report = Report(formatters=formatters, dto_storage=dto_storage)
+        self.report = Report(
+            formatters=formatters,
+            dto_storage=dto_storage,
+            notifiers=notifiers,
+        )
 
     def create_testcase_report(
         self, command: CreateTestCaseReportCommand

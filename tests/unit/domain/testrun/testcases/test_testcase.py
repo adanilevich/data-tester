@@ -1,5 +1,5 @@
 from src.domain.testrun.precondition_checks import IPreconditionChecker, Checkable
-from src.dtos import TestCaseDTO, TestType, SpecificationType
+from src.dtos import TestCaseDTO, TestType, SpecType
 
 
 class DummyChecker(IPreconditionChecker):
@@ -23,7 +23,7 @@ class TestExecutingTestcases:
         assert testcase.status.name == "PRECONDITIONS"
         for check in testcase.preconditions:
             msg = f"Checking that {check.replace('_', ' ')} ..."
-            assert msg in testcase.notifiers[0].notifications
+            assert msg in [n.message for n in testcase.notifiers[0].notifications]
 
     def test_handling_nok_preconditions(self, testcase_creator):
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)
@@ -34,7 +34,7 @@ class TestExecutingTestcases:
 
         assert check_result is False
         assert testcase.status.name == "ABORTED"
-        msgs = testcase.notifiers[0].notifications
+        msgs = [n.message for n in testcase.notifiers[0].notifications]
         assert "Any: True" in msgs
         assert "Stopping execution due to failed precondition: must fail!" in msgs
 
@@ -42,9 +42,9 @@ class TestExecutingTestcases:
         testcase = testcase_creator.create(ttype=TestType.DUMMY_OK)
         for index, spec in enumerate(testcase.specs):
             if index == 0:
-                spec.spec_type = SpecificationType.SCHEMA
+                spec.spec_type = SpecType.SCHEMA
             else:
-                spec.spec_type = SpecificationType.SCHEMA
+                spec.spec_type = SpecType.SCHEMA
 
         testcase.required_specs = ["sql", "schema"]
         testcase.preconditions = []

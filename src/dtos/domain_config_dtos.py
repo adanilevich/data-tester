@@ -3,7 +3,7 @@ from typing import List, Dict
 from pydantic import Field
 
 from src.dtos.dto import DTO
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 
 
 class SchemaTestCaseConfigDTO(DTO):

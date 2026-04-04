@@ -1,0 +1,288 @@
+{
+  "todotree": {
+    "tree": [
+      {
+        "key": 1775314232600,
+        "children": [],
+        "todo": {
+          "content": "Reengineer Specification for better parsing",
+          "id": 1775314232600,
+          "level": "warning",
+          "done": true,
+          "start": 1775314232600,
+          "tags": [
+            "1775314814107"
+          ],
+          "focus": false,
+          "end": 1775330274157
+        }
+      },
+      {
+        "key": 1775314025940,
+        "children": [],
+        "todo": {
+          "content": "Add Logging",
+          "id": 1775314025940,
+          "level": "success",
+          "done": true,
+          "start": 1775314025940,
+          "focus": false,
+          "end": 1775341417326,
+          "tags": [
+            "1775314524399"
+          ]
+        }
+      },
+      {
+        "key": 1775314093010,
+        "children": [],
+        "todo": {
+          "content": "Implement Notifications",
+          "id": 1775314093010,
+          "level": "success",
+          "done": true,
+          "start": 1775314093010,
+          "tags": [
+            "1775314524399"
+          ],
+          "focus": false,
+          "end": 1775336699177
+        }
+      },
+      {
+        "key": 1775342759119,
+        "children": [],
+        "todo": {
+          "content": "Implement NiceGUI Frontend",
+          "id": 1775342759119,
+          "level": "success",
+          "done": false,
+          "start": 1775342759119,
+          "tags": [
+            "1775314524399"
+          ]
+        }
+      },
+      {
+        "key": 1775314502201,
+        "children": [],
+        "todo": {
+          "content": "Implement FastAPI Backend",
+          "id": 1775314502201,
+          "level": "success",
+          "done": false,
+          "start": 1775314502202,
+          "tags": [
+            "1775314524399"
+          ]
+        }
+      },
+      {
+        "key": 1775342874864,
+        "children": [],
+        "todo": {
+          "content": "Add parallelized test execution",
+          "id": 1775342874864,
+          "level": "success",
+          "done": false,
+          "start": 1775342874864,
+          "tags": [
+            "1775314524399"
+          ]
+        }
+      },
+      {
+        "key": 1775336080534,
+        "children": [],
+        "todo": {
+          "content": "Improve Report Content",
+          "id": 1775336080534,
+          "level": "success",
+          "done": true,
+          "start": 1775336080534,
+          "tags": [
+            "1775314524399"
+          ],
+          "focus": false,
+          "end": 1775338110818
+        }
+      },
+      {
+        "key": 1775314290887,
+        "children": [],
+        "todo": {
+          "content": "Fix Claude Permission Issues",
+          "id": 1775314290887,
+          "level": "success",
+          "done": true,
+          "start": 1775314290887,
+          "tags": [
+            "1775314416339"
+          ],
+          "focus": false,
+          "end": 1775330310665
+        }
+      },
+      {
+        "key": 1775335326893,
+        "children": [],
+        "todo": {
+          "content": "Move prepare data to DemoBackend and allow persistence",
+          "id": 1775335326893,
+          "level": "default",
+          "done": true,
+          "start": 1775335326893,
+          "tags": [
+            "1775319148403"
+          ],
+          "focus": false,
+          "end": 1775346460166
+        }
+      },
+      {
+        "key": 1775314305889,
+        "children": [],
+        "todo": {
+          "content": "Try Claude Agents",
+          "id": 1775314305889,
+          "level": "default",
+          "done": false,
+          "start": 1775314305889,
+          "tags": [
+            "1775314416339"
+          ]
+        }
+      },
+      {
+        "key": 1775332204736,
+        "children": [],
+        "todo": {
+          "content": "Try Context7 MCP",
+          "id": 1775332204736,
+          "level": "default",
+          "done": false,
+          "start": 1775332204736,
+          "tags": [
+            "1775314416339"
+          ]
+        }
+      },
+      {
+        "key": 1775314347648,
+        "children": [],
+        "todo": {
+          "content": "Code Review",
+          "id": 1775314347648,
+          "level": "default",
+          "done": true,
+          "start": 1775314347649,
+          "focus": false,
+          "end": 1775338115380
+        }
+      },
+      {
+        "key": 1775314314244,
+        "children": [],
+        "todo": {
+          "content": "Try Claude Hooks",
+          "id": 1775314314244,
+          "level": "secondary",
+          "done": false,
+          "start": 1775314314244,
+          "tags": [
+            "1775314416339"
+          ]
+        }
+      },
+      {
+        "key": 1775314363834,
+        "children": [],
+        "todo": {
+          "content": "Add Badges",
+          "id": 1775314363834,
+          "level": "secondary",
+          "done": false,
+          "start": 1775314363834
+        }
+      },
+      {
+        "key": 1775319120826,
+        "children": [],
+        "todo": {
+          "content": "Move Adapter Tests to Own Level",
+          "id": 1775319120826,
+          "level": "default",
+          "done": true,
+          "start": 1775319120826,
+          "tags": [
+            "1775319148403"
+          ],
+          "focus": false,
+          "end": 1775332185443
+        }
+      },
+      {
+        "key": 1775341896997,
+        "children": [],
+        "todo": {
+          "content": "Improve coverage",
+          "id": 1775341896997,
+          "level": "default",
+          "done": true,
+          "start": 1775341896998,
+          "focus": false,
+          "end": 1775342741990
+        }
+      }
+    ],
+    "expandKeys": [
+      1775314025940,
+      1775314232600,
+      1775314290887,
+      1775314093010
+    ],
+    "schema": "https://github.com/Saber2pr/vsc-ext-todolist/blob/master/src/api/type.ts#L3",
+    "add_mode": "bottom",
+    "virtual": false,
+    "timelines": [],
+    "showLine": false,
+    "restDays": [],
+    "playFontSize": 24,
+    "tags": {
+      "1775314416339": {
+        "label": "claude",
+        "color": "#46a11f",
+        "fontColor": "#000000",
+        "level": 0,
+        "timeline": false
+      },
+      "1775314524399": {
+        "label": "feature",
+        "color": "#1b26c5",
+        "fontColor": "#ffffff",
+        "level": 0,
+        "timeline": false
+      },
+      "1775314814107": {
+        "label": "issue",
+        "color": "#f90101",
+        "fontColor": "#ffffff",
+        "level": 0,
+        "timeline": false
+      },
+      "1775319148403": {
+        "label": "clarity",
+        "color": "#ffffff",
+        "fontColor": "#000000",
+        "level": 0,
+        "timeline": false
+      }
+    },
+    "title": "Tasklist",
+    "autoSort": false,
+    "showEndTime": false,
+    "simpleMode": false,
+    "lang": "en",
+    "version": "1775346460200"
+  }
+}

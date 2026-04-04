@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.dtos.storage import StorageType
+from src.dtos.storage_dtos import StorageType
 from src.infrastructure_ports.i_user_storage import IUserStorage
 
 

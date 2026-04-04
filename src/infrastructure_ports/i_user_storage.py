@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 
 
 class IUserStorage(ABC):

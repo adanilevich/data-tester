@@ -1,34 +1,39 @@
 from typing import List
 
 import pytest
-import time
 import polars as pl
 
-from src.domain.testrun.testcases.compare import CompareTestCase, CompareTestCaseError
+from src.domain.testrun.testcases.compare import (
+    CompareTestCase,
+    CompareTestCaseError,
+    PrimaryKeysMissingError,
+    QueryExecutionError,
+    SchemaMismatchError,
+)
 from src.dtos import (
-    SchemaSpecificationDTO,
-    CompareSqlDTO,
+    SchemaSpecDTO,
+    CompareSpecDTO,
     TestType,
-    SpecificationType,
+    SpecType,
     LocationDTO,
 )
 
 
 # noinspection PyUnusedLocal
 class TestCompareTestCase:
-    schema = SchemaSpecificationDTO(
+    schema = SchemaSpecDTO(
         location=LocationDTO(path="dummy://this_location"),
         columns={"a": "int", "b": "string", "c": "bool"},
         primary_keys=["a", "b"],
         testobject="stage_customers",
-        spec_type=SpecificationType.COMPARE_SQL,
+        spec_type=SpecType.COMPARE,
     )
 
-    sql = CompareSqlDTO(
+    sql = CompareSpecDTO(
         location=LocationDTO(path="dummy://this_location"),
         query="this_will_be_changed",
         testobject="stage_customers",
-        spec_type=SpecificationType.COMPARE_SQL,
+        spec_type=SpecType.COMPARE,
     )
 
     data = pl.DataFrame(
@@ -44,7 +49,7 @@ class TestCompareTestCase:
     def testcase(self, testcase_creator) -> CompareTestCase:
         testcase_ = testcase_creator.create(ttype=TestType.COMPARE)
 
-        def get_schema_from_query(*args, **kwargs) -> SchemaSpecificationDTO:
+        def get_schema_from_query(*args, **kwargs) -> SchemaSpecDTO:
             return self.schema
 
         testcase_.backend.get_schema_from_query = get_schema_from_query
@@ -91,7 +96,7 @@ class TestCompareTestCase:
         assert testcase.sample_size == 100
 
     def test_key_sampling_exception_is_caught(self, testcase):
-        sql = CompareSqlDTO.from_dict(self.sql.to_dict())
+        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
         sql.query = "exception"
         testcase.specs = [sql, self.schema]
 
@@ -107,7 +112,7 @@ class TestCompareTestCase:
         assert "from testobject equals sample from test sql" in testcase.summary
 
     def test_that_diff_is_treated_correctly(self, testcase):
-        sql = CompareSqlDTO.from_dict(self.sql.to_dict())
+        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
         sql.query = "bad"
         testcase.specs = [sql, self.schema]
 
@@ -117,39 +122,66 @@ class TestCompareTestCase:
         assert "compare_diff" in testcase.diff
         assert testcase.summary == "Testobject differs from SQL in 1 row(s)."
 
-    # skip performance test, only execute if needed
-    @pytest.mark.skipif(True, reason="Only run performance test on demand")
-    def test_in_memory_comparison_performance(self, testcase, performance_test_data):
-        """
-        Test speed of diff comparison. Result expectations so far:
-            - dataset of ca 12 Mio rows, 150 columns, compared with itself (one version
-                truncated and casted to string:
-                - fixtures download and preparation: ca 45 s
-                - comparison duration if no casting required: 9 s (almost all for rowhash)
-                - comparison if dynamic casting required: 380 s (50/50 casting/rowhash)
-                - comparison duration if to-string casting: 330 s (50/50 casting/rowhash)
-                - comparison duration if only one col is casted: ca 70 s
-        """
+    def test_get_schema_from_query_failure(self, testcase):
+        def raise_error(*args, **kwargs):
+            raise RuntimeError("backend timeout")
 
-        print("\nStarting performance tests for compare ...")
+        testcase.backend.get_schema_from_query = raise_error
 
-        def compare_data(df, other_df):
-            print("Comparing dataframes of shapes", df.shape, other_df.shape)
-            start_ = time.time()
-            diff_ = testcase._compare(df, other_df)
-            end_ = time.time()
-            comparison_time = end_ - start_
-            print("\nData comparison time: ", comparison_time, "s")
-            return diff_
+        with pytest.raises(QueryExecutionError) as err:
+            testcase._execute()
 
-        # truncate to provoke difference and cast first column to string to force
-        # testcase._get_diff to cast dataframes
-        this = performance_test_data.with_columns(pl.lit("value").alias("__concat_key__"))
-        that = (
-            this[:-10]
-            # .cast({this.columns[0]: pl.String})
-            # .reverse()
+        assert "Error while obtaining schema from test query" in str(err)
+
+    def test_primary_keys_missing_in_query(self, testcase):
+        schema_without_pks = SchemaSpecDTO(
+            location=LocationDTO(path="dummy://loc"),
+            columns={"x": "int", "y": "string"},
+            primary_keys=[],
+            testobject="stage_customers",
         )
 
-        diff = compare_data(this, that)
-        assert diff.shape[0] == 10
+        def get_schema_without_pks(*args, **kwargs):
+            return schema_without_pks
+
+        testcase.backend.get_schema_from_query = get_schema_without_pks
+
+        with pytest.raises(PrimaryKeysMissingError) as err:
+            testcase._execute()
+
+        assert "Primary keys are missing in query" in str(err)
+
+    def test_sample_from_query_failure(self, testcase):
+        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
+        sql.query = "error"
+        testcase.specs = [sql, self.schema]
+
+        with pytest.raises(QueryExecutionError) as err:
+            testcase._execute()
+
+        assert "Error while sampling from test query" in str(err)
+
+    def test_sample_from_testobject_failure(self, testcase):
+        def raise_error(*args, **kwargs):
+            raise RuntimeError("testobject read failed")
+
+        testcase.backend.get_sample_from_testobject = raise_error
+
+        with pytest.raises(QueryExecutionError) as err:
+            testcase._execute()
+
+        assert "Error while sampling from testobject" in str(err)
+
+    def test_schema_mismatch_raises_error(self, testcase):
+        extra_col_data = self.data.with_columns(
+            pl.lit("extra").alias("missing_col"),
+        )
+
+        def get_sample_with_extra(*args, **kwargs):
+            return extra_col_data
+
+        testcase.backend.get_sample_from_query = get_sample_with_extra
+
+        with pytest.raises(SchemaMismatchError):
+            testcase._execute()
+

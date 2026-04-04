@@ -12,11 +12,11 @@ from .demo_query_handler import DemoQueryHandler
 
 from src.infrastructure_ports import IBackend, BackendError
 from src.dtos import (
-    SchemaSpecificationDTO,
+    SchemaSpecDTO,
     DomainConfigDTO,
     TestObjectDTO,
     DBInstanceDTO,
-    SpecificationType,
+    SpecType,
     LocationDTO,
 )
 
@@ -206,7 +206,7 @@ class DemoBackend(IBackend):
         """See interface definition (parent class IBackend)."""
         return self.con.query(query).pl()
 
-    def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
+    def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecDTO:
         """
         Gets table schema from duckdb, harmonizes datatypes according to conventions and
         returns results. Schema retrieval of file objects is not supported.
@@ -246,18 +246,18 @@ class DemoBackend(IBackend):
             path=f"duckdb://{testobject.domain}_{testobject.stage}"
             f".{testobject.instance}.{testobject.name}.duck"
         )
-        result = SchemaSpecificationDTO(
+        result = SchemaSpecDTO(
             location=location,
             columns=schema_as_dict,
             testobject=testobject.name,
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
         )
 
         return result
 
     def get_schema_from_query(
         self, query: str, db: DBInstanceDTO
-    ) -> SchemaSpecificationDTO:
+    ) -> SchemaSpecDTO:
         """Gets schema of query. Expects query to be already translated"""
 
         query: str = f"""
@@ -279,16 +279,16 @@ class DemoBackend(IBackend):
         location= LocationDTO(
             path=f"duckdb://{db.domain}_{db.stage}.{db.instance}.user_query.duck"
         )
-        result = SchemaSpecificationDTO(
+        result = SchemaSpecDTO(
             location=location,
             testobject="user query",
             columns=schema_as_dict,
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
         )
 
         return result
 
-    def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
+    def harmonize_schema(self, schema: SchemaSpecDTO) -> SchemaSpecDTO:
         """
         In our DWH stage, the convention is that datatypes are relevant for comparison
         only in their simplified form, e.g. complex datatypes like ARRAY, STRUCT are
@@ -305,6 +305,7 @@ class DemoBackend(IBackend):
                     - 'TEXT', 'STRING', 'VARCHAR(n)' are translated to 'string'
         """
 
+        assert schema.columns is not None  # caller provides populated schema
         harmonized_columns: Dict[str, str] = {}
         for column_name, dtype in schema.columns.items():
             dtype: str = dtype.lower()
@@ -331,16 +332,17 @@ class DemoBackend(IBackend):
 
             harmonized_columns.update({column_name: harmonized_dtype})
 
-        harmonized_schema_dto: SchemaSpecificationDTO = schema.copy()
+        harmonized_schema_dto: SchemaSpecDTO = schema.copy()
         harmonized_schema_dto.columns: Dict[str, str] = harmonized_columns
 
         return harmonized_schema_dto
 
     @staticmethod
     def _get_concat_key(
-        primary_keys: List[str], cast_to: Optional[SchemaSpecificationDTO] = None
+        primary_keys: List[str], cast_to: Optional[SchemaSpecDTO] = None
     ) -> str:
         if cast_to is not None:
+            assert cast_to.columns is not None  # caller provides populated schema
             column_list: List[str] = [
                 f"CAST(CAST({col} AS {dtype}) AS STRING)"
                 for col, dtype in cast_to.columns.items()
@@ -354,12 +356,13 @@ class DemoBackend(IBackend):
     @staticmethod
     def _get_column_selection(
         columns: Optional[List[str]] = None,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> str:
         if columns is None:
             if cast_to is None:
                 cols: List[str] = ["*"]
             else:
+                assert cast_to.columns is not None  # caller provides populated schema
                 cols: List[str] = [
                     f"CAST({col} AS {dtype}) AS {col}"
                     for col, dtype in cast_to.columns.items()
@@ -369,6 +372,7 @@ class DemoBackend(IBackend):
             if cast_to is None:
                 cols: List[str] = [col for col in columns if col != "__concat_key__"]
             else:
+                assert cast_to.columns is not None  # caller provides populated schema
                 cols: List[str] = [
                     f"CAST({col} AS {cast_to.columns[col]}) AS {col}"
                     for col in columns
@@ -395,7 +399,7 @@ class DemoBackend(IBackend):
         primary_keys: List[str],
         sample_size: int,
         db: DBInstanceDTO,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> List[str]:
         """See interface definition (parent class IBackend)."""
 
@@ -424,7 +428,7 @@ class DemoBackend(IBackend):
         key_sample: List[str],
         db: DBInstanceDTO,
         columns: Optional[List[str]] = None,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> pl.DataFrame:
         if len(key_sample) == 0 or len(primary_keys) == 0:
             raise DemoBackendError(
@@ -453,7 +457,7 @@ class DemoBackend(IBackend):
         primary_keys: List[str],
         key_sample: List[str],
         columns: Optional[List[str]] = None,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> pl.DataFrame:
         if len(key_sample) == 0 or len(primary_keys) == 0:
             raise DemoBackendError(

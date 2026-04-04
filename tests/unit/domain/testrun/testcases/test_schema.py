@@ -1,18 +1,18 @@
 import pytest
 
 from src.domain.testrun.testcases import AbstractTestCase
-from src.dtos import SchemaSpecificationDTO, TestType, SpecificationType, LocationDTO
+from src.dtos import SchemaSpecDTO, TestType, SpecType, LocationDTO
 
 
 class TestSchemaTestCase:
-    spec = SchemaSpecificationDTO(
+    spec = SchemaSpecDTO(
         location=LocationDTO(path="dummy://this_location"),
         columns={"a": "int", "b": "string", "c": "array"},
         partition_columns=["a"],
         clustering_columns=["b"],
         primary_keys=["a", "b"],
         testobject="stage_customers",
-        spec_type=SpecificationType.SCHEMA,
+        spec_type=SpecType.SCHEMA,
     )
 
     @pytest.fixture
@@ -20,10 +20,10 @@ class TestSchemaTestCase:
         testcase_ = testcase_creator.create(ttype=TestType.SCHEMA)
 
         # patch backend to return required resuls
-        def get_schema_(*args, **kwargs) -> SchemaSpecificationDTO:
+        def get_schema_(*args, **kwargs) -> SchemaSpecDTO:
             return self.spec
 
-        def harmonize_schema_(schema) -> SchemaSpecificationDTO:
+        def harmonize_schema_(schema) -> SchemaSpecDTO:
             return schema
 
         testcase_.backend.get_schema = get_schema_
@@ -42,7 +42,7 @@ class TestSchemaTestCase:
         assert {"Specification": "dummy://this_location/"} in testcase.facts
 
     def test_that_result_is_nok_if_pk_comparison_fails(self, testcase):
-        spec = SchemaSpecificationDTO(**self.spec.to_dict())
+        spec = SchemaSpecDTO(**self.spec.to_dict())
         spec.primary_keys = ["a"]  # this sould run in an error
         testcase.specs = [spec]
 
@@ -61,7 +61,7 @@ class TestSchemaTestCase:
         } in testcase.details
 
     def test_that_result_is_nok_if_column_comparison_fails(self, testcase):
-        spec = SchemaSpecificationDTO(**self.spec.to_dict())
+        spec = SchemaSpecDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "bool"}  # this sould run in an error
         testcase.specs = [spec]
 
@@ -91,7 +91,7 @@ class TestSchemaTestCase:
         # first the expected schema deviates from actual schema in column 'c'
         # in a datatype which is not relevant for comparison - here 'unknown'
         # this deviation should be ignored
-        spec = SchemaSpecificationDTO(**self.spec.to_dict())
+        spec = SchemaSpecDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "string", "c": "unknown"}
         testcase.specs = [spec]
 
@@ -101,7 +101,7 @@ class TestSchemaTestCase:
 
         # next, the specified datatype for column 'c' is a known one
         # since it deviates from actual schema, the test fails
-        spec = SchemaSpecificationDTO(**self.spec.to_dict())
+        spec = SchemaSpecDTO(**self.spec.to_dict())
         spec.columns = {"a": "int", "b": "string", "c": "int"}  # this should fail
         testcase.specs = [spec]
 

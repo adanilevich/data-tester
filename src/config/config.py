@@ -24,19 +24,20 @@ class Config(BaseSettings):
 
     # NOTIFIERS CONFIGURATION
     DATATESTER_NOTIFIERS: List[str] = Field(
-        default_factory=lambda: ["IN_MEMORY", "STDOUT"]
+        default_factory=lambda: ["IN_MEMORY", "LOG"]
     )
+
+    # LOGGING CONFIGURATION
+    DATATESTER_LOG_LEVEL: str = Field(default="INFO")
+    DATATESTER_LOG_FORMAT: str = Field(default="TEXT")
 
     # STORAGE ENGINES AND LOCATIONS
     DATATESTER_INTERNAL_STORAGE_LOCATION: str = Field(default="memory://datatester/")
     DATATESTER_USER_STORAGE_ENGINE: str = Field(default="MEMORY")
 
+    # DEMO BACKEND DATA PATHS
+    DATATESTER_DEMO_RAW_PATH: str = Field(default="tests/fixtures/demo/raw")
+    DATATESTER_DEMO_DB_PATH: str = Field(default="tests/fixtures/demo/dbs")
+
     # GCP DEPLOYMENT CONFIGURATIONS
     DATATESTER_GCP_PROJECT: str | None = Field(default=None)
-
-    def model_post_init(self, __context) -> None:
-        """Set config values for local mode"""
-        if self.DATATESTER_ENV == "LOCAL":
-            self.DATATESTER_INTERNAL_STORAGE_LOCATION = "memory://datatester/"
-            self.DATATESTER_USER_STORAGE_ENGINE = "MEMORY"
-            self.DATATESTER_NOTIFIERS = ["IN_MEMORY","STDOUT",]

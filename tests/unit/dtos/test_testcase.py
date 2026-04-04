@@ -9,14 +9,14 @@ from src.dtos.testrun_dtos import (
     TestType,
 )
 from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
-from src.dtos.specification_dtos import SpecificationDTO, SpecificationType
+from src.dtos.specification_dtos import SpecDTO, SpecType
 from src.dtos.domain_config_dtos import (
     DomainConfigDTO,
     TestCasesConfigDTO,
     CompareTestCaseConfigDTO,
     SchemaTestCaseConfigDTO,
 )
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 
 
 @pytest.fixture
@@ -51,11 +51,13 @@ class TestTestRunDTO:
                 "table1_SCHEMA": TestCaseEntryDTO(
                     testobject="table1",
                     testtype=TestType.SCHEMA,
+                    domain="test_domain",
                     comment="Schema test"
                 ),
                 "table2_ROWCOUNT": TestCaseEntryDTO(
                     testobject="table2",
                     testtype=TestType.ROWCOUNT,
+                    domain="test_domain",
                     comment="Row count test"
                 )
             }
@@ -63,14 +65,14 @@ class TestTestRunDTO:
 
         # And specifications for each test case
         spec_list = [
-            [SpecificationDTO(
+            [SpecDTO(
                 location=LocationDTO(path="dummy://spec1"),
-                spec_type=SpecificationType.SCHEMA,
+                spec_type=SpecType.SCHEMA,
                 testobject="table1"
             )],
-            [SpecificationDTO(
+            [SpecDTO(
                 location=LocationDTO(path="dummy://spec2"),
-                spec_type=SpecificationType.ROWCOUNT_SQL,
+                spec_type=SpecType.ROWCOUNT,
                 testobject="table2"
             )]
         ]
@@ -103,19 +105,21 @@ class TestTestRunDTO:
             testcases={
                 "table1_SCHEMA": TestCaseEntryDTO(
                     testobject="table1",
+                    domain="test_domain",
                     testtype=TestType.SCHEMA
                 ),
                 "table2_ROWCOUNT": TestCaseEntryDTO(
                     testobject="table2",
-                    testtype=TestType.ROWCOUNT
+                    testtype=TestType.ROWCOUNT,
+                    domain="test_domain",
                 )
             }
         )
 
         # And a spec_list with only 1 entry (mismatched length)
-        spec_list = [[SpecificationDTO(
+        spec_list = [[SpecDTO(
             location=LocationDTO(path="dummy://spec1"),
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
             testobject="table1"
         )]]
 
@@ -134,14 +138,15 @@ class TestTestRunDTO:
             testcases={
                 "table1_SCHEMA": TestCaseEntryDTO(
                     testobject="table1",
-                    testtype=TestType.SCHEMA
+                    testtype=TestType.SCHEMA,
+                    domain="test_domain",
                 )
             }
         )
 
-        spec_list = [[SpecificationDTO(
+        spec_list = [[SpecDTO(
             location=LocationDTO(path="dummy://spec1"),
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
             testobject="table1"
         )]]
 
@@ -175,20 +180,21 @@ class TestTestRunDTO:
                 "table1_COMPARE_yesterday": TestCaseEntryDTO(
                     testobject="table1",
                     testtype=TestType.COMPARE,
+                    domain="test_domain",
                     scenario="yesterday"
                 )
             }
         )
 
         spec_list = [[
-            SpecificationDTO(
+            SpecDTO(
                 location=LocationDTO(path="dummy://spec1"),
-                spec_type=SpecificationType.COMPARE_SQL,
+                spec_type=SpecType.COMPARE,
                 testobject="table1"
             ),
-            SpecificationDTO(
+            SpecDTO(
                 location=LocationDTO(path="dummy://spec2"),
-                spec_type=SpecificationType.COMPARE_SQL,
+                spec_type=SpecType.COMPARE,
                 testobject="table1"
             )
         ]]

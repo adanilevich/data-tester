@@ -7,7 +7,7 @@ from uuid import uuid4
 from pydantic import UUID4
 
 from src.dtos.dto import DTO
-from src.dtos.specification_dtos import SpecificationDTO
+from src.dtos.specification_dtos import SpecDTO
 from src.dtos.testrun_dtos import TestCaseDTO
 from src.dtos.testrun_dtos import TestRunDTO
 
@@ -51,7 +51,7 @@ class TestCaseReportDTO(TestReportDTO):
     summary: str
     facts: List[Dict[str, str | int]]
     details: List[Dict[str, Union[str, int, float]]]
-    specifications: List[SpecificationDTO]
+    specifications: List[SpecDTO]
 
     @property
     def object_id(self) -> str:

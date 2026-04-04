@@ -44,7 +44,11 @@ def _make_testset(domain: str = "payments", name: str = "my_testset") -> TestSet
         default_stage="test",
         default_instance="alpha",
         testcases={
-            "obj_schema": TestCaseEntryDTO(testobject="obj", testtype=TestType.SCHEMA),
+            "obj_schema": TestCaseEntryDTO(
+                testobject="obj",
+                testtype=TestType.SCHEMA,
+                domain="test_domain",
+            ),
         },
     )
 

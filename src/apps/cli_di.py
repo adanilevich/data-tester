@@ -14,10 +14,7 @@ from src.domain.report.plugins import (
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
 )
-from src.domain.specification.plugins import (
-    NamingConventionsFactory,
-    FormatterFactory as SpecFormatterFactory,
-)
+from src.domain.specification import NamingConventionsFactory, SpecParserFactory
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,
@@ -27,7 +24,7 @@ from src.drivers import (
 )
 from src.dtos import LocationDTO, StorageType
 from src.infrastructure.backend import DemoBackendFactory, DummyBackendFactory
-from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.notifier import InMemoryNotifier, LogNotifier
 from src.infrastructure.storage import DtoStorageFactory, UserStorageFactory
 from src.infrastructure_ports import INotifier, IDtoStorage, IBackendFactory, IUserStorage
 
@@ -35,11 +32,15 @@ from src.infrastructure_ports import INotifier, IDtoStorage, IBackendFactory, IU
 def get_backend_factory(config: Config) -> IBackendFactory:
     platform_type = config.DATATESTER_DATA_PLATFORM
     if platform_type == "DEMO":
-        return DemoBackendFactory()
+        return DemoBackendFactory(
+            files_path=config.DATATESTER_DEMO_RAW_PATH,
+            db_path=config.DATATESTER_DEMO_DB_PATH,
+        )
     elif platform_type == "DUMMY":
         return DummyBackendFactory()
     else:
         raise ValueError(f"Unknown data platform type: {platform_type}")
+
 
 def get_notifiers(config: Config) -> List[INotifier]:
     requested_notifiers = config.DATATESTER_NOTIFIERS
@@ -47,17 +48,24 @@ def get_notifiers(config: Config) -> List[INotifier]:
     for notifier in requested_notifiers:
         if notifier == "IN_MEMORY":
             notifiers.append(InMemoryNotifier())
-        elif notifier == "STDOUT":
-            notifiers.append(StdoutNotifier())
+        elif notifier == "LOG":
+            notifiers.append(
+                LogNotifier(
+                    level=config.DATATESTER_LOG_LEVEL,
+                    structured=True if config.DATATESTER_LOG_FORMAT == "JSON" else False,
+                )
+            )
         else:
             raise ValueError(f"Unknown notifier type: {notifier}")
     return notifiers
+
 
 def get_dto_storage(config: Config) -> IDtoStorage:
     factory = DtoStorageFactory(gcp_project=config.DATATESTER_GCP_PROJECT)
     location = LocationDTO(config.DATATESTER_INTERNAL_STORAGE_LOCATION)
     storage = factory.get_storage(storage_location=location)
     return storage
+
 
 def get_user_storage(config: Config) -> IUserStorage:
     factory = UserStorageFactory(gcp_project=config.DATATESTER_GCP_PROJECT)
@@ -80,7 +88,7 @@ class CliDependencyInjector:
         self.notifiers = get_notifiers(config)
         self.backend_factory = get_backend_factory(config)
         self.spec_naming_conventions_factory = NamingConventionsFactory()
-        self.spec_formatter_factory = SpecFormatterFactory()
+        self.spec_formatter_factory = SpecParserFactory()
 
     def domain_config_driver(self) -> DomainConfigDriver:
         handler = DomainConfigAdapter(dto_storage=self.dto_storage)
@@ -95,6 +103,7 @@ class CliDependencyInjector:
             user_storage=self.user_storage,
             naming_conventions_factory=self.spec_naming_conventions_factory,
             formatter_factory=self.spec_formatter_factory,
+            notifiers=self.notifiers,
         )
         return SpecDriver(spec_adapter=handler)
 
@@ -110,5 +119,6 @@ class CliDependencyInjector:
         handler = ReportAdapter(
             formatters=self.testreport_formatters,
             dto_storage=self.dto_storage,
+            notifiers=self.notifiers,
         )
         return ReportDriver(report_adapter=handler)

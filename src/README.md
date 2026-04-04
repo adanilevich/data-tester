@@ -43,4 +43,4 @@ The architecture supports extension through well-defined interfaces:
 - Add data platforms via `IBackend` interface
 - Add storage backends via `IStorage` interface
 - Add report formats via `IReportFormatter` interface
-- Add specification formats via `ISpecFormatter` interface
+- Add specification formats via `ISpecParser` interface

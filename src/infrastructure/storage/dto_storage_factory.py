@@ -1,4 +1,4 @@
-from src.dtos.storage import LocationDTO, StorageType
+from src.dtos.storage_dtos import LocationDTO, StorageType
 from src.infrastructure_ports import (
     IDtoStorageFactory,
     IDtoStorage,

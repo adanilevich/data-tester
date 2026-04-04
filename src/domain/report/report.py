@@ -1,6 +1,6 @@
 from typing import List, Dict, Tuple, cast
 
-from src.infrastructure_ports import IDtoStorage
+from src.infrastructure_ports import IDtoStorage, INotifier
 from src.domain.report.plugins import IReportFormatter
 from src.dtos import (
     TestCaseReportDTO,
@@ -12,6 +12,9 @@ from src.dtos import (
     ReportArtifactFormat,
     ReportType,
     ObjectType,
+    Importance,
+    NotificationDTO,
+    NotificationProcess,
 )
 
 
@@ -36,9 +39,15 @@ class Report:
         IReportFormatter,
     ]
 
-    def __init__(self, formatters: List[IReportFormatter], dto_storage: IDtoStorage):
+    def __init__(
+        self,
+        formatters: List[IReportFormatter],
+        dto_storage: IDtoStorage,
+        notifiers: List[INotifier] | None = None,
+    ):
         self.formatters = formatters
         self.dto_storage = dto_storage
+        self.notifiers: List[INotifier] = notifiers or []
         self.formatters_by_type_artifact_and_format: Dict[
             Tuple[ReportType, ReportArtifact, ReportArtifactFormat],
             IReportFormatter,
@@ -53,6 +62,21 @@ class Report:
             if key in self.formatters_by_type_artifact_and_format:
                 raise ReportError(f"Formatter {formatter} already registered")
             self.formatters_by_type_artifact_and_format[key] = formatter
+
+    def _notify(
+        self,
+        message: str,
+        domain: str = "",
+        importance: Importance = Importance.INFO,
+    ):
+        notification = NotificationDTO(
+            domain=domain,
+            process=NotificationProcess.REPORT,
+            importance=importance,
+            message=message,
+        )
+        for notifier in self.notifiers:
+            notifier.notify(notification)
 
     def create_testcase_report(self, result: TestCaseDTO) -> TestCaseReportDTO:
         """Creates a report from a testcase result."""
@@ -148,12 +172,26 @@ class Report:
     def create_and_save_all_reports(self, testrun: TestRunDTO) -> TestRunReportDTO:
         """Creates and saves all reports for a testrun and its testcases,
         then saves the testrun with updated report_ids."""
+        self._notify(
+            f"Creating reports for testrun {testrun.testrun_id}",
+            domain=testrun.domain,
+        )
         testrun_report = self.create_testrun_report(testrun)
         self.save_report(testrun_report)
+        self._notify("Testrun report created and saved", domain=testrun.domain)
 
         for testcase in testrun.testcase_results:
             testcase_report = self.create_testcase_report(testcase)
             self.save_report(testcase_report)
+            self._notify(
+                f"Testcase report created for {testcase.testobject.name}",
+                domain=testrun.domain,
+            )
 
         self.dto_storage.write_dto(dto=testrun)
+        n = len(testrun.testcase_results)
+        self._notify(
+            f"All reports created and saved ({n} testcase report(s))",
+            domain=testrun.domain,
+        )
         return testrun_report

@@ -3,20 +3,22 @@ import polars as pl
 
 from src.domain.testrun.testcases import AbstractTestCase
 from src.domain.testrun.testcases.rowcount import RowCountTestCaseError
-from src.dtos import RowCountSqlDTO, TestType, SpecificationType, LocationDTO
+from src.dtos import RowcountSpecDTO, TestType, SpecType, LocationDTO
 
 
 # noinspection PyUnusedLocal
 class TestRowCountTestCase:
-    spec = RowCountSqlDTO(
-        location=LocationDTO(path="dummy://this_location"),
-        query="to be replaced by test",
-        testobject="stage_customers",
-        spec_type=SpecificationType.ROWCOUNT_SQL,
-    )
+    @pytest.fixture
+    def spec(self) -> RowcountSpecDTO:
+        return RowcountSpecDTO(
+            location=LocationDTO(path="dummy://this_location"),
+            query="to be replaced by test",
+            testobject="stage_customers",
+            spec_type=SpecType.ROWCOUNT,
+        )
 
     @pytest.fixture
-    def testcase(self, testcase_creator) -> AbstractTestCase:
+    def testcase(self, testcase_creator, spec) -> AbstractTestCase:
         testcase_ = testcase_creator.create(ttype=TestType.ROWCOUNT)
 
         def run_query_(query, *args, **kwargs) -> pl.DataFrame:
@@ -38,13 +40,13 @@ class TestRowCountTestCase:
                 return pl.DataFrame()
 
         testcase_.backend.run_query = run_query_
-        testcase_.specs = [self.spec]
+        testcase_.specs = [spec]
 
         return testcase_
 
-    def test_execution_stops_if_invalid_query_is_provided(self, testcase):
-        self.spec.query = "strange"
-        testcase.specs = [self.spec]
+    def test_execution_stops_if_invalid_query_is_provided(self, testcase, spec):
+        spec.query = "strange"
+        testcase.specs = [spec]
 
         testcase._execute()
 
@@ -52,9 +54,9 @@ class TestRowCountTestCase:
         assert testcase.result == testcase.result.NA
         assert "Rowcount validation failed" in testcase.summary
 
-    def test_result_is_nok_if_counts_deviate(self, testcase):
-        self.spec.query = "bad"
-        testcase.specs = [self.spec]
+    def test_result_is_nok_if_counts_deviate(self, testcase, spec):
+        spec.query = "bad"
+        testcase.specs = [spec]
 
         testcase._execute()
 
@@ -64,18 +66,18 @@ class TestRowCountTestCase:
         )
         assert "rowcount_diff" in testcase.diff
 
-    def test_that_backend_exception_is_caught(self, testcase):
-        self.spec.query = "exception"
-        testcase.specs = [self.spec]
+    def test_that_backend_exception_is_caught(self, testcase, spec):
+        spec.query = "exception"
+        testcase.specs = [spec]
 
         with pytest.raises(RowCountTestCaseError):
             testcase._execute()
 
         assert testcase.result == testcase.result.NA
 
-    def test_happy_path(self, testcase):
-        self.spec.query = "good"
-        testcase.specs = [self.spec]
+    def test_happy_path(self, testcase, spec):
+        spec.query = "good"
+        testcase.specs = [spec]
 
         testcase._execute()
 

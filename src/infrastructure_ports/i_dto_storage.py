@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 
 from src.dtos.dto import DTO
-from src.dtos.storage import ObjectType
+from src.dtos.storage_dtos import ObjectType
 
 
 class IDtoStorage(ABC):

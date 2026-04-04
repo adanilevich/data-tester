@@ -47,7 +47,7 @@ The framework is built to:
 - Add new test types by implementing `AbstractTestCase`
 - Add new data platforms via `IBackend` interface
 - Add new notification target via `INotifier` interface
-- Add new specification formats via `ISpecFormatter` interface
+- Add new specification formats via `ISpecParser` interface
 - Add new report formats via `IReportFormatter` interface
 - Add new storage backends via `IStorage` interface
 
