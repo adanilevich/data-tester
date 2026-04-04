@@ -5,7 +5,7 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
 
 try:
-    from gcsfs import GCSFileSystem
+    from gcsfs import GCSFileSystem  # ty: ignore[unresolved-import, unused-ignore-comment]
 except ImportError:
     GCSFileSystem = None  # ty: ignore[invalid-assignment]
 
