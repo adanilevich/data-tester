@@ -59,7 +59,7 @@ jobs:
         MINIMUM_ORANGE: 70
     
     - name: Generate CLOC Badge
-      uses: Nightfury874/generate-cloc-badge-action@v1.1.0
+      uses: Nightfury874/generate-cloc-badge-action@v1.0.1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: gh-pages  # Optional, defaults to 'gh-pages' if omitted
