@@ -321,6 +321,16 @@ def _load_core_layer(core_targets: list[tuple[str, str, str]]) -> None:
     )
 
 
+def _detach_all_databases(db_path: Path) -> None:
+    """Detach all databases from the default connection to release file handles."""
+    fs = LocalFileSystem()
+    if fs.exists(str(db_path)):
+        for f in fs.ls(str(db_path)):
+            if f.endswith(".db"):
+                db_name = Path(f).stem
+                duckdb.execute(f"DETACH DATABASE IF EXISTS {db_name};")
+
+
 def _count_rows(table_fqn: str) -> int:
     """Count rows in a DuckDB table by fully-qualified name."""
     row = duckdb.sql(f"SELECT COUNT(*) AS n FROM {table_fqn}").fetchone()
@@ -346,6 +356,7 @@ def prepare_data(location: Path = Path(__file__).parent) -> None:
     _load_raw_layer(_LOADING_PLAN, raw_path)
     _load_staging_layer(_LOADING_PLAN, raw_path)
     _load_core_layer(_CORE_TARGETS)
+    _detach_all_databases(db_path)
 
 
 def clean_up() -> None:
@@ -359,11 +370,7 @@ def clean_up() -> None:
     fs = LocalFileSystem()
 
     # Detach DuckDB databases before deleting files
-    if fs.exists(str(db_path)):
-        for f in fs.ls(str(db_path)):
-            if f.endswith(".db"):
-                db_name = Path(f).stem
-                duckdb.execute(f"DETACH {db_name};")
+    _detach_all_databases(db_path)
 
     for path in (raw_path, db_path):
         if fs.exists(str(path)):

@@ -1,6 +1,7 @@
 from typing import List, Tuple
 
 import polars as pl
+from polars.exceptions import PolarsError
 
 from . import (
     AbstractTestCase,
@@ -214,7 +215,7 @@ class CompareTestCase(AbstractTestCase):
                 if expected.schema[col] != actual.schema[col]:
                     try:
                         actual = actual.cast({col: dtype})
-                    except pl.PolarsError:
+                    except PolarsError:
                         actual = actual.cast({col: pl.String})
                         expected = expected.cast({col: pl.String})
         else:
