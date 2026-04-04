@@ -6,7 +6,7 @@ from src.domain_adapters import TestRunAdapter
 from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.notifier import InMemoryNotifier
 from src.dtos import (
     TestRunDTO,
     TestDefinitionDTO,
@@ -16,8 +16,8 @@ from src.dtos import (
     TestResult,
     LocationDTO,
     DomainConfigDTO,
-    SpecificationDTO,
-    SpecificationType,
+    SpecDTO,
+    SpecType,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
@@ -48,7 +48,7 @@ def dto_storage() -> MemoryDtoStorage:
 @pytest.fixture
 def notifiers():
     """Create notifiers for testing"""
-    return [InMemoryNotifier(), StdoutNotifier()]
+    return [InMemoryNotifier()]
 
 
 @pytest.fixture
@@ -94,8 +94,8 @@ def test_definition(test_object, domain_config):
         testobject=test_object,
         testtype=TestType.DUMMY_OK,
         specs=[
-            SpecificationDTO(
-                spec_type=SpecificationType.SCHEMA,
+            SpecDTO(
+                spec_type=SpecType.SCHEMA,
                 location=LocationDTO(path="memory://specs/"),
                 testobject=test_object.name,
             )

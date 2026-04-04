@@ -8,3 +8,4 @@ from .check_testobject_exists import CheckTestObjectExists
 from .check_testobject_not_empty import CheckTestObjectNotEmpty
 from .check_specs_are_unique import CheckSpecsAreUnique
 from .check_primary_keys_are_specified import CheckPrimaryKeysAreSpecified
+from .check_specs_not_empty import CheckSpecsNotEmpty

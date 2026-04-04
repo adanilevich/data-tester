@@ -1,7 +1,7 @@
 from typing import List, Tuple, Any
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import RowCountSqlDTO, DBInstanceDTO, TestType, TestResult, TestStatus
+from src.dtos import RowcountSpecDTO, DBInstanceDTO, TestType, TestResult, TestStatus
 
 
 class RowCountTestCaseError(TestCaseError):
@@ -27,12 +27,16 @@ class RowCountTestCase(AbstractTestCase):
     """
 
     ttype = TestType.ROWCOUNT
-    required_specs = ["rowcount_sql"]
-    preconditions = ["specs_are_unique", "testobject_exists", "testobject_not_empty"]
+    required_specs = ["rowcount"]
+    preconditions = [
+        "specs_are_unique", "specs_not_empty",
+        "testobject_exists", "testobject_not_empty",
+    ]
 
     def _execute(self):
         self.add_fact({"Rowcount Query": self.sql.location.path})
         db = DBInstanceDTO.from_testobject(self.testobject)
+        assert self.sql.query is not None  # guaranteed by specs_not_empty precondition
 
         query = (
             self.sql.query
@@ -42,17 +46,18 @@ class RowCountTestCase(AbstractTestCase):
             SELECT *, 'actual' AS __source__ FROM __actual_count__
         """
         )
+        self.notify("Translating test query")
         translated_query = self.backend.translate_query(query, db)
         self.add_detail({"Original query": query})
         self.add_detail({"Applied query": translated_query})
 
+        self.notify("Executing query")
         try:
             query_result = self.backend.run_query(translated_query, db)
         except Exception as err:
-            raise RowCountQueryExecutionError(
-                "Error during rowcount query execution"
-            ) from err
+            raise RowCountQueryExecutionError("Error during query execution") from err
 
+        self.notify("Comparing counts")
         count_column_name = "cnt"
         for column_name in query_result.columns:
             if column_name != "__source__":
@@ -82,9 +87,9 @@ class RowCountTestCase(AbstractTestCase):
         return None
 
     @property
-    def sql(self) -> RowCountSqlDTO:
+    def sql(self) -> RowcountSpecDTO:
         for spec in self.specs or []:
-            if isinstance(spec, RowCountSqlDTO):
+            if isinstance(spec, RowcountSpecDTO):
                 return spec
         raise SpecNotFoundError("Rowcount SQL not found.")
 

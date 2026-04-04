@@ -1,12 +1,22 @@
 from typing import List
 import pytest
 
+from tests.fixtures.demo.prepare_demo_data import (
+    prepare_demo_data, clean_up_demo_data,
+)
 from src.infrastructure.backend.demo import DemoBackendFactory, DemoBackendError
 from src.dtos import DBInstanceDTO, TestObjectDTO
 
 
+@pytest.fixture(scope="module")
+def prepare_demo_data_fixture():
+    prepare_demo_data()
+    yield
+    clean_up_demo_data()
+
+
 class TestLocalBackendFactory:
-    def test_backend_creation(self, domain_config, prepare_local_data):
+    def test_backend_creation(self, domain_config, prepare_demo_data_fixture):
         factory = DemoBackendFactory()
         backend = factory.create(domain_config=domain_config)
 
@@ -26,7 +36,7 @@ class TestLocalBackend:
         return query
 
     @pytest.fixture
-    def backend(self, domain_config, prepare_local_data):
+    def backend(self, domain_config, prepare_demo_data_fixture):
         return DemoBackendFactory().create(domain_config=domain_config)
 
     @pytest.mark.parametrize(

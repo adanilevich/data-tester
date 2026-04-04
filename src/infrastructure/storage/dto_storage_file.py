@@ -1,4 +1,5 @@
 import json
+import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Dict, List, Type
@@ -19,14 +20,14 @@ from src.infrastructure_ports import (
 )
 from src.dtos import (
     DomainConfigDTO,
-    SpecificationDTO,
+    SpecDTO,
     TestSetDTO,
     TestRunDTO,
     TestCaseReportDTO,
     TestRunReportDTO,
     LocationDTO,
     ObjectType,
-    DTO
+    DTO,
 )
 
 
@@ -63,7 +64,7 @@ class JsonSerializer(ISerializer):
     def __init__(self) -> None:
         self._dto_mapping: Dict[ObjectType, Type[DTO]] = {
             ObjectType.DOMAIN_CONFIG: DomainConfigDTO,
-            ObjectType.SPECIFICATION: SpecificationDTO,
+            ObjectType.SPECIFICATION: SpecDTO,
             ObjectType.TESTRUN: TestRunDTO,
             ObjectType.TESTCASE_REPORT: TestCaseReportDTO,
             ObjectType.TESTRUN_REPORT: TestRunReportDTO,
@@ -108,6 +109,7 @@ _DTO_TYPE_MAPPING: Dict[Type[DTO], ObjectType] = {
     TestRunDTO: ObjectType.TESTRUN,
     TestCaseReportDTO: ObjectType.TESTCASE_REPORT,
     TestRunReportDTO: ObjectType.TESTRUN_REPORT,
+    SpecDTO: ObjectType.SPECIFICATION,
 }
 
 
@@ -146,20 +148,35 @@ class DtoStorageFile(IDtoStorage):
                 return f"testsets/{domain}/"
             case ObjectType.TESTRUN:
                 domain = getattr(dto, "domain", "")
-                start_ts: datetime = getattr(dto, "start_ts", datetime.now())
+                start_ts: datetime | None = getattr(dto, "start_ts", None)
+                if start_ts is None:
+                    msg = f"{type(dto).__name__} missing start_ts, using now()"
+                    logging.getLogger("datatester").warning(msg)
+                    start_ts = datetime.now()
                 date_str = start_ts.strftime("%Y-%m-%d")
                 return f"testruns/{domain}/{date_str}/"
             case ObjectType.TESTRUN_REPORT:
                 domain = getattr(dto, "domain", "")
-                start_ts = getattr(dto, "start_ts", datetime.now())
+                start_ts = getattr(dto, "start_ts", None)
+                if start_ts is None:
+                    msg = f"{type(dto).__name__} missing start_ts, using now()"
+                    logging.getLogger("datatester").warning(msg)
+                    start_ts = datetime.now()
                 date_str = start_ts.strftime("%Y-%m-%d")
                 return f"testrun_reports/{domain}/{date_str}/"
             case ObjectType.TESTCASE_REPORT:
                 domain = getattr(dto, "domain", "")
-                start_ts = getattr(dto, "start_ts", datetime.now())
+                start_ts = getattr(dto, "start_ts", None)
+                if start_ts is None:
+                    msg = f"{type(dto).__name__} missing start_ts, using now()"
+                    logging.getLogger("datatester").warning(msg)
+                    start_ts = datetime.now()
                 date_str = start_ts.strftime("%Y-%m-%d")
                 testrun_id = str(getattr(dto, "testrun_id", ""))
                 return f"testcase_reports/{domain}/{date_str}/{testrun_id}/"
+            case ObjectType.SPECIFICATION:
+                domain = getattr(dto, "domain", getattr(dto, "testobject", ""))
+                return f"specifications/{domain}/"
             case _:
                 raise DtoStorageFileError(f"Unknown object type: {object_type}")
 
@@ -176,6 +193,8 @@ class DtoStorageFile(IDtoStorage):
                 return "testrun_reports/"
             case ObjectType.TESTCASE_REPORT:
                 return "testcase_reports/"
+            case ObjectType.SPECIFICATION:
+                return "specifications/"
             case _:
                 raise DtoStorageFileError(f"Unknown object type: {object_type}")
 
@@ -199,8 +218,8 @@ class DtoStorageFile(IDtoStorage):
 
         try:
             matches = self.fs.glob(pattern)
-        except Exception:
-            matches = []
+        except Exception as err:
+            raise DtoStorageFileError(f"Error searching for {object_type} {id}") from err
 
         if not matches:
             raise ObjectNotFoundError(f"Object {id} of type {object_type}")
@@ -223,7 +242,7 @@ class DtoStorageFile(IDtoStorage):
         order_by: str | None = None,
     ) -> List[DTO]:
         if order_by is not None and order_by != "date":
-            raise ValueError(f"Unsupported order_by: {order_by}.Only 'date' supported.")
+            raise ValueError(f"Unsupported order_by: {order_by}. Only 'date' supported.")
 
         search_path = self.storage_location.path + self._get_folder(object_type)
 
@@ -238,15 +257,15 @@ class DtoStorageFile(IDtoStorage):
 
         # Build glob pattern for matching files
         glob_pattern = (
-            search_path +
-            f"**/{object_type.value.lower()}_*." +
-            self.serializer.file_suffix
+            search_path
+            + f"**/{object_type.value.lower()}_*."
+            + self.serializer.file_suffix
         )
 
         try:
             matches = self.fs.glob(glob_pattern)
-        except Exception:
-            matches = []
+        except Exception as err:
+            raise DtoStorageFileError(f"Error listing {object_type}: {err}") from err
 
         results: List[DTO] = []
         for match_path in matches:
@@ -255,7 +274,10 @@ class DtoStorageFile(IDtoStorage):
                     content = f.read()
                 dto = self.serializer.deserialize(content, object_type)
                 results.append(dto)
-            except Exception:
+            except Exception as err:
+                logging.getLogger("datatester").warning(
+                    "Skipping DTO at %s: %s", match_path, err,
+                )
                 continue
 
         if order_by == "date":

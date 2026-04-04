@@ -16,6 +16,8 @@ from src.domain_ports import (
     CreateTestCaseReportCommand,
     CreateTestRunReportCommand,
     SaveReportCommand,
+    LoadTestCaseReportCommand,
+    LoadTestRunReportCommand,
     ListTestCaseReportsCommand,
     ListTestRunReportsCommand,
     CreateTestCaseReportArtifactCommand,
@@ -42,6 +44,16 @@ class ReportDriver:
         """Saves report to internal storage."""
         command = SaveReportCommand(report=report)
         self.adapter.save_report(command=command)
+
+    def load_testcase_report(self, report_id: UUID4) -> TestCaseReportDTO:
+        """Loads a testcase report by ID."""
+        command = LoadTestCaseReportCommand(report_id=report_id)
+        return self.adapter.load_testcase_report(command=command)
+
+    def load_testrun_report(self, report_id: UUID4) -> TestRunReportDTO:
+        """Loads a testrun report by ID."""
+        command = LoadTestRunReportCommand(report_id=report_id)
+        return self.adapter.load_testrun_report(command=command)
 
     def list_testcase_reports(
         self,

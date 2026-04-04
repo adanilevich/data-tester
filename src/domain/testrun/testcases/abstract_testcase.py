@@ -12,9 +12,12 @@ from src.dtos import (
     TestResult,
     TestCaseDTO,
     DomainConfigDTO,
-    SpecificationDTO,
+    SpecDTO,
     TestType,
     TestDefinitionDTO,
+    Importance,
+    NotificationDTO,
+    NotificationProcess,
 )
 
 from src.infrastructure_ports import IBackend, INotifier
@@ -63,20 +66,19 @@ class AbstractTestCase(Checkable):
     ) -> None:
         # set infra
         self.notifiers: List[INotifier] = notifiers
-        self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
         self.backend: IBackend = backend
-        # set testcase data
+        # set testcase data (context fields first, before any notify call)
         self.testcase_id: UUID = uuid4()
+        self.testrun_id: UUID = definition.testrun_id
+        self.testset_id: UUID = definition.testset_id
+        self.testobject: TestObjectDTO = definition.testobject
+        self.scenario: str | None = definition.scenario
+        self.specs: List[SpecDTO] = definition.specs
+        self.domain_config: DomainConfigDTO = definition.domain_config
+        self.labels: List[str] = definition.labels
         self.start_ts: datetime = datetime.now()
         self.end_ts: datetime | None = None
         self.status: TestStatus = TestStatus.NOT_STARTED
-        self.testobject: TestObjectDTO = definition.testobject
-        self.scenario: str | None = definition.scenario
-        self.specs: List[SpecificationDTO] = definition.specs
-        self.domain_config: DomainConfigDTO = definition.domain_config
-        self.testrun_id: UUID = definition.testrun_id
-        self.testset_id: UUID = definition.testset_id
-        self.labels: List[str] = definition.labels
         self.result: TestResult = TestResult.NA
         self.summary: str = "Testcase not started."
         # list of key facts about test execution
@@ -84,10 +86,19 @@ class AbstractTestCase(Checkable):
         self.details: List[Dict[str, str | int | float]] = []  # list of execution details
         self.diff: Dict[str, List | Dict] = dict()  # list of diffs
         self.status = TestStatus.INITIATED
+        self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
 
-    def notify(self, message: str):
+    def notify(self, message: str, importance: Importance = Importance.INFO):
+        notification = NotificationDTO(
+            domain=self.testobject.domain,
+            process=NotificationProcess.TESTCASE,
+            testrun_id=str(self.testrun_id),
+            testcase_id=str(self.testcase_id),
+            importance=importance,
+            message=message,
+        )
         for notifier in self.notifiers:
-            notifier.notify(message)
+            notifier.notify(notification)
 
     def add_fact(self, fact: Dict[str, Any]):
         self.facts.append(fact)
@@ -114,7 +125,7 @@ class AbstractTestCase(Checkable):
             self.notify(f"{check_name.title()}: {str(check_result)}")
             if not check_result:
                 msg = f"Stopping execution due to failed precondition: {check_name}!"
-                self.notify(msg)
+                self.notify(msg, importance=Importance.WARNING)
                 self.result = TestResult.NA
                 self.status = TestStatus.ABORTED
                 return False
@@ -168,7 +179,7 @@ class AbstractTestCase(Checkable):
             self.result = TestResult.NA
             self.status = TestStatus.ERROR
             msg = f"Technical error during test execution: {str(err)}"
-            self.notify(msg)
+            self.notify(msg, importance=Importance.ERROR)
             self.summary = msg
 
         self.end_ts = datetime.now()

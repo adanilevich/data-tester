@@ -7,8 +7,7 @@ import polars as pl
 from src.domain.specification import Specification
 from src.domain.specification.plugins import (
     NamingConventionsFactory,
-    FormatterFactory,
-    SpecDeserializationError,
+    SpecParserFactory,
     SpecNamingConventionsError,
 )
 from src.infrastructure_ports import StorageError
@@ -19,10 +18,10 @@ from src.dtos import (
     LocationDTO,
     TestCaseEntryDTO,
     TestType,
-    SpecificationType,
-    SchemaSpecificationDTO,
-    RowCountSqlDTO,
-    CompareSqlDTO,
+    SpecType,
+    SchemaSpecDTO,
+    RowcountSpecDTO,
+    CompareSpecDTO,
 )
 
 
@@ -45,10 +44,7 @@ class TestSpecification:
         _put(storage, "specs/table1_schema.xlsx", schema_data)
 
         # Add rowcount SQL file for table1
-        rowcount_sql = (
-            "SELECT COUNT(*) as "
-            "__EXPECTED_ROWCOUNT__ FROM table1"
-        )
+        rowcount_sql = "SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM table1"
         _put(
             storage,
             "specs/table1_ROWCOUNT.sql",
@@ -56,10 +52,7 @@ class TestSpecification:
         )
 
         # Add compare sample SQL file for table2
-        compare_sql = (
-            "SELECT id, name FROM table2 "
-            "WHERE id = 1 -- __EXPECTED__"
-        )
+        compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
         _put(
             storage,
             "specs/table2_COMPARE.sql",
@@ -79,22 +72,22 @@ class TestSpecification:
         return NamingConventionsFactory()
 
     @pytest.fixture
-    def formatter_factory(self) -> FormatterFactory:
+    def spec_parser_factory(self) -> SpecParserFactory:
         """Create a FormatterFactory instance"""
-        return FormatterFactory()
+        return SpecParserFactory()
 
     @pytest.fixture
     def specification(
         self,
         user_storage: MemoryUserStorage,
         naming_conventions_factory: NamingConventionsFactory,
-        formatter_factory: FormatterFactory,
+        spec_parser_factory: SpecParserFactory,
     ) -> Specification:
         """Create a Specification instance with all dependencies"""
         return Specification(
             user_storage=user_storage,
             naming_conventions_factory=naming_conventions_factory,
-            formatter_factory=formatter_factory,
+            parser_factory=spec_parser_factory,
         )
 
     def _create_test_xlsx_schema(self) -> bytes:
@@ -119,232 +112,128 @@ class TestSpecification:
     def test_init(self, specification: Specification):
         """Test that Specification initializes correctly"""
         assert specification.user_storage is not None
-        assert (
-            specification.naming_conventions_factory
-            is not None
-        )
-        assert specification.formatter_factory is not None
+        assert specification.naming_conventions_factory is not None
+        assert specification.parser_factory is not None
 
-    def test_find_specs_schema(
-        self, specification: Specification
-    ):
+    def test_find_specs_schema(self, specification: Specification):
         """Test find_specs for schema test type"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table1", testtype=TestType.SCHEMA
+            testobject="table1", testtype=TestType.SCHEMA, domain="test_domain"
         )
 
-        specs = specification.find_specs(
-            location, testcase, "test_domain"
-        )
+        specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 1
-        assert isinstance(specs[0], SchemaSpecificationDTO)
+        assert isinstance(specs[0], SchemaSpecDTO)
         assert specs[0].testobject == "table1"
-        assert (
-            specs[0].spec_type == SpecificationType.SCHEMA
-        )
+        assert specs[0].spec_type == SpecType.SCHEMA
+        assert specs[0].columns is not None
         assert "id" in specs[0].columns
         assert "name" in specs[0].columns
         assert "created_at" in specs[0].columns
 
-    def test_find_specs_rowcount(
-        self, specification: Specification
-    ):
+    def test_find_specs_rowcount(self, specification: Specification):
         """Test find_specs for rowcount test type"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table1", testtype=TestType.ROWCOUNT
+            testobject="table1", testtype=TestType.ROWCOUNT, domain="test_domain"
         )
 
-        specs = specification.find_specs(
-            location, testcase, "test_domain"
-        )
+        specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 1
-        assert isinstance(specs[0], RowCountSqlDTO)
+        assert isinstance(specs[0], RowcountSpecDTO)
         assert specs[0].testobject == "table1"
-        assert (
-            specs[0].spec_type
-            == SpecificationType.ROWCOUNT_SQL
-        )
+        assert specs[0].spec_type == SpecType.ROWCOUNT
+        assert specs[0].query is not None
         assert "__EXPECTED_ROWCOUNT__" in specs[0].query
 
-    def test_find_specs_compare(
-        self, specification: Specification
-    ):
+    def test_find_specs_compare(self, specification: Specification):
         """Test find_specs for compare sample test type"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table2", testtype=TestType.COMPARE
+            testobject="table2", testtype=TestType.COMPARE, domain="test_domain"
         )
 
-        specs = specification.find_specs(
-            location, testcase, "test_domain"
-        )
+        specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 2
-        assert (
-            specs[0].spec_type
-            == SpecificationType.COMPARE_SQL
-        )
-        assert (
-            specs[1].spec_type == SpecificationType.SCHEMA
-        )
+        assert specs[0].spec_type == SpecType.COMPARE
+        assert specs[1].spec_type == SpecType.SCHEMA
 
-    def test_find_specs_no_matching_files(
-        self, specification: Specification
-    ):
+    def test_find_specs_no_matching_files(self, specification: Specification):
         """Test find_specs when no matching files are found"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
             testobject="nonexistent",
             testtype=TestType.SCHEMA,
+            domain="test_domain",
         )
 
-        specs = specification.find_specs(
-            location, testcase, "test_domain"
-        )
+        specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 0
 
-    def test_find_specs_handles_parsing_errors(
-        self, specification: Specification
-    ):
+    def test_find_specs_handles_parsing_errors(self, specification: Specification):
         """Test that find_specs gracefully handles parsing errors"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table1", testtype=TestType.SCHEMA
+            testobject="table1",
+            testtype=TestType.SCHEMA,
+            domain="test_domain",
         )
 
-        mock_formatter = Mock()
-        mock_formatter.deserialize.side_effect = (
-            SpecDeserializationError("Parse error")
+        error_spec = SchemaSpecDTO(
+            location=location, testobject="table1", message="Parse error"
         )
+        mock_parser = Mock()
+        mock_parser.parse.return_value = error_spec
 
         with patch.object(
-            specification.formatter_factory,
-            "get_formatter",
-            return_value=mock_formatter,
+            specification.parser_factory,
+            "get_parser",
+            return_value=mock_parser,
         ):
-            specs = specification.find_specs(
-                location, testcase, "test_domain"
-            )
-            assert len(specs) == 0
+            specs = specification.list_specs(location, testcase)
+            assert len(specs) == 1
+            assert specs[0].message == "Parse error"
 
-    def test_find_specs_with_unsupported_test_type(
-        self, specification: Specification
-    ):
+    def test_find_specs_with_unsupported_test_type(self, specification: Specification):
         """Test find_specs with an unsupported test type"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table1", testtype=TestType.UNKNOWN
+            testobject="table1",
+            testtype=TestType.UNKNOWN,
+            domain="test_domain",
         )
 
         with pytest.raises(SpecNamingConventionsError):
-            specification.find_specs(
-                location, testcase, "test_domain"
-            )
+            specification.list_specs(location, testcase)
 
-    def test_parse_spec_file_schema(
-        self, specification: Specification
-    ):
-        """Test parse_spec_file with a schema Excel file"""
-        schema_data = self._create_test_xlsx_schema()
-
-        specs = specification.parse_spec_file(
-            schema_data, "test_table"
-        )
-
-        assert len(specs) == 1
-        assert isinstance(specs[0], SchemaSpecificationDTO)
-        assert specs[0].testobject == "test_table"
-        assert (
-            specs[0].location.path
-            == "upload://test_table_schema.file"
-        )
-
-    def test_parse_spec_file_rowcount_sql(
-        self, specification: Specification
-    ):
-        """Test parse_spec_file with rowcount SQL content"""
-        sql_content = (
-            "SELECT COUNT(*) as "
-            "__EXPECTED_ROWCOUNT__ FROM table1"
-        ).encode()
-
-        specs = specification.parse_spec_file(
-            sql_content, "test_table"
-        )
-
-        assert len(specs) == 1
-        assert isinstance(specs[0], RowCountSqlDTO)
-        assert specs[0].testobject == "test_table"
-        assert (
-            specs[0].location.path
-            == "upload://test_table_rowcount_sql.file"
-        )
-
-    def test_parse_spec_file_compare_sql(
-        self, specification: Specification
-    ):
-        """Test parse_spec_file with compare SQL content"""
-        sql_content = (
-            "SELECT * FROM table1 -- __EXPECTED__".encode()
-        )
-
-        specs = specification.parse_spec_file(
-            sql_content, "test_table"
-        )
-
-        assert len(specs) == 1
-        assert isinstance(specs[0], CompareSqlDTO)
-        assert specs[0].testobject == "test_table"
-        assert (
-            specs[0].location.path
-            == "upload://test_table_compare_sql.file"
-        )
-
-    def test_parse_spec_file_invalid_content(
-        self, specification: Specification
-    ):
-        """Test parse_spec_file with invalid content"""
-        invalid_content = b"invalid content"
-
-        specs = specification.parse_spec_file(
-            invalid_content, "test_table"
-        )
-
-        assert len(specs) == 0
-
-    def test_find_specs_handles_file_read_errors(
-        self, specification: Specification
-    ):
+    def test_find_specs_handles_file_read_errors(self, specification: Specification):
         """Test that find_specs gracefully handles file read errors"""
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table1", testtype=TestType.SCHEMA
+            testobject="table1",
+            testtype=TestType.SCHEMA,
+            domain="test_domain",
         )
 
         mock_storage = Mock()
         mock_storage.list_objects.return_value = [
-            LocationDTO(
-                "memory://specs/table1_schema.xlsx"
-            )
+            LocationDTO("memory://specs/table1_schema.xlsx")
         ]
-        mock_storage.read_object.side_effect = (
-            StorageError("Read error")
-        )
+        mock_storage.read_object.side_effect = StorageError("Read error")
 
         with patch.object(
             specification,
             "user_storage",
             mock_storage,
         ):
-            specs = specification.find_specs(
-                location, testcase, "test_domain"
-            )
-            assert len(specs) == 0
+            specs = specification.list_specs(location, testcase)
+            assert len(specs) == 1
+            assert specs[0].message == "Couldn't read file from storage"
 
     def test_find_specs_partial_success(
         self,
@@ -360,9 +249,7 @@ class TestSpecification:
         )
 
         # Also add a valid SQL file for same testobject
-        sql_content = (
-            "SELECT COUNT(*) as __EXPECTED__ FROM table3"
-        )
+        sql_content = "SELECT COUNT(*) as __EXPECTED__ FROM table3"
         _put(
             user_storage,
             "specs/table3_COMPARE.sql",
@@ -371,18 +258,19 @@ class TestSpecification:
 
         location = LocationDTO("memory://specs/")
         testcase = TestCaseEntryDTO(
-            testobject="table3", testtype=TestType.COMPARE
+            testobject="table3",
+            testtype=TestType.COMPARE,
+            domain="test_domain",
         )
 
-        specs = specification.find_specs(
-            location, testcase, "test_domain"
-        )
+        specs = specification.list_specs(location, testcase)
 
-        assert len(specs) == 1
-        assert isinstance(specs[0], CompareSqlDTO)
-        assert specs[0].testobject == "table3"
-        assert (
-            specs[0].spec_type
-            == SpecificationType.COMPARE_SQL
-        )
-        assert "__EXPECTED__" in specs[0].query
+        assert len(specs) == 2
+        successful = [s for s in specs if s.message is None]
+        errors = [s for s in specs if s.message is not None]
+        assert len(successful) == 1
+        assert isinstance(successful[0], CompareSpecDTO)
+        assert successful[0].testobject == "table3"
+        assert successful[0].query is not None
+        assert "__EXPECTED__" in successful[0].query
+        assert len(errors) == 1

@@ -10,8 +10,8 @@ from . import (
     SpecNotFoundError,
 )
 from src.dtos import (
-    CompareSqlDTO,
-    SchemaSpecificationDTO,
+    CompareSpecDTO,
+    SchemaSpecDTO,
     DBInstanceDTO,
     TestResult,
     TestType,
@@ -49,22 +49,25 @@ class CompareTestCase(AbstractTestCase):
     """
 
     ttype = TestType.COMPARE
-    required_specs = ["compare_sql", "schema"]
+    required_specs = ["compare", "schema"]
     preconditions = [
         "specs_are_unique",
+        "specs_not_empty",
         "primary_keys_are_specified",
         "testobject_exists",
         "testobject_not_empty",
     ]
 
     def _execute(self):
+        query = self.sql.query
+        assert query is not None  # guaranteed by specs_not_empty precondition
         self.db = DBInstanceDTO.from_testobject(self.testobject)
-        self.translated_query = self.backend.translate_query(self.sql.query, self.db)
+        self.translated_query = self.backend.translate_query(query, self.db)
 
         self.add_fact({"Primary keys": ",".join(self.schema.primary_keys or [])})
         self.add_fact({"Schema specification": self.schema.location.path})
         self.add_fact({"Compare SQL": self.sql.location.path})
-        self.add_detail({"Original query": self.sql.query})
+        self.add_detail({"Original query": query})
         self.add_detail({"Applied query": self.translated_query})
 
         # get schema defined by testquery
@@ -115,21 +118,21 @@ class CompareTestCase(AbstractTestCase):
         return sample_size
 
     @property
-    def sql(self) -> CompareSqlDTO:
+    def sql(self) -> CompareSpecDTO:
         for spec in self.specs or []:
-            if isinstance(spec, CompareSqlDTO):
+            if isinstance(spec, CompareSpecDTO):
                 return spec
         raise SpecNotFoundError("Compare sql not found")
 
     @property
-    def schema(self) -> SchemaSpecificationDTO:
+    def schema(self) -> SchemaSpecDTO:
         for spec in self.specs or []:
-            if isinstance(spec, SchemaSpecificationDTO):
+            if isinstance(spec, SchemaSpecDTO):
                 return spec
         raise SpecNotFoundError("Schema spec not found")
 
     @time_it(step_name="getting schema of test query")
-    def _get_schema_from_query(self) -> SchemaSpecificationDTO:
+    def _get_schema_from_query(self) -> SchemaSpecDTO:
         try:
             schema = self.backend.get_schema_from_query(self.translated_query, self.db)
         except Exception as err:
@@ -137,6 +140,7 @@ class CompareTestCase(AbstractTestCase):
                 "Error while obtaining schema from test query"
             ) from err
 
+        assert schema.columns is not None  # backend always returns populated schema
         pks = self.schema.primary_keys or []
         missing_pks = [pk for pk in pks if pk not in schema.columns]
         if not len(missing_pks) == 0:
@@ -147,7 +151,7 @@ class CompareTestCase(AbstractTestCase):
         return schema
 
     @time_it(step_name="sampling primary keys from query")
-    def _sample_keys_from_query(self, schema: SchemaSpecificationDTO) -> List[str]:
+    def _sample_keys_from_query(self, schema: SchemaSpecDTO) -> List[str]:
         try:
             sample_keys = self.backend.get_sample_keys(
                 query=self.translated_query,
@@ -165,7 +169,7 @@ class CompareTestCase(AbstractTestCase):
 
     @time_it(step_name="sampling fixtures from query")
     def _sample_data_from_query(
-        self, sample_keys: List[str], schema: SchemaSpecificationDTO
+        self, sample_keys: List[str], schema: SchemaSpecDTO
     ) -> pl.DataFrame:
         try:
             expected = self.backend.get_sample_from_query(
@@ -182,7 +186,7 @@ class CompareTestCase(AbstractTestCase):
 
     @time_it(step_name="sampling fixtures from testobject")
     def _sample_data_from_testobject(
-        self, sample_keys: List[str], columns: List[str], schema: SchemaSpecificationDTO
+        self, sample_keys: List[str], columns: List[str], schema: SchemaSpecDTO
     ) -> pl.DataFrame:
         try:
             actual = self.backend.get_sample_from_testobject(

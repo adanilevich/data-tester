@@ -1,24 +1,39 @@
+from src.domain.specification.plugins.i_spec_parser import SpecParserError
 import io
 import pytest
 import polars as pl
 
 from src.dtos import (
-    SpecificationType,
-    SchemaContent,
-    CompareSqlContent,
-    RowCountSqlContent,
+    SpecType,
+    CompareSpecDTO,
+    SchemaSpecDTO,
+    RowcountSpecDTO,
+    SpecDTO,
+    LocationDTO,
 )
-from src.domain.specification.plugins.spec_formatter import (
-    XlsxSchemaFormatter,
-    RowcountSqlFormatter,
-    CompareSqlFormatter,
-    FormatterFactory,
-    SpecFormatterError,
-    SpecDeserializationError,
+from src.domain.specification.plugins import (
+    XlsxSchemaParser,
+    RowcountSqlParser,
+    CompareSqlParser,
+    SpecParserFactory,
 )
 
 
-class TestXlsxSchemaFormatter:
+def _make_spec(spec_type: SpecType) -> SpecDTO:
+    testobject = "to"
+    loc = LocationDTO("memory://any")
+    if spec_type == SpecType.COMPARE:
+        return CompareSpecDTO(location=loc, testobject=testobject)
+    elif spec_type == SpecType.ROWCOUNT:
+        return RowcountSpecDTO(location=loc, testobject=testobject)
+    elif spec_type == SpecType.SCHEMA:
+        return SchemaSpecDTO(location=loc, testobject=testobject)
+    else:
+        raise ValueError("Error in tests: unknown spec type")
+
+
+
+class TestXlsxSchemaParser:
     """Test cases for XlsxSchemaFormatter class."""
 
     def test_deserialize_basic_schema(self):
@@ -37,11 +52,11 @@ class TestXlsxSchemaFormatter:
         file_content = excel_buffer.read()
 
         # When deserializing the file
-        result = XlsxSchemaFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.SCHEMA)
+        result = XlsxSchemaParser().parse(file_content, empty_spec)
 
         # Then the result is a SchemaContent object with the correct properties
-        assert isinstance(result, SchemaContent)
-        assert result.spec_type == SpecificationType.SCHEMA
+        assert isinstance(result, SchemaSpecDTO)
         assert result.columns == {
             "id": "INTEGER",
             "name": "VARCHAR(255)",
@@ -66,11 +81,12 @@ class TestXlsxSchemaFormatter:
         file_content = excel_buffer.read()
 
         # When deserializing the file
-        result = XlsxSchemaFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.SCHEMA)
+        result = XlsxSchemaParser().parse(file_content, empty_spec)
 
         # Then the result is a SchemaContent object without partition and cluster columns
-        assert isinstance(result, SchemaContent)
-        assert result.spec_type == SpecificationType.SCHEMA
+        assert isinstance(result, SchemaSpecDTO)
+        assert result.spec_type == SpecType.SCHEMA
         assert result.columns == {
             "id": "INTEGER",
             "name": "VARCHAR(255)",
@@ -79,6 +95,7 @@ class TestXlsxSchemaFormatter:
         assert result.primary_keys == ["id"]
         assert result.partition_columns == []
         assert result.clustering_columns == []
+        assert not result.empty
 
     def test_deserialize_schema_with_none_columns(self):
         # Given a schema xlsx file with None columns
@@ -94,19 +111,21 @@ class TestXlsxSchemaFormatter:
         file_content = excel_buffer.read()
 
         # When deserializing the file
-        result = XlsxSchemaFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.SCHEMA)
+        result = XlsxSchemaParser().parse(file_content, empty_spec)
 
         # Then the resulting SchemaContent does not contain the None column
-        assert isinstance(result, SchemaContent)
+        assert isinstance(result, SchemaSpecDTO)
         assert result.columns == {
             "id": "INTEGER",
             "name": "VARCHAR(255)",
             "email": "VARCHAR(255)",
         }
         assert result.primary_keys == ["id"]
+        assert not result.empty
 
 
-class TestSqlFormatter:
+class TestSqlParser:
     """Test cases for SqlFormatter class."""
 
     def test_deserialize_compare_sql(self):
@@ -119,12 +138,13 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When
-        result = CompareSqlFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.COMPARE)
+        result = CompareSqlParser().parse(file_content, empty_spec)
 
         # Then
-        assert isinstance(result, CompareSqlContent)
-        assert result.spec_type == SpecificationType.COMPARE_SQL
+        assert isinstance(result, CompareSpecDTO)
         assert sql_content == result.query
+        assert not result.empty
 
     def test_deserialize_rowcount_sql(self):
         # Given a rowcount sql file
@@ -136,84 +156,46 @@ class TestSqlFormatter:
         file_content = sql_content.encode("utf-8")
 
         # When
-        result = RowcountSqlFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.ROWCOUNT)
+        result = RowcountSqlParser().parse(file_content, empty_spec)
 
         # Then
-        assert isinstance(result, RowCountSqlContent)
-        assert result.spec_type == SpecificationType.ROWCOUNT_SQL
+        assert isinstance(result, RowcountSpecDTO)
         assert sql_content == result.query
+        assert not result.empty
 
     def test_deserialize_sql_without_markers_raises_error(self):
         # Given a sql file without __EXPECTED__ or __EXPECTED_ROWCOUNT__ markers
         sql_content = "SELECT * FROM customers;"
         file_content = sql_content.encode("utf-8")
 
-        # When deserializing the file an error is raised
-        with pytest.raises(SpecDeserializationError, match="Unknown sql format"):
-            RowcountSqlFormatter().deserialize(file_content)
-        with pytest.raises(SpecDeserializationError, match="Unknown sql format"):
-            CompareSqlFormatter().deserialize(file_content)
+        empty_spec = _make_spec(spec_type=SpecType.ROWCOUNT)
+        result = RowcountSqlParser().parse(file_content, empty_spec)
+
+        # Spec should be empty
+        assert result.empty
 
 
-class TestFormatterFactory:
+class TestParserFactory:
     """Test cases for FormatterFactory class."""
 
-    def test_get_formatter_for_schema(self):
-        # Given a schema specification type
-        factory = FormatterFactory()
-        spec_type = SpecificationType.SCHEMA
+    def test_get_parser_for_schema(self):
+        factory = SpecParserFactory()
+        result = factory.get_parser("test_domain", SpecType.SCHEMA)
+        assert isinstance(result, XlsxSchemaParser)
 
-        # When getting the formatter
-        result = factory.get_formatter(spec_type)
+    def test_get_parser_for_rowcount(self):
+        factory = SpecParserFactory()
+        result = factory.get_parser("test_domain", SpecType.ROWCOUNT)
+        assert isinstance(result, RowcountSqlParser)
 
-        # Then the result is an XlsxSchemaFormatter instance
-        assert isinstance(result, XlsxSchemaFormatter)
+    def test_get_parser_for_compare(self):
+        factory = SpecParserFactory()
+        result = factory.get_parser("test_domain", SpecType.COMPARE)
+        assert isinstance(result, CompareSqlParser)
 
-    def test_get_formatter_for_rowcount_sql(self):
-        # Given a rowcount sql specification type
-        factory = FormatterFactory()
-        spec_type = SpecificationType.ROWCOUNT_SQL
+    def test_get_parser_for_unsupported_type_raises_error(self):
+        factory = SpecParserFactory()
+        with pytest.raises(SpecParserError, match="Parsing.*is not supported"):
+            factory.get_parser("test_domain", SpecType.ABSTRACT)
 
-        # When getting the formatter
-        result = factory.get_formatter(spec_type)
-
-        # Then the result is a SqlFormatter instance
-        assert isinstance(result, RowcountSqlFormatter)
-
-    def test_get_formatter_for_compare_sql(self):
-        # Given a compare sql specification type
-        factory = FormatterFactory()
-        spec_type = SpecificationType.COMPARE_SQL
-
-        # When getting the formatter
-        result = factory.get_formatter(spec_type)
-
-        # Then the result is a SqlFormatter instance
-        assert isinstance(result, CompareSqlFormatter)
-
-    def test_get_formatter_for_unsupported_type_raises_error(self):
-        # Given an unsupported specification type
-        factory = FormatterFactory()
-
-        class MockSpecType:
-            pass
-
-        unsupported_type = MockSpecType()
-
-        # When getting the formatter an error is raised
-        with pytest.raises(SpecFormatterError, match="Parsing.*is not supported"):
-            factory.get_formatter(unsupported_type)  # type: ignore
-
-    def test_formatter_factory_returns_different_instances(self):
-        # Given multiple calls to get formatter
-        factory = FormatterFactory()
-        spec_type = SpecificationType.SCHEMA
-
-        # When getting the formatter
-        formatter1 = factory.get_formatter(spec_type)
-        formatter2 = factory.get_formatter(spec_type)
-
-        # Then the result is an XlsxSchemaFormatter instance
-        assert isinstance(formatter1, XlsxSchemaFormatter)
-        assert isinstance(formatter2, XlsxSchemaFormatter)
-        assert formatter1 is not formatter2

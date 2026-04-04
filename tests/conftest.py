@@ -1,15 +1,12 @@
 from abc import ABC, abstractmethod
 from typing import Dict, List
-import time
 from uuid import uuid4
 from datetime import datetime
 
 import pytest
-import polars as pl
-from fsspec.implementations.local import LocalFileSystem
-from urllib import request
 
-from src.dtos.specification_dtos import SpecificationDTO, SpecificationType
+from src.dtos.notification_dtos import Importance
+from src.dtos.specification_dtos import SpecDTO, SpecType
 from src.dtos.domain_config_dtos import (
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
@@ -26,9 +23,9 @@ from src.dtos.testrun_dtos import (
 )
 from src.dtos.report_dtos import TestCaseReportDTO, TestRunReportDTO
 from src.dtos.testrun_dtos import TestRunDTO
-from src.dtos.storage import LocationDTO
+from src.dtos.storage_dtos import LocationDTO
 from src.infrastructure_ports import IBackend
-from src.infrastructure.notifier import InMemoryNotifier, StdoutNotifier
+from src.infrastructure.notifier import InMemoryNotifier
 from src.infrastructure.backend.dummy import DummyBackend
 from src.domain.testrun.testcases import (
     AbstractTestCase,
@@ -40,7 +37,6 @@ from src.domain.testrun.testcases import (
     DummyExceptionTestCase,
 )
 from src.domain.testrun.precondition_checks import Checkable
-from tests.fixtures.demo.prepare_data import clean_up, prepare_data
 
 
 @pytest.fixture(autouse=True)
@@ -61,11 +57,6 @@ def dummy_backend() -> IBackend:
 @pytest.fixture
 def in_memory_notifier() -> InMemoryNotifier:
     return InMemoryNotifier()
-
-
-@pytest.fixture
-def stdout_notifier() -> StdoutNotifier:
-    return StdoutNotifier()
 
 
 @pytest.fixture
@@ -113,7 +104,7 @@ class DummyCheckable(Checkable):
             self.details = []
         self.details.append(detail)
 
-    def notify(self, message: str):
+    def notify(self, message: str, importance: Importance = Importance.INFO):
         self.notifications.append(message)
 
 
@@ -147,23 +138,23 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
         def create(self, ttype: TestType) -> AbstractTestCase:
             testcase_class: type[AbstractTestCase]
             if ttype == TestType.SCHEMA:
-                spec_type = SpecificationType.SCHEMA
+                spec_type = SpecType.SCHEMA
                 testcase_class = SchemaTestCase
             elif ttype == TestType.ROWCOUNT:
-                spec_type = SpecificationType.ROWCOUNT_SQL
+                spec_type = SpecType.ROWCOUNT
                 testcase_class = RowCountTestCase
             elif ttype == TestType.COMPARE:
-                spec_type = SpecificationType.COMPARE_SQL
+                spec_type = SpecType.COMPARE
                 testcase_class = CompareTestCase
             elif ttype == TestType.DUMMY_OK:
                 testcase_class = DummyOkTestCase
-                spec_type = SpecificationType.SCHEMA
+                spec_type = SpecType.SCHEMA
             elif ttype == TestType.DUMMY_NOK:
                 testcase_class = DummyNokTestCase
-                spec_type = SpecificationType.SCHEMA
+                spec_type = SpecType.SCHEMA
             elif ttype == TestType.DUMMY_EXCEPTION:
                 testcase_class = DummyExceptionTestCase
-                spec_type = SpecificationType.SCHEMA
+                spec_type = SpecType.SCHEMA
             else:
                 raise ValueError(f"Conftest: Invalid test type: {ttype}")
 
@@ -171,12 +162,12 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
                 testobject=testobject,
                 testtype=ttype,
                 specs=[
-                    SpecificationDTO(
+                    SpecDTO(
                         spec_type=spec_type,
                         location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
                     ),
-                    SpecificationDTO(
+                    SpecDTO(
                         spec_type=spec_type,
                         location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
@@ -190,71 +181,13 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
             testcase = testcase_class(
                 definition=definition,
                 backend=DummyBackend(),
-                notifiers=[InMemoryNotifier(), StdoutNotifier()],
+                notifiers=[InMemoryNotifier()],
             )
 
             return testcase
 
     return TestCaseCreator()
 
-
-@pytest.fixture(scope="session")
-def prepare_local_data():
-    prepare_data()
-    yield
-    clean_up()
-
-
-@pytest.fixture
-def performance_test_data() -> pl.DataFrame:  # type: ignore
-    def download_performance_test_data(source_file: str, target_file: str):
-        print("Starting download from", source_file)
-        start = time.time()
-        request.urlretrieve(source_file, target_file)
-        end = time.time()
-        print("Download Duration: ", (end - start), "s")
-
-    def read_as_parquet(target_file: str) -> pl.DataFrame:
-        start = time.time()
-        df = pl.read_parquet(target_file)
-        end = time.time()
-        print("Reading parquet in a DataFrame: ", (end - start), "s")
-        print("Dataset shape:", df.shape)
-        return df
-
-    def copy_data(df: pl.DataFrame) -> pl.DataFrame:
-        start = time.time()
-        df = df.hstack(df.cast(pl.String).rename(lambda x: x + "_str"))
-        df = df.hstack(df.rename(lambda x: x + "_copy"))
-        df = df.hstack(df.rename(lambda x: x + "_again"))
-        end = time.time()
-        print("Copying fixtures 8-fold: ", (end - start), "s")
-        print("Dataset shape:", df.shape)
-
-        return df
-
-    def clean_up_performance_test_data(target_file: str):
-        fs = LocalFileSystem()
-        if fs.exists(path=target_file):
-            print("Deleting target file", target_file)
-            fs.rm_file(target_file)
-
-    source_file_ = (
-        "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2015-01.parquet"
-    )
-    target_file_ = "yellow_tripdata_2015-01.parquet"
-
-    start_ = time.time()
-    download_performance_test_data(source_file_, target_file_)
-    df_ = read_as_parquet(target_file_)
-    df_ = copy_data(df_)
-    end_ = time.time()
-
-    print("Overall time to set up fixture for performance test: ", (end_ - start_), "s")
-
-    yield df_
-
-    clean_up_performance_test_data(target_file_)
 
 
 @pytest.fixture

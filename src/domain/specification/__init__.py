@@ -1,8 +1,3 @@
-from .plugins import NamingConventionsFactory, FormatterFactory
+# ruff: noqa
+from .plugins import NamingConventionsFactory, SpecParserFactory
 from .specification import Specification
-
-__all__: list[str] = [
-    "NamingConventionsFactory",
-    "FormatterFactory",
-    "Specification",
-]

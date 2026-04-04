@@ -2,7 +2,7 @@ from typing import List, Optional, Dict, Literal
 from pydantic import Field
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import SchemaSpecificationDTO, TestResult, DTO, TestType
+from src.dtos import SchemaSpecDTO, TestResult, DTO, TestType
 
 
 class SchemaTestCaseError(TestCaseError):
@@ -37,7 +37,9 @@ class SchemaTestCase(AbstractTestCase):
 
     ttype: Literal[TestType.SCHEMA] = TestType.SCHEMA
     required_specs: list[str] = ["schema"]
-    preconditions: list[str] = ["specs_are_unique", "testobject_exists"]
+    preconditions: list[str] = [
+        "specs_are_unique", "specs_not_empty", "testobject_exists",
+    ]
 
     def _execute(self):
         self.column_comparison_result: Optional[bool] = None
@@ -45,8 +47,8 @@ class SchemaTestCase(AbstractTestCase):
         self.clustering_comparison_result: Optional[bool] = None
         self.pk_comparison_result: Optional[bool] = None
 
-        expected: SchemaSpecificationDTO = self.schema
-        actual: SchemaSpecificationDTO = self._get_actual_schema()
+        expected: SchemaSpecDTO = self.schema
+        actual: SchemaSpecDTO = self._get_actual_schema()
 
         self.add_fact({"Specification": expected.location.path})
 
@@ -103,13 +105,13 @@ class SchemaTestCase(AbstractTestCase):
         return None
 
     @property
-    def schema(self) -> SchemaSpecificationDTO:
+    def schema(self) -> SchemaSpecDTO:
         for spec in self.specs or []:
-            if isinstance(spec, SchemaSpecificationDTO):
+            if isinstance(spec, SchemaSpecDTO):
                 return spec
         raise SpecNotFoundError("Schema specification not found")
 
-    def _get_actual_schema(self) -> SchemaSpecificationDTO:
+    def _get_actual_schema(self) -> SchemaSpecDTO:
         self.notify(f"Getting data object schema for testobject {self.testobject.name}")
         result_schema_raw = self.backend.get_schema(self.testobject)
         result_schema = self.backend.harmonize_schema(result_schema_raw)
@@ -117,8 +119,8 @@ class SchemaTestCase(AbstractTestCase):
 
     def _compare_columns(
         self,
-        expected: SchemaSpecificationDTO,
-        actual: SchemaSpecificationDTO,
+        expected: SchemaSpecDTO,
+        actual: SchemaSpecDTO,
     ) -> ColumnDiffDTO:
         """
         Returns the comparison result as a ComnDiffDTO object and overall OK/NOK result
@@ -128,6 +130,8 @@ class SchemaTestCase(AbstractTestCase):
         diff = ColumnDiffDTO(diffs=[])
         result = True
         compare_datatypes = self.domain_config.testcases.schema.compare_datatypes
+        # narrowing for type checker; guaranteed by specs_not_empty precondition
+        assert expected.columns is not None and actual.columns is not None
 
         for expected_col, expected_dtype in expected.columns.items():
             diff_entry = ColumnDiffEntryDTO()
@@ -173,8 +177,8 @@ class SchemaTestCase(AbstractTestCase):
 
     def _compare_partitioning(
         self,
-        expected: SchemaSpecificationDTO,
-        actual: SchemaSpecificationDTO,
+        expected: SchemaSpecDTO,
+        actual: SchemaSpecDTO,
     ) -> Optional[Dict[str, List[str]]]:
         if self.backend.supports_partitions:
             diff = {
@@ -191,8 +195,8 @@ class SchemaTestCase(AbstractTestCase):
 
     def _compare_clustering(
         self,
-        expected: SchemaSpecificationDTO,
-        actual: SchemaSpecificationDTO,
+        expected: SchemaSpecDTO,
+        actual: SchemaSpecDTO,
     ) -> Optional[Dict[str, List[str]]]:
         if self.backend.supports_clustering:
             diff = {
@@ -208,8 +212,8 @@ class SchemaTestCase(AbstractTestCase):
 
     def _compare_primary_keys(
         self,
-        expected: SchemaSpecificationDTO,
-        actual: SchemaSpecificationDTO,
+        expected: SchemaSpecDTO,
+        actual: SchemaSpecDTO,
     ) -> Optional[Dict[str, List[str]]]:
         if self.backend.supports_primary_keys:
             diff = {

@@ -13,10 +13,7 @@ from src.domain.report.plugins import (
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
 )
-from src.domain.specification.plugins import (
-    FormatterFactory as SpecFormatterFactory,
-    NamingConventionsFactory,
-)
+from src.domain.specification import SpecParserFactory, NamingConventionsFactory
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,
@@ -89,7 +86,7 @@ class TestCliDependencyInjectorInit:
         )
         assert isinstance(
             injector.spec_formatter_factory,
-            SpecFormatterFactory,
+            SpecParserFactory,
         )
 
 

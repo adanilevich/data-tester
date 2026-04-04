@@ -36,11 +36,15 @@ class LocationDTO(DTO):
     def validate_path(cls, v):
         if len(v.split("://")) != 2:
             raise ValueError(f"Invalid path: one storage qualifier '://' expected: {v}")
-        if len(v.split(".")) > 2:
+        # check dots only in the last path segment (filename), not in directories
+        path_part = v.split("://")[1]
+        stripped = path_part.rstrip("/")
+        filename = stripped.rsplit("/", 1)[-1] if "/" in stripped else stripped
+        if len(filename.split(".")) > 2:
             if v.startswith("duckdb://"):  # database paths are separated by '.'
                 pass
             else:
-                raise ValueError(f"Invalid path: only one '.' allowed in path: {v}")
+                raise ValueError(f"Invalid path: only one '.' allowed in filename: {v}")
         return v
 
     def model_post_init(self, __context):
@@ -68,7 +72,7 @@ class LocationDTO(DTO):
 
     @property
     def is_db(self) -> bool:
-        return True if self.path.startswith(("duckdb:://")) else False
+        return True if self.path.startswith("duckdb://") else False
 
     @property
     def filename(self) -> str | None:

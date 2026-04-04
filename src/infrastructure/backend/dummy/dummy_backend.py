@@ -4,10 +4,10 @@ import polars as pl
 
 from src.infrastructure_ports import IBackend
 from src.dtos import (
-    SchemaSpecificationDTO,
+    SchemaSpecDTO,
     DBInstanceDTO,
     TestObjectDTO,
-    SpecificationType,
+    SpecType,
     LocationDTO,
 )
 
@@ -23,25 +23,25 @@ class DummyBackend(IBackend):
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
         return ["testobject1", "testobject2"]
 
-    def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecificationDTO:
-        return SchemaSpecificationDTO(
+    def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecDTO:
+        return SchemaSpecDTO(
             location=LocationDTO(f"dummy://{testobject.name}.dummy"),
             testobject=testobject.name,
             columns={"my_col": "my_dtype"},
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
         )
 
     def get_schema_from_query(
         self, query: str, db: DBInstanceDTO
-    ) -> SchemaSpecificationDTO:
-        return SchemaSpecificationDTO(
+    ) -> SchemaSpecDTO:
+        return SchemaSpecDTO(
             location=LocationDTO("dummy://user_query.dummy"),
             testobject="user query",
             columns={"my_col": "my_dtype"},
-            spec_type=SpecificationType.SCHEMA,
+            spec_type=SpecType.SCHEMA,
         )
 
-    def harmonize_schema(self, schema: SchemaSpecificationDTO) -> SchemaSpecificationDTO:
+    def harmonize_schema(self, schema: SchemaSpecDTO) -> SchemaSpecDTO:
         return schema
 
     def translate_query(self, query: str, db: DBInstanceDTO) -> str:
@@ -61,7 +61,7 @@ class DummyBackend(IBackend):
         primary_keys: List[str],
         sample_size: int,
         db: DBInstanceDTO,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> List[str]:
         return ["a_10", "b_20"]
 
@@ -72,7 +72,7 @@ class DummyBackend(IBackend):
         key_sample: List[str],
         db: DBInstanceDTO,
         columns: Optional[List[str]] = None,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> pl.DataFrame:
         return pl.DataFrame({"a": [10, 20], "b": [30, 40]})
 
@@ -82,6 +82,6 @@ class DummyBackend(IBackend):
         primary_keys: List[str],
         key_sample: List[str],
         columns: Optional[List[str]] = None,
-        cast_to: Optional[SchemaSpecificationDTO] = None,
+        cast_to: Optional[SchemaSpecDTO] = None,
     ) -> pl.DataFrame:
         return pl.DataFrame({"a": [10, 20], "b": [30, 40]})

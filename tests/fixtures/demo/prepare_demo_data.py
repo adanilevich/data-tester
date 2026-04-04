@@ -74,8 +74,8 @@ See ddl_*.sql (table creation) and dml_*.sql (data loading).
 
 Public API
 ----------
-  prepare_data(location)  — create the full DWH at the given path
-  clean_up()              — delete everything created by prepare_data
+  prepare_demo_data(location)   — create the full DWH at the given path
+  clean_up_demo_data()          — delete everything created by prepare_demo_data
 """
 
 from __future__ import annotations
@@ -87,7 +87,7 @@ import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 
-__all__ = ["prepare_data", "clean_up"]
+__all__ = ["prepare_demo_data", "clean_up_demo_data"]
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -343,7 +343,7 @@ def _count_rows(table_fqn: str) -> int:
 # ---------------------------------------------------------------------------
 
 
-def prepare_data(location: Path = Path(__file__).parent) -> None:
+def prepare_demo_data(location: Path = Path(__file__).parent) -> None:
     """Create the full mini-DWH (raw + staging + core layers) at *location*."""
     global _active_location  # noqa: PLW0603
     _active_location = location
@@ -359,8 +359,8 @@ def prepare_data(location: Path = Path(__file__).parent) -> None:
     _detach_all_databases(db_path)
 
 
-def clean_up() -> None:
-    """Delete all data created by the last prepare_data() call."""
+def clean_up_demo_data() -> None:
+    """Delete all data created by the last prepare_demo_data() call."""
     global _active_location  # noqa: PLW0603
     if _active_location is None:
         return

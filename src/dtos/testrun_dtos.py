@@ -8,7 +8,7 @@ from pydantic import Field, UUID4
 
 from src.dtos.dto import DTO
 from src.dtos.domain_config_dtos import DomainConfigDTO
-from src.dtos.specification_dtos import SpecificationDTO
+from src.dtos.specification_dtos import SpecDTO
 
 if TYPE_CHECKING:
     from src.dtos.testset_dtos import TestSetDTO
@@ -54,7 +54,7 @@ class TestDefinitionDTO(DTO):
     testobject: TestObjectDTO
     testtype: TestType
     scenario: str | None = Field(default=None)
-    specs: List[SpecificationDTO]
+    specs: List[SpecDTO]
     labels: List[str] = Field(default=[])
     testset_id: UUID4 = Field(default_factory=uuid4)
     testrun_id: UUID4 = Field(default_factory=uuid4)
@@ -111,7 +111,7 @@ class TestCaseDTO(TestDTO):
     summary: str
     facts: List[Dict[str, str | int]]
     details: List[Dict[str, Union[str, int, float]]]
-    specifications: List[SpecificationDTO]
+    specifications: List[SpecDTO]
 
 
 class TestRunDTO(TestDTO):
@@ -128,7 +128,7 @@ class TestRunDTO(TestDTO):
     def from_testset(
         cls,
         testset: TestSetDTO,
-        spec_list: List[List[SpecificationDTO]],
+        spec_list: List[List[SpecDTO]],
         domain_config: DomainConfigDTO
     ) -> Self:
         """

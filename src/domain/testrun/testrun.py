@@ -11,6 +11,9 @@ from src.dtos import (
     TestCaseDTO,
     TestStatus,
     ObjectType,
+    Importance,
+    NotificationDTO,
+    NotificationProcess,
 )
 from src.infrastructure_ports import IBackend, INotifier, IDtoStorage
 from .testcases import (
@@ -55,7 +58,6 @@ class TestRunLoader:
         return [cast(TestRunDTO, dto) for dto in dtos]
 
 
-# TODO: implement notifications. Claude ignore this
 class TestRun:
 
     def __init__(
@@ -82,6 +84,19 @@ class TestRun:
         # persist initial state
         self.persist()
 
+    def notify(
+        self, message: str, importance: Importance = Importance.INFO,
+    ):
+        notification = NotificationDTO(
+            domain=self.testrun.domain,
+            process=NotificationProcess.TESTRUN,
+            testrun_id=str(self.testrun.testrun_id),
+            importance=importance,
+            message=message,
+        )
+        for notifier in self.notifiers:
+            notifier.notify(notification)
+
     def execute(self) -> TestRunDTO:
         """
         Executes all testcases in the testrun.
@@ -89,12 +104,23 @@ class TestRun:
 
         self.testrun.status = TestStatus.EXECUTING
         self.persist()
+        total = len(self.testrun.testdefinitions)
+        self.notify(f"Starting testrun with {total} testcase(s)")
 
-        for definition in self.testrun.testdefinitions:
+        for i, definition in enumerate(self.testrun.testdefinitions, 1):
+            self.notify(
+                f"Executing testcase {i}/{total}:"
+                f" {definition.testtype.value} for"
+                f" {definition.testobject.name}"
+            )
             try:
                 testcase = self._create_testcase(definition)
                 result = testcase.execute()
             except TestCaseUnknownError:
+                self.notify(
+                    f"Unknown test type: {definition.testtype}",
+                    importance=Importance.ERROR,
+                )
                 result = TestCaseDTO(
                     testcase_id=uuid4(),
                     result=TestResult.NA,
@@ -129,6 +155,9 @@ class TestRun:
 
         self.testrun.status = TestStatus.FINISHED
         self.testrun.end_ts = datetime.now()
+        self.notify(
+            f"Testrun finished with result: {self.testrun.result.name}"
+        )
 
         self.persist()
 

@@ -5,31 +5,21 @@ from datetime import datetime
 import polars as pl
 
 from src.domain_adapters import SpecAdapter
-from src.domain.specification.plugins import (
-    NamingConventionsFactory,
-    FormatterFactory,
-)
-from src.infrastructure.storage.user_storage import (
-    MemoryUserStorage,
-)
-from src.domain_ports import (
-    ListSpecsCommand,
-    ParseSpecCommand,
-)
+from src.domain.specification.plugins import NamingConventionsFactory, SpecParserFactory
+from src.infrastructure.storage.user_storage import MemoryUserStorage
+from src.domain_ports import ListSpecsCommand
 from src.dtos import (
     LocationDTO,
     TestCaseEntryDTO,
     TestSetDTO,
     TestType,
-    SpecificationType,
-    SchemaSpecificationDTO,
-    RowCountSqlDTO,
+    SpecType,
+    SchemaSpecDTO,
+    RowcountSpecDTO,
 )
 
 
-def _put(
-    storage: MemoryUserStorage, path: str, data: bytes
-) -> None:
+def _put(storage: MemoryUserStorage, path: str, data: bytes) -> None:
     """Write test data into MemoryUserStorage."""
     with storage.fs.open(path, mode="wb") as f:
         f.write(data)
@@ -45,9 +35,7 @@ class TestSpecAdapter:
 
         # Add schema xlsx file for table1
         schema_data = self._create_test_xlsx_schema()
-        _put(
-            storage, "specs/table1_schema.xlsx", schema_data
-        )
+        _put(storage, "specs/table1_schema.xlsx", schema_data)
         _put(
             storage,
             "backup/table1_schema.xlsx",
@@ -55,10 +43,7 @@ class TestSpecAdapter:
         )
 
         # Add rowcount SQL file for table1
-        rowcount_sql = (
-            "SELECT COUNT(*) as "
-            "__EXPECTED_ROWCOUNT__ FROM table1"
-        )
+        rowcount_sql = "SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM table1"
         _put(
             storage,
             "specs/table1_ROWCOUNT.sql",
@@ -66,18 +51,13 @@ class TestSpecAdapter:
         )
 
         # Add compare sample SQL and schema files for table2
-        compare_sql = (
-            "SELECT id, name FROM table2 "
-            "WHERE id = 1 -- __EXPECTED__"
-        )
+        compare_sql = "SELECT id, name FROM table2 WHERE id = 1 -- __EXPECTED__"
         _put(
             storage,
             "specs/table2_COMPARE.sql",
             compare_sql.encode(),
         )
-        _put(
-            storage, "specs/table2_schema.xlsx", schema_data
-        )
+        _put(storage, "specs/table2_schema.xlsx", schema_data)
 
         return storage
 
@@ -89,16 +69,16 @@ class TestSpecAdapter:
         return NamingConventionsFactory()
 
     @pytest.fixture
-    def formatter_factory(self) -> FormatterFactory:
-        """Create a FormatterFactory instance"""
-        return FormatterFactory()
+    def formatter_factory(self) -> SpecParserFactory:
+        """Create a SpecParserFactory instance"""
+        return SpecParserFactory()
 
     @pytest.fixture
     def handler(
         self,
         user_storage: MemoryUserStorage,
         naming_conventions_factory: NamingConventionsFactory,
-        formatter_factory: FormatterFactory,
+        formatter_factory: SpecParserFactory,
     ) -> SpecAdapter:
         """Create a SpecAdapter instance"""
         return SpecAdapter(
@@ -114,16 +94,19 @@ class TestSpecAdapter:
             "table1_SCHEMA": TestCaseEntryDTO(
                 testobject="table1",
                 testtype=TestType.SCHEMA,
+                domain="test_domain",
                 comment="Schema test for table1",
             ),
             "table1_ROWCOUNT": TestCaseEntryDTO(
                 testobject="table1",
                 testtype=TestType.ROWCOUNT,
+                domain="test_domain",
                 comment="Rowcount test for table1",
             ),
             "table2_COMPARE": TestCaseEntryDTO(
                 testobject="table2",
                 testtype=TestType.COMPARE,
+                domain="test_domain",
                 comment="Compare sample test for table2",
             ),
         }
@@ -161,9 +144,7 @@ class TestSpecAdapter:
 
     def test_init(self, handler: SpecAdapter):
         """Test that SpecAdapter initializes correctly"""
-        assert (
-            handler.naming_conventions_factory is not None
-        )
+        assert handler.naming_conventions_factory is not None
         assert handler.user_storage is not None
         assert handler.formatter_factory is not None
 
@@ -179,11 +160,7 @@ class TestSpecAdapter:
             domain=test_testset.domain,
             default_stage=test_testset.default_stage,
             default_instance=test_testset.default_instance,
-            testcases={
-                "table1_SCHEMA": test_testset.testcases[
-                    "table1_SCHEMA"
-                ]
-            },
+            testcases={"table1_SCHEMA": test_testset.testcases["table1_SCHEMA"]},
         )
 
         command = ListSpecsCommand(
@@ -195,9 +172,7 @@ class TestSpecAdapter:
 
         assert len(result) == 1
         assert len(result[0]) == 1
-        assert isinstance(
-            result[0][0], SchemaSpecificationDTO
-        )
+        assert isinstance(result[0][0], SchemaSpecDTO)
         assert result[0][0].testobject == "table1"
 
     def test_list_specs_multiple_locations(
@@ -212,11 +187,7 @@ class TestSpecAdapter:
             domain=test_testset.domain,
             default_stage=test_testset.default_stage,
             default_instance=test_testset.default_instance,
-            testcases={
-                "table1_SCHEMA": test_testset.testcases[
-                    "table1_SCHEMA"
-                ]
-            },
+            testcases={"table1_SCHEMA": test_testset.testcases["table1_SCHEMA"]},
         )
 
         command = ListSpecsCommand(
@@ -231,14 +202,8 @@ class TestSpecAdapter:
 
         assert len(result) == 1
         assert len(result[0]) == 2
-        assert all(
-            isinstance(spec, SchemaSpecificationDTO)
-            for spec in result[0]
-        )
-        assert all(
-            spec.testobject == "table1"
-            for spec in result[0]
-        )
+        assert all(isinstance(spec, SchemaSpecDTO) for spec in result[0])
+        assert all(spec.testobject == "table1" for spec in result[0])
 
     def test_list_specs_multiple_testcases(
         self,
@@ -257,31 +222,26 @@ class TestSpecAdapter:
 
         # First testcase: table1_SCHEMA
         assert len(result[0]) == 1
-        assert isinstance(
-            result[0][0], SchemaSpecificationDTO
-        )
+        assert isinstance(result[0][0], SchemaSpecDTO)
         assert result[0][0].testobject == "table1"
 
         # Second testcase: table1_ROWCOUNT
         assert len(result[1]) == 1
-        assert isinstance(result[1][0], RowCountSqlDTO)
+        assert isinstance(result[1][0], RowcountSpecDTO)
         assert result[1][0].testobject == "table1"
 
         # Third testcase: table2_COMPARE
         assert len(result[2]) == 2
-        spec_types = [
-            spec.spec_type for spec in result[2]
-        ]
-        assert SpecificationType.COMPARE_SQL in spec_types
-        assert SpecificationType.SCHEMA in spec_types
+        spec_types = [spec.spec_type for spec in result[2]]
+        assert SpecType.COMPARE in spec_types
+        assert SpecType.SCHEMA in spec_types
 
-    def test_list_specs_no_specs_found(
-        self, handler: SpecAdapter
-    ):
+    def test_list_specs_no_specs_found(self, handler: SpecAdapter):
         """Test list_specs when no specifications are found"""
         testcase = TestCaseEntryDTO(
             testobject="nonexistent_table",
             testtype=TestType.SCHEMA,
+            domain="test_domain",
             comment="Test for non-existent table",
         )
 
@@ -304,47 +264,23 @@ class TestSpecAdapter:
         assert len(result) == 1
         assert len(result[0]) == 0
 
-    def test_parse_spec_schema_file(
-        self, handler: SpecAdapter
-    ):
-        """Test parse_spec with schema Excel file"""
-        schema_data = self._create_test_xlsx_schema()
-
-        command = ParseSpecCommand(
-            file=schema_data, testobject="test_table"
-        )
-
-        result = handler.parse_spec(command)
-
-        schema_specs = [
-            s
-            for s in result
-            if s.spec_type == SpecificationType.SCHEMA
-        ]
-        assert len(schema_specs) == 1
-        assert isinstance(
-            schema_specs[0], SchemaSpecificationDTO
-        )
-        assert schema_specs[0].testobject == "test_table"
-        assert "id" in schema_specs[0].columns
-        assert "name" in schema_specs[0].columns
-
-    def test_list_specs_preserves_testcase_order(
-        self, handler: SpecAdapter
-    ):
+    def test_list_specs_preserves_testcase_order(self, handler: SpecAdapter):
         """Test that list_specs preserves the order of testcases"""
         testcases = {
             "z_table": TestCaseEntryDTO(
                 testobject="table1",
                 testtype=TestType.SCHEMA,
+                domain="test_domain",
             ),
             "a_table": TestCaseEntryDTO(
                 testobject="table2",
                 testtype=TestType.SCHEMA,
+                domain="test_domain",
             ),
             "m_table": TestCaseEntryDTO(
                 testobject="table1",
                 testtype=TestType.ROWCOUNT,
+                domain="test_domain",
             ),
         }
 
@@ -371,7 +307,6 @@ class TestSpecAdapter:
             expected_testcase = testcase_list[i]
             if len(testcase_specs) > 0:
                 assert all(
-                    spec.testobject
-                    == expected_testcase.testobject
+                    spec.testobject == expected_testcase.testobject
                     for spec in testcase_specs
                 )

@@ -1,6 +1,6 @@
 from typing import Tuple, List
 
-from src.dtos import TestCaseEntryDTO, LocationDTO, TestType, SpecificationType
+from src.dtos import TestCaseEntryDTO, LocationDTO, TestType, SpecType
 from .i_naming_conventions import INamingConventions, INamingConventionsFactory
 
 
@@ -16,7 +16,7 @@ class DefaultNamingConventions(INamingConventions):
 
     def match(
         self, testcase: TestCaseEntryDTO, file: LocationDTO
-    ) -> Tuple[bool, List[SpecificationType]]:
+    ) -> Tuple[bool, List[SpecType]]:
         """
         Match files to testcase by testobject name and testtype. Expects .xlsx files
         for schema and .sql files for rowcount and compare.
@@ -44,19 +44,19 @@ class DefaultNamingConventions(INamingConventions):
         # for schema testcase, only an .xlsx schema definition file is expected
         if testcase.testtype == TestType.SCHEMA:
             match = all(schema_xlsx_naming_conditions)
-            spec_types = [SpecificationType.SCHEMA] if match else []
+            spec_types = [SpecType.SCHEMA] if match else []
         # for rowcount testcase, only a .sql file is expected
         elif testcase.testtype == TestType.ROWCOUNT:
             match = all(rowcount_sql_naming_conditions)
-            spec_types = [SpecificationType.ROWCOUNT_SQL] if match else []
+            spec_types = [SpecType.ROWCOUNT] if match else []
         # for compare testcase, an .sql file and a schema defintion are expected
         elif testcase.testtype == TestType.COMPARE:
             if all(compare_sql_naming_conditions):
                 match = True
-                spec_types = [SpecificationType.COMPARE_SQL]
+                spec_types = [SpecType.COMPARE]
             if all(schema_xlsx_naming_conditions):
                 match = True
-                spec_types.append(SpecificationType.SCHEMA)
+                spec_types.append(SpecType.SCHEMA)
         elif testcase.testtype in [
             TestType.DUMMY_OK,
             TestType.DUMMY_NOK,

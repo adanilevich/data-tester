@@ -2,7 +2,7 @@ from typing import Dict
 import pytest
 
 from src.domain.testrun.precondition_checks import Checkable, PreConditionChecker
-from src.dtos import TestObjectDTO
+from src.dtos import TestObjectDTO, Importance
 
 
 class DummyCheckable(Checkable):
@@ -21,7 +21,7 @@ class DummyCheckable(Checkable):
     def update_summary(self, summary: str):
         pass
 
-    def notify(self, message: str):
+    def notify(self, message: str, importance: Importance = Importance.INFO):
         pass
 
 
