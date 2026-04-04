@@ -57,6 +57,9 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
+    
+    - name: Generate CLOC Badge
+      uses: Kherrisan/cloc-badge-action@1.0.1
 
     - name: Create-PR
       # do not create PR if not on master branch
