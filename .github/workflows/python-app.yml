@@ -57,6 +57,12 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
         MINIMUM_GREEN: 90
         MINIMUM_ORANGE: 70
+    
+    - name: Generate CLOC Badge
+      uses: your-username/generate-cloc-badge-action@v1.1.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages  # Optional, defaults to 'gh-pages' if omitted
 
     - name: Create-PR
       # do not create PR if not on master branch
