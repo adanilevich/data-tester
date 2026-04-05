@@ -12,13 +12,13 @@ class TestTestObjectNotEmptyChecker:
     def checkable(self, checkable_creator) -> Checkable:
         checkable = checkable_creator.create()
 
-        def get_rowcount_(testobject: TestObjectDTO, *args, **kwargs) -> int:
+        def get_testobject_rowcount_(testobject: TestObjectDTO, *args, **kwargs) -> int:
             if "zero" in testobject.name:
                 return 0
             else:
                 return 10
 
-        checkable.backend.get_rowcount = get_rowcount_
+        checkable.backend.get_testobject_rowcount = get_testobject_rowcount_
 
         return checkable
 

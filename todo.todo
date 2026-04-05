@@ -43,20 +43,6 @@
         }
       },
       {
-        "key": 1775346832785,
-        "children": [],
-        "todo": {
-          "content": "Change UUID4 to UUID7",
-          "id": 1775346832785,
-          "level": "default",
-          "done": false,
-          "start": 1775346832785,
-          "tags": [
-            "1775319148403"
-          ]
-        }
-      },
-      {
         "key": 1775314305889,
         "children": [],
         "todo": {
@@ -96,6 +82,36 @@
           "tags": [
             "1775314524399"
           ]
+        }
+      },
+      {
+        "key": 1775314314244,
+        "children": [],
+        "todo": {
+          "content": "Try Claude Hooks",
+          "id": 1775314314244,
+          "level": "secondary",
+          "done": false,
+          "start": 1775314314244,
+          "tags": [
+            "1775314416339"
+          ]
+        }
+      },
+      {
+        "key": 1775346832785,
+        "children": [],
+        "todo": {
+          "content": "Change UUID4 to UUID7",
+          "id": 1775346832785,
+          "level": "default",
+          "done": true,
+          "start": 1775346832785,
+          "tags": [
+            "1775319148403"
+          ],
+          "focus": false,
+          "end": 1775415295621
         }
       },
       {
@@ -144,20 +160,6 @@
           ],
           "focus": false,
           "end": 1775406271017
-        }
-      },
-      {
-        "key": 1775314314244,
-        "children": [],
-        "todo": {
-          "content": "Try Claude Hooks",
-          "id": 1775314314244,
-          "level": "secondary",
-          "done": false,
-          "start": 1775314314244,
-          "tags": [
-            "1775314416339"
-          ]
         }
       },
       {
@@ -373,6 +375,6 @@
     "showEndTime": false,
     "simpleMode": false,
     "lang": "en",
-    "version": "1775411153903"
+    "version": "1775415906933"
   }
 }

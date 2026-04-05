@@ -12,6 +12,7 @@ from .specification_dtos import (
     SchemaSpecDTO,
     RowcountSpecDTO,
     CompareSpecDTO,
+    StagecountSpecDTO,
     SpecFactory,
     spec_class_by_type
 )

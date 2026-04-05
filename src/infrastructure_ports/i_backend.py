@@ -55,18 +55,28 @@ class IBackend(ABC):
         """
 
     @abstractmethod
-    def get_rowcount(
-        self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
+    def get_testobject_rowcount(
+        self,
+        testobject: TestObjectDTO,
+        filters: Optional[List[Tuple[str, str]]] = None,
+        encoding: Optional[str] = None,
+        skip_lines: Optional[int] = None,
     ) -> int:
         """
-        Get rowcount of the specified testobject. If defined, additional filters
-        are applied.
+        Get rowcount of the specified testobject (table or file).
             - Filters are a list of 2-tuples (column_name, operation)
             - Hereby, column names must correspond to columns in testobject table or file
             - Operations to be supported are
                 '=<value>': testobject will be filtered to only keep rows where the
                     specified column corresponds to this value
+            - For file testobjects, encoding and skip_lines control how lines are counted.
+              If None, the backend infers them from the file. Must stream, not read whole
+              file at once.
         """
+
+    @abstractmethod
+    def get_raw_testobject(self, testobject: TestObjectDTO) -> TestObjectDTO:
+        """Given a stage testobject, returns the corresponding raw file testobject."""
 
     @abstractmethod
     def get_sample_keys(

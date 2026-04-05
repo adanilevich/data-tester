@@ -24,6 +24,7 @@ from .testcases import (
     SchemaTestCase,
     CompareTestCase,
     RowCountTestCase,
+    StageCountTestCase,
     DummyExceptionTestCase,
     DummyNokTestCase,
     DummyOkTestCase,
@@ -219,6 +220,12 @@ class TestRun:
                 )
             case TestType.ROWCOUNT:
                 return RowCountTestCase(
+                    definition=definition,
+                    backend=backend,
+                    notifiers=self.notifiers,
+                )
+            case TestType.STAGECOUNT:
+                return StageCountTestCase(
                     definition=definition,
                     backend=backend,
                     notifiers=self.notifiers,

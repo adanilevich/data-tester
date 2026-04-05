@@ -32,6 +32,7 @@ from src.domain.testrun.testcases import (
     SchemaTestCase,
     RowCountTestCase,
     CompareTestCase,
+    StageCountTestCase,
     DummyOkTestCase,
     DummyNokTestCase,
     DummyExceptionTestCase,
@@ -146,6 +147,9 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
             elif ttype == TestType.COMPARE:
                 spec_type = SpecType.COMPARE
                 testcase_class = CompareTestCase
+            elif ttype == TestType.STAGECOUNT:
+                spec_type = SpecType.STAGECOUNT
+                testcase_class = StageCountTestCase
             elif ttype == TestType.DUMMY_OK:
                 testcase_class = DummyOkTestCase
                 spec_type = SpecType.SCHEMA
