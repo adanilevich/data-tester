@@ -1,3 +1,4 @@
+import threading
 from typing import List
 
 from src.dtos import NotificationDTO
@@ -9,6 +10,8 @@ class InMemoryNotifier(INotifier):
 
     def __init__(self):
         self.notifications: List[NotificationDTO] = []
+        self._lock = threading.Lock()
 
     def notify(self, notification: NotificationDTO) -> None:
-        self.notifications.append(notification)
+        with self._lock:
+            self.notifications.append(notification)

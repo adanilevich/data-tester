@@ -56,6 +56,12 @@ class DemoNamingResolver:
         coordinates: Tuple[str, str] = resolver.resolve_db_schema(db=db)
         return coordinates
 
+    def get_raw_testobject(
+        self, testobject: TestObjectDTO
+    ) -> TestObjectDTO:
+        resolver = self._fetch_resolver(domain=testobject.domain)
+        return resolver.get_raw_testobject(testobject)
+
 
 class DemoDefaultResolver:
     def __init__(self, domain_config: DomainConfigDTO):
@@ -144,3 +150,21 @@ class DemoDefaultResolver:
         catalog: str = db.domain + "_" + db.stage
         schema: str = db.instance
         return catalog, schema
+
+    @staticmethod
+    def get_raw_testobject(
+        testobject: TestObjectDTO,
+    ) -> TestObjectDTO:
+        """Given a stage testobject, returns the raw file testobject.
+
+        Convention: stage_X -> raw_X
+        """
+        raw_name: str = "raw_" + testobject.name.removeprefix(
+            "stage_"
+        )
+        return TestObjectDTO(
+            name=raw_name,
+            domain=testobject.domain,
+            stage=testobject.stage,
+            instance=testobject.instance,
+        )

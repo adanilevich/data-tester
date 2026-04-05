@@ -12,6 +12,7 @@ from .specification_dtos import (
     SchemaSpecDTO,
     RowcountSpecDTO,
     CompareSpecDTO,
+    StagecountSpecDTO,
     SpecFactory,
     spec_class_by_type
 )
@@ -35,5 +36,5 @@ from .report_dtos import (
 )
 from .storage_dtos import LocationDTO, StorageType, ObjectType, ObjectLocationDTO
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO
-from .testrun_dtos import TestRunDTO
+from .testrun_dtos import TestRunDTO, TestRunSummaryDTO
 from .notification_dtos import NotificationDTO, Importance, NotificationProcess

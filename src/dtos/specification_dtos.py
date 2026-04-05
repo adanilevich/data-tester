@@ -15,6 +15,7 @@ class SpecType(Enum):
     SCHEMA = "schema"
     ROWCOUNT = "rowcount"
     COMPARE = "compare"
+    STAGECOUNT = "stagecount"
     ABSTRACT = "abstract"
 
 
@@ -83,6 +84,17 @@ class CompareSpecDTO(SpecDTO):
         return True if self.query is None else False
 
 
+class StagecountSpecDTO(SpecDTO):
+    spec_type: SpecType = SpecType.STAGECOUNT
+    raw_file_format: Optional[str] = None  # e.g. 'csv', 'json' — inferred if None
+    raw_file_encoding: Optional[str] = None  # e.g. 'utf-8' — inferred if None
+    skip_lines: Optional[int] = None  # header lines to skip — inferred if None
+
+    @property
+    def empty(self) -> bool:
+        return False
+
+
 class SpecFactory:
     def create_from_dict(self, spec_as_dict: dict) -> SpecDTO:
         requested_spec_type = spec_as_dict["spec_type"]
@@ -103,5 +115,7 @@ def spec_class_by_type(spec_type: SpecType) -> Type[SpecDTO]:
         return RowcountSpecDTO
     elif spec_type == SpecType.SCHEMA:
         return SchemaSpecDTO
+    elif spec_type == SpecType.STAGECOUNT:
+        return StagecountSpecDTO
     else:
         raise ValueError(f"Unknown spec type {spec_type}")

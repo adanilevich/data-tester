@@ -1,4 +1,6 @@
 from __future__ import annotations
+import csv
+import threading
 from typing import Dict, List, Tuple, Optional
 from random import randint
 from time import sleep
@@ -77,21 +79,26 @@ class DemoBackend(IBackend):
         self.query_handler: DemoQueryHandler = query_handler
         self.fs: LocalFileSystem = fs or LocalFileSystem()
         self._con: Optional[duckdb.DuckDBPyConnection] = None
+        self._con_lock = threading.Lock()
 
     @property
     def con(self) -> duckdb.DuckDBPyConnection:
-        if self._con is None:
-            self._con = duckdb.connect()
-            for attempt in range(5):
-                try:
-                    self._con.execute(self.attach_data_statement)
-                    break
-                except duckdb.BinderException:
-                    if attempt < 4:
-                        sleep(0.1)
-                    else:
-                        raise
-        return self._con
+        """Returns a thread-safe cursor to the shared DuckDB connection.
+        The underlying connection is lazily initialized and shared; each call
+        returns a new cursor so that concurrent threads do not interfere."""
+        with self._con_lock:
+            if self._con is None:
+                self._con = duckdb.connect()
+                for attempt in range(5):
+                    try:
+                        self._con.execute(self.attach_data_statement)
+                        break
+                    except duckdb.BinderException:
+                        if attempt < 4:
+                            sleep(0.1 * (attempt + 1))
+                        else:
+                            raise
+        return self._con.cursor()
 
     @property
     def attach_data_statement(self) -> str:
@@ -102,7 +109,7 @@ class DemoBackend(IBackend):
         ]
         for db_file in db_files:
             db_name: str = db_file.split(sep="/")[-1].removesuffix(".db")
-            statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name};\n"
+            statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name} (READ_ONLY);\n"
         return statement
 
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
@@ -141,18 +148,23 @@ class DemoBackend(IBackend):
 
         return file_testobjects + db_testobject
 
-    def get_rowcount(
-        self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
+    def get_testobject_rowcount(
+        self,
+        testobject: TestObjectDTO,
+        filters: Optional[List[Tuple[str, str]]] = None,
+        encoding: Optional[str] = None,
+        skip_lines: Optional[int] = None,
     ) -> int:
         """See interface definition (parent class IBackend)."""
 
-        object_type: TestobjectType = self.naming_resolver.get_object_type(
-            testobject=testobject
-        )
-        if object_type == object_type.FILE:
-            count: int = self._get_file_rowcount(testobject=testobject, filters=filters)
+        object_type = self.naming_resolver.get_object_type(testobject=testobject)
+        if object_type == TestobjectType.FILE:
+            count = self._get_file_rowcount(
+                testobject=testobject, filters=filters,
+                encoding=encoding, skip_lines=skip_lines,
+            )
         else:
-            count: int = self._get_db_rowcount(testobject=testobject, filters=filters)
+            count = self._get_db_rowcount(testobject=testobject, filters=filters)
 
         return count
 
@@ -165,12 +177,9 @@ class DemoBackend(IBackend):
 
         filters_: List[Tuple[str, str]] = filters or []
         db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
-        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
+        catalog, schema, table = self.naming_resolver.resolve_db_object(
             db=db, testobject_name=testobject.name
         )
-        catalog: str = coordinates[0]
-        schema: str = coordinates[1]
-        table: str = coordinates[2]
 
         where_clause = "WHERE 1 = 1"
         for column_name, operation in filters_:
@@ -189,14 +198,93 @@ class DemoBackend(IBackend):
         return count
 
     def _get_file_rowcount(
-        self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
+        self,
+        testobject: TestObjectDTO,
+        filters: Optional[List[Tuple[str, str]]] = None,
+        encoding: Optional[str] = None,
+        skip_lines: Optional[int] = None,
     ) -> int:
-        """Get rowcount of a file-like testobject"""
+        """Get rowcount of a file-like testobject by streaming lines.
 
-        raise DemoBackendError(
-            "Getting rowcount for file-like testobjects (e.g. raw "
-            "layer) is not yet supported."
+        Expects a ('filepath', '=<full_path>') entry in filters
+        to identify the exact file to count.
+        """
+        filepath: Optional[str] = None
+        for col, op in (filters or []):
+            if col == "filepath" and op.startswith("="):
+                filepath = op.removeprefix("=")
+        if not filepath:
+            raise DemoBackendError(
+                "filepath filter is required for file rowcount."
+            )
+
+        # Strip storage type prefix (e.g. "local://")
+        if "://" in filepath:
+            filepath = filepath.split("://", 1)[1]
+
+        if not self.fs.exists(filepath):
+            raise DemoBackendError(
+                f"File not found: {filepath}"
+            )
+
+        file_encoding: str = (
+            encoding or self._infer_encoding(filepath)
         )
+        file_skip: int = (
+            skip_lines if skip_lines is not None
+            else self._infer_skip_lines(filepath, file_encoding)
+        )
+
+        line_count: int = 0
+        with self.fs.open(
+            filepath, mode="r", encoding=file_encoding
+        ) as fh:
+            for _ in fh:
+                line_count += 1
+
+        return max(0, line_count - file_skip)
+
+    def _infer_encoding(self, filepath: str) -> str:
+        """Infer encoding by trying common encodings on a small sample."""
+        candidates: List[str] = ["utf-8", "ascii", "latin-1", "cp1252"]
+        for enc in candidates:
+            try:
+                with self.fs.open(filepath, mode="rb") as fh:
+                    sample: bytes = fh.read(8192)
+                sample.decode(enc)
+                return enc
+            except (UnicodeDecodeError, LookupError):
+                continue
+        raise DemoBackendError(
+            f"Cannot infer encoding for file: {filepath}. "
+            f"Tried: {', '.join(candidates)}"
+        )
+
+    def _infer_skip_lines(
+        self, filepath: str, encoding: str
+    ) -> int:
+        """Infer number of header lines to skip (assumes csv-like format)."""
+        with self.fs.open(filepath, mode="r", encoding=encoding) as fh:
+            head_lines: List[str] = []
+            for i, line in enumerate(fh):
+                if i >= 20:
+                    break
+                head_lines.append(line)
+
+        if len(head_lines) < 2:
+            return 0
+
+        try:
+            sniffer = csv.Sniffer()
+            sample: str = "".join(head_lines)
+            has_header: bool = sniffer.has_header(sample)
+            return 1 if has_header else 0
+        except csv.Error:
+            return 0
+
+    def get_raw_testobject(self, testobject: TestObjectDTO) -> TestObjectDTO:
+        """Given a stage testobject, returns the corresponding raw file testobject."""
+        return self.naming_resolver.get_raw_testobject(testobject)
 
     def translate_query(self, query: str, db: DBInstanceDTO) -> str:
         translated_query: str = self.query_handler.translate(query, db)
@@ -255,9 +343,7 @@ class DemoBackend(IBackend):
 
         return result
 
-    def get_schema_from_query(
-        self, query: str, db: DBInstanceDTO
-    ) -> SchemaSpecDTO:
+    def get_schema_from_query(self, query: str, db: DBInstanceDTO) -> SchemaSpecDTO:
         """Gets schema of query. Expects query to be already translated"""
 
         query: str = f"""
@@ -276,7 +362,7 @@ class DemoBackend(IBackend):
             zip(schema_as_named_dict["col"], schema_as_named_dict["dtype"], strict=False)
         )
 
-        location= LocationDTO(
+        location = LocationDTO(
             path=f"duckdb://{db.domain}_{db.stage}.{db.instance}.user_query.duck"
         )
         result = SchemaSpecDTO(

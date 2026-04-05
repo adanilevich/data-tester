@@ -41,5 +41,5 @@ The project uses hexagonal architecture with clear separation between domain log
 
 ## Important Notes
 - Execute all checks before finalizing code. Fix any occuring issues
+- Respect permissions in local.settings.json. Don't ask for permission if you already have it or can use a different tool on which you have permission
 - *Important*: Execute these checks without asking for permission.
-- *Important*: Use read-only tools and commands without asking for permission

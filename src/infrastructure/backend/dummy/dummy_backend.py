@@ -50,10 +50,23 @@ class DummyBackend(IBackend):
     def run_query(self, query: str, db: DBInstanceDTO) -> pl.DataFrame:
         return pl.DataFrame({"col": [1, 2, 3]})
 
-    def get_rowcount(
-        self, testobject: TestObjectDTO, filters: Optional[List[Tuple[str, str]]] = None
+    def get_testobject_rowcount(
+        self,
+        testobject: TestObjectDTO,
+        filters: Optional[List[Tuple[str, str]]] = None,
+        encoding: Optional[str] = None,
+        skip_lines: Optional[int] = None,
     ) -> int:
         return 10
+
+    def get_raw_testobject(self, testobject: TestObjectDTO) -> TestObjectDTO:
+        raw_name: str = "raw_" + testobject.name.removeprefix("stage_")
+        return TestObjectDTO(
+            name=raw_name,
+            domain=testobject.domain,
+            stage=testobject.stage,
+            instance=testobject.instance,
+        )
 
     def get_sample_keys(
         self,

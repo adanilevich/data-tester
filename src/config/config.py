@@ -23,9 +23,7 @@ class Config(BaseSettings):
     DATATESTER_DATA_PLATFORM: str = Field(default="DUMMY")
 
     # NOTIFIERS CONFIGURATION
-    DATATESTER_NOTIFIERS: List[str] = Field(
-        default_factory=lambda: ["IN_MEMORY", "LOG"]
-    )
+    DATATESTER_NOTIFIERS: List[str] = Field(default_factory=lambda: ["IN_MEMORY", "LOG"])
 
     # LOGGING CONFIGURATION
     DATATESTER_LOG_LEVEL: str = Field(default="INFO")
@@ -38,6 +36,9 @@ class Config(BaseSettings):
     # DEMO BACKEND DATA PATHS
     DATATESTER_DEMO_RAW_PATH: str = Field(default="tests/fixtures/demo/raw")
     DATATESTER_DEMO_DB_PATH: str = Field(default="tests/fixtures/demo/dbs")
+
+    # EXECUTION CONFIGURATION
+    DATATESTER_MAX_TESTRUN_THREADS: int = Field(default=4)
 
     # GCP DEPLOYMENT CONFIGURATIONS
     DATATESTER_GCP_PROJECT: str | None = Field(default=None)

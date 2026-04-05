@@ -12,6 +12,7 @@ from .dummy_nok import DummyNokTestCase
 from .schema import SchemaTestCase
 from .rowcount import RowCountTestCase
 from .compare import CompareTestCase
+from .stagecount import StageCountTestCase
 
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     "SchemaTestCase",
     "RowCountTestCase",
     "CompareTestCase",
+    "StageCountTestCase",
 ]

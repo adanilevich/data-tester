@@ -10,7 +10,9 @@ class CheckTestObjectNotEmpty(AbstractCheck):
     name = "testobject_not_empty"
 
     def _check(self, checkable: Checkable) -> bool:
-        rowcount: int = checkable.backend.get_rowcount(testobject=checkable.testobject)
+        rowcount: int = checkable.backend.get_testobject_rowcount(
+            testobject=checkable.testobject
+        )
 
         if rowcount > 0:
             return True
