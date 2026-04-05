@@ -19,35 +19,35 @@ from src.infrastructure.notifier import InMemoryNotifier
 
 sql = CompareSpecDTO(
     location=LocationDTO(path="dummy://this_location"),
-    testobject="core_customer_transactions",
+    testobject="core_account_payments",
     spec_type=SpecType.COMPARE,
     query="""
     WITH __expected__ AS (
         SELECT
-            customers.name AS customer_name,
-            customers.id AS customer_id,
+            accounts.name AS account_name,
+            accounts.id AS account_id,
             transactions.id AS id,
             transactions.date AS transaction_date,
             transactions.amount AS amount
         FROM payments_test.alpha.stage_transactions AS transactions
-        LEFT JOIN payments_test.alpha.stage_customers AS customers
-            ON transactions.customer_id = customers.id
-            AND transactions.date = customers.date
-        WHERE customers.region != 'africa'
+        LEFT JOIN payments_test.alpha.stage_accounts AS accounts
+            ON transactions.account_id = accounts.id
+            AND transactions.date = accounts.date
     )
     """,
 )
 
 schema = SchemaSpecDTO(
     location=LocationDTO(path="dummy://that_location"),
-    testobject="core_customer_transactions",
+    testobject="core_account_payments",
     spec_type=SpecType.SCHEMA,
-    columns={"customer_id": "int"},  # plays no role, but must be non-empty
-    primary_keys=["customer_id", "transaction_date"],
+    columns={"account_id": "int"},  # plays no role, but must be non-empty
+    primary_keys=["account_id", "transaction_date"],
 )
 
 testobject = TestObjectDTO(
-    domain="payments", stage="test", instance="alpha", name="core_customer_transactions"
+    domain="payments", stage="test", instance="alpha",
+    name="core_account_payments",
 )
 
 

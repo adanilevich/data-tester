@@ -87,7 +87,11 @@ def _create_test_xlsx_schema(
 
 @pytest.fixture
 def di() -> CliDi:
-    return CliDi(Config())
+    config = Config()
+    config.DATATESTER_DATA_PLATFORM = "DUMMY"
+    config.DATATESTER_USER_STORAGE_ENGINE = "MEMORY"
+    config.DATATESTER_NOTIFIERS = ["IN_MEMORY", "LOG"]
+    return CliDi(config)
 
 
 # --- DI Wiring Tests ---

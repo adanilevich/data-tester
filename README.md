@@ -22,7 +22,7 @@ The framework is built to:
 
 ## Project Goals
 
-- **Support Business Validation:** Focus on verifying that ETL pipelines meet business requirements, not just technical data quality.
+- **Support Business Validation:** Focus on verifying that ETL pipelines meet business requirements.
 - **Accelerate ETL Development:** Enable fast feedback cycles for changes in business logic or data models.
 - **Promote Collaboration:** Bridge the gap between business users and technical teams through transparent, understandable test results.
 - **Enable Automation:** Integrate business tests into CI/CD pipelines for continuous validation of ETL processes.
@@ -30,7 +30,7 @@ The framework is built to:
 ## Key Features
 
 - **Business Rule Testing:** Define and automate tests that check business logic, such as calculations, aggregations, mappings, and data transformations.
-- **Automated Execution:** Due to built-in extensiblity, tests can be run via CLI or from UI or integrate with automation tools for scheduled or triggered runs.
+- **Automated Execution:** Due to flexible architecture tests can be run via CLI or from UI or integrate with automation tools for scheduled or triggered runs.
 - **Comprehensive Reporting:** Generate reports in multiple formats (json, txt, xlsx) - or extend the framework for your own format.
 - **Adaptablity and Extensibility:** Due to the choices made in code architecture, this framework can be expanded to new data platforms and storage backends.
 
@@ -39,12 +39,12 @@ The framework is built to:
 1. **Define Business Test Cases:**
    - Define test specifications using SQL or custom specification formats.
 2. **Execute Tests:**
-   - Run business tests via the CLI or integrate with CI/CD tools to validate each ETL deployment.
+   - Run business tests via UI, CLI or integrate with CI/CD tools to validate each ETL deployment.
 3. **Review Results:**
    - Analyze generated reports to identify business rule violations or unexpected outcomes.
    - Share results with both technical and business teams for rapid feedback and resolution.
 4. **Scale and manage:**
-   - Organize tests in test sets depending on your stage (e.g. test, uat), test scenario or other requirements.
+   - Organize tests in test sets depending on your business domain, stage (e.g. test, uat), test scenario or other requirements.
    - Schedule and execute test sets to ensure ETL result quality
 
 ## Extension Points
@@ -56,6 +56,10 @@ The framework is built to:
 - Add new report formats via `IReportFormatter` interface
 - Add new storage backends via `IStorage` interface
 
+
+## Run
+
+- Run HTTP backend with `uv run python main.py`
 ---
 
 For more details, see the source code and module-level documentation.
