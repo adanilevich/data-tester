@@ -22,3 +22,6 @@ uv run coverage run
 
 #echo "Running code line count..."
 #uv run pygount src --format=summary
+
+echo "Generating badges..."
+uv run python badges/generate.py
