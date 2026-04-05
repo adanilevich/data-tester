@@ -1,10 +1,13 @@
 # flake8: noqa
+import threading
 from typing import List, Dict, cast
 from datetime import datetime
 from uuid import uuid4
+from concurrent.futures import ThreadPoolExecutor, as_completed, Future
 
 from src.dtos import (
     TestRunDTO,
+    TestRunSummaryDTO,
     TestDefinitionDTO,
     TestType,
     TestResult,
@@ -15,7 +18,7 @@ from src.dtos import (
     NotificationDTO,
     NotificationProcess,
 )
-from src.infrastructure_ports import IBackend, INotifier, IDtoStorage
+from src.infrastructure_ports import IBackendFactory, INotifier, IDtoStorage
 from .testcases import (
     AbstractTestCase,
     SchemaTestCase,
@@ -59,18 +62,20 @@ class TestRunLoader:
 
 
 class TestRun:
-
     def __init__(
         self,
         testrun: TestRunDTO,
-        backend: IBackend,
+        backend_factory: IBackendFactory,
         notifiers: List[INotifier],
         dto_storage: IDtoStorage,
+        max_testrun_threads: int = 4,
     ):
         self.testrun = testrun
-        self.backend = backend
+        self.backend_factory = backend_factory
         self.notifiers = notifiers
         self.dto_storage = dto_storage
+        self.max_testrun_threads = max_testrun_threads
+        self._lock = threading.Lock()
 
         # set dynamic fields
         self.testrun.start_ts = datetime.now()
@@ -80,12 +85,17 @@ class TestRun:
         # set result fields
         self.testcase_results: List[TestCaseDTO] = []
         self.testrun.status = TestStatus.INITIATED
+        self.testrun.summary = TestRunSummaryDTO(
+            total_testcases=len(self.testrun.testdefinitions)
+        )
 
         # persist initial state
         self.persist()
 
     def notify(
-        self, message: str, importance: Importance = Importance.INFO,
+        self,
+        message: str,
+        importance: Importance = Importance.INFO,
     ):
         notification = NotificationDTO(
             domain=self.testrun.domain,
@@ -99,7 +109,9 @@ class TestRun:
 
     def execute(self) -> TestRunDTO:
         """
-        Executes all testcases in the testrun.
+        Executes all testcases in the testrun in parallel using a thread pool.
+        Each testcase gets its own backend instance for thread safety.
+        Results are persisted after each testcase completes.
         """
 
         self.testrun.status = TestStatus.EXECUTING
@@ -107,43 +119,25 @@ class TestRun:
         total = len(self.testrun.testdefinitions)
         self.notify(f"Starting testrun with {total} testcase(s)")
 
-        for i, definition in enumerate(self.testrun.testdefinitions, 1):
-            self.notify(
-                f"Executing testcase {i}/{total}:"
-                f" {definition.testtype.value} for"
-                f" {definition.testobject.name}"
-            )
-            try:
-                testcase = self._create_testcase(definition)
-                result = testcase.execute()
-            except TestCaseUnknownError:
-                self.notify(
-                    f"Unknown test type: {definition.testtype}",
-                    importance=Importance.ERROR,
-                )
-                result = TestCaseDTO(
-                    testcase_id=uuid4(),
-                    result=TestResult.NA,
-                    summary=f"Test type {definition.testtype} unknown!",
-                    facts=[],
-                    details=[],
-                    status=TestStatus.ERROR,
-                    start_ts=datetime.now(),
-                    end_ts=datetime.now(),
-                    testobject=definition.testobject,
-                    testrun_id=self.testrun.testrun_id,
-                    testset_id=self.testrun.testset_id,
-                    labels=definition.labels,
-                    diff=dict(),
-                    testtype=definition.testtype,
-                    specifications=definition.specs,
-                    domain_config=definition.domain_config,
-                    domain=definition.testobject.domain,
-                    stage=definition.testobject.stage,
-                    instance=definition.testobject.instance,
-                )
+        with ThreadPoolExecutor(max_workers=self.max_testrun_threads) as executor:
+            futures: Dict[Future[TestCaseDTO], TestDefinitionDTO] = {}
+            for definition in self.testrun.testdefinitions:
+                future = executor.submit(self._execute_single_testcase, definition)
+                futures[future] = definition
 
-            self.testcase_results.append(result)
+            for i, future in enumerate(as_completed(futures), 1):
+                definition = futures[future]
+                result = future.result()
+                with self._lock:
+                    self.testcase_results.append(result)
+                    self._update_summary(result)
+                    self.notify(
+                        f"Completed testcase {i}/{total}:"
+                        f" {definition.testtype.value} for"
+                        f" {definition.testobject.name}"
+                        f" — {result.result.name}"
+                    )
+                    self.persist()
 
         # testrun result is only OK if all testcases are OK
         if all(result.result == TestResult.OK for result in self.testcase_results):
@@ -155,55 +149,96 @@ class TestRun:
 
         self.testrun.status = TestStatus.FINISHED
         self.testrun.end_ts = datetime.now()
-        self.notify(
-            f"Testrun finished with result: {self.testrun.result.name}"
-        )
+        self.notify(f"Testrun finished with result: {self.testrun.result.name}")
 
         self.persist()
 
         return self.to_dto()
 
+    def _execute_single_testcase(self, definition: TestDefinitionDTO) -> TestCaseDTO:
+        """Execute a single testcase in its own thread with its own backend."""
+        try:
+            testcase = self._create_testcase(definition)
+            return testcase.execute()
+        except TestCaseUnknownError:
+            self.notify(
+                f"Unknown test type: {definition.testtype}",
+                importance=Importance.ERROR,
+            )
+            return TestCaseDTO(
+                testcase_id=uuid4(),
+                result=TestResult.NA,
+                summary=f"Test type {definition.testtype} unknown!",
+                facts=[],
+                details=[],
+                status=TestStatus.ERROR,
+                start_ts=datetime.now(),
+                end_ts=datetime.now(),
+                testobject=definition.testobject,
+                testrun_id=self.testrun.testrun_id,
+                testset_id=self.testrun.testset_id,
+                labels=definition.labels,
+                diff=dict(),
+                testtype=definition.testtype,
+                specifications=definition.specs,
+                domain_config=definition.domain_config,
+                domain=definition.testobject.domain,
+                stage=definition.testobject.stage,
+                instance=definition.testobject.instance,
+            )
+
+    def _update_summary(self, result: TestCaseDTO) -> None:
+        """Update the testrun summary counters after a testcase completes."""
+        self.testrun.summary.completed_testcases += 1
+        match result.result:
+            case TestResult.OK:
+                self.testrun.summary.ok_testcases += 1
+            case TestResult.NOK:
+                self.testrun.summary.nok_testcases += 1
+            case TestResult.NA:
+                self.testrun.summary.na_testcases += 1
+
     def _create_testcase(self, definition: TestDefinitionDTO) -> AbstractTestCase:
         """
         Creates a testcase object (subclass instance of TestCase) based on class attribute
         'ttype' - the specified test type must be implemented as subclass of TestCase.
+        Each testcase gets its own backend instance for thread safety.
         """
+        backend = self.backend_factory.create(domain_config=self.testrun.domain_config)
 
         match definition.testtype:
             case TestType.SCHEMA:
                 return SchemaTestCase(
-                    definition=definition,
-                    backend=self.backend,
-                    notifiers=self.notifiers
+                    definition=definition, backend=backend, notifiers=self.notifiers
                 )
             case TestType.COMPARE:
                 return CompareTestCase(
                     definition=definition,
-                    backend=self.backend,
+                    backend=backend,
                     notifiers=self.notifiers,
                 )
             case TestType.ROWCOUNT:
                 return RowCountTestCase(
                     definition=definition,
-                    backend=self.backend,
+                    backend=backend,
                     notifiers=self.notifiers,
                 )
             case TestType.DUMMY_OK:
                 return DummyOkTestCase(
                     definition=definition,
-                    backend=self.backend,
+                    backend=backend,
                     notifiers=self.notifiers,
                 )
             case TestType.DUMMY_NOK:
                 return DummyNokTestCase(
                     definition=definition,
-                    backend=self.backend,
+                    backend=backend,
                     notifiers=self.notifiers,
                 )
             case TestType.DUMMY_EXCEPTION:
                 return DummyExceptionTestCase(
                     definition=definition,
-                    backend=self.backend,
+                    backend=backend,
                     notifiers=self.notifiers,
                 )
             case _:

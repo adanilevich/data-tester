@@ -18,7 +18,7 @@ from src.dtos import (
 from src.domain.testrun.testrun import TestRun
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.infrastructure.backend.dummy import DummyBackend
+from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
 
 
@@ -56,8 +56,8 @@ class TestTestRun:
         )
 
     @pytest.fixture
-    def backend(self):
-        return DummyBackend()
+    def backend_factory(self):
+        return DummyBackendFactory()
 
     @pytest.fixture
     def notifier(self):
@@ -112,7 +112,7 @@ class TestTestRun:
         specifications,
         domain_config,
         dto_storage,
-        backend,
+        backend_factory,
         notifier,
     ):
         testrun_dto = self.make_testrun_dto(
@@ -121,7 +121,7 @@ class TestTestRun:
         original_start_ts = testrun_dto.start_ts
 
         testrun = TestRun(
-            testrun_dto, backend, [notifier], dto_storage
+            testrun_dto, backend_factory, [notifier], dto_storage
         )
 
         assert testrun.testrun.testrun_id == testrun_dto.testrun_id
@@ -130,7 +130,7 @@ class TestTestRun:
         assert testrun.testrun.result == TestResult.NA
         assert testrun.testrun.status == TestStatus.INITIATED
         assert testrun.testcase_results == []
-        assert testrun.backend == backend
+        assert testrun.backend_factory == backend_factory
         assert testrun.notifiers == [notifier]
         assert testrun.dto_storage == dto_storage
 
@@ -153,14 +153,14 @@ class TestTestRun:
         specifications,
         domain_config,
         dto_storage,
-        backend,
+        backend_factory,
         notifier,
     ):
         testrun_dto = self.make_testrun_dto(
             testobject, specifications, domain_config
         )
         testrun = TestRun(
-            testrun_dto, backend, [notifier], dto_storage
+            testrun_dto, backend_factory, [notifier], dto_storage
         )
 
         result = testrun.execute()
@@ -196,14 +196,14 @@ class TestTestRun:
         specifications,
         domain_config,
         dto_storage,
-        backend,
+        backend_factory,
         notifier,
     ):
         testrun_dto = self.make_testrun_dto(
             testobject, specifications, domain_config
         )
         testrun = TestRun(
-            testrun_dto, backend, [notifier], dto_storage
+            testrun_dto, backend_factory, [notifier], dto_storage
         )
 
         dto = testrun.to_dto()

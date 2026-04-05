@@ -1,4 +1,6 @@
+import threading
 from pathlib import Path
+from typing import Dict
 
 from src.dtos import DomainConfigDTO
 from .demo_backend import DemoBackend
@@ -18,15 +20,22 @@ class DemoBackendFactory(IBackendFactory):
     ):
         self.files_path = files_path
         self.db_path = db_path
+        self._backends: Dict[str, DemoBackend] = {}
+        self._lock = threading.Lock()
 
     def create(self, domain_config: DomainConfigDTO) -> DemoBackend:
-        query_handler = DemoQueryHandler(domain_config=domain_config)
-        naming_resolver = DemoNamingResolver(domain_cofig=domain_config)
-        backend = DemoBackend(
-            files_path=self.files_path,
-            db_path=self.db_path,
-            domain_config=domain_config,
-            naming_resolver=naming_resolver,
-            query_handler=query_handler,
-        )
-        return backend
+        with self._lock:
+            if domain_config.domain in self._backends:
+                return self._backends[domain_config.domain]
+
+            query_handler = DemoQueryHandler(domain_config=domain_config)
+            naming_resolver = DemoNamingResolver(domain_cofig=domain_config)
+            backend = DemoBackend(
+                files_path=self.files_path,
+                db_path=self.db_path,
+                domain_config=domain_config,
+                naming_resolver=naming_resolver,
+                query_handler=query_handler,
+            )
+            self._backends[domain_config.domain] = backend
+            return backend

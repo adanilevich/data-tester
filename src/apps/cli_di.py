@@ -112,6 +112,7 @@ class CliDependencyInjector:
             backend_factory=self.backend_factory,
             notifiers=self.notifiers,
             dto_storage=self.dto_storage,
+            max_testrun_threads=self.config.DATATESTER_MAX_TESTRUN_THREADS,
         )
         return TestRunDriver(testrun_adapter=handler)
 

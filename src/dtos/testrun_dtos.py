@@ -114,10 +114,21 @@ class TestCaseDTO(TestDTO):
     specifications: List[SpecDTO]
 
 
+class TestRunSummaryDTO(DTO):
+    """Summary of testrun progress — updated after each testcase completes."""
+    __test__ = False
+    total_testcases: int = 0
+    completed_testcases: int = 0
+    ok_testcases: int = 0
+    nok_testcases: int = 0
+    na_testcases: int = 0
+
+
 class TestRunDTO(TestDTO):
     __test__ = False  # prevents pytest collection
     testdefinitions: List[TestDefinitionDTO]
     testcase_results: List[TestCaseDTO] = Field(default=[])
+    summary: TestRunSummaryDTO = Field(default_factory=TestRunSummaryDTO)
 
     @property
     def object_id(self) -> str:
@@ -186,7 +197,8 @@ class TestRunDTO(TestDTO):
             status=TestStatus.NOT_STARTED,
             testdefinitions=testdefinitions,
             testcase_results=[],
-            domain_config=domain_config
+            domain_config=domain_config,
+            summary=TestRunSummaryDTO(total_testcases=len(testdefinitions)),
         )
 
     @classmethod
@@ -207,6 +219,14 @@ class TestRunDTO(TestDTO):
         else:
             end_ts = max([tc.end_ts for tc in testcases if tc.end_ts is not None])
 
+        summary = TestRunSummaryDTO(
+            total_testcases=len(testcases),
+            completed_testcases=len(testcases),
+            ok_testcases=sum(1 for tc in testcases if tc.result == TestResult.OK),
+            nok_testcases=sum(1 for tc in testcases if tc.result == TestResult.NOK),
+            na_testcases=sum(1 for tc in testcases if tc.result == TestResult.NA),
+        )
+
         return cls(
             testrun_id=testrun_id,
             start_ts=min([tc.start_ts for tc in testcases]),
@@ -222,6 +242,7 @@ class TestRunDTO(TestDTO):
             domain_config=testcases[0].domain_config,
             status=TestStatus.FINISHED,
             testdefinitions=testdefinitions,
+            summary=summary,
         )
 
     @staticmethod

@@ -213,6 +213,7 @@ class TestTestRunAdapter:
         result = testrun_command_handler.execute_testrun(command)
 
         assert len(result.testcase_results) == 2
-        assert result.testcase_results[0].result == TestResult.OK
-        assert result.testcase_results[1].result == TestResult.NOK
+        results_by_type = {tc.testtype: tc for tc in result.testcase_results}
+        assert results_by_type[TestType.DUMMY_OK].result == TestResult.OK
+        assert results_by_type[TestType.DUMMY_NOK].result == TestResult.NOK
         assert result.result == TestResult.NOK

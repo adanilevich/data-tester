@@ -1,4 +1,5 @@
 from __future__ import annotations
+import threading
 from typing import Dict, List, Tuple, Optional
 from random import randint
 from time import sleep
@@ -77,21 +78,26 @@ class DemoBackend(IBackend):
         self.query_handler: DemoQueryHandler = query_handler
         self.fs: LocalFileSystem = fs or LocalFileSystem()
         self._con: Optional[duckdb.DuckDBPyConnection] = None
+        self._con_lock = threading.Lock()
 
     @property
     def con(self) -> duckdb.DuckDBPyConnection:
-        if self._con is None:
-            self._con = duckdb.connect()
-            for attempt in range(5):
-                try:
-                    self._con.execute(self.attach_data_statement)
-                    break
-                except duckdb.BinderException:
-                    if attempt < 4:
-                        sleep(0.1)
-                    else:
-                        raise
-        return self._con
+        """Returns a thread-safe cursor to the shared DuckDB connection.
+        The underlying connection is lazily initialized and shared; each call
+        returns a new cursor so that concurrent threads do not interfere."""
+        with self._con_lock:
+            if self._con is None:
+                self._con = duckdb.connect()
+                for attempt in range(5):
+                    try:
+                        self._con.execute(self.attach_data_statement)
+                        break
+                    except duckdb.BinderException:
+                        if attempt < 4:
+                            sleep(0.1 * (attempt + 1))
+                        else:
+                            raise
+        return self._con.cursor()
 
     @property
     def attach_data_statement(self) -> str:
@@ -102,7 +108,7 @@ class DemoBackend(IBackend):
         ]
         for db_file in db_files:
             db_name: str = db_file.split(sep="/")[-1].removesuffix(".db")
-            statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name};\n"
+            statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name} (READ_ONLY);\n"
         return statement
 
     def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
