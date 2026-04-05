@@ -86,20 +86,6 @@
         }
       },
       {
-        "key": 1775314363834,
-        "children": [],
-        "todo": {
-          "content": "Add Badges",
-          "id": 1775314363834,
-          "level": "secondary",
-          "done": false,
-          "start": 1775314363834,
-          "tags": [
-            "1775346682372"
-          ]
-        }
-      },
-      {
         "key": 1775314314244,
         "children": [],
         "todo": {
@@ -111,6 +97,22 @@
           "tags": [
             "1775314416339"
           ]
+        }
+      },
+      {
+        "key": 1775314363834,
+        "children": [],
+        "todo": {
+          "content": "Add Badges",
+          "id": 1775314363834,
+          "level": "secondary",
+          "done": true,
+          "start": 1775314363834,
+          "tags": [
+            "1775346682372"
+          ],
+          "focus": false,
+          "end": 1775348290117
         }
       },
       {
@@ -310,6 +312,6 @@
     "showEndTime": false,
     "simpleMode": false,
     "lang": "en",
-    "version": "1775346854809"
+    "version": "1775348292311"
   }
 }
