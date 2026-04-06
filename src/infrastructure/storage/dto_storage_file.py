@@ -9,9 +9,9 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec.implementations.memory import MemoryFileSystem
 
 try:
-    from gcsfs import GCSFileSystem  # ty: ignore[unresolved-import, unused-ignore-comment]
+    from gcsfs import GCSFileSystem  # ty: ignore[unresolved-import]
 except ImportError:
-    GCSFileSystem = None  # ty: ignore[invalid-assignment]
+    GCSFileSystem = None
 
 from src.infrastructure_ports import (
     IDtoStorage,

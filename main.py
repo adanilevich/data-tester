@@ -51,7 +51,7 @@ def _setup_demo(config: Config) -> HttpDependencyInjector:
 
 def main() -> None:
     is_local = os.environ.get("DATATESTER_ENV", "LOCAL") == "LOCAL"
-    config = Config(_env_file=".env" if is_local else None)
+    config = Config(_env_file=".env" if is_local else None)  # ty: ignore[unknown-argument]
     di: HttpDependencyInjector | None = None
 
     if config.DATATESTER_DATA_PLATFORM == "DEMO":
