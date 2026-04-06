@@ -3,9 +3,9 @@ import pytest
 from tests.fixtures.demo.prepare_demo_data import (
     prepare_demo_data, clean_up_demo_data,
 )
-from src.domain.testrun.testcases import SchemaTestCase
+from src.domain.testrun.testcases import StageCountTestCase
 from src.dtos import (
-    SchemaSpecDTO,
+    StagecountSpecDTO,
     TestObjectDTO,
     TestType,
     SpecType,
@@ -15,20 +15,14 @@ from src.dtos import (
 from src.infrastructure.backend.demo import DemoBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
 
-spec = SchemaSpecDTO(
-    location=LocationDTO(path="dummy://this_location"),
+
+spec = StagecountSpecDTO(
+    location=LocationDTO(path="dummy://stagecount_spec"),
     testobject="stage_accounts",
-    spec_type=SpecType.SCHEMA,
-    columns={
-        "date": "string",
-        "id": "int",
-        "customer_id": "int",
-        "type": "string",
-        "name": "string",
-        "m__ts": "timestamp",
-        "m__source_file": "string",
-        "m__source_file_path": "string",
-    },
+    spec_type=SpecType.STAGECOUNT,
+    raw_file_format="csv",
+    raw_file_encoding="utf-8",
+    skip_lines=1,
 )
 
 testobject = TestObjectDTO(
@@ -45,14 +39,15 @@ def prepare_demo_data_fixture():
 
 
 def test_straight_through_execution(domain_config, prepare_demo_data_fixture):
+    """stage_accounts has no truncation, so counts should match → OK."""
     definition = TestDefinitionDTO(
         testobject=testobject,
-        testtype=TestType.SCHEMA,
+        testtype=TestType.STAGECOUNT,
         specs=[spec],
         domain_config=domain_config,
         testrun_id=uuid4(),
     )
-    testcase = SchemaTestCase(
+    testcase = StageCountTestCase(
         definition=definition,
         backend=DemoBackendFactory().create(domain_config=domain_config),
         notifiers=[InMemoryNotifier()],

@@ -14,6 +14,8 @@ dependencies = [
     "pyyaml",  # read and write yaml files
     "duckdb",  # needed for demo and for e2e tests
     "fsspec",  # needed for demo, 2e2 tests and also for input finders and report storage
+    "fastapi",  # HTTP backend framework
+    "uvicorn[standard]",  # ASGI server for FastAPI
     "pip>=26.0.1",
 ]
 
@@ -24,6 +26,8 @@ gcs = ["gcsfs"]  # needed if data is stored in GCS
 dev = [
     "ruff",  # linter / syntax checker and formatter - replaces flake8
     "pytest",  # test framework
+    "pytest-asyncio",  # async test support
+    "httpx",  # async HTTP client for FastAPI testing
     "coverage",  # test coverage reports
     "pygount",  # count lines of code  # enforce import rules for hexagonal architecture
     "import-linter",

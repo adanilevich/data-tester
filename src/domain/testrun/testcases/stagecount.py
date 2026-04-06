@@ -43,8 +43,9 @@ class StageCountTestCase(AbstractTestCase):
         skip_lines: Optional[int] = spec.skip_lines if spec else None
         self.add_detail({"Encoding": encoding or "inferred by backend"})
         self.add_detail({"Skip lines": f"{skip_lines or 'inferred by backend'}"})
+        raw_testobject = self.backend.get_raw_testobject(self.testobject)
         raw_rowcount: int = self.backend.get_testobject_rowcount(
-            testobject=self.testobject,
+            testobject=raw_testobject,
             filters=[("filepath", f"={source_file_path}")],
             encoding=encoding,
             skip_lines=skip_lines,

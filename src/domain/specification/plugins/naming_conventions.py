@@ -38,6 +38,10 @@ class DefaultNamingConventions(INamingConventions):
             file.filename.startswith(f"{testobject_}_COMPARE"),
             file.filename.endswith(".sql"),
         ]
+        stagecount_json_naming_conditions = [
+            file.filename.startswith(f"{testobject_}_STAGECOUNT"),
+            file.filename.endswith(".json"),
+        ]
 
         match = False
         spec_types = []
@@ -57,6 +61,10 @@ class DefaultNamingConventions(INamingConventions):
             if all(schema_xlsx_naming_conditions):
                 match = True
                 spec_types.append(SpecType.SCHEMA)
+        # for stagecount testcase, a .json spec file is optional
+        elif testcase.testtype == TestType.STAGECOUNT:
+            match = all(stagecount_json_naming_conditions)
+            spec_types = [SpecType.STAGECOUNT] if match else []
         elif testcase.testtype in [
             TestType.DUMMY_OK,
             TestType.DUMMY_NOK,

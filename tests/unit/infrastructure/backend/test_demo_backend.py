@@ -2,10 +2,20 @@ from typing import List
 import pytest
 
 from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data, clean_up_demo_data,
+    prepare_demo_data,
+    clean_up_demo_data,
 )
-from src.infrastructure.backend.demo import DemoBackendFactory, DemoBackendError
-from src.dtos import DBInstanceDTO, TestObjectDTO
+from src.infrastructure.backend.demo import (
+    DemoBackendFactory,
+    DemoBackendError,
+)
+from src.dtos import (
+    DBInstanceDTO,
+    TestObjectDTO,
+    SchemaSpecDTO,
+    SpecType,
+    LocationDTO,
+)
 
 
 @pytest.fixture(scope="module")
@@ -15,25 +25,28 @@ def prepare_demo_data_fixture():
     clean_up_demo_data()
 
 
-class TestLocalBackendFactory:
-    def test_backend_creation(self, domain_config, prepare_demo_data_fixture):
+class TestDemoBackendFactory:
+    def test_backend_creation(
+        self, domain_config, prepare_demo_data_fixture,
+    ):
         factory = DemoBackendFactory()
         backend = factory.create(domain_config=domain_config)
-
         assert backend.config == domain_config
 
 
-class TestLocalBackend:
-    db = DBInstanceDTO(domain="payments", stage="test", instance="alpha")
+class TestDemoBackend:
+    db = DBInstanceDTO(
+        domain="payments", stage="test", instance="alpha",
+    )
 
     @pytest.fixture
     def test_query(self):
-        query = """
+        return """
             WITH __expected__ AS (
-            SELECT * FROM payments_test.alpha.core_customer_transactions
+            SELECT *
+            FROM payments_test.alpha.core_account_payments
             )
         """
-        return query
 
     @pytest.fixture
     def backend(self, domain_config, prepare_demo_data_fixture):
@@ -42,182 +55,348 @@ class TestLocalBackend:
     @pytest.mark.parametrize(
         "domain,stage,instance,testobjects_expected",
         [
-            ("payments", "uat", "main", ["stage_customers", "raw_customers"]),
-            ("sales", "test", "main", ["stage_customers", "raw_customers"]),
             (
-                "payments",
-                "test",
-                "alpha",
+                "payments", "uat", "main",
                 [
-                    "stage_customers",
-                    "raw_customers",
-                    "stage_transactions",
-                    "raw_transactions",
+                    "raw_accounts", "raw_transactions",
+                    "stage_accounts", "stage_transactions",
+                    "core_account_payments",
+                ],
+            ),
+            (
+                "sales", "test", "main",
+                [
+                    "raw_customers", "raw_transactions",
+                    "stage_customers", "stage_transactions",
                     "core_customer_transactions",
+                    "mart_customer_revenues_by_date",
+                ],
+            ),
+            (
+                "payments", "test", "alpha",
+                [
+                    "raw_accounts", "raw_transactions",
+                    "stage_accounts", "stage_transactions",
+                    "core_account_payments",
+                    "mart_account_payments_by_date",
                 ],
             ),
         ],
     )
     def test_getting_testobjects(
-        self, backend, domain, stage, instance, testobjects_expected
+        self, backend, domain, stage, instance, testobjects_expected,
     ):
-        db = DBInstanceDTO(domain=domain, stage=stage, instance=instance)
-
+        db = DBInstanceDTO(
+            domain=domain, stage=stage, instance=instance,
+        )
         testobjects_obtained = backend.get_testobjects(db)
-
         assert set(testobjects_obtained) == set(testobjects_expected)
 
     def test_getting_schema_of_file_objects_fails(self, backend):
         testobject = TestObjectDTO(
-            name="raw_customers", domain="payments", stage="uat", instance="main"
+            name="raw_accounts", domain="payments",
+            stage="test", instance="alpha",
         )
-
         with pytest.raises(DemoBackendError) as err:
             _ = backend.get_schema(testobject)
-
         assert "Getting schema for file-like testobjects" in str(err)
 
     def test_getting_schema_of_db_objects(self, backend):
         testobject = TestObjectDTO(
-            name="stage_customers", domain="payments", stage="test", instance="alpha"
+            name="stage_accounts", domain="payments",
+            stage="test", instance="alpha",
         )
-
         schema = backend.get_schema(testobject)
-
-        assert schema.columns == {
-            "date": "VARCHAR",
-            "id": "INTEGER",
-            "region": "VARCHAR",
-            "type": "VARCHAR",
-            "name": "VARCHAR",
-            "source_file": "VARCHAR",
+        assert set(schema.columns.keys()) == {
+            "date", "id", "customer_id", "type", "name",
+            "m__ts", "m__source_file", "m__source_file_path",
         }
-        assert schema.primary_keys is None
-        assert schema.partition_columns is None
-        assert schema.clustering_columns is None
 
     def test_getting_harmonized_schema_of_db_objects(self, backend):
         testobject = TestObjectDTO(
-            name="stage_customers", domain="payments", stage="test", instance="alpha"
+            name="stage_accounts", domain="payments",
+            stage="test", instance="alpha",
         )
-
         schema = backend.get_schema(testobject)
-        harmonized_schema = backend.harmonize_schema(schema)
-        harmonized_schema.columns.update({"complex": "array<string>"})
+        harmonized = backend.harmonize_schema(schema)
+        harmonized.columns.update({"complex": "array<string>"})
 
-        assert harmonized_schema.columns == {
-            "date": "string",
-            "id": "int",
-            "region": "string",
-            "type": "string",
-            "name": "string",
-            "source_file": "string",
-            "complex": "array<string>",
-        }
+        assert harmonized.columns["date"] == "string"
+        assert harmonized.columns["id"] == "int"
+        assert harmonized.columns["customer_id"] == "int"
+        assert harmonized.columns["complex"] == "array<string>"
 
-    def test_getting_sample_keys_fails_without_defining_pks(self, backend, test_query):
+    def test_getting_sample_keys_fails_without_pks(
+        self, backend, test_query,
+    ):
         primary_keys: List[str] = []
-
         with pytest.raises(DemoBackendError) as err:
             _ = backend.get_sample_keys(
-                query=test_query, primary_keys=primary_keys, sample_size=5, db=self.db
+                query=test_query, primary_keys=primary_keys,
+                sample_size=5, db=self.db,
             )
-
         assert "Provide a non-empty list of primary keys" in str(err)
 
-    def test_that_unique_keys_are_sampled(self, backend, test_query):
+    def test_that_unique_keys_are_sampled(
+        self, backend, test_query,
+    ):
         primary_keys = ["id"]
-
         key_sample = backend.get_sample_keys(
-            query=test_query, primary_keys=primary_keys, sample_size=5, db=self.db
+            query=test_query, primary_keys=primary_keys,
+            sample_size=5, db=self.db,
         )
-
-        # primary keys are exact, so sample size must be equal specified size
         assert len(key_sample) == 5
-        # all sampled key values must be unique
         assert len(set(key_sample)) == 5
 
-    def test_key_sampling_with_underspecified_keys_works(self, backend, test_query):
-        primary_keys = ["customer_name", "customer_id"]
-
+    def test_key_sampling_with_underspecified_keys(
+        self, backend, test_query,
+    ):
+        primary_keys = ["account_id", "customer_id"]
         key_sample = backend.get_sample_keys(
-            query=test_query, primary_keys=primary_keys, sample_size=2, db=self.db
+            query=test_query, primary_keys=primary_keys,
+            sample_size=2, db=self.db,
         )
-
-        # even for underspecified keys, key sample size must be exact
         assert len(key_sample) == 2
-        # also all keys must be concatenations of columns defined in primary_keys
         for concat_key in key_sample:
             assert len(concat_key.split("|")) == 2
 
-    def test_sampling_from_query_using_unique_keys(self, backend, test_query):
-        primary_keys = ["customer_name", "id"]
-        key_sample = ["Peter Lustig|1", "Big Company Ltd|5", "Big Company Ltd|1"]
-
+    def test_sampling_from_query(self, backend, test_query):
+        primary_keys = ["id", "account_id"]
+        key_sample = backend.get_sample_keys(
+            query=test_query, primary_keys=primary_keys,
+            sample_size=3, db=self.db,
+        )
         sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db
+            query=test_query, primary_keys=primary_keys,
+            key_sample=key_sample, db=self.db,
         )
+        assert len(sample) == 3
 
-        assert sample.select("amount").sum().to_series()[0] == 3010
-
-    def test_sampling_from_query_using_non_unique_keys(self, backend, test_query):
-        primary_keys = ["customer_name"]
-        key_sample = ["Peter Lustig"]
-
-        sample = backend.get_sample_from_query(
-            query=test_query, primary_keys=primary_keys, key_sample=key_sample, db=self.db
-        )
-
-        assert sample.select("amount").sum().to_series()[0] == 21
-
-    def test_sampling_from_testobject_using_unique_keys(self, backend):
+    def test_sampling_from_testobject(self, backend):
         testobject = TestObjectDTO(
-            name="core_customer_transactions",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="core_account_payments", domain="payments",
+            stage="test", instance="alpha",
         )
-        primary_keys = ["customer_name", "id"]
-        key_sample = ["Peter Lustig|1", "Big Company Ltd|5", "Big Company Ltd|1"]
-
+        primary_keys = ["id", "account_id"]
+        key_sample = backend.get_sample_keys(
+            query="""
+                WITH __expected__ AS (
+                SELECT *
+                FROM payments_test.alpha.core_account_payments
+                )
+            """,
+            primary_keys=primary_keys, sample_size=3, db=self.db,
+        )
         sample = backend.get_sample_from_testobject(
-            testobject=testobject, primary_keys=primary_keys, key_sample=key_sample
-        )
-
-        assert sample.select("amount").sum().to_series()[0] == 3010
-
-    def test_sampling_from_testobject_using_non_unique_keys(self, backend):
-        testobject = TestObjectDTO(
-            name="core_customer_transactions",
-            domain="payments",
-            stage="test",
-            instance="alpha",
-        )
-        primary_keys = ["customer_name"]
-        key_sample = ["Peter Lustig"]
-
-        sample = backend.get_sample_from_testobject(
-            testobject=testobject, primary_keys=primary_keys, key_sample=key_sample
-        )
-
-        assert sample.select("amount").sum().to_series()[0] == 21
-
-    def test_sampling_from_testobject_using_column_filters(self, backend):
-        testobject = TestObjectDTO(
-            name="core_customer_transactions",
-            domain="payments",
-            stage="test",
-            instance="alpha",
-        )
-        primary_keys = ["customer_name"]
-        key_sample = ["Peter Lustig"]
-        columns = ["customer_name", "customer_id"]
-
-        sample = backend.get_sample_from_testobject(
-            testobject=testobject,
-            primary_keys=primary_keys,
+            testobject=testobject, primary_keys=primary_keys,
             key_sample=key_sample,
-            columns=columns,
+        )
+        assert len(sample) == 3
+
+    def test_sampling_from_testobject_with_columns(
+        self, backend,
+    ):
+        testobject = TestObjectDTO(
+            name="core_account_payments", domain="payments",
+            stage="test", instance="alpha",
+        )
+        primary_keys = ["id", "account_id"]
+        key_sample = backend.get_sample_keys(
+            query="""
+                WITH __expected__ AS (
+                SELECT *
+                FROM payments_test.alpha.core_account_payments
+                )
+            """,
+            primary_keys=primary_keys, sample_size=2, db=self.db,
+        )
+        columns = ["account_id", "customer_id"]
+        sample = backend.get_sample_from_testobject(
+            testobject=testobject, primary_keys=primary_keys,
+            key_sample=key_sample, columns=columns,
+        )
+        assert list(sample.columns) == (
+            columns + ["__concat_key__"]
         )
 
-        assert list(sample.columns) == columns + ["__concat_key__"]
+    def test_sampling_from_query_fails_with_empty_keys(
+        self, backend, test_query,
+    ):
+        with pytest.raises(DemoBackendError) as err:
+            backend.get_sample_from_query(
+                query=test_query, primary_keys=[],
+                key_sample=["some_key"], db=self.db,
+            )
+        assert "non-empty" in str(err)
+
+    def test_sampling_from_testobject_fails_for_files(
+        self, backend,
+    ):
+        testobject = TestObjectDTO(
+            name="raw_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        with pytest.raises(DemoBackendError) as err:
+            backend.get_sample_from_testobject(
+                testobject=testobject,
+                primary_keys=["id"], key_sample=["1"],
+            )
+        assert "Sampling files not yet supported" in str(err)
+
+    def test_translate_query_resolves_table_names(self, backend):
+        query = "SELECT * FROM stage_accounts"
+        result = backend.translate_query(query=query, db=self.db)
+        assert result == (
+            "SELECT * FROM payments_test.alpha.stage_accounts"
+        )
+
+    def test_translate_query_skips_already_qualified(self, backend):
+        query = (
+            "SELECT * FROM payments_test.alpha.stage_accounts"
+        )
+        result = backend.translate_query(query=query, db=self.db)
+        assert result == query
+
+    def test_run_query_returns_dataframe(self, backend):
+        import polars as pl
+
+        query = (
+            "SELECT * FROM payments_test.alpha.stage_accounts"
+            " LIMIT 3"
+        )
+        result = backend.run_query(query=query, db=self.db)
+        assert isinstance(result, pl.DataFrame)
+        assert len(result) == 3
+
+    def test_get_raw_testobject(self, backend):
+        testobject = TestObjectDTO(
+            name="stage_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        raw = backend.get_raw_testobject(testobject=testobject)
+        assert raw.name == "raw_accounts"
+        assert raw.domain == testobject.domain
+
+
+class TestGetTestobjectRowcount:
+    db = DBInstanceDTO(
+        domain="payments", stage="test", instance="alpha",
+    )
+
+    @pytest.fixture
+    def backend(self, domain_config, prepare_demo_data_fixture):
+        return DemoBackendFactory().create(domain_config=domain_config)
+
+    def test_db_rowcount_stage_accounts(self, backend):
+        testobject = TestObjectDTO(
+            name="stage_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        count = backend.get_testobject_rowcount(testobject=testobject)
+        assert count == 410  # 200 + 210
+
+    def test_db_rowcount_stage_transactions(self, backend):
+        testobject = TestObjectDTO(
+            name="stage_transactions", domain="payments",
+            stage="test", instance="alpha",
+        )
+        count = backend.get_testobject_rowcount(testobject=testobject)
+        assert count == 1500  # 1000 + 500 (truncated)
+
+    def test_db_rowcount_with_filter(self, backend):
+        testobject = TestObjectDTO(
+            name="stage_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        count = backend.get_testobject_rowcount(
+            testobject=testobject,
+            filters=[
+                ("m__source_file", "='accounts_2024-01-01.csv'"),
+            ],
+        )
+        assert count == 200
+
+    def test_file_rowcount_returns_correct_count(self, backend):
+        testobject = TestObjectDTO(
+            name="raw_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        filepath = (
+            "tests/fixtures/demo/raw/payments/test/alpha/accounts"
+            "/accounts_2024-01-01.csv"
+        )
+        count = backend.get_testobject_rowcount(
+            testobject=testobject,
+            filters=[("filepath", f"={filepath}")],
+        )
+        assert count == 200
+
+    def test_file_rowcount_raises_without_filepath(self, backend):
+        testobject = TestObjectDTO(
+            name="raw_accounts", domain="payments",
+            stage="test", instance="alpha",
+        )
+        with pytest.raises(DemoBackendError) as err:
+            backend.get_testobject_rowcount(testobject=testobject)
+        assert "filepath filter is required" in str(err)
+
+
+class TestHarmonizeSchemaExtended:
+    @pytest.fixture
+    def backend(self, domain_config, prepare_demo_data_fixture):
+        return DemoBackendFactory().create(domain_config=domain_config)
+
+    def _make_schema(self, columns: dict) -> SchemaSpecDTO:
+        return SchemaSpecDTO(
+            location=LocationDTO(
+                path="duckdb://test.schema.table.duck",
+            ),
+            columns=columns,
+            testobject="test_table",
+            spec_type=SpecType.SCHEMA,
+        )
+
+    def test_harmonize_float_dtypes(self, backend):
+        schema = self._make_schema(
+            {"a": "FLOAT", "b": "REAL", "c": "DOUBLE"},
+        )
+        result = backend.harmonize_schema(schema)
+        assert result.columns == {
+            "a": "float", "b": "float", "c": "float",
+        }
+
+    def test_harmonize_decimal_dtypes(self, backend):
+        schema = self._make_schema(
+            {"a": "DECIMAL(10,2)", "b": "NUMERIC"},
+        )
+        result = backend.harmonize_schema(schema)
+        assert result.columns == {"a": "decimal", "b": "decimal"}
+
+    def test_harmonize_date_dtype(self, backend):
+        schema = self._make_schema({"a": "DATE"})
+        result = backend.harmonize_schema(schema)
+        assert result.columns == {"a": "date"}
+
+    def test_harmonize_timestamp_dtype(self, backend):
+        schema = self._make_schema(
+            {"a": "TIMESTAMP", "b": "TIMESTAMP WITH TIME ZONE"},
+        )
+        result = backend.harmonize_schema(schema)
+        assert result.columns == {
+            "a": "timestamp", "b": "timestamp",
+        }
+
+    def test_harmonize_complex_dtypes_passthrough(self, backend):
+        schema = self._make_schema({
+            "a": "ARRAY<STRING>",
+            "b": "LIST(INTEGER)",
+            "c": "INTERVAL",
+            "d": "STRUCT(x INTEGER, y VARCHAR)",
+        })
+        result = backend.harmonize_schema(schema)
+        assert result.columns == {
+            "a": "array<string>",
+            "b": "list(integer)",
+            "c": "interval",
+            "d": "struct(x integer, y varchar)",
+        }

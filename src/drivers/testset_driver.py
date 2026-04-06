@@ -4,6 +4,7 @@ from src.domain_ports import (
     ITestSet,
     ListTestSetsCommand,
     LoadTestSetCommand,
+    SaveTestSetCommand,
 )
 
 
@@ -30,6 +31,11 @@ class TestSetDriver:
         testset_adapter: ITestSet,
     ):
         self.adapter = testset_adapter
+
+    def save_testset(self, testset: TestSetDTO) -> None:
+        """Saves a testset."""
+        command = SaveTestSetCommand(testset=testset)
+        self.adapter.save_testset(command=command)
 
     def load_testset(self, testset_id: str) -> TestSetDTO:
         """Loads a testset by ID."""

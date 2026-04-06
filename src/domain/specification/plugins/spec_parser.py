@@ -1,5 +1,6 @@
+import json
 from typing import cast
-from src.dtos.specification_dtos import SpecDTO
+
 import polars as pl
 
 from src.dtos import (
@@ -7,7 +8,9 @@ from src.dtos import (
     SchemaSpecDTO,
     RowcountSpecDTO,
     CompareSpecDTO,
+    StagecountSpecDTO,
 )
+from src.dtos.specification_dtos import SpecDTO
 from .i_spec_parser import (
     ISpecParser,
     ISpecParserFactory,
@@ -128,6 +131,29 @@ class CompareSqlParser(ISpecParser):
             return cast(CompareSpecDTO, spec)
 
 
+class StagecountJsonParser(ISpecParser):
+    """Parses stagecount specification from a JSON file."""
+
+    spec_type = SpecType.STAGECOUNT
+
+    def parse(self, file: bytes, empty_spec: SpecDTO) -> StagecountSpecDTO:
+        try:
+            data = json.loads(file.decode("utf-8"))
+        except Exception as e:
+            spec = self.set_message(
+                empty_spec, f"Error reading stagecount JSON: {e}",
+            )
+            return cast(StagecountSpecDTO, spec)
+
+        return StagecountSpecDTO(
+            location=empty_spec.location,
+            testobject=empty_spec.testobject,
+            raw_file_format=data.get("raw_file_format"),
+            raw_file_encoding=data.get("raw_file_encoding"),
+            skip_lines=data.get("skip_lines"),
+        )
+
+
 class SpecParserFactory(ISpecParserFactory):
     """
     Factory for picking right formatters. In real implementation, this factory should
@@ -141,5 +167,7 @@ class SpecParserFactory(ISpecParserFactory):
             return RowcountSqlParser()
         elif spec_type == SpecType.COMPARE:
             return CompareSqlParser()
+        elif spec_type == SpecType.STAGECOUNT:
+            return StagecountJsonParser()
         else:
             raise SpecParserError(f"Parsing {spec_type} is not supported")

@@ -18,26 +18,26 @@ from src.infrastructure.notifier import InMemoryNotifier
 
 spec = RowcountSpecDTO(
     location=LocationDTO(path="dummy://this_location"),
-    testobject="core_customer_transactions",
+    testobject="core_account_payments",
     spec_type=SpecType.ROWCOUNT,
     query="""
     WITH __expected_count__ AS (
         SELECT COUNT(*)
         FROM payments_test.alpha.stage_transactions AS transactions
-        LEFT JOIN payments_test.alpha.stage_customers AS customers
-            ON transactions.customer_id = customers.id
-            AND transactions.date = customers.date
-        WHERE customers.region != 'africa'
+        LEFT JOIN payments_test.alpha.stage_accounts AS accounts
+            ON transactions.account_id = accounts.id
+            AND transactions.date = accounts.date
     )
     , __actual_count__ AS (
         SELECT COUNT(*)
-        FROM payments_test.alpha.core_customer_transactions
+        FROM payments_test.alpha.core_account_payments
     )
     """,
 )
 
 testobject = TestObjectDTO(
-    domain="payments", stage="test", instance="alpha", name="core_customer_transactions"
+    domain="payments", stage="test", instance="alpha",
+    name="core_account_payments",
 )
 
 
