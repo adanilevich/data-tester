@@ -40,12 +40,14 @@ class LogNotifier(INotifier):
             if structured:
                 handler.setFormatter(JsonFormatter())
             else:
-                handler.setFormatter(logging.Formatter(
-                    fmt="[%(asctime)s] [%(levelname)s]"
-                    " [%(process_name)s] %(message)s",
-                    datefmt="%H:%M:%S",
-                    defaults={"process_name": "System"},
-                ))
+                handler.setFormatter(
+                    logging.Formatter(
+                        fmt="[%(asctime)s] [%(levelname)s]"
+                        " [%(process_name)s] %(message)s",
+                        datefmt="%H:%M:%S",
+                        defaults={"process_name": "System"},
+                    )
+                )
             self.logger.addHandler(handler)
 
     def notify(self, notification: NotificationDTO) -> None:

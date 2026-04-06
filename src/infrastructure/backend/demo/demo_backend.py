@@ -112,41 +112,40 @@ class DemoBackend(IBackend):
             statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name} (READ_ONLY);\n"
         return statement
 
-    def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
+    def list_testobjects(self, db: DBInstanceDTO) -> List[TestObjectDTO]:
         """
         Gets both file-like testobjects (e.g. file directories in raw layer)
         and existing testobjects from db, e.g. tables and views.
         """
+        domain, stage, instance = db.domain, db.stage, db.instance
 
-        # FIRST: get file-like testobjects. For that, get base paths to file like objects.
-        # These could be several paths, e.g. <...>/raw and <...>/export
-        rel_filepaths: List[str] = self.naming_resolver.resolve_file_object_path(db=db)
-        abs_filepaths: List[str] = [self.files_path + "/" + p_ for p_ in rel_filepaths]
-
-        file_testobjects: List[str] = []
-        all_subpaths: List[str] = []
-        for filepath in abs_filepaths:
-            all_subpaths.extend(self.fs.ls(path=filepath))
-        all_subdirs: List[str] = [path for path in all_subpaths if self.fs.isdir(path)]
-        for dir in all_subdirs:
-            testobject_name: str = self.naming_resolver.get_file_testobject_name(
-                db=db, path=dir
+        # FIRST: get file-like testobjects
+        abs_path = "/".join([self.files_path, domain, stage, instance, ""])
+        file_testobjects: List[TestObjectDTO] = []
+        subdirs: List[str] = [p for p in self.fs.ls(path=abs_path) if self.fs.isdir(p)]
+        for dir in subdirs:
+            name: str = self.naming_resolver.get_testobject_name(path=dir)
+            file_testobjects.append(
+                TestObjectDTO(name=name, domain=domain, stage=stage, instance=instance)
             )
-            file_testobjects.append(testobject_name)
 
-        # SECOND: get testobjects from dwh / database layer
-        coordinates: Tuple[str, str] = self.naming_resolver.resolve_db_schema(db=db)
-        catalog: str = coordinates[0]
-        schema: str = coordinates[1]
+        # SECOND: get testobjects from dwh / database layer via information_schema
+        dummy = TestObjectDTO(name="", domain=domain, stage=stage, instance=instance)
+        coords = self.naming_resolver.testobject_to_db_coordinates(dummy)
         query: str = f"""
-            SELECT table_name FROM INFORMATION_SCHEMA.TABLES
-            WHERE table_catalog = '{catalog}'
-            AND table_schema = '{schema}'
+            SELECT table_catalog, table_schema, table_name
+            FROM INFORMATION_SCHEMA.TABLES
+            WHERE table_catalog = '{coords.catalog}'
+            AND table_schema = '{coords.schema}'
         """
         tables_df = self.con.query(query=query).pl()
-        db_testobject = tables_df.to_dict(as_series=False)["table_name"]
+        tables: List[str] = tables_df.to_dict(as_series=False)["table_name"]
+        db_testobjects = [
+            TestObjectDTO(name=n, domain=domain, stage=stage, instance=instance)
+            for n in tables
+        ]
 
-        return file_testobjects + db_testobject
+        return file_testobjects + db_testobjects
 
     def get_testobject_rowcount(
         self,
@@ -157,11 +156,13 @@ class DemoBackend(IBackend):
     ) -> int:
         """See interface definition (parent class IBackend)."""
 
-        object_type = self.naming_resolver.get_object_type(testobject=testobject)
+        object_type = self.naming_resolver.get_testobject_type(testobject=testobject)
         if object_type == TestobjectType.FILE:
             count = self._get_file_rowcount(
-                testobject=testobject, filters=filters,
-                encoding=encoding, skip_lines=skip_lines,
+                testobject=testobject,
+                filters=filters,
+                encoding=encoding,
+                skip_lines=skip_lines,
             )
         else:
             count = self._get_db_rowcount(testobject=testobject, filters=filters)
@@ -176,10 +177,7 @@ class DemoBackend(IBackend):
         """Get rowcount of a database testobject"""
 
         filters_: List[Tuple[str, str]] = filters or []
-        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
-        catalog, schema, table = self.naming_resolver.resolve_db_object(
-            db=db, testobject_name=testobject.name
-        )
+        coords = self.naming_resolver.testobject_to_db_coordinates(testobject)
 
         where_clause = "WHERE 1 = 1"
         for column_name, operation in filters_:
@@ -188,7 +186,8 @@ class DemoBackend(IBackend):
                 where_clause += f"\n\tAND {column_name} == {value}"
 
         query = f"""
-            SELECT COUNT(*) AS __cnt__ FROM {catalog}.{schema}.{table}
+            SELECT COUNT(*) AS __cnt__
+            FROM {coords.catalog}.{coords.schema}.{coords.table}
             {where_clause}
         """
         count_df = self.con.query(query).pl()
@@ -210,35 +209,28 @@ class DemoBackend(IBackend):
         to identify the exact file to count.
         """
         filepath: Optional[str] = None
-        for col, op in (filters or []):
+        for col, op in filters or []:
             if col == "filepath" and op.startswith("="):
                 filepath = op.removeprefix("=")
         if not filepath:
-            raise DemoBackendError(
-                "filepath filter is required for file rowcount."
-            )
+            raise DemoBackendError("filepath filter is required for file rowcount.")
 
         # Strip storage type prefix (e.g. "local://")
         if "://" in filepath:
             filepath = filepath.split("://", 1)[1]
 
         if not self.fs.exists(filepath):
-            raise DemoBackendError(
-                f"File not found: {filepath}"
-            )
+            raise DemoBackendError(f"File not found: {filepath}")
 
-        file_encoding: str = (
-            encoding or self._infer_encoding(filepath)
-        )
+        file_encoding: str = encoding or self._infer_encoding(filepath)
         file_skip: int = (
-            skip_lines if skip_lines is not None
+            skip_lines
+            if skip_lines is not None
             else self._infer_skip_lines(filepath, file_encoding)
         )
 
         line_count: int = 0
-        with self.fs.open(
-            filepath, mode="r", encoding=file_encoding
-        ) as fh:
+        with self.fs.open(filepath, mode="r", encoding=file_encoding) as fh:
             for _ in fh:
                 line_count += 1
 
@@ -256,13 +248,10 @@ class DemoBackend(IBackend):
             except (UnicodeDecodeError, LookupError):
                 continue
         raise DemoBackendError(
-            f"Cannot infer encoding for file: {filepath}. "
-            f"Tried: {', '.join(candidates)}"
+            f"Cannot infer encoding for file: {filepath}. Tried: {', '.join(candidates)}"
         )
 
-    def _infer_skip_lines(
-        self, filepath: str, encoding: str
-    ) -> int:
+    def _infer_skip_lines(self, filepath: str, encoding: str) -> int:
         """Infer number of header lines to skip (assumes csv-like format)."""
         with self.fs.open(filepath, mode="r", encoding=encoding) as fh:
             head_lines: List[str] = []
@@ -300,27 +289,21 @@ class DemoBackend(IBackend):
         returns results. Schema retrieval of file objects is not supported.
         """
 
-        object_type: TestobjectType = self.naming_resolver.get_object_type(testobject)
+        object_type: TestobjectType = self.naming_resolver.get_testobject_type(testobject)
         if object_type == object_type.FILE:
             raise DemoBackendError(
                 "Getting schema for file-like testobjects (e.g. raw "
                 "layer) is not supported."
             )
 
-        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
-        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
-            db=db, testobject_name=testobject.name
-        )
-        catalog: str = coordinates[0]
-        schema: str = coordinates[1]
-        table: str = coordinates[2]
+        coords = self.naming_resolver.testobject_to_db_coordinates(testobject)
 
         schema_query: str = f"""
                 SELECT column_name AS col, data_type AS dtype
                 FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE table_catalog = '{catalog}'
-                AND table_schema = '{schema}'
-                AND table_name = '{table}'
+                WHERE table_catalog = '{coords.catalog}'
+                AND table_schema = '{coords.schema}'
+                AND table_name = '{coords.table}'
             """
         schema_as_df = self.con.query(schema_query).pl()
         # convert to dict with keys 'col', 'dtype' and value-lists as values
@@ -550,17 +533,13 @@ class DemoBackend(IBackend):
                 "Provide a non-empty list of primary keys and samples!"
             )
 
-        testobject_type: TestobjectType = self.naming_resolver.get_object_type(testobject)
+        testobject_type: TestobjectType = self.naming_resolver.get_testobject_type(
+            testobject
+        )
         if testobject_type == testobject_type.FILE:
             raise DemoBackendError("Sampling files not yet supported")
 
-        db: DBInstanceDTO = DBInstanceDTO.from_testobject(testobject)
-        coordinates: Tuple[str, str, str] = self.naming_resolver.resolve_db_object(
-            db=db, testobject_name=testobject.name
-        )
-        catalog: str = coordinates[0]
-        schema: str = coordinates[1]
-        table: str = coordinates[2]
+        coords = self.naming_resolver.testobject_to_db_coordinates(testobject)
 
         column_selection: str = self._get_column_selection(columns, cast_to)
         concat_key: str = self._get_concat_key(primary_keys, cast_to)
@@ -568,7 +547,7 @@ class DemoBackend(IBackend):
         sample_query: str = f"""
             SELECT __obj__.* FROM (
                 SELECT {column_selection}, {concat_key} AS __concat_key__
-                FROM {catalog}.{schema}.{table}
+                FROM {coords.catalog}.{coords.schema}.{coords.table}
             ) AS __obj__
             INNER JOIN __test__.__concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__

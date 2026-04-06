@@ -33,7 +33,7 @@ class Config(BaseSettings):
     DATATESTER_INTERNAL_STORAGE_LOCATION: str = Field(default="memory://datatester/")
     DATATESTER_USER_STORAGE_ENGINE: str = Field(default="MEMORY")
 
-    # DEMO BACKEND DATA PATHS
+    # DEMO BACKEND DATA PATHS - no need to change this
     DATATESTER_DEMO_RAW_PATH: str = Field(default="tests/fixtures/demo/raw")
     DATATESTER_DEMO_DB_PATH: str = Field(default="tests/fixtures/demo/dbs")
 

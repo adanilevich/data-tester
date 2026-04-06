@@ -58,9 +58,7 @@ class TestCliAppE2E:
         config = Config(
             DATATESTER_DATA_PLATFORM="DEMO",
             DATATESTER_USER_STORAGE_ENGINE="LOCAL",
-            DATATESTER_INTERNAL_STORAGE_LOCATION=(
-                f"local://{_DEMO_DIR}/internal/"
-            ),
+            DATATESTER_INTERNAL_STORAGE_LOCATION=(f"local://{_DEMO_DIR}/internal/"),
             DATATESTER_DEMO_RAW_PATH=str(_DEMO_DIR / "raw"),
             DATATESTER_DEMO_DB_PATH=str(_DEMO_DIR / "dbs"),
         )
@@ -110,27 +108,14 @@ class TestCliAppE2E:
         assert payments_tr.status == TestStatus.FINISHED
 
         pr = {
-            (tc.testobject.name, tc.testtype): tc
-            for tc in payments_tr.testcase_results
+            (tc.testobject.name, tc.testtype): tc for tc in payments_tr.testcase_results
         }
-        assert pr[
-            ("stage_accounts", TestType.SCHEMA)
-        ].result == TestResult.OK
-        assert pr[
-            ("stage_transactions", TestType.SCHEMA)
-        ].result == TestResult.OK
-        assert pr[
-            ("core_account_payments", TestType.ROWCOUNT)
-        ].result == TestResult.OK
-        assert pr[
-            ("core_account_payments", TestType.COMPARE)
-        ].result == TestResult.OK
-        assert pr[
-            ("stage_accounts", TestType.STAGECOUNT)
-        ].result == TestResult.OK
-        assert pr[
-            ("stage_transactions", TestType.STAGECOUNT)
-        ].result == TestResult.NOK
+        assert pr[("stage_accounts", TestType.SCHEMA)].result == TestResult.OK
+        assert pr[("stage_transactions", TestType.SCHEMA)].result == TestResult.OK
+        assert pr[("core_account_payments", TestType.ROWCOUNT)].result == TestResult.OK
+        assert pr[("core_account_payments", TestType.COMPARE)].result == TestResult.OK
+        assert pr[("stage_accounts", TestType.STAGECOUNT)].result == TestResult.OK
+        assert pr[("stage_transactions", TestType.STAGECOUNT)].result == TestResult.NOK
         for tc in payments_tr.testcase_results:
             assert tc.status == TestStatus.FINISHED
 
@@ -141,28 +126,17 @@ class TestCliAppE2E:
         assert sales_tr.result == TestResult.NOK
         assert sales_tr.status == TestStatus.FINISHED
 
-        sr = {
-            (tc.testobject.name, tc.testtype): tc
-            for tc in sales_tr.testcase_results
-        }
-        assert sr[
-            ("stage_customers", TestType.SCHEMA)
-        ].result == TestResult.OK
-        assert sr[
-            ("stage_transactions", TestType.SCHEMA)
-        ].result == TestResult.OK
-        assert sr[
-            ("core_customer_transactions", TestType.ROWCOUNT)
-        ].result == TestResult.OK
-        assert sr[
-            ("core_customer_transactions", TestType.COMPARE)
-        ].result == TestResult.NOK
-        assert sr[
-            ("stage_customers", TestType.STAGECOUNT)
-        ].result == TestResult.OK
-        assert sr[
-            ("stage_transactions", TestType.STAGECOUNT)
-        ].result == TestResult.OK
+        sr = {(tc.testobject.name, tc.testtype): tc for tc in sales_tr.testcase_results}
+        assert sr[("stage_customers", TestType.SCHEMA)].result == TestResult.OK
+        assert sr[("stage_transactions", TestType.SCHEMA)].result == TestResult.OK
+        assert (
+            sr[("core_customer_transactions", TestType.ROWCOUNT)].result == TestResult.OK
+        )
+        assert (
+            sr[("core_customer_transactions", TestType.COMPARE)].result == TestResult.NOK
+        )
+        assert sr[("stage_customers", TestType.STAGECOUNT)].result == TestResult.OK
+        assert sr[("stage_transactions", TestType.STAGECOUNT)].result == TestResult.OK
         for tc in sales_tr.testcase_results:
             assert tc.status == TestStatus.FINISHED
 
@@ -190,22 +164,20 @@ class TestCliAppE2E:
         for report in payments_tc_reports:
             assert report.domain == "payments"
             assert report.result in (
-                TestResult.OK.value, TestResult.NOK.value,
+                TestResult.OK.value,
+                TestResult.NOK.value,
             )
 
         for report in sales_tc_reports:
             assert report.domain == "sales"
             assert report.result in (
-                TestResult.OK.value, TestResult.NOK.value,
+                TestResult.OK.value,
+                TestResult.NOK.value,
             )
 
         nok = TestResult.NOK.value
-        assert len(
-            [r for r in payments_tc_reports if r.result == nok]
-        ) == 1
-        assert len(
-            [r for r in sales_tc_reports if r.result == nok]
-        ) == 1
+        assert len([r for r in payments_tc_reports if r.result == nok]) == 1
+        assert len([r for r in sales_tc_reports if r.result == nok]) == 1
 
         # 5. No cross-contamination
         for report in payments_tc_reports:

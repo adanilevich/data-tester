@@ -40,6 +40,7 @@ from src.domain.testrun.testcases import (
 from src.domain.testrun.precondition_checks import Checkable
 
 
+# TODO: DELETE THIS
 @pytest.fixture(autouse=True)
 def _clear_memory_filesystem():
     """Clear MemoryFileSystem shared state before and after each test."""
@@ -50,16 +51,19 @@ def _clear_memory_filesystem():
     MemoryFileSystem.store.clear()
 
 
+# TODO: DELETE THIS
 @pytest.fixture
 def dummy_backend() -> IBackend:
     return DummyBackend()
 
 
+# TODO: DELETE THIS
 @pytest.fixture
 def in_memory_notifier() -> InMemoryNotifier:
     return InMemoryNotifier()
 
 
+# TODO: DELETE THIS
 @pytest.fixture
 def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
@@ -191,7 +195,6 @@ def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
             return testcase
 
     return TestCaseCreator()
-
 
 
 @pytest.fixture

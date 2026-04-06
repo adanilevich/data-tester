@@ -29,8 +29,8 @@ def domain_config():
         testreports_location=LocationDTO(path="dummy://reports"),
         testcases=TestCasesConfigDTO(
             compare=CompareTestCaseConfigDTO(sample_size=100),
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["string", "int"])
-        )
+            schema=SchemaTestCaseConfigDTO(compare_datatypes=["string", "int"]),
+        ),
     )
 
 
@@ -52,29 +52,33 @@ class TestTestRunDTO:
                     testobject="table1",
                     testtype=TestType.SCHEMA,
                     domain="test_domain",
-                    comment="Schema test"
+                    comment="Schema test",
                 ),
                 "table2_ROWCOUNT": TestCaseEntryDTO(
                     testobject="table2",
                     testtype=TestType.ROWCOUNT,
                     domain="test_domain",
-                    comment="Row count test"
-                )
-            }
+                    comment="Row count test",
+                ),
+            },
         )
 
         # And specifications for each test case
         spec_list = [
-            [SpecDTO(
-                location=LocationDTO(path="dummy://spec1"),
-                spec_type=SpecType.SCHEMA,
-                testobject="table1"
-            )],
-            [SpecDTO(
-                location=LocationDTO(path="dummy://spec2"),
-                spec_type=SpecType.ROWCOUNT,
-                testobject="table2"
-            )]
+            [
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec1"),
+                    spec_type=SpecType.SCHEMA,
+                    testobject="table1",
+                )
+            ],
+            [
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec2"),
+                    spec_type=SpecType.ROWCOUNT,
+                    testobject="table2",
+                )
+            ],
         ]
 
         # When creating a TestRunDTO from the testset
@@ -104,24 +108,26 @@ class TestTestRunDTO:
             default_instance="instance1",
             testcases={
                 "table1_SCHEMA": TestCaseEntryDTO(
-                    testobject="table1",
-                    domain="test_domain",
-                    testtype=TestType.SCHEMA
+                    testobject="table1", domain="test_domain", testtype=TestType.SCHEMA
                 ),
                 "table2_ROWCOUNT": TestCaseEntryDTO(
                     testobject="table2",
                     testtype=TestType.ROWCOUNT,
                     domain="test_domain",
-                )
-            }
+                ),
+            },
         )
 
         # And a spec_list with only 1 entry (mismatched length)
-        spec_list = [[SpecDTO(
-            location=LocationDTO(path="dummy://spec1"),
-            spec_type=SpecType.SCHEMA,
-            testobject="table1"
-        )]]
+        spec_list = [
+            [
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec1"),
+                    spec_type=SpecType.SCHEMA,
+                    testobject="table1",
+                )
+            ]
+        ]
 
         # When creating a TestRunDTO, it should raise ValueError
         msg = "spec_list must be same length as testset.testcases"
@@ -141,14 +147,18 @@ class TestTestRunDTO:
                     testtype=TestType.SCHEMA,
                     domain="test_domain",
                 )
-            }
+            },
         )
 
-        spec_list = [[SpecDTO(
-            location=LocationDTO(path="dummy://spec1"),
-            spec_type=SpecType.SCHEMA,
-            testobject="table1"
-        )]]
+        spec_list = [
+            [
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec1"),
+                    spec_type=SpecType.SCHEMA,
+                    testobject="table1",
+                )
+            ]
+        ]
 
         # And a domain config with different domain
         different_domain_config = DomainConfigDTO(
@@ -158,8 +168,8 @@ class TestTestRunDTO:
             testreports_location=LocationDTO(path="dummy://reports"),
             testcases=TestCasesConfigDTO(
                 compare=CompareTestCaseConfigDTO(sample_size=100),
-                schema=SchemaTestCaseConfigDTO(compare_datatypes=["string"])
-            )
+                schema=SchemaTestCaseConfigDTO(compare_datatypes=["string"]),
+            ),
         )
 
         # When creating a TestRunDTO, it should raise ValueError
@@ -181,23 +191,25 @@ class TestTestRunDTO:
                     testobject="table1",
                     testtype=TestType.COMPARE,
                     domain="test_domain",
-                    scenario="yesterday"
+                    scenario="yesterday",
                 )
-            }
+            },
         )
 
-        spec_list = [[
-            SpecDTO(
-                location=LocationDTO(path="dummy://spec1"),
-                spec_type=SpecType.COMPARE,
-                testobject="table1"
-            ),
-            SpecDTO(
-                location=LocationDTO(path="dummy://spec2"),
-                spec_type=SpecType.COMPARE,
-                testobject="table1"
-            )
-        ]]
+        spec_list = [
+            [
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec1"),
+                    spec_type=SpecType.COMPARE,
+                    testobject="table1",
+                ),
+                SpecDTO(
+                    location=LocationDTO(path="dummy://spec2"),
+                    spec_type=SpecType.COMPARE,
+                    testobject="table1",
+                ),
+            ]
+        ]
 
         # When creating a TestRunDTO
         testrun = TestRunDTO.from_testset(testset, spec_list, domain_config)
@@ -231,7 +243,7 @@ class TestTestRunDTO:
             status=TestStatus.FINISHED,
             start_ts=datetime.now(),
             testdefinitions=[],
-            domain_config=domain_config
+            domain_config=domain_config,
         )
 
         # Then object_id should return string representation of testrun_id

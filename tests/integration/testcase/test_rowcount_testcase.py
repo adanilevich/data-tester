@@ -1,7 +1,8 @@
 from uuid import uuid4
 import pytest
 from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data, clean_up_demo_data,
+    prepare_demo_data,
+    clean_up_demo_data,
 )
 from src.domain.testrun.testcases import RowCountTestCase
 from src.dtos import (
@@ -36,7 +37,9 @@ spec = RowcountSpecDTO(
 )
 
 testobject = TestObjectDTO(
-    domain="payments", stage="test", instance="alpha",
+    domain="payments",
+    stage="test",
+    instance="alpha",
     name="core_account_payments",
 )
 

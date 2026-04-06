@@ -22,17 +22,15 @@ class IBackend(ABC):
     supports_primary_keys: bool
 
     @abstractmethod
-    def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
-        """Get a list of testobjects existing for given domain, stage and instance"""
+    def list_testobjects(self, db: DBInstanceDTO) -> List[TestObjectDTO]:
+        """Get a list of testobjects existing for given domain, stage and instance."""
 
     @abstractmethod
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecDTO:
         """Get schema (column names and datatyples) of testobject."""
 
     @abstractmethod
-    def get_schema_from_query(
-        self, query: str, db: DBInstanceDTO
-    ) -> SchemaSpecDTO:
+    def get_schema_from_query(self, query: str, db: DBInstanceDTO) -> SchemaSpecDTO:
         """Get schema (column names and datatyples) of (translated) query."""
 
     @abstractmethod

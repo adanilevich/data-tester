@@ -6,27 +6,27 @@ Data Tester is a flexible, extensible framework for automating business validati
 ## Tech Stack
 - Python
 - pydantic for data validation
+- fastapi for backend
 - fsspec for file system interaction
 
 ## Code Style and Quality Standards
 Claude must follow these rules when implementing code changes
-- All code must pass linter and formatter checks. Claude can automatically apply
-formatting without asking for permission
-- All code must pass typechecks. "... is defined" here messages from MyPy can be ignored
-unless Claude is promted explicitely to address them
-- Type hints are used in all signatures and function bodies
-- Code Formatting: Format code with ruff. Then try to put statements in one line, if not possible use next best approach for readability.
+- All code must pass linter, formatter checks. Apply formatting without asking permission
+- All code must pass typechecks.
+- Type hints are used in all signatures
+- Always format code with ruff
 
 ## Architecture
 The project uses hexagonal architecture with clear separation between domain logic, application services and adapters
-- `src/apps`: contains applications (cli client, http backend, etc.) which assemble drivers, ports, adapters and domain logic using dependency injection (`..._di.py` modules)
 - `src/config`: contains the application configuration
-- `src/domain`: contains the domain logic with the main domain objects being `domain_config`, `report`, `specification`, `testcase`, `testset`
-- `src/domain_ports`: defines ports (interfaces) of the domain objects. These ports are used by drivers to execute business logic
-- `src/drivers`: contains drivers for each app (cli, http) which define business use cases
+- `src/domain`: contains the domain logic with the main domain objects
+- `src/domain_ports`: defines ports (interfaces) of the domain objects
+- `src/domain_adapters`: containes implementations of domain_ports
+- `src/drivers`: contains drivers which execute domain logic via domain ports
 - `src/dtos`: contains data objects which are used in whole codebase
 - `src/infrastructure_ports`: contains driven (infrastructure) ports (interfaces) which are used as contracts by drivers and domain logic
 - `src/infrastructure`: contains implementations of the infrastructure ports, the most important are `storage`, `notifiers`, `backend` (aka `data_platform`)
+- `src/apps`: contains applications (`..._app.py` modules, e.g. cli client, http client) and dependency injection which assemble all objects (`..._di.py` modules)
 
 ## Commands
 - `uv sync`: install dependencies
@@ -39,7 +39,10 @@ The project uses hexagonal architecture with clear separation between domain log
 - `uv run pytest tests/integration/`: Run integration tests only
 - `./run_checks.sh`: Run all checks: linting, formatting, typechecks, tests
 
-## Important Notes
-- Execute all checks before finalizing code. Fix any occuring issues
-- Respect permissions in local.settings.json. Don't ask for permission if you already have it or can use a different tool on which you have permission
-- *Important*: Execute these checks without asking for permission.
+## MANDATORY: Planning Workflow (do this first before anything else)
+1. When planning, invoke the `planning-with-files:plan` skill using the Skill tool — do NOT use the built-in plan mode as a substitute
+2. Create planning files (`task_plan.md`, `findings.md`, `progress.md`) in `agent-artifacts/plans/intermediate/{task-title}/`
+3. Write your plan to `agent-artifacts/plans/{task-title}.md`
+4. **DO NOT present the plan to the user or prompt for implementation until step 2 and 3 are complete** 
+5. Execute all checks before finalizing code. Fix any occuring issues
+6. **IMPORTANT**: Respect permissions in local.settings.json. Don't ask for permission if you already have permission for an appropriate tool 

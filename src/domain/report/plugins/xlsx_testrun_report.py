@@ -41,20 +41,21 @@ class XlsxTestRunReportFormatter(IReportFormatter):
             raise ReportTypeNotSupportedError(msg)
 
         exclude = {
-            "report_id", "testrun_id", "testset_id",
-            "labels", "start_ts", "end_ts",
+            "report_id",
+            "testrun_id",
+            "testset_id",
+            "labels",
+            "start_ts",
+            "end_ts",
         }
         testcase_results = [
-            result.to_dict(exclude=exclude)
-            for result in report.testcase_results
+            result.to_dict(exclude=exclude) for result in report.testcase_results
         ]
 
         try:
             for row in testcase_results:
                 for k, v in row.items():
-                    if not isinstance(
-                        v, (str, int, float, bool, type(None), list)
-                    ):
+                    if not isinstance(v, (str, int, float, bool, type(None), list)):
                         row[k] = str(v)
             df = pl.DataFrame(testcase_results)
             excel_io = BytesIO()

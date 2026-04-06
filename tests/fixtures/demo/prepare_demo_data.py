@@ -94,7 +94,11 @@ __all__ = ["prepare_demo_data", "clean_up_demo_data"]
 _SQL_DIR: Path = Path(__file__).parent
 
 _REGIONS: list[str] = [
-    "europe", "asia", "americas", "africa", "oceania",
+    "europe",
+    "asia",
+    "americas",
+    "africa",
+    "oceania",
 ]
 _CUSTOMER_TYPES: list[str] = ["individual", "corporate", "government"]
 _ACCOUNT_TYPES: list[str] = ["checking", "savings", "credit"]
@@ -107,51 +111,60 @@ _ACCOUNT_TYPES: list[str] = ["checking", "savings", "credit"]
 def _generate_customers(n: int, date: str, seed: int) -> pl.DataFrame:
     """Generate n customer rows for a given date."""
     rng = random.Random(seed)
-    return pl.DataFrame({
-        "date": [date] * n,
-        "id": list(range(1, n + 1)),
-        "region": [rng.choice(_REGIONS) for _ in range(n)],
-        "type": [rng.choice(_CUSTOMER_TYPES) for _ in range(n)],
-        "name": [f"customer_{i}" for i in range(1, n + 1)],
-    })
+    return pl.DataFrame(
+        {
+            "date": [date] * n,
+            "id": list(range(1, n + 1)),
+            "region": [rng.choice(_REGIONS) for _ in range(n)],
+            "type": [rng.choice(_CUSTOMER_TYPES) for _ in range(n)],
+            "name": [f"customer_{i}" for i in range(1, n + 1)],
+        }
+    )
 
 
 def _generate_accounts(
-    n: int, date: str, max_customer_id: int, seed: int,
+    n: int,
+    date: str,
+    max_customer_id: int,
+    seed: int,
 ) -> pl.DataFrame:
     """Generate n account rows, each linked to a customer."""
     rng = random.Random(seed)
-    return pl.DataFrame({
-        "date": [date] * n,
-        "id": list(range(1, n + 1)),
-        "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
-        "type": [rng.choice(_ACCOUNT_TYPES) for _ in range(n)],
-        "name": [f"account_{i}" for i in range(1, n + 1)],
-    })
+    return pl.DataFrame(
+        {
+            "date": [date] * n,
+            "id": list(range(1, n + 1)),
+            "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
+            "type": [rng.choice(_ACCOUNT_TYPES) for _ in range(n)],
+            "name": [f"account_{i}" for i in range(1, n + 1)],
+        }
+    )
 
 
 def _generate_transactions(
-    n: int, date: str, max_customer_id: int, max_account_id: int, seed: int,
+    n: int,
+    date: str,
+    max_customer_id: int,
+    max_account_id: int,
+    seed: int,
 ) -> pl.DataFrame:
     """Generate n transaction rows, each linked to a customer and account."""
     rng = random.Random(seed)
-    return pl.DataFrame({
-        "date": [date] * n,
-        "id": list(range(1, n + 1)),
-        "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
-        "account_id": [rng.randint(1, max_account_id) for _ in range(n)],
-        "amount": [round(rng.uniform(1.0, 10000.0), 2) for _ in range(n)],
-    })
+    return pl.DataFrame(
+        {
+            "date": [date] * n,
+            "id": list(range(1, n + 1)),
+            "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
+            "account_id": [rng.randint(1, max_account_id) for _ in range(n)],
+            "amount": [round(rng.uniform(1.0, 10000.0), 2) for _ in range(n)],
+        }
+    )
 
 
 # Source file definitions: key -> (generator_func, kwargs)
 _SOURCE_FILES: dict[str, tuple] = {
-    "customers_1": (
-        _generate_customers, {"n": 100, "date": "2024-01-01", "seed": 42}
-    ),
-    "customers_2": (
-        _generate_customers, {"n": 105, "date": "2024-01-02", "seed": 43}
-    ),
+    "customers_1": (_generate_customers, {"n": 100, "date": "2024-01-01", "seed": 42}),
+    "customers_2": (_generate_customers, {"n": 105, "date": "2024-01-02", "seed": 43}),
     "accounts_1": (
         _generate_accounts,
         {"n": 200, "date": "2024-01-01", "max_customer_id": 100, "seed": 44},
@@ -163,15 +176,21 @@ _SOURCE_FILES: dict[str, tuple] = {
     "transactions_1": (
         _generate_transactions,
         {
-            "n": 1000, "date": "2024-01-01",
-            "max_customer_id": 100, "max_account_id": 200, "seed": 46,
+            "n": 1000,
+            "date": "2024-01-01",
+            "max_customer_id": 100,
+            "max_account_id": 200,
+            "seed": 46,
         },
     ),
     "transactions_2": (
         _generate_transactions,
         {
-            "n": 1000, "date": "2024-01-02",
-            "max_customer_id": 105, "max_account_id": 210, "seed": 47,
+            "n": 1000,
+            "date": "2024-01-02",
+            "max_customer_id": 105,
+            "max_account_id": 210,
+            "seed": 47,
         },
     ),
 }
@@ -336,9 +355,7 @@ def _setup_databases(
         "stage_customers": _read_sql("ddl_stage_customers.sql"),
         "stage_transactions": _read_sql("ddl_stage_transactions.sql"),
         "stage_accounts": _read_sql("ddl_stage_accounts.sql"),
-        "core_customer_transactions": _read_sql(
-            "ddl_core_customer_transactions.sql"
-        ),
+        "core_customer_transactions": _read_sql("ddl_core_customer_transactions.sql"),
         "core_account_payments": _read_sql("ddl_core_account_payments.sql"),
         "mart_account_payments_by_date": _read_sql(
             "ddl_mart_account_payments_by_date.sql"
@@ -351,16 +368,12 @@ def _setup_databases(
     for database, schema, table in all_objects:
         # Attach database file (creates .db on disk if not exists)
         db_filepath = str(db_path / database) + ".db"
-        duckdb.execute(
-            attach_sql.format(db_filepath=db_filepath, database=database)
-        )
+        duckdb.execute(attach_sql.format(db_filepath=db_filepath, database=database))
 
         # Create schema and table
         if table not in ddl_templates:
             raise ValueError(f"Unknown table name: {table}")
-        duckdb.execute(
-            ddl_templates[table].format(database=database, schema=schema)
-        )
+        duckdb.execute(ddl_templates[table].format(database=database, schema=schema))
 
     created_tables = duckdb.sql(
         "SELECT * FROM INFORMATION_SCHEMA.TABLES "
@@ -457,9 +470,7 @@ def _load_core_layer(
     """Load core layer tables by joining staging tables."""
     print("\nLOADING CORE LAYER:")
     dml_templates: dict[str, str] = {
-        "core_account_payments": _read_sql(
-            "dml_load_core_account_payments.sql"
-        ),
+        "core_account_payments": _read_sql("dml_load_core_account_payments.sql"),
         "core_customer_transactions": _read_sql(
             "dml_load_core_customer_transactions.sql"
         ),

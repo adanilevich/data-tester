@@ -184,4 +184,3 @@ class TestCompareTestCase:
 
         with pytest.raises(SchemaMismatchError):
             testcase._execute()
-

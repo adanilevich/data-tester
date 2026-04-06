@@ -18,9 +18,7 @@ class TestSetAdapter(ITestSet):
         self.testset.save_testset(testset=command.testset)
 
     def load_testset(self, command: LoadTestSetCommand) -> TestSetDTO:
-        return self.testset.load_testset(
-            testset_id=command.testset_id
-        )
+        return self.testset.load_testset(testset_id=command.testset_id)
 
     def list_testsets(self, command: ListTestSetsCommand) -> List[TestSetDTO]:
         return self.testset.list_testsets(domain=command.domain)

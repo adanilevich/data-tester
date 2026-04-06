@@ -246,12 +246,16 @@ class DtoStorageFile(IDtoStorage):
 
         search_path = self.storage_location.path + self._get_folder(object_type)
 
-        # Apply filters to narrow the search path
+        # Apply filters to narrow the search path.
+        # Directory layout: {type}/{domain}/{date}/{testrun_id}/
+        # When an intermediate segment is missing, use **/ to match any.
         if filters:
             if "domain" in filters:
                 search_path += f"{filters['domain']}/"
             if "date" in filters:
                 search_path += f"{filters['date']}/"
+            elif "testrun_id" in filters:
+                search_path += "**/"  # match any date
             if "testrun_id" in filters:
                 search_path += f"{filters['testrun_id']}/"
 
@@ -276,7 +280,9 @@ class DtoStorageFile(IDtoStorage):
                 results.append(dto)
             except Exception as err:
                 logging.getLogger("datatester").warning(
-                    "Skipping DTO at %s: %s", match_path, err,
+                    "Skipping DTO at %s: %s",
+                    match_path,
+                    err,
                 )
                 continue
 

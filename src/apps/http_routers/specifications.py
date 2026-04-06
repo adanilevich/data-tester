@@ -1,11 +1,10 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter
 from pydantic import BaseModel
 
 from src.apps.http_di import SpecDriverDep
 from src.dtos import LocationDTO, TestSetDTO
-from src.dtos.specification_dtos import SpecDTO
 
 router = APIRouter(tags=["specifications"])
 
@@ -15,8 +14,9 @@ class FindSpecsRequest(BaseModel):
     locations: List[LocationDTO]
 
 
-@router.post("/{domain}/specification/find", response_model=List[List[SpecDTO]])
+@router.post("/{domain}/specification/find")
 def find_specifications(
     domain: str, body: FindSpecsRequest, driver: SpecDriverDep
-) -> List[List[SpecDTO]]:
-    return driver.find_specifications(testset=body.testset, locations=body.locations)
+) -> Any:
+    specs = driver.find_specifications(testset=body.testset, locations=body.locations)
+    return [[s.to_dict(mode="json") for s in group] for group in specs]

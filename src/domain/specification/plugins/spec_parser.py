@@ -122,7 +122,7 @@ class CompareSqlParser(ISpecParser):
 
         if "__EXPECTED__" in content:
             return CompareSpecDTO(
-                location = empty_spec.location,
+                location=empty_spec.location,
                 testobject=empty_spec.testobject,
                 query=content,
             )
@@ -141,7 +141,8 @@ class StagecountJsonParser(ISpecParser):
             data = json.loads(file.decode("utf-8"))
         except Exception as e:
             spec = self.set_message(
-                empty_spec, f"Error reading stagecount JSON: {e}",
+                empty_spec,
+                f"Error reading stagecount JSON: {e}",
             )
             return cast(StagecountSpecDTO, spec)
 

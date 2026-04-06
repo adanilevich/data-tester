@@ -119,7 +119,8 @@ class TestTxtTestCaseReportFormatter:
         assert "partitioning_diff" in parsed_yaml["diff"]
 
     def test_schema_diff_omits_equal_sections(
-        self, testcase_report: TestCaseReportDTO,
+        self,
+        testcase_report: TestCaseReportDTO,
     ):
         # given a SCHEMA testcase report where partitioning is equal
         testcase_report.testtype = "SCHEMA"

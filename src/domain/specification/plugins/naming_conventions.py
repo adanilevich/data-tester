@@ -73,9 +73,7 @@ class DefaultNamingConventions(INamingConventions):
             match = False
             spec_types = []
         else:
-            raise SpecNamingConventionsError(
-                f"Unsupported testtype: {testcase.testtype}"
-            )
+            raise SpecNamingConventionsError(f"Unsupported testtype: {testcase.testtype}")
 
         return match, spec_types
 

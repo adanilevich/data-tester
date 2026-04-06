@@ -15,29 +15,17 @@ class TestDtoStorageFactory:
         return DtoStorageFactory()
 
     def test_get_storage_memory(self, factory: DtoStorageFactory):
-        storage = factory.get_storage(
-            LocationDTO("memory://data/")
-        )
+        storage = factory.get_storage(LocationDTO("memory://data/"))
         assert isinstance(storage, MemoryDtoStorage)
 
     def test_get_storage_local(self, factory: DtoStorageFactory):
-        storage = factory.get_storage(
-            LocationDTO("local:///tmp/test_storage/")
-        )
+        storage = factory.get_storage(LocationDTO("local:///tmp/test_storage/"))
         assert isinstance(storage, LocalDtoStorage)
 
-    def test_get_storage_gcs_without_project_raises(
-        self, factory: DtoStorageFactory
-    ):
+    def test_get_storage_gcs_without_project_raises(self, factory: DtoStorageFactory):
         with pytest.raises(StorageTypeUnknownError):
-            factory.get_storage(
-                LocationDTO("gcs://bucket/")
-            )
+            factory.get_storage(LocationDTO("gcs://bucket/"))
 
-    def test_get_storage_unsupported_raises(
-        self, factory: DtoStorageFactory
-    ):
+    def test_get_storage_unsupported_raises(self, factory: DtoStorageFactory):
         with pytest.raises(StorageTypeUnknownError):
-            factory.get_storage(
-                LocationDTO("dict://data/")
-            )
+            factory.get_storage(LocationDTO("dict://data/"))

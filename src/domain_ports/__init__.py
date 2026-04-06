@@ -31,6 +31,7 @@ from .i_testset import (
     LoadTestSetCommand,
     ListTestSetsCommand,
 )
+from .i_platform import IPlatform, ListTestObjectsCommand
 
 __all__ = [
     "IDomainConfig",
@@ -59,4 +60,6 @@ __all__ = [
     "SaveTestSetCommand",
     "LoadTestSetCommand",
     "ListTestSetsCommand",
+    "IPlatform",
+    "ListTestObjectsCommand",
 ]

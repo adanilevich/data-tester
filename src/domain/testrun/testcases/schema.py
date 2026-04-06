@@ -38,7 +38,9 @@ class SchemaTestCase(AbstractTestCase):
     ttype: Literal[TestType.SCHEMA] = TestType.SCHEMA
     required_specs: list[str] = ["schema"]
     preconditions: list[str] = [
-        "specs_are_unique", "specs_not_empty", "testobject_exists",
+        "specs_are_unique",
+        "specs_not_empty",
+        "testobject_exists",
     ]
 
     def _execute(self):

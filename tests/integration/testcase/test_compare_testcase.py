@@ -1,7 +1,8 @@
 from uuid import uuid4
 import pytest
 from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data, clean_up_demo_data,
+    prepare_demo_data,
+    clean_up_demo_data,
 )
 from src.domain.testrun.testcases import CompareTestCase
 from src.dtos import (
@@ -46,7 +47,9 @@ schema = SchemaSpecDTO(
 )
 
 testobject = TestObjectDTO(
-    domain="payments", stage="test", instance="alpha",
+    domain="payments",
+    stage="test",
+    instance="alpha",
     name="core_account_payments",
 )
 

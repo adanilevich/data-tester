@@ -50,9 +50,7 @@ def testset_dto():
 def test_save_and_load_testset(handler, testset_dto):
     save_cmd = SaveTestSetCommand(testset=testset_dto)
     handler.save_testset(save_cmd)
-    load_cmd = LoadTestSetCommand(
-        testset_id=str(testset_dto.testset_id)
-    )
+    load_cmd = LoadTestSetCommand(testset_id=str(testset_dto.testset_id))
     loaded = handler.load_testset(load_cmd)
     assert loaded.name == testset_dto.name
     assert loaded.domain == testset_dto.domain
@@ -60,9 +58,7 @@ def test_save_and_load_testset(handler, testset_dto):
 
 
 def test_list_testsets_by_domain(handler, testset_dto):
-    handler.save_testset(
-        SaveTestSetCommand(testset=testset_dto)
-    )
+    handler.save_testset(SaveTestSetCommand(testset=testset_dto))
     other_testset = TestSetDTO(
         name="OtherSet",
         description="Other",
@@ -72,9 +68,7 @@ def test_list_testsets_by_domain(handler, testset_dto):
         default_instance="instance2",
         testcases={},
     )
-    handler.save_testset(
-        SaveTestSetCommand(testset=other_testset)
-    )
+    handler.save_testset(SaveTestSetCommand(testset=other_testset))
     list_cmd = ListTestSetsCommand(domain="domain1")
     result = handler.list_testsets(list_cmd)
     assert len(result) == 1

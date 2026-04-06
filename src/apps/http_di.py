@@ -18,6 +18,7 @@ from src.domain.report.plugins import (
 from src.domain.specification import NamingConventionsFactory, SpecParserFactory
 from src.domain_adapters import (
     DomainConfigAdapter,
+    PlatformAdapter,
     ReportAdapter,
     SpecAdapter,
     TestRunAdapter,
@@ -25,6 +26,7 @@ from src.domain_adapters import (
 )
 from src.drivers import (
     DomainConfigDriver,
+    PlatformDriver,
     ReportDriver,
     SpecDriver,
     TestRunDriver,
@@ -51,6 +53,10 @@ class HttpDependencyInjector:
     def domain_config_driver(self) -> DomainConfigDriver:
         handler = DomainConfigAdapter(dto_storage=self.dto_storage)
         return DomainConfigDriver(domain_config_adapter=handler)
+
+    def platform_driver(self) -> PlatformDriver:
+        handler = PlatformAdapter(backend_factory=self.backend_factory)
+        return PlatformDriver(platform_adapter=handler)
 
     def testset_driver(self) -> TestSetDriver:
         handler = TestSetAdapter(dto_storage=self.dto_storage)
@@ -111,7 +117,13 @@ def get_report_driver(request: Request) -> ReportDriver:
     return di.report_driver()
 
 
+def get_platform_driver(request: Request) -> PlatformDriver:
+    di: HttpDependencyInjector = request.app.state.di
+    return di.platform_driver()
+
+
 DomainConfigDriverDep = Annotated[DomainConfigDriver, Depends(get_domain_config_driver)]
+PlatformDriverDep = Annotated[PlatformDriver, Depends(get_platform_driver)]
 TestSetDriverDep = Annotated[TestSetDriver, Depends(get_testset_driver)]
 SpecDriverDep = Annotated[SpecDriver, Depends(get_spec_driver)]
 TestRunDriverDep = Annotated[TestRunDriver, Depends(get_testrun_driver)]

@@ -20,7 +20,7 @@ from src.dtos import (
     TestCasesConfigDTO,
     CompareTestCaseConfigDTO,
     SchemaTestCaseConfigDTO,
-    DTO
+    DTO,
 )
 
 

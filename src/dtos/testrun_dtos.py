@@ -117,6 +117,7 @@ class TestCaseDTO(TestDTO):
 
 class TestRunSummaryDTO(DTO):
     """Summary of testrun progress — updated after each testcase completes."""
+
     __test__ = False
     total_testcases: int = 0
     completed_testcases: int = 0
@@ -141,7 +142,7 @@ class TestRunDTO(TestDTO):
         cls,
         testset: TestSetDTO,
         spec_list: List[List[SpecDTO]],
-        domain_config: DomainConfigDTO
+        domain_config: DomainConfigDTO,
     ) -> Self:
         """
         Creates a TestRunDTO from a TestSetDTO, a list of specifications and a
@@ -169,7 +170,7 @@ class TestRunDTO(TestDTO):
                 name=testcase_entry.testobject,
                 domain=testset.domain,
                 stage=testset.stage,
-                instance=testset.instance
+                instance=testset.instance,
             )
 
             definition = TestDefinitionDTO(
@@ -180,7 +181,7 @@ class TestRunDTO(TestDTO):
                 labels=testset.labels,
                 testset_id=testset.testset_id,
                 testrun_id=testrun_id,
-                domain_config=domain_config
+                domain_config=domain_config,
             )
             testdefinitions.append(definition)
 

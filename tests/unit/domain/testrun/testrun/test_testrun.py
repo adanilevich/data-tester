@@ -25,9 +25,7 @@ from src.infrastructure.notifier import InMemoryNotifier
 class TestTestRun:
     @pytest.fixture
     def testobject(self):
-        return TestObjectDTO(
-            name="to", domain="dom", stage="proj", instance="inst"
-        )
+        return TestObjectDTO(name="to", domain="dom", stage="proj", instance="inst")
 
     @pytest.fixture
     def specifications(self):
@@ -63,9 +61,7 @@ class TestTestRun:
     def notifier(self):
         return InMemoryNotifier()
 
-    def make_testrun_dto(
-        self, testobject, specifications, domain_config
-    ):
+    def make_testrun_dto(self, testobject, specifications, domain_config):
         return TestRunDTO(
             testrun_id=uuid4(),
             testset_id=uuid4(),
@@ -115,14 +111,10 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(
-            testobject, specifications, domain_config
-        )
+        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
         original_start_ts = testrun_dto.start_ts
 
-        testrun = TestRun(
-            testrun_dto, backend_factory, [notifier], dto_storage
-        )
+        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
 
         assert testrun.testrun.testrun_id == testrun_dto.testrun_id
         assert testrun.testrun.start_ts != original_start_ts
@@ -156,23 +148,15 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(
-            testobject, specifications, domain_config
-        )
-        testrun = TestRun(
-            testrun_dto, backend_factory, [notifier], dto_storage
-        )
+        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
+        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
 
         result = testrun.execute()
 
-        results = {
-            tc.testtype: tc for tc in result.testcase_results
-        }
+        results = {tc.testtype: tc for tc in result.testcase_results}
         assert results[TestType.DUMMY_OK].result == TestResult.OK
         assert results[TestType.DUMMY_NOK].result == TestResult.NOK
-        assert (
-            results[TestType.DUMMY_EXCEPTION].result == TestResult.NA
-        )
+        assert results[TestType.DUMMY_EXCEPTION].result == TestResult.NA
 
         assert result.result == TestResult.NOK
         assert result.status == TestStatus.FINISHED
@@ -199,12 +183,8 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(
-            testobject, specifications, domain_config
-        )
-        testrun = TestRun(
-            testrun_dto, backend_factory, [notifier], dto_storage
-        )
+        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
+        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
 
         dto = testrun.to_dto()
         testrun.persist()
@@ -224,9 +204,5 @@ class TestTestRun:
         assert persisted_dto.instance == dto.instance
         assert persisted_dto.status == dto.status
         assert persisted_dto.result == dto.result
-        assert len(persisted_dto.testdefinitions) == len(
-            dto.testdefinitions
-        )
-        assert len(persisted_dto.testcase_results) == len(
-            dto.testcase_results
-        )
+        assert len(persisted_dto.testdefinitions) == len(dto.testdefinitions)
+        assert len(persisted_dto.testcase_results) == len(dto.testcase_results)

@@ -40,7 +40,9 @@ def _setup_demo(config: Config) -> HttpDependencyInjector:
 
     dc_driver = di.domain_config_driver()
     for cfg_file in sorted((demo_base / "configs").glob("*.json")):
-        dc_driver.save_domain_config(config=DomainConfigDTO.from_json(cfg_file.read_text()))
+        dc_driver.save_domain_config(
+            config=DomainConfigDTO.from_json(cfg_file.read_text())
+        )
 
     ts_driver = di.testset_driver()
     for ts_file in sorted((demo_base / "testsets").rglob("*.json")):

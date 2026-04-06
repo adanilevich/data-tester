@@ -3,6 +3,7 @@ from typing import List
 
 from src.dtos import LocationDTO, DTO, SpecDTO, TestSetDTO
 
+
 class ListSpecsCommand(DTO):
     locations: List[LocationDTO]
     testset: TestSetDTO

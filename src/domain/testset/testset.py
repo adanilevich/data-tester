@@ -20,9 +20,7 @@ class TestSet:
 
     def load_testset(self, testset_id: str) -> TestSetDTO:
         """Retrieves a TestSetDTO by testset_id."""
-        dto = self.storage.read_dto(
-            object_type=ObjectType.TESTSET, id=testset_id
-        )
+        dto = self.storage.read_dto(object_type=ObjectType.TESTSET, id=testset_id)
         return cast(TestSetDTO, dto)
 
     def list_testsets(self, domain: str) -> List[TestSetDTO]:

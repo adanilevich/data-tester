@@ -24,9 +24,7 @@ class DemoQueryHandler:
 
 # Matches unqualified table names like stage_customers, core_account_payments,
 # mart_customer_revenues_by_date — but not already-qualified ones (preceded by dot).
-_TABLE_PATTERN = re.compile(
-    r"(?<!\.)(?<!\w)\b((?:stage|core|mart)_\w+)\b"
-)
+_TABLE_PATTERN = re.compile(r"(?<!\.)(?<!\w)\b((?:stage|core|mart)_\w+)\b")
 
 
 class DefaultDemoTranslator:

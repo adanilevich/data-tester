@@ -94,7 +94,8 @@ def _create_stagecount_spec_json(
 
 
 def _domain_configs(
-    specs_base: str, reports_base: str,
+    specs_base: str,
+    reports_base: str,
 ) -> List[DomainConfigDTO]:
     return [
         DomainConfigDTO(
@@ -210,8 +211,7 @@ def _testsets() -> List[TestSetDTO]:
                     testtype=TestType.COMPARE,
                     domain="sales",
                     comment=(
-                        "Compare: staging to core data accuracy "
-                        "(NOK — africa filter)"
+                        "Compare: staging to core data accuracy (NOK — africa filter)"
                     ),
                 ),
                 "stage_customers_STAGECOUNT": TestCaseEntryDTO(
@@ -240,22 +240,46 @@ def _payment_specs(specs_base: str) -> dict[str, bytes]:
     return {
         "stage_accounts_schema.xlsx": _create_schema_xlsx(
             columns=[
-                "date", "id", "customer_id", "type", "name",
-                "m__ts", "m__source_file", "m__source_file_path",
+                "date",
+                "id",
+                "customer_id",
+                "type",
+                "name",
+                "m__ts",
+                "m__source_file",
+                "m__source_file_path",
             ],
             types=[
-                "STRING", "INTEGER", "INTEGER", "STRING", "STRING",
-                "TIMESTAMP", "STRING", "STRING",
+                "STRING",
+                "INTEGER",
+                "INTEGER",
+                "STRING",
+                "STRING",
+                "TIMESTAMP",
+                "STRING",
+                "STRING",
             ],
         ),
         "stage_transactions_schema.xlsx": _create_schema_xlsx(
             columns=[
-                "date", "id", "customer_id", "account_id", "amount",
-                "m__ts", "m__source_file", "m__source_file_path",
+                "date",
+                "id",
+                "customer_id",
+                "account_id",
+                "amount",
+                "m__ts",
+                "m__source_file",
+                "m__source_file_path",
             ],
             types=[
-                "STRING", "INTEGER", "INTEGER", "INTEGER", "FLOAT",
-                "TIMESTAMP", "STRING", "STRING",
+                "STRING",
+                "INTEGER",
+                "INTEGER",
+                "INTEGER",
+                "FLOAT",
+                "TIMESTAMP",
+                "STRING",
+                "STRING",
             ],
         ),
         "core_account_payments_schema.xlsx": _create_schema_xlsx(
@@ -308,22 +332,46 @@ def _sales_specs(specs_base: str) -> dict[str, bytes]:
     return {
         "stage_customers_schema.xlsx": _create_schema_xlsx(
             columns=[
-                "date", "id", "region", "type", "name",
-                "m__ts", "m__source_file", "m__source_file_path",
+                "date",
+                "id",
+                "region",
+                "type",
+                "name",
+                "m__ts",
+                "m__source_file",
+                "m__source_file_path",
             ],
             types=[
-                "STRING", "INTEGER", "STRING", "STRING", "STRING",
-                "TIMESTAMP", "STRING", "STRING",
+                "STRING",
+                "INTEGER",
+                "STRING",
+                "STRING",
+                "STRING",
+                "TIMESTAMP",
+                "STRING",
+                "STRING",
             ],
         ),
         "stage_transactions_schema.xlsx": _create_schema_xlsx(
             columns=[
-                "date", "id", "customer_id", "account_id", "amount",
-                "m__ts", "m__source_file", "m__source_file_path",
+                "date",
+                "id",
+                "customer_id",
+                "account_id",
+                "amount",
+                "m__ts",
+                "m__source_file",
+                "m__source_file_path",
             ],
             types=[
-                "STRING", "INTEGER", "INTEGER", "INTEGER", "FLOAT",
-                "TIMESTAMP", "STRING", "STRING",
+                "STRING",
+                "INTEGER",
+                "INTEGER",
+                "INTEGER",
+                "FLOAT",
+                "TIMESTAMP",
+                "STRING",
+                "STRING",
             ],
         ),
         "core_customer_transactions_schema.xlsx": _create_schema_xlsx(
@@ -392,7 +440,9 @@ def _create_spec_files(location: Path, specs_base: str) -> None:
 
 
 def _create_domain_configs(
-    location: Path, specs_base: str, reports_base: str,
+    location: Path,
+    specs_base: str,
+    reports_base: str,
 ) -> None:
     configs_dir = location / "configs"
     configs_dir.mkdir(parents=True, exist_ok=True)
@@ -424,7 +474,9 @@ def prepare_demo_artifacts(location: Path = Path(__file__).parent) -> None:
     reports_prefix = f"local://{location / 'testreports'}/"
     _create_spec_files(location, specs_base=specs_prefix)
     _create_domain_configs(
-        location, specs_base=specs_prefix, reports_base=reports_prefix,
+        location,
+        specs_base=specs_prefix,
+        reports_base=reports_prefix,
     )
     _create_testsets(location)
 
