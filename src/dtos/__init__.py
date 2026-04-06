@@ -14,7 +14,7 @@ from .specification_dtos import (
     CompareSpecDTO,
     StagecountSpecDTO,
     SpecFactory,
-    spec_class_by_type
+    spec_class_by_type,
 )
 from .testrun_dtos import (
     TestObjectDTO,

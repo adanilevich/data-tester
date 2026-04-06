@@ -99,7 +99,7 @@ class Specification:
                     file_bytes: bytes = self.user_storage.read_object(file)
                     spec = parser.parse(file_bytes, spec)
                 except StorageError:  # parser errors are handled by parser
-                    spec.message="Couldn't read file from storage"
+                    spec.message = "Couldn't read file from storage"
                     self._notify(
                         f"Failed to read spec file: {file.path}",
                         domain=testcase.domain,
@@ -108,8 +108,7 @@ class Specification:
                 results.append(spec)
 
         self._notify(
-            f"Found {len(results)} spec(s) for"
-            f" {testcase.testobject} in {loc.path}",
+            f"Found {len(results)} spec(s) for {testcase.testobject} in {loc.path}",
             domain=testcase.domain,
         )
         return results

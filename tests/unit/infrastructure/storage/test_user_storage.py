@@ -13,6 +13,7 @@ class TestMemoryUserStorage:
     def storage(self) -> MemoryUserStorage:
         from typing import cast
         from fsspec.implementations.memory import MemoryFileSystem
+
         s = MemoryUserStorage()
         cast(MemoryFileSystem, s.fs).store.clear()
         return s

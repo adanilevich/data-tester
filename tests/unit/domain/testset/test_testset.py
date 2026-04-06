@@ -43,22 +43,16 @@ def testset(dto_storage: MemoryDtoStorage) -> TestSet:
     return TestSet(dto_storage)
 
 
-def test_save_and_load_testset(
-    testset: TestSet, testset_dto: TestSetDTO
-):
+def test_save_and_load_testset(testset: TestSet, testset_dto: TestSetDTO):
     testset.save_testset(testset=testset_dto)
-    loaded = testset.load_testset(
-        testset_id=str(testset_dto.testset_id)
-    )
+    loaded = testset.load_testset(testset_id=str(testset_dto.testset_id))
     assert loaded.name == testset_dto.name
     assert loaded.domain == testset_dto.domain
     assert loaded.testcases.keys() == testset_dto.testcases.keys()
     assert loaded.testcases == testset_dto.testcases
 
 
-def test_list_testsets_by_domain(
-    testset: TestSet, testset_dto: TestSetDTO
-):
+def test_list_testsets_by_domain(testset: TestSet, testset_dto: TestSetDTO):
     testset.save_testset(testset_dto)
     other_testset = TestSetDTO(
         name="OtherSet",

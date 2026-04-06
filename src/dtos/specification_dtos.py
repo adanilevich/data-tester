@@ -12,6 +12,7 @@ class SpecType(Enum):
     Specification Type is by purpose different from TestType: a testcase might require
     several specifications of different types, e.g. GENERAL and SCHEMA
     """
+
     SCHEMA = "schema"
     ROWCOUNT = "rowcount"
     COMPARE = "compare"

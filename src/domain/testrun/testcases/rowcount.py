@@ -29,8 +29,10 @@ class RowCountTestCase(AbstractTestCase):
     ttype = TestType.ROWCOUNT
     required_specs = ["rowcount"]
     preconditions = [
-        "specs_are_unique", "specs_not_empty",
-        "testobject_exists", "testobject_not_empty",
+        "specs_are_unique",
+        "specs_not_empty",
+        "testobject_exists",
+        "testobject_not_empty",
     ]
 
     def _execute(self):

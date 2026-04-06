@@ -2,7 +2,7 @@ from src.infrastructure_ports import (
     IUserStorageFactory,
     IUserStorage,
     StorageTypeUnknownError,
-    StorageError
+    StorageError,
 )
 from src.dtos.storage_dtos import StorageType
 from .user_storage import LocalUserStorage, MemoryUserStorage, GcsUserStorage

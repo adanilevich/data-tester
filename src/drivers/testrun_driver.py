@@ -30,9 +30,7 @@ class TestRunDriver:
         command = LoadTestRunCommand(testrun_id=testrun_id)
         return self.adapter.load_testrun(command=command)
 
-    def list_testruns(
-        self, domain: str, date: Optional[str] = None
-    ) -> List[TestRunDTO]:
+    def list_testruns(self, domain: str, date: Optional[str] = None) -> List[TestRunDTO]:
         """Lists testruns by domain and optionally by date."""
         command = ListTestRunsCommand(domain=domain, date=date)
         return self.adapter.list_testruns(command=command)

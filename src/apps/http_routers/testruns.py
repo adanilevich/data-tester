@@ -1,4 +1,4 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
@@ -6,16 +6,29 @@ from pydantic import BaseModel, model_validator
 
 from src.apps.http_di import ReportDriverDep, TestRunDriverDep
 from src.dtos import DomainConfigDTO, TestRunDTO, TestSetDTO
-from src.dtos.specification_dtos import SpecDTO
+from src.dtos.specification_dtos import SpecDTO, SpecFactory
 from src.dtos.testrun_dtos import TestStatus
 
 router = APIRouter(tags=["testruns"])
+
+_spec_factory = SpecFactory()
 
 
 class ExecuteTestRunRequest(BaseModel):
     testset: TestSetDTO
     domain_config: DomainConfigDTO
     spec_list: List[List[SpecDTO]]
+
+    @model_validator(mode="before")
+    @classmethod
+    def deserialize_specs(cls, data: Any) -> Any:
+        """Deserialize specs into proper subclasses (e.g. SchemaSpecDTO)."""
+        if isinstance(data, dict) and "spec_list" in data:
+            raw = data["spec_list"]
+            data["spec_list"] = [
+                [_spec_factory.create_from_dict(s) for s in group] for group in raw
+            ]
+        return data
 
     @model_validator(mode="after")
     def validate_spec_list_length(self) -> "ExecuteTestRunRequest":

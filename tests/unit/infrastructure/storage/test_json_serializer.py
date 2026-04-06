@@ -38,37 +38,25 @@ class TestJsonSerializer:
         assert data["name"] == "Test Testset"
         assert data["domain"] == "test-domain"
 
-        deserialized = serializer.deserialize(
-            serialized, ObjectType.TESTSET
-        )
+        deserialized = serializer.deserialize(serialized, ObjectType.TESTSET)
 
         assert isinstance(deserialized, TestSetDTO)
         assert deserialized.name == test_dto.name
         assert deserialized.domain == test_dto.domain
         assert deserialized.default_stage == test_dto.default_stage
         assert deserialized.default_instance == test_dto.default_instance
-        assert str(deserialized.testset_id) == str(
-            test_dto.testset_id
-        )
+        assert str(deserialized.testset_id) == str(test_dto.testset_id)
 
-    def test_unknown_object_type_raises(
-        self, serializer: JsonSerializer
-    ):
+    def test_unknown_object_type_raises(self, serializer: JsonSerializer):
         """Test that unknown object types raise SerializerError"""
-        with pytest.raises(
-            SerializerError, match="Unknown object type"
-        ):
+        with pytest.raises(SerializerError, match="Unknown object type"):
             serializer.deserialize(b"{}", ObjectType.UNKNOWN)
 
-    def test_deserialize_invalid_json_raises(
-        self, serializer: JsonSerializer
-    ):
+    def test_deserialize_invalid_json_raises(self, serializer: JsonSerializer):
         """Test that invalid JSON raises DeserializationError"""
         from src.infrastructure.storage.dto_storage_file import (
             DeserializationError,
         )
 
         with pytest.raises(DeserializationError):
-            serializer.deserialize(
-                b"not-json", ObjectType.TESTSET
-            )
+            serializer.deserialize(b"not-json", ObjectType.TESTSET)

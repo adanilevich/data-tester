@@ -47,22 +47,17 @@ class TestSetDriver:
         command = ListTestSetsCommand(domain=domain)
         return self.adapter.list_testsets(command=command)
 
-    def load_domain_testset_by_name(
-        self, domain: str, name: str
-    ) -> TestSetDTO:
+    def load_domain_testset_by_name(self, domain: str, name: str) -> TestSetDTO:
         """
         Lists all testsets for the given domain and loads
         the one with the requested name.
         Raises ValueError if not found.
         """
         command = ListTestSetsCommand(domain=domain)
-        testsets = self.adapter.list_testsets(
-            command=command
-        )
+        testsets = self.adapter.list_testsets(command=command)
         for testset in testsets:
             if testset.name == name:
                 return testset
         raise TestSetNotFoundError(
-            f"Testset with name '{name}' not found "
-            f"in domain '{domain}'"
+            f"Testset with name '{name}' not found in domain '{domain}'"
         )

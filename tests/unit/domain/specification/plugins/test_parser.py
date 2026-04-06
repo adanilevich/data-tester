@@ -32,7 +32,6 @@ def _make_spec(spec_type: SpecType) -> SpecDTO:
         raise ValueError("Error in tests: unknown spec type")
 
 
-
 class TestXlsxSchemaParser:
     """Test cases for XlsxSchemaFormatter class."""
 
@@ -198,4 +197,3 @@ class TestParserFactory:
         factory = SpecParserFactory()
         with pytest.raises(SpecParserError, match="Parsing.*is not supported"):
             factory.get_parser("test_domain", SpecType.ABSTRACT)
-

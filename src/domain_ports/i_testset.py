@@ -19,25 +19,19 @@ class ListTestSetsCommand(DTO):
 
 class ITestSet(ABC):
     @abstractmethod
-    def save_testset(
-        self, command: SaveTestSetCommand
-    ) -> None:
+    def save_testset(self, command: SaveTestSetCommand) -> None:
         """
         Saves a TestSetDTO.
         """
 
     @abstractmethod
-    def load_testset(
-        self, command: LoadTestSetCommand
-    ) -> TestSetDTO:
+    def load_testset(self, command: LoadTestSetCommand) -> TestSetDTO:
         """
         Loads a TestSetDTO by testset_id.
         """
 
     @abstractmethod
-    def list_testsets(
-        self, command: ListTestSetsCommand
-    ) -> List[TestSetDTO]:
+    def list_testsets(self, command: ListTestSetsCommand) -> List[TestSetDTO]:
         """
         Lists all testsets for the given domain.
         """

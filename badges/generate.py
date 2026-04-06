@@ -66,7 +66,9 @@ def python_loc_badge() -> BadgeData:
     """Count Python lines of code in src/ using pygount."""
     result = subprocess.run(
         ["pygount", "src", "--suffix=py", "--format=json"],
-        capture_output=True, text=True, check=True,
+        capture_output=True,
+        text=True,
+        check=True,
     )
     data = json.loads(result.stdout)
     loc = 0

@@ -112,7 +112,8 @@ class TestCheckSpecsNotEmpty:
             query=None,
         )
         checkable.required_specs = [
-            SpecType.SCHEMA.value, SpecType.COMPARE.value,
+            SpecType.SCHEMA.value,
+            SpecType.COMPARE.value,
         ]
         checkable.specs = [schema, compare]
 

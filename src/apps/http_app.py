@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from src.apps.http_di import HttpDependencyInjector
 from src.apps.http_routers import (
     domain_config,
+    platform,
     reports,
     specifications,
     testsets,
@@ -22,6 +23,7 @@ def create_app(config: Config, di: HttpDependencyInjector | None = None) -> Fast
 
     app = FastAPI(title="Data Tester API", lifespan=lifespan)
     app.include_router(domain_config.router)
+    app.include_router(platform.router)
     app.include_router(testsets.router)
     app.include_router(specifications.router)
     app.include_router(testruns.router)

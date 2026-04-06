@@ -88,7 +88,6 @@ class TestXlsxTestRunReportFormatter:
         assert isinstance(result, bytes)
         assert len(result) > 0
 
-
     def test_create_artifact_with_testcase_report_raises_error(
         self, testcase_report: TestCaseReportDTO
     ):

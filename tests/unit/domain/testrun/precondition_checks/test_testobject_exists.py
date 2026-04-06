@@ -1,6 +1,7 @@
 from typing import List
 import pytest
 
+from src.dtos import TestObjectDTO
 from src.domain.testrun.precondition_checks import Checkable, CheckTestObjectExists
 
 
@@ -9,10 +10,13 @@ class TestTestObjectExistsChecker:
     def checkable(self, checkable_creator) -> Checkable:
         checkable = checkable_creator.create()
 
-        def get_testobjects_(*args, **kwargs) -> List[str]:
-            return ["testobject_1", "testobject_2"]
+        def list_testobjects_(*args, **kwargs) -> List[TestObjectDTO]:
+            return [
+                TestObjectDTO(name="testobject_1", domain="d", stage="s", instance="i"),
+                TestObjectDTO(name="testobject_2", domain="d", stage="s", instance="i"),
+            ]
 
-        checkable.backend.get_testobjects = get_testobjects_
+        checkable.backend.list_testobjects = list_testobjects_
 
         return checkable
 

@@ -20,8 +20,15 @@ class DummyBackend(IBackend):
     supports_partitions = False
     supports_primary_keys = False
 
-    def get_testobjects(self, db: DBInstanceDTO) -> List[str]:
-        return ["testobject1", "testobject2"]
+    def list_testobjects(self, db: DBInstanceDTO) -> List[TestObjectDTO]:
+        return [
+            TestObjectDTO(
+                name="testobject1", domain=db.domain, stage=db.stage, instance=db.instance
+            ),
+            TestObjectDTO(
+                name="testobject2", domain=db.domain, stage=db.stage, instance=db.instance
+            ),
+        ]
 
     def get_schema(self, testobject: TestObjectDTO) -> SchemaSpecDTO:
         return SchemaSpecDTO(
@@ -31,9 +38,7 @@ class DummyBackend(IBackend):
             spec_type=SpecType.SCHEMA,
         )
 
-    def get_schema_from_query(
-        self, query: str, db: DBInstanceDTO
-    ) -> SchemaSpecDTO:
+    def get_schema_from_query(self, query: str, db: DBInstanceDTO) -> SchemaSpecDTO:
         return SchemaSpecDTO(
             location=LocationDTO("dummy://user_query.dummy"),
             testobject="user query",
