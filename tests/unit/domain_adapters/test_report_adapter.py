@@ -65,8 +65,8 @@ class TestReportAdapter:
         result = report_handler.create_testcase_report(command)
 
         assert isinstance(result, TestCaseReportDTO)
-        assert result.testcase_id == testcase_result.testcase_id
-        assert result.testrun_id == testcase_result.testrun_id
+        assert result.testcase_id == testcase_result.id
+        assert result.testrun_id == testcase_result.testrun_id  # testrun_id stays
         assert result.result == testcase_result.result.value
         assert result.testobject == testcase_result.testobject.name
         assert result.testtype == testcase_result.testtype.value
@@ -78,9 +78,9 @@ class TestReportAdapter:
         result = report_handler.create_testrun_report(command)
 
         assert isinstance(result, TestRunReportDTO)
-        assert result.testrun_id == testrun.testrun_id
+        assert result.testrun_id == testrun.id
         assert result.result == testrun.result.value
-        assert len(result.testcase_results) == len(testrun.testcase_results)
+        assert len(result.testcase_results) == len(testrun.results)
 
     def test_save_load_roundtrip_testcase_report(self, report_handler, testcase_report):
         """Test saving and loading a test case report"""
@@ -192,5 +192,5 @@ class TestReportAdapter:
 
         assert isinstance(result, TestRunReportDTO)
         assert testrun.report_id == result.report_id
-        for tc in testrun.testcase_results:
+        for tc in testrun.results:
             assert tc.report_id is not None

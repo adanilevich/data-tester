@@ -14,7 +14,8 @@ from src.domain.testrun.testcases import (
     SchemaTestCase,
     StageCountTestCase,
 )
-from src.dtos import TestDefinitionDTO, TestType
+from src.dtos import TestType
+from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.dtos.specification_dtos import SpecDTO, SpecType
 from src.dtos.storage_dtos import LocationDTO
 from src.infrastructure.backend.dummy import DummyBackend
@@ -50,7 +51,7 @@ def testcase_creator(domain_config, testobject):  # noqa: ANN201
             else:
                 raise ValueError(f"Conftest: Invalid test type: {ttype}")
 
-            definition = TestDefinitionDTO(
+            definition = TestCaseDefDTO(
                 testobject=testobject,
                 testtype=ttype,
                 specs=[
@@ -66,12 +67,12 @@ def testcase_creator(domain_config, testobject):  # noqa: ANN201
                     ),
                 ],
                 domain_config=domain_config,
-                testrun_id=uuid4(),
                 labels=["my_label", "my_label2"],
             )
 
             return testcase_class(
                 definition=definition,
+                testrun_id=uuid4(),
                 backend=DummyBackend(),
                 notifiers=[InMemoryNotifier()],
             )

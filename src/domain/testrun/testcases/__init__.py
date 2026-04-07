@@ -1,5 +1,6 @@
 from .abstract_testcase import (
     AbstractTestCase,
+    TestCaseCreator,
     time_it,
     TestCaseError,
     SpecNotFoundError,
@@ -17,6 +18,7 @@ from .stagecount import StageCountTestCase
 
 __all__ = [
     "AbstractTestCase",
+    "TestCaseCreator",
     "time_it",
     "TestCaseError",
     "SpecNotFoundError",

@@ -18,9 +18,9 @@ from src.dtos import (
     LocationDTO,
     TestCaseDTO,
     TestObjectDTO,
-    TestResult,
+    Result,
     TestRunDTO,
-    TestStatus,
+    Status,
     TestType,
 )
 from tests.fixtures.demo.prepare_demo_artifacts import (
@@ -117,12 +117,12 @@ def testobject() -> TestObjectDTO:
 @pytest.fixture
 def testcase_result(testobject, domain_config) -> TestCaseDTO:
     return TestCaseDTO(
-        testcase_id=uuid4(),
+        id=uuid4(),
         testrun_id=uuid4(),
         testobject=testobject,
         testtype=TestType.SCHEMA,
-        status=TestStatus.FINISHED,
-        result=TestResult.OK,
+        status=Status.FINISHED,
+        result=Result.OK,
         diff={"my_diff": {"a": [1, 2, 3], "b": ["c", "d", "e"]}},
         summary="My Summary",
         facts=[{"a": 5}, {"b": "2"}],
@@ -140,7 +140,22 @@ def testcase_result(testobject, domain_config) -> TestCaseDTO:
 
 @pytest.fixture
 def testrun(testcase_result) -> TestRunDTO:
-    return TestRunDTO.from_testcases(testcases=[testcase_result, testcase_result])
+    return TestRunDTO(
+        id=uuid4(),
+        testset_id=testcase_result.testset_id,
+        domain=testcase_result.domain,
+        stage=testcase_result.stage,
+        instance=testcase_result.instance,
+        result=Result.OK,
+        status=Status.FINISHED,
+        start_ts=testcase_result.start_ts,
+        end_ts=testcase_result.end_ts,
+        results=[testcase_result, testcase_result],
+        testdefinitions=[],
+        labels=testcase_result.labels,
+        domain_config=testcase_result.domain_config,
+        testset_name="test testset",
+    )
 
 
 @pytest.fixture

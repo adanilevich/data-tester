@@ -70,7 +70,7 @@ class TestCaseReportDTO(TestReportDTO):
             result=testcase_result.result.value,
             start_ts=testcase_result.start_ts,
             end_ts=testcase_result.end_ts or datetime.now(),
-            testcase_id=testcase_result.testcase_id,
+            testcase_id=testcase_result.id,
             testobject=testcase_result.testobject.name,
             testtype=testcase_result.testtype.value,
             diff=testcase_result.diff,
@@ -118,7 +118,7 @@ class TestRunReportDTO(TestReportDTO):
     def from_testrun_result(cls, testrun: TestRunDTO) -> Self:
         return cls(
             report_id=uuid4(),
-            testrun_id=testrun.testrun_id,
+            testrun_id=testrun.id,
             testset_id=testrun.testset_id,
             domain=testrun.domain,
             stage=testrun.stage,
@@ -129,6 +129,6 @@ class TestRunReportDTO(TestReportDTO):
             end_ts=testrun.end_ts or datetime.now(),
             testcase_results=[
                 TestRunReportTestCaseEntryDTO.from_testcase_result(tc)
-                for tc in testrun.testcase_results
+                for tc in testrun.results
             ],
         )

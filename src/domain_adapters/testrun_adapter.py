@@ -30,11 +30,12 @@ class TestRunAdapter(ITestRun):
 
     def execute_testrun(self, command: ExecuteTestRunCommand) -> TestRunDTO:
         testrun = TestRun(
-            testrun=command.testrun,
+            testrun_def=command.testrun_def,
             backend_factory=self.backend_factory,
             notifiers=self.notifiers,
             dto_storage=self.dto_storage,
             max_testrun_threads=self.max_testrun_threads,
+            testrun_id=command.testrun_id,
         )
 
         return testrun.execute()

@@ -1,20 +1,19 @@
 import pytest
 from typing import cast
 from uuid import uuid4
-from datetime import datetime
 
 from src.dtos import (
     TestObjectDTO,
     SchemaSpecDTO,
     RowcountSpecDTO,
     TestType,
-    TestDefinitionDTO,
     TestRunDTO,
-    TestStatus,
-    TestResult,
+    Status,
+    Result,
     LocationDTO,
     ObjectType,
 )
+from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
 from src.domain.testrun.testrun import TestRun
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.dto_storage_file import JsonSerializer
@@ -59,45 +58,35 @@ class TestTestRun:
     def notifier(self):
         return InMemoryNotifier()
 
-    def make_testrun_dto(self, testobject, specifications, domain_config):
-        return TestRunDTO(
-            testrun_id=uuid4(),
-            testset_id=uuid4(),
-            report_id=None,
-            domain=testobject.domain,
-            stage=testobject.stage,
-            instance=testobject.instance,
-            testset_name="testset",
-            labels=[],
-            domain_config=domain_config,
-            start_ts=datetime.now(),
-            end_ts=None,
-            status=TestStatus.NOT_STARTED,
-            result=TestResult.NA,
-            testdefinitions=[
-                TestDefinitionDTO(
+    def make_testrun_def(self, testobject, specifications, domain_config):
+        return TestRunDefDTO(
+            testcase_defs=[
+                TestCaseDefDTO(
                     testobject=testobject,
                     testtype=TestType.DUMMY_OK,
                     specs=specifications,
                     domain_config=domain_config,
-                    testrun_id=uuid4(),
+                    labels=[],
                 ),
-                TestDefinitionDTO(
+                TestCaseDefDTO(
                     testobject=testobject,
                     testtype=TestType.DUMMY_NOK,
                     specs=specifications,
                     domain_config=domain_config,
-                    testrun_id=uuid4(),
+                    labels=[],
                 ),
-                TestDefinitionDTO(
+                TestCaseDefDTO(
                     testobject=testobject,
                     testtype=TestType.DUMMY_EXCEPTION,
                     specs=specifications,
                     domain_config=domain_config,
-                    testrun_id=uuid4(),
+                    labels=[],
                 ),
             ],
-            testcase_results=[],
+            domain=testobject.domain,
+            stage=testobject.stage,
+            instance=testobject.instance,
+            domain_config=domain_config,
         )
 
     def test_init(
@@ -109,17 +98,18 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
-        original_start_ts = testrun_dto.start_ts
+        testrun_def = self.make_testrun_def(testobject, specifications, domain_config)
+        testrun_id = uuid4()
 
-        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
+        testrun = TestRun(
+            testrun_def, backend_factory, [notifier], dto_storage, testrun_id=testrun_id
+        )
 
-        assert testrun.testrun.testrun_id == testrun_dto.testrun_id
-        assert testrun.testrun.start_ts != original_start_ts
-        assert testrun.testrun.end_ts is None
-        assert testrun.testrun.result == TestResult.NA
-        assert testrun.testrun.status == TestStatus.INITIATED
-        assert testrun.testcase_results == []
+        assert testrun.id == testrun_id
+        assert testrun.end_ts is None
+        assert testrun.result == Result.NA
+        assert testrun.status == Status.INITIATED
+        assert testrun.results == []
         assert testrun.backend_factory == backend_factory
         assert testrun.notifiers == [notifier]
         assert testrun.dto_storage == dto_storage
@@ -129,13 +119,13 @@ class TestTestRun:
             TestRunDTO,
             dto_storage.read_dto(
                 object_type=ObjectType.TESTRUN,
-                id=str(testrun_dto.testrun_id),
+                id=str(testrun_id),
             ),
         )
-        assert persisted_dto.testrun_id == testrun_dto.testrun_id
-        assert persisted_dto.status == TestStatus.INITIATED
-        assert persisted_dto.result == TestResult.NA
-        assert persisted_dto.testcase_results == []
+        assert persisted_dto.id == testrun_id
+        assert persisted_dto.status == Status.INITIATED
+        assert persisted_dto.result == Result.NA
+        assert persisted_dto.results == []
 
     def test_execute(
         self,
@@ -146,31 +136,31 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
-        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
+        testrun_def = self.make_testrun_def(testobject, specifications, domain_config)
+        testrun = TestRun(testrun_def, backend_factory, [notifier], dto_storage)
 
         result = testrun.execute()
 
-        results = {tc.testtype: tc for tc in result.testcase_results}
-        assert results[TestType.DUMMY_OK].result == TestResult.OK
-        assert results[TestType.DUMMY_NOK].result == TestResult.NOK
-        assert results[TestType.DUMMY_EXCEPTION].result == TestResult.NA
+        results = {tc.testtype: tc for tc in result.results}
+        assert results[TestType.DUMMY_OK].result == Result.OK
+        assert results[TestType.DUMMY_NOK].result == Result.NOK
+        assert results[TestType.DUMMY_EXCEPTION].result == Result.NA
 
-        assert result.result == TestResult.NOK
-        assert result.status == TestStatus.FINISHED
+        assert result.result == Result.NOK
+        assert result.status == Status.FINISHED
 
         # Final state should be persisted
         persisted_dto = cast(
             TestRunDTO,
             dto_storage.read_dto(
                 object_type=ObjectType.TESTRUN,
-                id=str(testrun_dto.testrun_id),
+                id=str(testrun.id),
             ),
         )
-        assert persisted_dto.status == TestStatus.FINISHED
-        assert persisted_dto.result == TestResult.NOK
+        assert persisted_dto.status == Status.FINISHED
+        assert persisted_dto.result == Result.NOK
         assert persisted_dto.end_ts is not None
-        assert len(persisted_dto.testcase_results) == 3
+        assert len(persisted_dto.results) == 3
 
     def test_to_dto_and_persist(
         self,
@@ -181,8 +171,8 @@ class TestTestRun:
         backend_factory,
         notifier,
     ):
-        testrun_dto = self.make_testrun_dto(testobject, specifications, domain_config)
-        testrun = TestRun(testrun_dto, backend_factory, [notifier], dto_storage)
+        testrun_def = self.make_testrun_def(testobject, specifications, domain_config)
+        testrun = TestRun(testrun_def, backend_factory, [notifier], dto_storage)
 
         dto = testrun.to_dto()
         testrun.persist()
@@ -191,11 +181,11 @@ class TestTestRun:
             TestRunDTO,
             dto_storage.read_dto(
                 object_type=ObjectType.TESTRUN,
-                id=str(testrun_dto.testrun_id),
+                id=str(testrun.id),
             ),
         )
         persisted_dto = TestRunDTO.model_validate(persisted_dto)
-        assert persisted_dto.testrun_id == dto.testrun_id
+        assert persisted_dto.id == dto.id
         assert persisted_dto.testset_id == dto.testset_id
         assert persisted_dto.domain == dto.domain
         assert persisted_dto.stage == dto.stage
@@ -203,4 +193,4 @@ class TestTestRun:
         assert persisted_dto.status == dto.status
         assert persisted_dto.result == dto.result
         assert len(persisted_dto.testdefinitions) == len(dto.testdefinitions)
-        assert len(persisted_dto.testcase_results) == len(dto.testcase_results)
+        assert len(persisted_dto.results) == len(dto.results)

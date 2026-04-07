@@ -18,12 +18,15 @@ from .specification_dtos import (
 from .testrun_dtos import (
     TestObjectDTO,
     DBInstanceDTO,
-    TestStatus,
-    TestDefinitionDTO,
-    TestResult,
+    Status,
+    Result,
     TestType,
     TestDTO,
+    TestCaseDefDTO,
+    TestRunDefDTO,
     TestCaseDTO,
+    TestRunSummaryDTO,
+    TestRunDTO,
 )
 from .report_dtos import (
     ReportArtifactFormat,
@@ -35,5 +38,4 @@ from .report_dtos import (
 )
 from .storage_dtos import LocationDTO, StorageType, ObjectType
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO
-from .testrun_dtos import TestRunDTO, TestRunSummaryDTO
 from .notification_dtos import NotificationDTO, Importance, NotificationProcess

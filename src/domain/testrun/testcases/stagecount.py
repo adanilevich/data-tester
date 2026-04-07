@@ -5,7 +5,7 @@ from src.dtos import (
     StagecountSpecDTO,
     DBInstanceDTO,
     TestType,
-    TestResult,
+    Result,
     Importance,
 )
 
@@ -89,10 +89,10 @@ class StageCountTestCase(AbstractTestCase):
 
     def _evaluate_results(self, stage_count: int, raw_count: int):
         if stage_count == raw_count:
-            self.result = TestResult.OK
+            self.result = Result.OK
             self.summary = f"Stage rowcount ({stage_count}) matches raw file count"
         else:
-            self.result = TestResult.NOK  # type: ignore[assignment]
+            self.result = Result.NOK  # type: ignore[assignment]
             self.summary = f"Stage ({stage_count}) and raw ({raw_count}) counts  differ"
             diff = {
                 "stagecount_diff": {

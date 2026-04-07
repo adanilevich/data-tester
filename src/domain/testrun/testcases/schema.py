@@ -2,7 +2,7 @@ from typing import List, Optional, Dict, Literal
 from pydantic import Field
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import SchemaSpecDTO, TestResult, DTO, TestType
+from src.dtos import SchemaSpecDTO, Result, DTO, TestType
 
 
 class SchemaTestCaseError(TestCaseError):
@@ -79,7 +79,7 @@ class SchemaTestCase(AbstractTestCase):
             self.add_detail({"Primary Keys Comparison": str(pk_diff)})
 
         # finally, all results are evaluated to an overall test result
-        self.result = TestResult.OK
+        self.result = Result.OK
         self.summary = ""
         for result, description in [
             (self.column_comparison_result, "Column comparison"),
@@ -91,13 +91,13 @@ class SchemaTestCase(AbstractTestCase):
                 self.summary += f" {description}: OK;"
             elif result is False:
                 self.summary += f" {description}: NOK;"
-                self.result = TestResult.NOK
+                self.result = Result.NOK
             else:  # basically if result is None, e.g. comparison not supported
                 pass
 
-        if self.result == TestResult.OK:
+        if self.result == Result.OK:
             self.summary = "Schema corresponds to specification:" + self.summary
-        elif self.result == TestResult.NOK:
+        elif self.result == Result.NOK:
             self.summary = "Schema deviates from specification:" + self.summary
         else:
             raise SchemaTestCaseError(

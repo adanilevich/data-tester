@@ -1,24 +1,25 @@
 from __future__ import annotations
+
 from abc import abstractmethod
 from functools import wraps
+from typing import ClassVar, Dict, List, Optional, Any
 from uuid import uuid4, UUID
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 import time
 
 from src.dtos import (
     AnySpec,
     TestObjectDTO,
-    TestStatus,
-    TestResult,
+    Status,
+    Result,
     TestCaseDTO,
     DomainConfigDTO,
     TestType,
-    TestDefinitionDTO,
     Importance,
     NotificationDTO,
     NotificationProcess,
 )
+from src.dtos.testrun_dtos import TestCaseDefDTO
 
 from src.infrastructure_ports import IBackend, INotifier
 from src.domain.testrun.precondition_checks import (
@@ -59,9 +60,20 @@ class AbstractTestCase(Checkable):
     specs: List[AnySpec]  # always set in __init__; narrows Optional from Checkable
     __test__ = False  # prevents pytest collection
 
+    known_testcases: ClassVar[Dict[TestType, type[AbstractTestCase]]] = {}
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if hasattr(cls, "ttype") and cls.ttype not in (
+            TestType.ABSTRACT,
+            TestType.UNKNOWN,
+        ):
+            AbstractTestCase.known_testcases[cls.ttype] = cls
+
     def __init__(
         self,
-        definition: TestDefinitionDTO,
+        definition: TestCaseDefDTO,
+        testrun_id: UUID,
         backend: IBackend,
         notifiers: List[INotifier],
     ) -> None:
@@ -69,9 +81,9 @@ class AbstractTestCase(Checkable):
         self.notifiers: List[INotifier] = notifiers
         self.backend: IBackend = backend
         # set testcase data (context fields first, before any notify call)
-        self.testcase_id: UUID = uuid4()
-        self.testrun_id: UUID = definition.testrun_id
-        self.testset_id: UUID = definition.testset_id
+        self.id: UUID = uuid4()
+        self.testrun_id: UUID = testrun_id
+        self.testset_id: UUID | None = definition.testset_id
         self.testobject: TestObjectDTO = definition.testobject
         self.scenario: str | None = definition.scenario
         self.specs = definition.specs
@@ -79,14 +91,14 @@ class AbstractTestCase(Checkable):
         self.labels: List[str] = definition.labels
         self.start_ts: datetime = datetime.now()
         self.end_ts: datetime | None = None
-        self.status: TestStatus = TestStatus.NOT_STARTED
-        self.result: TestResult = TestResult.NA
+        self.status: Status = Status.NOT_STARTED
+        self.result: Result = Result.NA
         self.summary: str = "Testcase not started."
         # list of key facts about test execution
         self.facts: List[Dict[str, str | int]] = []
         self.details: List[Dict[str, str | int | float]] = []  # list of execution details
         self.diff: Dict[str, List | Dict] = dict()  # list of diffs
-        self.status = TestStatus.INITIATED
+        self.status = Status.INITIATED
         self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
 
     def notify(self, message: str, importance: Importance = Importance.INFO):
@@ -94,7 +106,7 @@ class AbstractTestCase(Checkable):
             domain=self.testobject.domain,
             process=NotificationProcess.TESTCASE,
             testrun_id=str(self.testrun_id),
-            testcase_id=str(self.testcase_id),
+            testcase_id=str(self.id),
             importance=importance,
             message=message,
         )
@@ -114,7 +126,7 @@ class AbstractTestCase(Checkable):
         self.summary = summary
 
     def _check_preconditions(self, checker: IPreconditionChecker) -> bool:
-        self.status = TestStatus.PRECONDITIONS
+        self.status = Status.PRECONDITIONS
 
         if self.preconditions is None:
             return True
@@ -127,17 +139,17 @@ class AbstractTestCase(Checkable):
             if not check_result:
                 msg = f"Stopping execution due to failed precondition: {check_name}!"
                 self.notify(msg, importance=Importance.WARNING)
-                self.result = TestResult.NA
-                self.status = TestStatus.ABORTED
+                self.result = Result.NA
+                self.status = Status.ABORTED
                 return False
 
         return True
 
     def to_dto(self) -> TestCaseDTO:
         dto = TestCaseDTO(
-            testcase_id=self.testcase_id,
+            id=self.id,
             testrun_id=self.testrun_id,
-            testset_id=self.testset_id,
+            testset_id=self.testset_id or uuid4(),
             labels=self.labels,
             testtype=self.ttype,
             testobject=self.testobject,
@@ -169,22 +181,51 @@ class AbstractTestCase(Checkable):
             self.end_ts = datetime.now()
             return self.to_dto()
 
-        self.status = TestStatus.EXECUTING
+        self.status = Status.EXECUTING
         self.notify("Starting execution of core testlogic ...")
 
         try:
             self._execute()
-            self.status = TestStatus.FINISHED
+            self.status = Status.FINISHED
             self.notify(f"Finished test execution with result: {self.result.name}")
         except Exception as err:
-            self.result = TestResult.NA
-            self.status = TestStatus.ERROR
+            self.result = Result.NA
+            self.status = Status.ERROR
             msg = f"Technical error during test execution: {str(err)}"
             self.notify(msg, importance=Importance.ERROR)
             self.summary = msg
 
         self.end_ts = datetime.now()
         return self.to_dto()
+
+
+class _UnknownTestCase(AbstractTestCase):
+    """Handles execution of testcases with an unrecognised TestType."""
+
+    ttype: TestType = TestType.UNKNOWN
+
+    def _execute(self) -> None:
+        raise TestCaseExecutionError(f"Test type {self.ttype.value} unknown!")
+
+
+class TestCaseCreator:
+    """Creates a testcase instance from a TestCaseDefDTO.
+
+    Looks up the concrete class in known_testcases. If the testtype is not
+    registered, falls back to _UnknownTestCase.
+    """
+
+    @staticmethod
+    def create(
+        definition: TestCaseDefDTO,
+        testrun_id: UUID,
+        backend: IBackend,
+        notifiers: List[INotifier],
+    ) -> AbstractTestCase:
+        testcase_class = AbstractTestCase.known_testcases.get(definition.testtype)
+        if testcase_class is None:
+            return _UnknownTestCase(definition, testrun_id, backend, notifiers)
+        return testcase_class(definition, testrun_id, backend, notifiers)
 
 
 def time_it(step_name: str):

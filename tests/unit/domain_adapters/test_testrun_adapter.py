@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 from uuid import uuid4
 
 from src.domain_adapters import TestRunAdapter
@@ -9,11 +8,10 @@ from src.infrastructure.storage.dto_storage_file import JsonSerializer
 from src.infrastructure.notifier import InMemoryNotifier
 from src.dtos import (
     TestRunDTO,
-    TestDefinitionDTO,
     TestObjectDTO,
     TestType,
-    TestStatus,
-    TestResult,
+    Status,
+    Result,
     LocationDTO,
     DomainConfigDTO,
     SchemaSpecDTO,
@@ -21,6 +19,7 @@ from src.dtos import (
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
 )
+from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
 from src.domain_ports import (
     SaveTestRunCommand,
     LoadTestRunCommand,
@@ -87,9 +86,9 @@ def test_object():
 
 
 @pytest.fixture
-def test_definition(test_object, domain_config):
-    """Create a test definition for testing"""
-    return TestDefinitionDTO(
+def testcase_def(test_object, domain_config):
+    """Create a testcase definition for testing"""
+    return TestCaseDefDTO(
         testobject=test_object,
         testtype=TestType.DUMMY_OK,
         specs=[
@@ -99,30 +98,37 @@ def test_definition(test_object, domain_config):
             )
         ],
         domain_config=domain_config,
-        testrun_id=uuid4(),
         labels=["test_label"],
     )
 
 
 @pytest.fixture
-def testrun(test_definition):
-    """Create a test run for testing"""
-    return TestRunDTO(
-        testrun_id=uuid4(),
-        testset_id=uuid4(),
-        labels=["test_label"],
-        testset_name="test_testset",
+def testrun_def(testcase_def, domain_config):
+    """Create a testrun definition for testing"""
+    return TestRunDefDTO(
+        testcase_defs=[testcase_def],
+        domain="test_domain",
         stage="test_stage",
         instance="test_instance",
-        domain="test_domain",
-        domain_config=test_definition.domain_config,
-        start_ts=datetime.now(),
-        end_ts=None,
-        status=TestStatus.INITIATED,
-        result=TestResult.NA,
-        testdefinitions=[test_definition],
-        testcase_results=[],
+        domain_config=domain_config,
+        labels=["test_label"],
+        testset_name="test_testset",
     )
+
+
+@pytest.fixture
+def testrun(testrun_def, dto_storage, dummy_platform_factory, notifiers):
+    """Create and persist an initial testrun for save/load tests"""
+    from src.domain.testrun.testrun import TestRun
+    testrun_id = uuid4()
+    tr = TestRun(
+        testrun_def=testrun_def,
+        backend_factory=dummy_platform_factory,
+        notifiers=notifiers,
+        dto_storage=dto_storage,
+        testrun_id=testrun_id,
+    )
+    return tr.to_dto()
 
 
 class TestTestRunAdapter:
@@ -145,73 +151,77 @@ class TestTestRunAdapter:
         assert handler.notifiers == notifiers
         assert handler.dto_storage == dto_storage
 
-    def test_run_executes_testrun_successfully(self, testrun_command_handler, testrun):
+    def test_run_executes_testrun_successfully(
+        self, testrun_command_handler, testrun_def
+    ):
         """Test that run method executes a testrun successfully"""
-        command = ExecuteTestRunCommand(testrun=testrun)
+        command = ExecuteTestRunCommand(testrun_def=testrun_def)
 
         result = testrun_command_handler.execute_testrun(command)
 
         assert isinstance(result, TestRunDTO)
-        assert result.testrun_id == testrun.testrun_id
-        assert result.status == TestStatus.FINISHED
-        assert result.result == TestResult.OK
-        assert len(result.testcase_results) == 1
-        assert result.testcase_results[0].result == TestResult.OK
+        assert result.status == Status.FINISHED
+        assert result.result == Result.OK
+        assert len(result.results) == 1
+        assert result.results[0].result == Result.OK
 
     def test_save_load_roundtrip(self, testrun_command_handler, testrun):
         """Test that save and load work together"""
         save_command = SaveTestRunCommand(testrun=testrun)
-        load_command = LoadTestRunCommand(
-            testrun_id=str(testrun.testrun_id),
-        )
+        load_command = LoadTestRunCommand(testrun_id=str(testrun.id))
 
         testrun_command_handler.save_testrun(save_command)
         loaded_testrun = testrun_command_handler.load_testrun(load_command)
 
-        assert loaded_testrun.testrun_id == testrun.testrun_id
+        assert loaded_testrun.id == testrun.id
         assert loaded_testrun.testset_name == testrun.testset_name
         assert loaded_testrun.domain == testrun.domain
         assert loaded_testrun.stage == testrun.stage
         assert loaded_testrun.instance == testrun.instance
         assert len(loaded_testrun.testdefinitions) == len(testrun.testdefinitions)
-        assert len(loaded_testrun.testcase_results) == len(testrun.testcase_results)
+        assert len(loaded_testrun.results) == len(testrun.results)
 
     def test_load_raises_error_when_testrun_not_found(self, testrun_command_handler):
         """Test that load raises error when testrun is not found"""
         non_existent_id = str(uuid4())
-        command = LoadTestRunCommand(
-            testrun_id=non_existent_id,
-        )
+        command = LoadTestRunCommand(testrun_id=non_existent_id)
 
         with pytest.raises(ObjectNotFoundError):
             testrun_command_handler.load_testrun(command)
 
-    def test_run_with_multiple_testcases(self, testrun_command_handler, testrun):
+    def test_run_with_multiple_testcases(
+        self, testrun_command_handler, testcase_def, domain_config
+    ):
         """Test that run method handles multiple testcases"""
-        testrun.testdefinitions = [
-            TestDefinitionDTO(
-                testobject=testrun.testdefinitions[0].testobject,
-                testtype=TestType.DUMMY_OK,
-                specs=testrun.testdefinitions[0].specs,
-                domain_config=testrun.testdefinitions[0].domain_config,
-                testrun_id=testrun.testrun_id,
-                labels=["test_label"],
-            ),
-            TestDefinitionDTO(
-                testobject=testrun.testdefinitions[0].testobject,
-                testtype=TestType.DUMMY_NOK,
-                specs=testrun.testdefinitions[0].specs,
-                domain_config=testrun.testdefinitions[0].domain_config,
-                testrun_id=testrun.testrun_id,
-                labels=["test_label"],
-            ),
-        ]
-        command = ExecuteTestRunCommand(testrun=testrun)
+        test_object = testcase_def.testobject
+        testrun_def = TestRunDefDTO(
+            testcase_defs=[
+                TestCaseDefDTO(
+                    testobject=test_object,
+                    testtype=TestType.DUMMY_OK,
+                    specs=testcase_def.specs,
+                    domain_config=domain_config,
+                    labels=["test_label"],
+                ),
+                TestCaseDefDTO(
+                    testobject=test_object,
+                    testtype=TestType.DUMMY_NOK,
+                    specs=testcase_def.specs,
+                    domain_config=domain_config,
+                    labels=["test_label"],
+                ),
+            ],
+            domain="test_domain",
+            stage="test_stage",
+            instance="test_instance",
+            domain_config=domain_config,
+        )
+        command = ExecuteTestRunCommand(testrun_def=testrun_def)
 
         result = testrun_command_handler.execute_testrun(command)
 
-        assert len(result.testcase_results) == 2
-        results_by_type = {tc.testtype: tc for tc in result.testcase_results}
-        assert results_by_type[TestType.DUMMY_OK].result == TestResult.OK
-        assert results_by_type[TestType.DUMMY_NOK].result == TestResult.NOK
-        assert result.result == TestResult.NOK
+        assert len(result.results) == 2
+        results_by_type = {tc.testtype: tc for tc in result.results}
+        assert results_by_type[TestType.DUMMY_OK].result == Result.OK
+        assert results_by_type[TestType.DUMMY_NOK].result == Result.NOK
+        assert result.result == Result.NOK

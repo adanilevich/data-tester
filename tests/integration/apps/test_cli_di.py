@@ -7,8 +7,6 @@ each driver produced by the DI container is functional.
 
 import io
 from typing import List, cast
-from uuid import uuid4
-from datetime import datetime
 
 import pytest
 import polars as pl
@@ -37,15 +35,15 @@ from src.dtos import (
     SchemaTestCaseConfigDTO,
     TestCaseEntryDTO,
     TestCasesConfigDTO,
-    TestDefinitionDTO,
     TestObjectDTO,
-    TestResult,
+    Result,
     TestRunDTO,
     TestRunReportDTO,
     TestSetDTO,
-    TestStatus,
+    Status,
     TestType,
 )
+from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
 from src.drivers.testset_driver import TestSetNotFoundError
 from src.infrastructure.backend import DemoBackendFactory, DummyBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier, LogNotifier
@@ -307,10 +305,10 @@ class TestTestRunDriverIntegration:
             ),
         )
 
-    def _make_definition(
-        self, testobject_name: str, testtype: TestType, testrun_id, dc: DomainConfigDTO
-    ) -> TestDefinitionDTO:
-        return TestDefinitionDTO(
+    def _make_testcase_def(
+        self, testobject_name: str, testtype: TestType, dc: DomainConfigDTO
+    ) -> TestCaseDefDTO:
+        return TestCaseDefDTO(
             testobject=TestObjectDTO(
                 domain="my_domain",
                 stage="my_stage",
@@ -325,27 +323,18 @@ class TestTestRunDriverIntegration:
                 ),
             ],
             domain_config=dc,
-            testrun_id=testrun_id,
         )
 
-    def _make_testrun(
-        self, definitions: List[TestDefinitionDTO], dc: DomainConfigDTO
-    ) -> TestRunDTO:
-        return TestRunDTO(
-            testrun_id=uuid4(),
-            testset_id=uuid4(),
-            labels=[],
-            testset_name="testset",
+    def _make_testrun_def(
+        self, testcase_defs: List[TestCaseDefDTO], dc: DomainConfigDTO
+    ) -> TestRunDefDTO:
+        return TestRunDefDTO(
+            testcase_defs=testcase_defs,
+            domain="my_domain",
             stage="my_stage",
             instance="my_instance",
-            domain="my_domain",
             domain_config=dc,
-            start_ts=datetime.now(),
-            end_ts=None,
-            status=TestStatus.INITIATED,
-            result=TestResult.NA,
-            testdefinitions=definitions,
-            testcase_results=[],
+            testset_name="testset",
         )
 
     def test_execute_dummy_testcases(self):
@@ -355,28 +344,25 @@ class TestTestRunDriverIntegration:
         driver = di.testrun_driver()
 
         dc = self._make_domain_config()
-        testrun_id = uuid4()
         names_and_types = [
             ("obj1", TestType.DUMMY_OK),
             ("obj2", TestType.DUMMY_NOK),
             ("obj3", TestType.DUMMY_EXCEPTION),
             ("obj4", TestType.UNKNOWN),
         ]
-        definitions = [
-            self._make_definition(n, t, testrun_id, dc) for n, t in names_and_types
-        ]
-        testrun = self._make_testrun(definitions, dc)
+        testcase_defs = [self._make_testcase_def(n, t, dc) for n, t in names_and_types]
+        testrun_def = self._make_testrun_def(testcase_defs, dc)
 
-        result = driver.execute_testrun(testrun)
+        result = driver.execute_testrun(testrun_def)
 
-        assert len(result.testcase_results) == 4
+        assert len(result.results) == 4
         expected_map = {
-            TestType.DUMMY_OK: (TestResult.OK, TestStatus.FINISHED),
-            TestType.DUMMY_NOK: (TestResult.NOK, TestStatus.FINISHED),
-            TestType.DUMMY_EXCEPTION: (TestResult.NA, TestStatus.ERROR),
-            TestType.UNKNOWN: (TestResult.NA, TestStatus.ERROR),
+            TestType.DUMMY_OK: (Result.OK, Status.FINISHED),
+            TestType.DUMMY_NOK: (Result.NOK, Status.FINISHED),
+            TestType.DUMMY_EXCEPTION: (Result.NA, Status.ERROR),
+            TestType.UNKNOWN: (Result.NA, Status.ERROR),
         }
-        for tc in result.testcase_results:
+        for tc in result.results:
             exp_result, exp_status = expected_map[tc.testtype]
             assert tc.result == exp_result
             assert tc.status == exp_status
@@ -390,17 +376,14 @@ class TestTestRunDriverIntegration:
         runner = di.testrun_driver()
 
         dc = self._make_domain_config()
-        testrun_id = uuid4()
-        definition = self._make_definition(
-            "obj_unknown", TestType.UNKNOWN, testrun_id, dc
-        )
-        testrun = self._make_testrun([definition], dc)
-        result = runner.execute_testrun(testrun)
+        testcase_def = self._make_testcase_def("obj_unknown", TestType.UNKNOWN, dc)
+        testrun_def = self._make_testrun_def([testcase_def], dc)
+        result = runner.execute_testrun(testrun_def)
 
-        assert len(result.testcase_results) == 1
-        tc = result.testcase_results[0]
-        assert tc.result == TestResult.NA
-        assert tc.status == TestStatus.ERROR
+        assert len(result.results) == 1
+        tc = result.results[0]
+        assert tc.result == Result.NA
+        assert tc.status == Status.ERROR
         assert "unknown" in tc.summary.lower()
 
 
@@ -417,19 +400,19 @@ class TestReportDriverIntegration:
         assert isinstance(testrun_report, TestRunReportDTO)
         assert testrun.report_id == testrun_report.report_id
 
-        for tc in testrun.testcase_results:
+        for tc in testrun.results:
             assert tc.report_id is not None
 
         loaded_tr = adapter.load_testrun_report(
             LoadTestRunReportCommand(report_id=testrun_report.report_id)
         )
         assert str(loaded_tr.testrun_id) == str(testrun_report.testrun_id)
-        assert len(loaded_tr.testcase_results) == len(testrun.testcase_results)
+        assert len(loaded_tr.testcase_results) == len(testrun.results)
 
-        for tc in testrun.testcase_results:
+        for tc in testrun.results:
             assert tc.report_id is not None
             loaded_tc = adapter.load_testcase_report(
                 LoadTestCaseReportCommand(report_id=tc.report_id)
             )
-            assert str(loaded_tc.testcase_id) == str(tc.testcase_id)
+            assert str(loaded_tc.testcase_id) == str(tc.id)
             assert loaded_tc.testobject == tc.testobject.name

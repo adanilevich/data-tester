@@ -65,7 +65,7 @@ class TestReport:
         report_dto = report.create_testcase_report(testcase_result)
 
         assert isinstance(report_dto, TestCaseReportDTO)
-        assert report_dto.testcase_id == testcase_result.testcase_id
+        assert report_dto.testcase_id == testcase_result.id
         assert report_dto.testrun_id == testcase_result.testrun_id
         assert report_dto.testobject == testcase_result.testobject.name
         assert report_dto.testtype == testcase_result.testtype.value
@@ -82,13 +82,13 @@ class TestReport:
         report_dto = report.create_testrun_report(testrun)
 
         assert isinstance(report_dto, TestRunReportDTO)
-        assert report_dto.testrun_id == testrun.testrun_id
+        assert report_dto.testrun_id == testrun.id
         assert report_dto.result == testrun.result.value
         assert report_dto.start_ts == testrun.start_ts
         assert report_dto.end_ts == testrun.end_ts
-        assert len(report_dto.testcase_results) == len(testrun.testcase_results)
+        assert len(report_dto.testcase_results) == len(testrun.results)
 
-        for i, testcase_result in enumerate(testrun.testcase_results):
+        for i, testcase_result in enumerate(testrun.results):
             dto_testcase = report_dto.testcase_results[i]
             assert dto_testcase.testrun_id == testcase_result.testrun_id
             assert dto_testcase.testobject == testcase_result.testobject.name
@@ -175,13 +175,13 @@ class TestReport:
         loaded_testrun_report = report.load_testrun_report(
             report_id=str(result.report_id)
         )
-        assert loaded_testrun_report.testrun_id == testrun.testrun_id
+        assert loaded_testrun_report.testrun_id == testrun.id
 
         # testcase reports were created and saved
         testcase_reports = report.list_testcase_reports(domain=testrun.domain)
-        assert len(testcase_reports) == len(testrun.testcase_results)
+        assert len(testcase_reports) == len(testrun.results)
 
         # report_ids were set on testrun and testcases
         assert testrun.report_id == result.report_id
-        for tc in testrun.testcase_results:
+        for tc in testrun.results:
             assert tc.report_id is not None

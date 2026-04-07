@@ -1,5 +1,8 @@
 from typing import List, Optional
+from uuid import UUID
+
 from src.dtos import TestRunDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 from src.domain_ports import (
     ITestRun,
     ExecuteTestRunCommand,
@@ -15,9 +18,13 @@ class TestRunDriver:
     def __init__(self, testrun_adapter: ITestRun):
         self.adapter = testrun_adapter
 
-    def execute_testrun(self, testrun: TestRunDTO) -> TestRunDTO:
+    def execute_testrun(
+        self,
+        testrun_def: TestRunDefDTO,
+        testrun_id: UUID | None = None,
+    ) -> TestRunDTO:
         """Executes a testrun and returns the result."""
-        command = ExecuteTestRunCommand(testrun=testrun)
+        command = ExecuteTestRunCommand(testrun_def=testrun_def, testrun_id=testrun_id)
         return self.adapter.execute_testrun(command=command)
 
     def save_testrun(self, testrun: TestRunDTO) -> None:

@@ -6,9 +6,9 @@ from src.dtos import (
     TestObjectDTO,
     TestType,
     SpecType,
-    TestDefinitionDTO,
     LocationDTO,
 )
+from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.infrastructure.backend.demo import DemoBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
 
@@ -41,12 +41,11 @@ testobject = TestObjectDTO(
 
 
 def test_straight_through_execution(domain_config, demo_data: DemoData):
-    definition = TestDefinitionDTO(
+    definition = TestCaseDefDTO(
         testobject=testobject,
         testtype=TestType.ROWCOUNT,
         specs=[spec],
         domain_config=domain_config,
-        testrun_id=uuid4(),
     )
     backend = DemoBackendFactory(
         files_path=demo_data.raw_path,
@@ -55,6 +54,7 @@ def test_straight_through_execution(domain_config, demo_data: DemoData):
     try:
         testcase = RowCountTestCase(
             definition=definition,
+            testrun_id=uuid4(),
             backend=backend,
             notifiers=[InMemoryNotifier()],
         )
