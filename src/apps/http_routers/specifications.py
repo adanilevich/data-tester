@@ -1,19 +1,13 @@
-from typing import Any, List
+from typing import Any
 
 from fastapi import APIRouter
-from pydantic import BaseModel
 
 from src.apps.http_di import SpecDriverDep
-from src.dtos import LocationDTO, TestSetDTO
+from src.client_interface.requests import FindSpecsRequest
 
 router = APIRouter(tags=["specifications"])
 
-
-class FindSpecsRequest(BaseModel):
-    testset: TestSetDTO
-    locations: List[LocationDTO]
-
-
+## TODO: change response to list of list of specs
 @router.post("/{domain}/specification/find")
 def find_specifications(
     domain: str, body: FindSpecsRequest, driver: SpecDriverDep

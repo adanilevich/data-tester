@@ -1,44 +1,14 @@
-from typing import Any, List
+from typing import List
 
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, model_validator
 
 from src.apps.http_di import ReportDriverDep, TestRunDriverDep
-from src.dtos import DomainConfigDTO, TestRunDTO, TestSetDTO
-from src.dtos.specification_dtos import SpecDTO, SpecFactory
+from src.client_interface.requests import ExecuteTestRunRequest
+from src.dtos import TestRunDTO
 from src.dtos.testrun_dtos import TestStatus
 
 router = APIRouter(tags=["testruns"])
-
-_spec_factory = SpecFactory()
-
-
-class ExecuteTestRunRequest(BaseModel):
-    testset: TestSetDTO
-    domain_config: DomainConfigDTO
-    spec_list: List[List[SpecDTO]]
-
-    @model_validator(mode="before")
-    @classmethod
-    def deserialize_specs(cls, data: Any) -> Any:
-        """Deserialize specs into proper subclasses (e.g. SchemaSpecDTO)."""
-        if isinstance(data, dict) and "spec_list" in data:
-            raw = data["spec_list"]
-            data["spec_list"] = [
-                [_spec_factory.create_from_dict(s) for s in group] for group in raw
-            ]
-        return data
-
-    @model_validator(mode="after")
-    def validate_spec_list_length(self) -> "ExecuteTestRunRequest":
-        n_testcases = len(self.testset.testcases)
-        if len(self.spec_list) != n_testcases:
-            raise ValueError(
-                f"spec_list length ({len(self.spec_list)}) must equal "
-                f"number of testcases ({n_testcases})"
-            )
-        return self
 
 
 @router.get("/{domain}/testrun/", response_model=List[TestRunDTO])
