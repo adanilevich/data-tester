@@ -8,11 +8,11 @@
 | src/apps/cli\_di.py                                                             |       63 |        2 |     97% |    42, 59 |
 | src/apps/http\_app.py                                                           |       19 |        0 |    100% |           |
 | src/apps/http\_di.py                                                            |       61 |        0 |    100% |           |
-| src/apps/http\_routers/domain\_config.py                                        |       16 |        0 |    100% |           |
+| src/apps/http\_routers/domain\_config.py                                        |       16 |        1 |     94% |        13 |
 | src/apps/http\_routers/platform.py                                              |       10 |        0 |    100% |           |
 | src/apps/http\_routers/reports.py                                               |       18 |        2 |     89% |    26, 42 |
 | src/apps/http\_routers/specifications.py                                        |       11 |        0 |    100% |           |
-| src/apps/http\_routers/testruns.py                                              |       40 |        1 |     98% |        37 |
+| src/apps/http\_routers/testruns.py                                              |       40 |        2 |     95% |    37, 48 |
 | src/apps/http\_routers/testsets.py                                              |       15 |        0 |    100% |           |
 | src/config/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
 | src/config/config.py                                                            |       19 |        1 |     95% |         9 |
@@ -53,7 +53,7 @@
 | src/domain/testrun/testcases/rowcount.py                                        |       61 |        1 |     98% |        96 |
 | src/domain/testrun/testcases/schema.py                                          |      133 |        3 |     98% |103, 114, 153 |
 | src/domain/testrun/testcases/stagecount.py                                      |       51 |        0 |    100% |           |
-| src/domain/testrun/testrun.py                                                   |      111 |        1 |     99% |        57 |
+| src/domain/testrun/testrun.py                                                   |       92 |        1 |     99% |        61 |
 | src/domain/testset/\_\_init\_\_.py                                              |        1 |        0 |    100% |           |
 | src/domain/testset/testset.py                                                   |       16 |        0 |    100% |           |
 | src/domain\_adapters/\_\_init\_\_.py                                            |        7 |        0 |    100% |           |
@@ -88,8 +88,8 @@
 | src/dtos/testset\_dtos.py                                                       |       34 |        1 |     97% |        25 |
 | src/infrastructure/backend/\_\_init\_\_.py                                      |        4 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                |      237 |       13 |     95% |96-100, 223, 248-250, 264, 271-272, 400, 532 |
-| src/infrastructure/backend/demo/demo\_backend\_factory.py                       |       25 |        0 |    100% |           |
+| src/infrastructure/backend/demo/demo\_backend.py                                |      227 |       11 |     95% |110-111, 224, 249-251, 265, 272-273, 401, 536 |
+| src/infrastructure/backend/demo/demo\_backend\_factory.py                       |       16 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_naming\_resolver.py                       |       42 |        4 |     90% |57, 61, 63, 67 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                         |       25 |        1 |     96% |        41 |
 | src/infrastructure/notifier/\_\_init\_\_.py                                     |        3 |        0 |    100% |           |
@@ -101,14 +101,14 @@
 | src/infrastructure/storage/user\_storage\_factory.py                            |       21 |        1 |     95% |        25 |
 | src/infrastructure\_ports/\_\_init\_\_.py                                       |        9 |        0 |    100% |           |
 | src/infrastructure\_ports/errors.py                                             |        7 |        0 |    100% |           |
-| src/infrastructure\_ports/i\_backend.py                                         |        6 |        0 |    100% |           |
+| src/infrastructure\_ports/i\_backend.py                                         |       17 |        2 |     88% |   147-148 |
 | src/infrastructure\_ports/i\_backend\_factory.py                                |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_dto\_storage.py                                    |        5 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_dto\_storage\_factory.py                           |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_notifier.py                                        |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage.py                                   |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage\_factory.py                          |        4 |        0 |    100% |           |
-| **TOTAL**                                                                       | **2966** |  **158** | **95%** |           |
+| **TOTAL**                                                                       | **2939** |  **160** | **95%** |           |
 
 4 empty files skipped.
 
