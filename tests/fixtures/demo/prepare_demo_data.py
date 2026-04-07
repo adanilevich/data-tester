@@ -108,16 +108,17 @@ _ACCOUNT_TYPES: list[str] = ["checking", "savings", "credit"]
 # ---------------------------------------------------------------------------
 
 
-def _generate_customers(n: int, date: str, seed: int) -> pl.DataFrame:
+def _generate_customers(n: int, date: str, seed: int, id_start: int = 1) -> pl.DataFrame:
     """Generate n customer rows for a given date."""
     rng = random.Random(seed)
+    ids = list(range(id_start, id_start + n))
     return pl.DataFrame(
         {
             "date": [date] * n,
-            "id": list(range(1, n + 1)),
+            "id": ids,
             "region": [rng.choice(_REGIONS) for _ in range(n)],
             "type": [rng.choice(_CUSTOMER_TYPES) for _ in range(n)],
-            "name": [f"customer_{i}" for i in range(1, n + 1)],
+            "name": [f"customer_{i}" for i in ids],
         }
     )
 
@@ -127,16 +128,18 @@ def _generate_accounts(
     date: str,
     max_customer_id: int,
     seed: int,
+    id_start: int = 1,
 ) -> pl.DataFrame:
     """Generate n account rows, each linked to a customer."""
     rng = random.Random(seed)
+    ids = list(range(id_start, id_start + n))
     return pl.DataFrame(
         {
             "date": [date] * n,
-            "id": list(range(1, n + 1)),
+            "id": ids,
             "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
             "type": [rng.choice(_ACCOUNT_TYPES) for _ in range(n)],
-            "name": [f"account_{i}" for i in range(1, n + 1)],
+            "name": [f"account_{i}" for i in ids],
         }
     )
 
@@ -147,13 +150,15 @@ def _generate_transactions(
     max_customer_id: int,
     max_account_id: int,
     seed: int,
+    id_start: int = 1,
 ) -> pl.DataFrame:
     """Generate n transaction rows, each linked to a customer and account."""
     rng = random.Random(seed)
+    ids = list(range(id_start, id_start + n))
     return pl.DataFrame(
         {
             "date": [date] * n,
-            "id": list(range(1, n + 1)),
+            "id": ids,
             "customer_id": [rng.randint(1, max_customer_id) for _ in range(n)],
             "account_id": [rng.randint(1, max_account_id) for _ in range(n)],
             "amount": [round(rng.uniform(1.0, 10000.0), 2) for _ in range(n)],
@@ -162,9 +167,16 @@ def _generate_transactions(
 
 
 # Source file definitions: key -> (generator_func, kwargs)
+# id_start offsets ensure globally unique IDs across batches
 _SOURCE_FILES: dict[str, tuple] = {
-    "customers_1": (_generate_customers, {"n": 100, "date": "2024-01-01", "seed": 42}),
-    "customers_2": (_generate_customers, {"n": 105, "date": "2024-01-02", "seed": 43}),
+    "customers_1": (
+        _generate_customers,
+        {"n": 100, "date": "2024-01-01", "seed": 42},
+    ),
+    "customers_2": (
+        _generate_customers,
+        {"n": 105, "date": "2024-01-02", "seed": 43},
+    ),
     "accounts_1": (
         _generate_accounts,
         {"n": 200, "date": "2024-01-01", "max_customer_id": 100, "seed": 44},
@@ -181,6 +193,7 @@ _SOURCE_FILES: dict[str, tuple] = {
             "max_customer_id": 100,
             "max_account_id": 200,
             "seed": 46,
+            "id_start": 1,
         },
     ),
     "transactions_2": (
@@ -191,6 +204,7 @@ _SOURCE_FILES: dict[str, tuple] = {
             "max_customer_id": 105,
             "max_account_id": 210,
             "seed": 47,
+            "id_start": 1001,
         },
     ),
 }
@@ -266,10 +280,10 @@ def _read_sql(filename: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Module state for clean_up
+# Default location
 # ---------------------------------------------------------------------------
 
-_active_location: Path | None = None
+_DEFAULT_LOCATION: Path = Path("tests/fixtures/demo/data")
 
 # ---------------------------------------------------------------------------
 # Private implementation
@@ -528,11 +542,14 @@ def _count_rows(table_fqn: str) -> int:
 # ---------------------------------------------------------------------------
 
 
-def prepare_demo_data(location: Path = Path(__file__).parent) -> None:
-    """Create the full mini-DWH (raw + staging + core + mart) at *location*."""
-    global _active_location  # noqa: PLW0603
-    _active_location = location
+def prepare_demo_data(location: Path = _DEFAULT_LOCATION) -> None:
+    """Create the full mini-DWH (raw + staging + core + mart) at *location*.
 
+    Layout under *location*::
+
+        raw/<domain>/<stage>/<instance>/<object>/*.csv
+        dbs/<domain>_<stage>.db
+    """
     raw_path = location / "raw"
     db_path = location / "dbs"
 
@@ -545,21 +562,14 @@ def prepare_demo_data(location: Path = Path(__file__).parent) -> None:
     _detach_all_databases(db_path)
 
 
-def clean_up_demo_data() -> None:
-    """Delete all data created by the last prepare_demo_data() call."""
-    global _active_location  # noqa: PLW0603
-    if _active_location is None:
-        return
+def clean_up_demo_data(location: Path = _DEFAULT_LOCATION) -> None:
+    """Delete the data folder created by prepare_demo_data().
 
-    raw_path = _active_location / "raw"
-    db_path = _active_location / "dbs"
+    Detaches any DuckDB databases first to release file handles, then removes
+    the entire *location* folder (raw/, dbs/, and anything else under it).
+    """
+    db_path = location / "dbs"
     fs = LocalFileSystem()
-
-    # Detach DuckDB databases before deleting files
     _detach_all_databases(db_path)
-
-    for path in (raw_path, db_path):
-        if fs.exists(str(path)):
-            fs.rm(str(path), recursive=True)
-
-    _active_location = None
+    if fs.exists(str(location)):
+        fs.rm(str(location), recursive=True)

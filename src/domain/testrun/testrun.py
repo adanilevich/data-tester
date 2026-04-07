@@ -31,9 +31,16 @@ from .testcases import (
 )
 
 
-class TestCaseUnknownError(NotImplementedError):
-    __test__ = False
-    pass
+# Maps each TestType to its concrete TestCase class.
+_TESTCASE_CLASSES: Dict[TestType, type[AbstractTestCase]] = {
+    TestType.SCHEMA: SchemaTestCase,
+    TestType.COMPARE: CompareTestCase,
+    TestType.ROWCOUNT: RowCountTestCase,
+    TestType.STAGECOUNT: StageCountTestCase,
+    TestType.DUMMY_OK: DummyOkTestCase,
+    TestType.DUMMY_NOK: DummyNokTestCase,
+    TestType.DUMMY_EXCEPTION: DummyExceptionTestCase,
+}
 
 
 class TestRunLoader:
@@ -44,10 +51,7 @@ class TestRunLoader:
 
     def load_testrun(self, testrun_id: str) -> TestRunDTO:
         """Load a testrun by ID."""
-        dto = self.dto_storage.read_dto(
-            object_type=ObjectType.TESTRUN,
-            id=testrun_id,
-        )
+        dto = self.dto_storage.read_dto(object_type=ObjectType.TESTRUN, id=testrun_id)
         return cast(TestRunDTO, dto)
 
     def list_testruns(self, domain: str, date: str | None = None) -> List[TestRunDTO]:
@@ -55,10 +59,7 @@ class TestRunLoader:
         filters: Dict[str, str] = {"domain": domain}
         if date is not None:
             filters["date"] = date
-        dtos = self.dto_storage.list_dtos(
-            object_type=ObjectType.TESTRUN,
-            filters=filters,
-        )
+        dtos = self.dto_storage.list_dtos(object_type=ObjectType.TESTRUN, filters=filters)
         return [cast(TestRunDTO, dto) for dto in dtos]
 
 
@@ -86,18 +87,13 @@ class TestRun:
         # set result fields
         self.testcase_results: List[TestCaseDTO] = []
         self.testrun.status = TestStatus.INITIATED
-        self.testrun.summary = TestRunSummaryDTO(
-            total_testcases=len(self.testrun.testdefinitions)
-        )
+        total_testcases = len(self.testrun.testdefinitions)
+        self.testrun.summary = TestRunSummaryDTO(total_testcases=total_testcases)
 
         # persist initial state
         self.persist()
 
-    def notify(
-        self,
-        message: str,
-        importance: Importance = Importance.INFO,
-    ):
+    def notify(self, message: str, importance: Importance = Importance.INFO):
         notification = NotificationDTO(
             domain=self.testrun.domain,
             process=NotificationProcess.TESTRUN,
@@ -157,15 +153,17 @@ class TestRun:
         return self.to_dto()
 
     def _execute_single_testcase(self, definition: TestDefinitionDTO) -> TestCaseDTO:
-        """Execute a single testcase in its own thread with its own backend."""
-        try:
-            testcase = self._create_testcase(definition)
-            return testcase.execute()
-        except TestCaseUnknownError:
-            self.notify(
-                f"Unknown test type: {definition.testtype}",
-                importance=Importance.ERROR,
-            )
+        """Execute a single testcase in its own thread with its own backend.
+
+        The backend is closed after the testcase finishes so that any resources
+        it holds (e.g. a DemoBackend's DuckDB connection and file handles) are
+        released promptly instead of waiting for garbage collection.
+        """
+        backend = self.backend_factory.create(domain_config=self.testrun.domain_config)
+        testcase_class = _TESTCASE_CLASSES.get(definition.testtype)
+        ttype = definition.testtype
+        if testcase_class is None:
+            self.notify(f"Unknown test type: {ttype}", importance=Importance.ERROR)
             return TestCaseDTO(
                 testcase_id=uuid4(),
                 result=TestResult.NA,
@@ -187,6 +185,9 @@ class TestRun:
                 stage=definition.testobject.stage,
                 instance=definition.testobject.instance,
             )
+        with backend:
+            testcase = testcase_class(definition, backend, self.notifiers)
+            return testcase.execute()
 
     def _update_summary(self, result: TestCaseDTO) -> None:
         """Update the testrun summary counters after a testcase completes."""
@@ -198,58 +199,6 @@ class TestRun:
                 self.testrun.summary.nok_testcases += 1
             case TestResult.NA:
                 self.testrun.summary.na_testcases += 1
-
-    def _create_testcase(self, definition: TestDefinitionDTO) -> AbstractTestCase:
-        """
-        Creates a testcase object (subclass instance of TestCase) based on class attribute
-        'ttype' - the specified test type must be implemented as subclass of TestCase.
-        Each testcase gets its own backend instance for thread safety.
-        """
-        backend = self.backend_factory.create(domain_config=self.testrun.domain_config)
-
-        match definition.testtype:
-            case TestType.SCHEMA:
-                return SchemaTestCase(
-                    definition=definition, backend=backend, notifiers=self.notifiers
-                )
-            case TestType.COMPARE:
-                return CompareTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case TestType.ROWCOUNT:
-                return RowCountTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case TestType.STAGECOUNT:
-                return StageCountTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case TestType.DUMMY_OK:
-                return DummyOkTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case TestType.DUMMY_NOK:
-                return DummyNokTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case TestType.DUMMY_EXCEPTION:
-                return DummyExceptionTestCase(
-                    definition=definition,
-                    backend=backend,
-                    notifiers=self.notifiers,
-                )
-            case _:
-                raise TestCaseUnknownError(f"Test type {definition.testtype} unknown!")
 
     def to_dto(self) -> TestRunDTO:
         return TestRunDTO(
@@ -269,7 +218,5 @@ class TestRun:
             domain_config=self.testrun.domain_config,
         )
 
-    def persist(self, dto: TestRunDTO | None = None) -> None:
-        if dto is None:
-            dto = self.to_dto()
-        self.dto_storage.write_dto(dto)
+    def persist(self) -> None:
+        self.dto_storage.write_dto(self.to_dto())

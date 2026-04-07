@@ -34,8 +34,8 @@ class Config(BaseSettings):
     DATATESTER_USER_STORAGE_ENGINE: str = Field(default="MEMORY")
 
     # DEMO BACKEND DATA PATHS - no need to change this
-    DATATESTER_DEMO_RAW_PATH: str = Field(default="tests/fixtures/demo/raw")
-    DATATESTER_DEMO_DB_PATH: str = Field(default="tests/fixtures/demo/dbs")
+    DATATESTER_DEMO_RAW_PATH: str = Field(default="tests/fixtures/demo/data/raw")
+    DATATESTER_DEMO_DB_PATH: str = Field(default="tests/fixtures/demo/data/dbs")
 
     # EXECUTION CONFIGURATION
     DATATESTER_MAX_TESTRUN_THREADS: int = Field(default=4)

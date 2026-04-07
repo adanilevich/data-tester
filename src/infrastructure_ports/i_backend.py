@@ -126,3 +126,31 @@ class IBackend(ABC):
         list of values, obtains a random sample of defined (or all) columns from the
         testobject.
         """
+
+    def close(self) -> None:
+        """Release any resources held by the backend.
+
+        Backends that own external handles — database connections, file
+        descriptors, network sockets — should override this to release them
+        promptly. Callers (notably ``TestRun._execute_single_testcase``) invoke
+        ``close()`` after every testcase so resources don't accumulate during a
+        long testrun. Backends without external resources can rely on the
+        default no-op. Implementations must be safe to call more than once and
+        must never raise.
+        """
+        return None
+
+    def __del__(self) -> None:
+        """Best-effort cleanup if the caller forgets to close()."""
+        try:
+            self.close()
+        except Exception:
+            pass
+
+    def __enter__(self) -> "IBackend":
+        """Enter the runtime context; returns the backend itself."""
+        return self
+
+    def __exit__(self, _exc_type: object, _exc: object, _tb: object) -> None:
+        """Exit the runtime context, releasing resources via ``close()``."""
+        self.close()
