@@ -1,30 +1,37 @@
-import pytest
+from typing import Dict
 
-from src.domain.testrun.precondition_checks import (
-    CheckTestObjectNotEmpty,
-    Checkable,
-)
-from src.dtos import TestObjectDTO
+from src.domain.testrun.precondition_checks import CheckTestObjectNotEmpty, Checkable
+from src.dtos import Importance, TestObjectDTO
+from src.infrastructure.backend.dummy import DummyBackend
 
 
-class TestTestObjectNotEmptyChecker:
-    @pytest.fixture
-    def checkable(self, checkable_creator) -> Checkable:
-        checkable = checkable_creator.create()
+class DummyCheckable(Checkable):
+    def __init__(self) -> None:
+        self.testobject = TestObjectDTO(
+            name="stage_customers", domain="payments", stage="test", instance="alpha"
+        )
+        self.backend = DummyBackend()
+        self.summary = ""
 
-        def get_testobject_rowcount_(testobject: TestObjectDTO, *args, **kwargs) -> int:
-            if "zero" in testobject.name:
-                return 0
-            else:
-                return 10
+    def update_summary(self, summary: str) -> None:
+        self.summary += summary
 
-        checkable.backend.get_testobject_rowcount = get_testobject_rowcount_
+    def add_detail(self, detail: Dict[str, str | int | float]) -> None:
+        pass
 
-        return checkable
+    def notify(self, message: str, importance: Importance = Importance.INFO) -> None:
+        pass
 
-    def test_if_empty_nok_is_returned_and_summary_updated(self, checkable):
-        checkable = checkable
+
+class TestCheckTestObjectNotEmpty:
+    def test_if_empty_nok_is_returned_and_summary_updated(self):
+        checkable = DummyCheckable()
         checkable.testobject.name = "zero"
+
+        def get_testobject_rowcount(testobject: TestObjectDTO, *args, **kwargs) -> int:
+            return 0
+
+        checkable.backend.get_testobject_rowcount = get_testobject_rowcount  # ty: ignore[invalid-assignment]
         checker = CheckTestObjectNotEmpty()
 
         check_result = checker._check(checkable)
@@ -32,8 +39,13 @@ class TestTestObjectNotEmptyChecker:
         assert check_result is False
         assert "Testobject zero is empty" in checkable.summary
 
-    def test_happy_path(self, checkable):
-        checkable = checkable
+    def test_happy_path(self):
+        checkable = DummyCheckable()
+
+        def get_testobject_rowcount(testobject: TestObjectDTO, *args, **kwargs) -> int:
+            return 10
+
+        checkable.backend.get_testobject_rowcount = get_testobject_rowcount  # ty: ignore[invalid-assignment]
         checker = CheckTestObjectNotEmpty()
 
         check_result = checker._check(checkable)

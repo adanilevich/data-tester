@@ -40,7 +40,7 @@ def demo_client(demo_data: DemoData):
 
 def _assert_testcase_results(
     results: list[tuple[str, str, str]],
-    expected: list[tuple[str, str, str]],
+    expected: list[tuple[str, str, str]]
 ) -> None:
     """Assert actual results match expected (testobject, testtype, result).
 

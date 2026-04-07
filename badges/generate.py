@@ -62,6 +62,47 @@ def render_badge_svg(badge: BadgeData) -> str:
 # ── Badge providers ─────────────────────────────────────────
 
 
+def _get_coverage_total() -> tuple[int, bool]:
+    """Run coverage report and return (pct, success)."""
+    result = subprocess.run(
+        ["coverage", "report", "--format=total"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return 0, False
+    try:
+        return int(result.stdout.strip()), True
+    except ValueError:
+        return 0, False
+
+
+def _coverage_color(pct: int) -> str:
+    if pct >= 90:
+        return "#97ca00"
+    if pct >= 75:
+        return "#dfb317"
+    if pct >= 50:
+        return "#fe7d37"
+    return "#e05d44"
+
+
+def tests_badge() -> BadgeData:
+    """Show passing/failing based on whether a valid coverage report exists."""
+    _, success = _get_coverage_total()
+    if success:
+        return BadgeData("tests", "passing", "#97ca00", "tests.svg")
+    return BadgeData("tests", "failing", "#e05d44", "tests.svg")
+
+
+def coverage_badge() -> BadgeData:
+    """Show total coverage percentage from last coverage run."""
+    pct, success = _get_coverage_total()
+    if not success:
+        return BadgeData("coverage", "unknown", "#9f9f9f", "coverage.svg")
+    return BadgeData("coverage", f"{pct}%", _coverage_color(pct), "coverage.svg")
+
+
 def python_loc_badge() -> BadgeData:
     """Count Python lines of code in src/ using pygount."""
     result = subprocess.run(
@@ -96,6 +137,8 @@ def ty_badge() -> BadgeData:
 
 
 BADGE_PROVIDERS: list[BadgeProvider] = [
+    tests_badge,
+    coverage_badge,
     python_loc_badge,
     licence_badge,
     ruff_badge,

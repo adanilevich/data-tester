@@ -1,54 +1,35 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Dict, List, NamedTuple
-from uuid import uuid4
 from datetime import datetime
+from pathlib import Path
+from typing import NamedTuple
+from uuid import uuid4
 
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
-from src.dtos.notification_dtos import Importance
-from src.dtos.specification_dtos import SpecDTO, SpecType
-from src.dtos.domain_config_dtos import (
-    SchemaTestCaseConfigDTO,
+from src.dtos import (
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
+    SchemaTestCaseConfigDTO,
     TestCasesConfigDTO,
-)
-from src.dtos.testrun_dtos import (
-    TestObjectDTO,
+    TestCaseReportDTO,
+    TestRunReportDTO,
+    LocationDTO,
     TestCaseDTO,
+    TestObjectDTO,
     TestResult,
+    TestRunDTO,
     TestStatus,
     TestType,
-    TestDefinitionDTO,
 )
-from src.dtos.report_dtos import TestCaseReportDTO, TestRunReportDTO
-from src.dtos.testrun_dtos import TestRunDTO
-from src.dtos.storage_dtos import LocationDTO
-from src.infrastructure_ports import IBackend
-from src.infrastructure.notifier import InMemoryNotifier
-from src.infrastructure.backend.dummy import DummyBackend
-from src.domain.testrun.testcases import (
-    AbstractTestCase,
-    SchemaTestCase,
-    RowCountTestCase,
-    CompareTestCase,
-    StageCountTestCase,
-    DummyOkTestCase,
-    DummyNokTestCase,
-    DummyExceptionTestCase,
-)
-from src.domain.testrun.precondition_checks import Checkable
 from tests.fixtures.demo.prepare_demo_artifacts import (
-    prepare_demo_artifacts,
     clean_up_demo_artifacts,
+    prepare_demo_artifacts,
 )
 from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data,
     clean_up_demo_data,
+    prepare_demo_data,
 )
 
 
@@ -106,16 +87,6 @@ def demo_data():  # noqa: ANN201
 
 
 @pytest.fixture
-def dummy_backend() -> IBackend:
-    return DummyBackend()
-
-
-@pytest.fixture
-def in_memory_notifier() -> InMemoryNotifier:
-    return InMemoryNotifier()
-
-
-@pytest.fixture
 def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
@@ -135,117 +106,12 @@ def domain_config() -> DomainConfigDTO:
 
 @pytest.fixture
 def testobject() -> TestObjectDTO:
-    testobject = TestObjectDTO(
+    return TestObjectDTO(
         name="stage_customers",
         domain="payments",
         stage="test",
         instance="alpha",
     )
-    return testobject
-
-
-class DummyCheckable(Checkable):
-    def __init__(self, testobject: TestObjectDTO, backend: IBackend):
-        self.testobject = testobject
-        self.backend = backend
-        self.summary = ""
-        self.details = []
-        self.notifications: List[str] = []
-
-    def update_summary(self, summary: str):
-        self.summary += summary
-
-    def add_detail(self, detail: Dict[str, str | int | float]):
-        if self.details is None:
-            self.details = []
-        self.details.append(detail)
-
-    def notify(self, message: str, importance: Importance = Importance.INFO):
-        self.notifications.append(message)
-
-
-class ICheckableCreator(ABC):
-    @abstractmethod
-    def create(self) -> Checkable:
-        """Creates a checkable"""
-
-
-@pytest.fixture
-def checkable_creator(testobject, dummy_backend) -> ICheckableCreator:
-    class CheckableCreator(ICheckableCreator):
-        def create(self) -> Checkable:
-            checkable = DummyCheckable(backend=dummy_backend, testobject=testobject)
-            return checkable
-
-    creator = CheckableCreator()
-
-    return creator
-
-
-class ITestCaseCreator(ABC):
-    @abstractmethod
-    def create(self, ttype: TestType) -> AbstractTestCase:
-        """creates testcase of required type"""
-
-
-@pytest.fixture
-def testcase_creator(domain_config, testobject) -> ITestCaseCreator:
-    class TestCaseCreator(ITestCaseCreator):
-        def create(self, ttype: TestType) -> AbstractTestCase:
-            testcase_class: type[AbstractTestCase]
-            if ttype == TestType.SCHEMA:
-                spec_type = SpecType.SCHEMA
-                testcase_class = SchemaTestCase
-            elif ttype == TestType.ROWCOUNT:
-                spec_type = SpecType.ROWCOUNT
-                testcase_class = RowCountTestCase
-            elif ttype == TestType.COMPARE:
-                spec_type = SpecType.COMPARE
-                testcase_class = CompareTestCase
-            elif ttype == TestType.STAGECOUNT:
-                spec_type = SpecType.STAGECOUNT
-                testcase_class = StageCountTestCase
-            elif ttype == TestType.DUMMY_OK:
-                testcase_class = DummyOkTestCase
-                spec_type = SpecType.SCHEMA
-            elif ttype == TestType.DUMMY_NOK:
-                testcase_class = DummyNokTestCase
-                spec_type = SpecType.SCHEMA
-            elif ttype == TestType.DUMMY_EXCEPTION:
-                testcase_class = DummyExceptionTestCase
-                spec_type = SpecType.SCHEMA
-            else:
-                raise ValueError(f"Conftest: Invalid test type: {ttype}")
-
-            definition = TestDefinitionDTO(
-                testobject=testobject,
-                testtype=ttype,
-                specs=[
-                    SpecDTO(
-                        spec_type=spec_type,
-                        location=LocationDTO("memory://my_location"),
-                        testobject=testobject.name,
-                    ),
-                    SpecDTO(
-                        spec_type=spec_type,
-                        location=LocationDTO("memory://my_location"),
-                        testobject=testobject.name,
-                    ),
-                ],
-                domain_config=domain_config,
-                testrun_id=uuid4(),
-                labels=["my_label", "my_label2"],
-            )
-
-            testcase = testcase_class(
-                definition=definition,
-                backend=DummyBackend(),
-                notifiers=[InMemoryNotifier()],
-            )
-
-            return testcase
-
-    return TestCaseCreator()
 
 
 @pytest.fixture
