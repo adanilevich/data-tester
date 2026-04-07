@@ -11,16 +11,14 @@ from fsspec.implementations.memory import MemoryFileSystem
 from src.dtos import (
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
-    SchemaTestCaseConfigDTO,
-    TestCasesConfigDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
     LocationDTO,
-    TestCaseDTO,
-    TestObjectDTO,
     Result,
-    TestRunDTO,
+    SchemaTestCaseConfigDTO,
     Status,
+    TestCaseDTO,
+    TestCasesConfigDTO,
+    TestObjectDTO,
+    TestRunDTO,
     TestType,
 )
 from tests.fixtures.demo.prepare_demo_artifacts import (
@@ -156,13 +154,3 @@ def testrun(testcase_result) -> TestRunDTO:
         domain_config=testcase_result.domain_config,
         testset_name="test testset",
     )
-
-
-@pytest.fixture
-def testcase_report(testcase_result) -> TestCaseReportDTO:
-    return TestCaseReportDTO.from_testcase_result(testcase_result)
-
-
-@pytest.fixture
-def testrun_report(testrun) -> TestRunReportDTO:
-    return TestRunReportDTO.from_testrun_result(testrun)

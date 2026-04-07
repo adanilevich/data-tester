@@ -1,15 +1,14 @@
-import pytest
 import polars as pl
-
+import pytest
 from src.domain.testrun.testcases import AbstractTestCase
 from src.domain.testrun.testcases.stagecount import (
     StageCountTestCaseError,
 )
 from src.dtos import (
+    LocationDTO,
+    SpecType,
     StagecountSpecDTO,
     TestType,
-    SpecType,
-    LocationDTO,
 )
 
 

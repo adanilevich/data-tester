@@ -1,7 +1,7 @@
 from typing import Dict, cast
 
-from src.infrastructure_ports import IDtoStorage, StorageError
 from src.dtos import DomainConfigDTO, ObjectType
+from src.infrastructure_ports import IDtoStorage, StorageError
 
 
 class DomainConfigNotUniqueError(Exception):

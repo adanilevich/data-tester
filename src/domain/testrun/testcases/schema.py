@@ -1,8 +1,10 @@
-from typing import List, Optional, Dict, Literal
+from typing import Dict, List, Literal, Optional
+
 from pydantic import Field
 
-from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import SchemaSpecDTO, Result, DTO, TestType
+from src.dtos import DTO, Result, SchemaSpecDTO, TestType
+
+from . import AbstractTestCase, SpecNotFoundError, TestCaseError
 
 
 class SchemaTestCaseError(TestCaseError):

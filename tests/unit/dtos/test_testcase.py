@@ -1,29 +1,29 @@
-import pytest
 from datetime import datetime
 from uuid import uuid4
 
-from src.dtos.testrun_dtos import (
-    TestRunDefDTO,
-    TestRunDTO,
-    TestCaseDefDTO,
-    Status,
-    Result,
-    TestType,
+import pytest
+from src.dtos.domain_config_dtos import (
+    CompareTestCaseConfigDTO,
+    DomainConfigDTO,
+    SchemaTestCaseConfigDTO,
+    TestCasesConfigDTO,
 )
-from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
 from src.dtos.specification_dtos import (
     AnySpec,
     CompareSpecDTO,
     RowcountSpecDTO,
     SchemaSpecDTO,
 )
-from src.dtos.domain_config_dtos import (
-    DomainConfigDTO,
-    TestCasesConfigDTO,
-    CompareTestCaseConfigDTO,
-    SchemaTestCaseConfigDTO,
-)
 from src.dtos.storage_dtos import LocationDTO
+from src.dtos.testrun_dtos import (
+    Result,
+    Status,
+    TestCaseDefDTO,
+    TestRunDefDTO,
+    TestRunDTO,
+    TestType,
+)
+from src.dtos.testset_dtos import TestCaseEntryDTO, TestSetDTO
 
 
 @pytest.fixture

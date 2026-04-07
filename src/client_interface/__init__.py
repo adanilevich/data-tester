@@ -5,7 +5,5 @@ from src.dtos import (
     TestSetDTO,
     TestObjectDTO,
     TestRunDTO,
-    TestCaseReportDTO,
     TestCaseEntryDTO,
-    TestRunReportDTO,
 )

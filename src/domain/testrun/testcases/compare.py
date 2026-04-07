@@ -3,18 +3,19 @@ from typing import List, Tuple
 import polars as pl
 from polars.exceptions import PolarsError
 
-from . import (
-    AbstractTestCase,
-    time_it,
-    TestCaseError,
-    SpecNotFoundError,
-)
 from src.dtos import (
     CompareSpecDTO,
-    SchemaSpecDTO,
     DBInstanceDTO,
     Result,
+    SchemaSpecDTO,
     TestType,
+)
+
+from . import (
+    AbstractTestCase,
+    SpecNotFoundError,
+    TestCaseError,
+    time_it,
 )
 
 

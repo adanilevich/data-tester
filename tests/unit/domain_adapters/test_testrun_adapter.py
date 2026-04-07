@@ -1,30 +1,29 @@
-import pytest
 from uuid import uuid4
 
+import pytest
 from src.domain_adapters import TestRunAdapter
-from src.infrastructure.backend.dummy import DummyBackendFactory
-from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
-from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.infrastructure.notifier import InMemoryNotifier
+from src.domain_ports import (
+    ExecuteTestRunCommand,
+    LoadTestRunCommand,
+    SaveTestRunCommand,
+)
 from src.dtos import (
-    TestRunDTO,
-    TestObjectDTO,
-    TestType,
-    Status,
-    Result,
-    LocationDTO,
-    DomainConfigDTO,
-    SchemaSpecDTO,
-    TestCasesConfigDTO,
-    SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
+    DomainConfigDTO,
+    LocationDTO,
+    Result,
+    SchemaSpecDTO,
+    SchemaTestCaseConfigDTO,
+    Status,
+    TestCasesConfigDTO,
+    TestObjectDTO,
+    TestRunDTO,
+    TestType,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
-from src.domain_ports import (
-    SaveTestRunCommand,
-    LoadTestRunCommand,
-    ExecuteTestRunCommand,
-)
+from src.infrastructure.backend.dummy import DummyBackendFactory
+from src.infrastructure.notifier import InMemoryNotifier
+from src.infrastructure.storage.dto_storage_file import JsonSerializer, MemoryDtoStorage
 from src.infrastructure_ports import ObjectNotFoundError
 
 

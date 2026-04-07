@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.dtos import SpecType, SpecDTO
+
+from src.dtos import SpecDTO, SpecType
 
 
 class SpecParserError(Exception):

@@ -1,15 +1,16 @@
 from typing import List, Optional
 from uuid import UUID
 
-from src.dtos import TestRunDTO
-from src.dtos.testrun_dtos import TestRunDefDTO
 from src.domain_ports import (
-    ITestRun,
     ExecuteTestRunCommand,
-    SaveTestRunCommand,
-    LoadTestRunCommand,
+    ITestRun,
     ListTestRunsCommand,
+    LoadTestCaseCommand,
+    LoadTestRunCommand,
+    SaveTestRunCommand,
 )
+from src.dtos import TestCaseDTO, TestRunDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 
 
 class TestRunDriver:
@@ -22,7 +23,7 @@ class TestRunDriver:
         self,
         testrun_def: TestRunDefDTO,
         testrun_id: UUID | None = None,
-    ) -> TestRunDTO:
+    ) -> TestRunDTO:  # type: ignore[override]
         """Executes a testrun and returns the result."""
         command = ExecuteTestRunCommand(testrun_def=testrun_def, testrun_id=testrun_id)
         return self.adapter.execute_testrun(command=command)
@@ -41,3 +42,8 @@ class TestRunDriver:
         """Lists testruns by domain and optionally by date."""
         command = ListTestRunsCommand(domain=domain, date=date)
         return self.adapter.list_testruns(command=command)
+
+    def load_testcase(self, testcase_id: UUID) -> TestCaseDTO:
+        """Loads a persisted testcase by ID."""
+        command = LoadTestCaseCommand(testcase_id=testcase_id)
+        return self.adapter.load_testcase(command=command)

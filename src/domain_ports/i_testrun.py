@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import UUID4
 
-from src.dtos import DTO, TestRunDTO
+from src.dtos import DTO, TestCaseDTO, TestRunDTO
 from src.dtos.testrun_dtos import TestRunDefDTO
 
 
@@ -18,6 +18,10 @@ class SaveTestRunCommand(DTO):
 
 class LoadTestRunCommand(DTO):
     testrun_id: str
+
+
+class LoadTestCaseCommand(DTO):
+    testcase_id: UUID4
 
 
 class ListTestRunsCommand(DTO):
@@ -43,3 +47,7 @@ class ITestRun(ABC):
     @abstractmethod
     def list_testruns(self, command: ListTestRunsCommand) -> List[TestRunDTO]:
         """List testruns by domain and optionally date."""
+
+    @abstractmethod
+    def load_testcase(self, command: LoadTestCaseCommand) -> TestCaseDTO:
+        """Load a persisted testcase by ID."""

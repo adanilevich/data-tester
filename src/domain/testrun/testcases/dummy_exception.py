@@ -1,5 +1,6 @@
-from .abstract_testcase import AbstractTestCase, TestCaseExecutionError
 from src.dtos import TestType
+
+from .abstract_testcase import AbstractTestCase, TestCaseExecutionError
 
 
 class DummyExceptionTestCase(AbstractTestCase):

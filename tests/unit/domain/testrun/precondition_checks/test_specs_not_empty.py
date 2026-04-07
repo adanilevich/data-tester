@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.domain.testrun.precondition_checks import CheckSpecsNotEmpty, Checkable
+from src.domain.testrun.precondition_checks import Checkable, CheckSpecsNotEmpty
 from src.dtos import (
     CompareSpecDTO,
     Importance,

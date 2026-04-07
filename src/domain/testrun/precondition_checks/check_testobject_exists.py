@@ -1,5 +1,6 @@
-from . import AbstractCheck, Checkable
 from src.dtos import DBInstanceDTO
+
+from . import AbstractCheck, Checkable
 
 
 class CheckTestObjectExists(AbstractCheck):

@@ -41,9 +41,14 @@ The project uses hexagonal architecture with clear separation between domain log
 
 ## MANDATORY: Planning Workflow (do this first before anything else)
 1. When planning, invoke the `planning-with-files:plan` skill using the Skill tool — do NOT use the built-in plan mode as a substitute
-2. Create intermediate planning files (`task_plan.md`, `findings.md`, `progress.md`) in `agent-artifacts/plans/intermediate/{task-title}/`
-3. **DO NOT prompt for permission to create intermediate folders**
-4. Write your plan to `agent-artifacts/plans/{task-title}.md`
-4. **DO NOT present the plan to the user or prompt for implementation until step 2 and 4 are complete** 
-5. Execute all checks before finalizing code. Fix any occuring issues
-6. **MANDATORY**: DO NOT ask for permissions if they are already provided in `local.settings.json`. 
+2. Write your plan to `agent-artifacts/plans/{task-title}.md`. **DO NOT prompt for permission to create folders**
+3. **DO NOT present the plan to the user or prompt for implementation until step 2 is complete** 
+4. Execute all checks before finalizing code. Fix any occuring issues
+5. **MANDATORY**: DO NOT ask for permissions if they are already provided in `local.settings.json`.
+6. After implementation write a summary to `agent-artifacts/summaries/summary-{task-title}.md`
+
+## Before prompting for implementation verify
+- [ ] Final plan persisted to `agent-artifacts/plans/plan-{task-title}.md`
+
+## After implementation verify
+- [ ] Summary persisted to `agent-artifacts/summaries/summary-{task-title}.md`

@@ -1,6 +1,7 @@
 from typing import List
+
 from src.domain_ports import ISpec, ListSpecsCommand
-from src.dtos import TestSetDTO, LocationDTO
+from src.dtos import LocationDTO, TestSetDTO
 
 
 class SpecDriver:

@@ -1,8 +1,8 @@
 from typing import Dict
-import pytest
 
+import pytest
 from src.domain.testrun.precondition_checks import Checkable, PreConditionChecker
-from src.dtos import TestObjectDTO, Importance
+from src.dtos import Importance, TestObjectDTO
 
 
 class DummyCheckable(Checkable):

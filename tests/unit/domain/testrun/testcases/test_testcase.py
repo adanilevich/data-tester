@@ -1,5 +1,5 @@
-from src.domain.testrun.precondition_checks import IPreconditionChecker, Checkable
-from src.dtos import TestCaseDTO, TestType, SpecType
+from src.domain.testrun.precondition_checks import Checkable, IPreconditionChecker
+from src.dtos import SpecType, TestCaseDTO, TestType
 
 
 class DummyChecker(IPreconditionChecker):

@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-from enum import Enum
-from typing import Dict, List, Self, Union, TYPE_CHECKING
-from uuid import uuid4
 from datetime import datetime
+from enum import Enum
+from typing import TYPE_CHECKING, Dict, List, Self, Union
+from uuid import uuid4
 
-from pydantic import Field, UUID4, model_validator
+from pydantic import UUID4, Field, model_validator
 
-from src.dtos.dto import DTO
 from src.dtos.domain_config_dtos import DomainConfigDTO
+from src.dtos.dto import DTO
 from src.dtos.specification_dtos import AnySpec
 
 if TYPE_CHECKING:
@@ -153,7 +153,6 @@ class TestDTO(DTO):
     __test__ = False  # prevents pytest collection
     # reference fields
     testset_id: UUID4 = Field(default_factory=uuid4)
-    report_id: UUID4 | None = None
     # data object coordinates
     domain: str
     stage: str

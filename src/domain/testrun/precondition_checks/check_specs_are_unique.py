@@ -1,7 +1,8 @@
 from typing import Dict, List
 
-from . import AbstractCheck, Checkable
 from src.dtos.specification_dtos import AnySpec
+
+from . import AbstractCheck, Checkable
 
 
 class CheckSpecsAreUnique(AbstractCheck):

@@ -1,8 +1,8 @@
-from typing import List, cast
 from datetime import datetime
+from typing import List, cast
 
+from src.dtos import ObjectType, TestSetDTO
 from src.infrastructure_ports import IDtoStorage
-from src.dtos import TestSetDTO, ObjectType
 
 
 class TestSet:

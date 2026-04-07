@@ -1,8 +1,8 @@
 from typing import List
 
 from src.domain_ports import IPlatform, ListTestObjectsCommand
-from src.infrastructure_ports import IBackendFactory
 from src.dtos import TestObjectDTO
+from src.infrastructure_ports import IBackendFactory
 
 
 class PlatformAdapter(IPlatform):

@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from enum import Enum
 
-from src.dtos import DomainConfigDTO, TestObjectDTO, DTO
+from src.dtos import DTO, DomainConfigDTO, TestObjectDTO
 from src.infrastructure_ports import BackendError
 
 

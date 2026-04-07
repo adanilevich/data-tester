@@ -1,6 +1,6 @@
+from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
 from src.dtos.testrun_dtos import TestRunDefDTO
-from src.apps.cli_di import CliDependencyInjector
 
 
 class CliApp:
@@ -38,6 +38,4 @@ class CliApp:
         )
         testrun = testrun_driver.execute_testrun(testrun_def)
 
-        # generate and save all reports
-        report_driver = self.di.report_driver()
-        report_driver.create_and_save_all_reports(testrun)
+        return testrun

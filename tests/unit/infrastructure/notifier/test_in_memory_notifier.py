@@ -1,4 +1,4 @@
-from src.dtos import NotificationDTO, NotificationProcess, Importance
+from src.dtos import Importance, NotificationDTO, NotificationProcess
 from src.infrastructure.notifier import InMemoryNotifier
 
 

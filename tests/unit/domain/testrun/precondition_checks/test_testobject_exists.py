@@ -1,6 +1,6 @@
 from typing import Dict
 
-from src.domain.testrun.precondition_checks import CheckTestObjectExists, Checkable
+from src.domain.testrun.precondition_checks import Checkable, CheckTestObjectExists
 from src.dtos import Importance, TestObjectDTO
 from src.infrastructure.backend.dummy import DummyBackend
 

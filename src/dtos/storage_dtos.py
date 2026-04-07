@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from enum import Enum
 
 from pydantic import field_validator
@@ -17,8 +18,7 @@ class StorageType(Enum):
 
 class ObjectType(Enum):
     TESTRUN = "testrun"
-    TESTCASE_REPORT = "testcase_report"
-    TESTRUN_REPORT = "testrun_report"
+    TESTCASE = "testcase"
     TESTSET = "testset"
     DOMAIN_CONFIG = "domain_config"
     SPECIFICATION = "specification"

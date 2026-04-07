@@ -1,7 +1,8 @@
 from typing import List
 
-from . import AbstractCheck, Checkable
 from src.dtos.specification_dtos import AnySpec
+
+from . import AbstractCheck, Checkable
 
 
 class CheckSpecsNotEmpty(AbstractCheck):

@@ -1,22 +1,22 @@
+from .plugins import (
+    ITestCaseFormatter,
+    ITestRunFormatter,
+    TxtTestCaseReportFormatter,
+    XlsxTestCaseDiffFormatter,
+    XlsxTestRunReportFormatter,
+)
 from .report import (
+    NoFormatterFoundError,
     Report,
     ReportError,
-    NoFormatterFoundError,
-    ReportNotRetrievableError,
-)
-from .plugins import (
-    IReportFormatter,
-    XlsxTestCaseDiffFormatter,
-    TxtTestCaseReportFormatter,
-    XlsxTestRunReportFormatter,
 )
 
 __all__: list[str] = [
     "Report",
     "ReportError",
     "NoFormatterFoundError",
-    "ReportNotRetrievableError",
-    "IReportFormatter",
+    "ITestCaseFormatter",
+    "ITestRunFormatter",
     "XlsxTestCaseDiffFormatter",
     "TxtTestCaseReportFormatter",
     "XlsxTestRunReportFormatter",

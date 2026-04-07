@@ -1,8 +1,7 @@
 from typing import List
 
-import pytest
 import polars as pl
-
+import pytest
 from src.domain.testrun.testcases.compare import (
     CompareTestCase,
     CompareTestCaseError,
@@ -11,11 +10,11 @@ from src.domain.testrun.testcases.compare import (
     SchemaMismatchError,
 )
 from src.dtos import (
-    SchemaSpecDTO,
     CompareSpecDTO,
-    TestType,
-    SpecType,
     LocationDTO,
+    SchemaSpecDTO,
+    SpecType,
+    TestType,
 )
 
 

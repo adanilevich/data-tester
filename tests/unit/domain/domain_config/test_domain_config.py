@@ -1,14 +1,13 @@
 import pytest
-
-from src.dtos import DomainConfigDTO, LocationDTO
 from src.domain.domain_config import (
     DomainConfig,
     DomainConfigNotUniqueError,
 )
+from src.dtos import DomainConfigDTO, LocationDTO
 from src.infrastructure.storage.dto_storage_file import (
+    JsonSerializer,
     MemoryDtoStorage,
 )
-from src.infrastructure.storage.dto_storage_file import JsonSerializer
 
 
 class TestDomainConfig:

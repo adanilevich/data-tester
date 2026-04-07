@@ -1,13 +1,14 @@
 from typing import Dict
+
+from src.domain.domain_config.domain_config import DomainConfig
 from src.domain_ports import (
     IDomainConfig,
     ListDomainConfigsCommand,
     LoadDomainConfigCommand,
     SaveDomainConfigCommand,
 )
-from src.infrastructure_ports import IDtoStorage
-from src.domain.domain_config.domain_config import DomainConfig
 from src.dtos import DomainConfigDTO
+from src.infrastructure_ports import IDtoStorage
 
 
 class DomainConfigAdapter(IDomainConfig):

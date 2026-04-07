@@ -1,24 +1,23 @@
-import pytest
 from typing import cast
 from uuid import uuid4
 
+import pytest
+from src.domain.testrun.testrun import TestRun
 from src.dtos import (
-    TestObjectDTO,
-    SchemaSpecDTO,
-    RowcountSpecDTO,
-    TestType,
-    TestRunDTO,
-    Status,
-    Result,
     LocationDTO,
     ObjectType,
+    Result,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    Status,
+    TestObjectDTO,
+    TestRunDTO,
+    TestType,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
-from src.domain.testrun.testrun import TestRun
-from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
-from src.infrastructure.storage.dto_storage_file import JsonSerializer
 from src.infrastructure.backend.dummy import DummyBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
+from src.infrastructure.storage.dto_storage_file import JsonSerializer, MemoryDtoStorage
 
 
 class TestTestRun:

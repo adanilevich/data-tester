@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Tuple, List
+from typing import List, Tuple
 
-from src.dtos import TestCaseEntryDTO, LocationDTO, SpecType
+from src.dtos import LocationDTO, SpecType, TestCaseEntryDTO
 
 
 class INamingConventions(ABC):

@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
-from src.dtos import DomainConfigDTO, DTO
+
+from src.dtos import DTO, DomainConfigDTO
 
 
 class ListDomainConfigsCommand(DTO):

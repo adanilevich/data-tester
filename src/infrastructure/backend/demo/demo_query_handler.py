@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from src.dtos import DomainConfigDTO, DBInstanceDTO
+from src.dtos import DBInstanceDTO, DomainConfigDTO
 
 
 class DemoQueryHandler:

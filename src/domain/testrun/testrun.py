@@ -145,7 +145,9 @@ class TestRun:
         """
         backend = self.backend_factory.create(domain_config=self.domain_config)
         with backend:
-            testcase = TestCaseCreator.create(definition, self.id, backend, self.notifiers)
+            testcase = TestCaseCreator.create(
+                definition, self.id, backend, self.notifiers, self.dto_storage
+            )
             return testcase.execute()
 
     def to_dto(self) -> TestRunDTO:

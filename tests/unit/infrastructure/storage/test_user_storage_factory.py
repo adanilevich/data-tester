@@ -1,12 +1,11 @@
 import pytest
-
-from src.infrastructure.storage.user_storage_factory import UserStorageFactory
+from src.dtos import StorageType
 from src.infrastructure.storage.user_storage import (
     LocalUserStorage,
     MemoryUserStorage,
 )
-from src.infrastructure_ports import StorageTypeUnknownError, StorageError
-from src.dtos import StorageType
+from src.infrastructure.storage.user_storage_factory import UserStorageFactory
+from src.infrastructure_ports import StorageError, StorageTypeUnknownError
 
 
 class TestUserStorageFactory:

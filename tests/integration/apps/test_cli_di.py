@@ -8,12 +8,15 @@ each driver produced by the DI container is functional.
 import io
 from typing import List, cast
 
-import pytest
 import polars as pl
-
+import pytest
 from src.apps.cli_di import CliDependencyInjector as CliDi
 from src.config import Config
 from src.domain_adapters import SpecAdapter
+from src.domain_ports import (
+    SaveDomainConfigCommand,
+    SaveTestSetCommand,
+)
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,
@@ -21,35 +24,29 @@ from src.drivers import (
     TestRunDriver,
     TestSetDriver,
 )
-from src.domain_ports import (
-    LoadTestRunReportCommand,
-    LoadTestCaseReportCommand,
-    SaveDomainConfigCommand,
-    SaveTestSetCommand,
-)
+from src.drivers.testset_driver import TestSetNotFoundError
 from src.dtos import (
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
+    ReportArtifact,
+    ReportArtifactFormat,
+    Result,
     SchemaSpecDTO,
     SchemaTestCaseConfigDTO,
+    Status,
     TestCaseEntryDTO,
     TestCasesConfigDTO,
     TestObjectDTO,
-    Result,
     TestRunDTO,
-    TestRunReportDTO,
     TestSetDTO,
-    Status,
     TestType,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
-from src.drivers.testset_driver import TestSetNotFoundError
 from src.infrastructure.backend import DemoBackendFactory, DummyBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier, LogNotifier
 from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
 from src.infrastructure.storage.user_storage import MemoryUserStorage
-
 
 # --- Helpers and Fixtures ---
 
@@ -103,7 +100,8 @@ class TestCliDependencyInjection:
         assert len(di.notifiers) == 2
         assert any(isinstance(n, InMemoryNotifier) for n in di.notifiers)
         assert any(isinstance(n, LogNotifier) for n in di.notifiers)
-        assert len(di.testreport_formatters) == 3
+        assert len(di.testcase_formatters) == 2
+        assert len(di.testrun_formatters) == 1
 
         assert isinstance(di.domain_config_driver(), DomainConfigDriver)
         assert isinstance(di.testset_driver(), TestSetDriver)
@@ -391,28 +389,73 @@ class TestTestRunDriverIntegration:
 
 
 class TestReportDriverIntegration:
-    def test_create_save_and_retrieve_reports(self, di: CliDi, testrun: TestRunDTO):
-        driver = di.report_driver()
-        adapter = driver.adapter
-
-        testrun_report = driver.create_and_save_all_reports(testrun)
-
-        assert isinstance(testrun_report, TestRunReportDTO)
-        assert testrun.report_id == testrun_report.report_id
-
-        for tc in testrun.results:
-            assert tc.report_id is not None
-
-        loaded_tr = adapter.load_testrun_report(
-            LoadTestRunReportCommand(report_id=testrun_report.report_id)
+    def _make_domain_config(self) -> DomainConfigDTO:
+        return DomainConfigDTO(
+            domain="my_domain",
+            instances={},
+            specifications_locations=[],
+            testreports_location=LocationDTO("memory://my_location"),
+            testcases=TestCasesConfigDTO(
+                schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
+                compare=CompareTestCaseConfigDTO(sample_size=100),
+            ),
         )
-        assert str(loaded_tr.testrun_id) == str(testrun_report.testrun_id)
-        assert len(loaded_tr.testcase_results) == len(testrun.results)
 
-        for tc in testrun.results:
-            assert tc.report_id is not None
-            loaded_tc = adapter.load_testcase_report(
-                LoadTestCaseReportCommand(report_id=tc.report_id)
-            )
-            assert str(loaded_tc.testcase_id) == str(tc.id)
-            assert loaded_tc.testobject == tc.testobject.name
+    def _make_testcase_def(
+        self, testobject_name: str, testtype: TestType, dc: DomainConfigDTO
+    ) -> TestCaseDefDTO:
+        return TestCaseDefDTO(
+            testobject=TestObjectDTO(
+                domain="my_domain",
+                stage="my_stage",
+                instance="my_instance",
+                name=testobject_name,
+            ),
+            testtype=testtype,
+            specs=[
+                SchemaSpecDTO(
+                    location=LocationDTO(path="memory://my_location"),
+                    testobject=testobject_name,
+                ),
+            ],
+            domain_config=dc,
+        )
+
+    def test_create_artifacts_after_testrun(self):
+        """Execute a testrun so testcases are persisted, then create artifacts."""
+        config = Config()
+        config.DATATESTER_DATA_PLATFORM = "DUMMY"
+        di = CliDi(config)
+
+        dc = self._make_domain_config()
+        testcase_def = self._make_testcase_def("obj1", TestType.DUMMY_OK, dc)
+        testrun_def = TestRunDefDTO(
+            testcase_defs=[testcase_def],
+            domain="my_domain",
+            stage="my_stage",
+            instance="my_instance",
+            domain_config=dc,
+            testset_name="testset",
+        )
+        testrun: TestRunDTO = di.testrun_driver().execute_testrun(testrun_def)
+        assert len(testrun.results) == 1
+        tc = testrun.results[0]
+
+        report_driver = di.report_driver()
+
+        # testcase REPORT/TXT artifact
+        txt_artifact = report_driver.create_testcase_report_artifact(
+            testcase_id=tc.id,
+            artifact=ReportArtifact.REPORT,
+            artifact_format=ReportArtifactFormat.TXT,
+        )
+        assert isinstance(txt_artifact, bytes)
+        assert len(txt_artifact) > 0
+
+        # testrun REPORT/XLSX artifact
+        xlsx_artifact = report_driver.create_testrun_report_artifact(
+            testrun_id=testrun.id,
+            artifact_format=ReportArtifactFormat.XLSX,
+        )
+        assert isinstance(xlsx_artifact, bytes)
+        assert xlsx_artifact.startswith(b"PK\x03\x04")

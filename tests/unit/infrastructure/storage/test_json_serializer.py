@@ -1,11 +1,11 @@
-import pytest
 import json
 
+import pytest
+from src.dtos import ObjectType, TestSetDTO
 from src.infrastructure.storage.dto_storage_file import (
     JsonSerializer,
     SerializerError,
 )
-from src.dtos import TestSetDTO, ObjectType
 
 
 class TestJsonSerializer:

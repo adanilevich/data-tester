@@ -1,5 +1,6 @@
 from .i_report_formatter import (
-    IReportFormatter,
+    ITestCaseFormatter,
+    ITestRunFormatter,
     ReportFormatterError,
     ReportTypeNotSupportedError,
 )
@@ -7,9 +8,9 @@ from .txt_testcase_report import TxtTestCaseReportFormatter
 from .xlsx_testcase_diff import XlsxTestCaseDiffFormatter
 from .xlsx_testrun_report import XlsxTestRunReportFormatter
 
-
 __all__ = [
-    "IReportFormatter",
+    "ITestCaseFormatter",
+    "ITestRunFormatter",
     "ReportFormatterError",
     "ReportTypeNotSupportedError",
     "TxtTestCaseReportFormatter",

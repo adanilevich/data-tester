@@ -24,7 +24,6 @@ from typing import List
 
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem
-
 from src.dtos import (
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
@@ -445,7 +444,7 @@ def _create_domain_configs(
 ) -> None:
     configs_dir.mkdir(parents=True, exist_ok=True)
     for config in _domain_configs(specs_base, reports_base):
-        path = configs_dir / f"domain_config_{config.domain}.json"
+        path = configs_dir / f"{config.id}.json"
         path.write_text(config.to_json())
 
 
@@ -453,7 +452,7 @@ def _create_testsets(testsets_dir: Path) -> None:
     for testset in _testsets():
         ts_dir = testsets_dir / testset.domain
         ts_dir.mkdir(parents=True, exist_ok=True)
-        path = ts_dir / f"testset_{testset.id}.json"
+        path = ts_dir / f"{testset.id}.json"
         path.write_text(testset.to_json())
 
 

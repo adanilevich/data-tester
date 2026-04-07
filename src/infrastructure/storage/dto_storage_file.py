@@ -13,23 +13,21 @@ try:
 except ImportError:
     GCSFileSystem = None
 
-from src.infrastructure_ports import (
-    IDtoStorage,
-    StorageError,
-    ObjectNotFoundError,
-)
 from src.dtos import (
+    DTO,
     DomainConfigDTO,
-    SpecDTO,
-    TestSetDTO,
-    TestRunDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
     LocationDTO,
     ObjectType,
-    DTO,
+    SpecDTO,
+    TestCaseDTO,
+    TestRunDTO,
+    TestSetDTO,
 )
-
+from src.infrastructure_ports import (
+    IDtoStorage,
+    ObjectNotFoundError,
+    StorageError,
+)
 
 # --- Serializer interface and implementation ---
 
@@ -45,7 +43,7 @@ class DeserializationError(SerializerError):
 class ISerializer(ABC):
     """Interface for serializing and deserializing DTO objects."""
 
-    file_suffix: str
+    suffix: str
 
     @abstractmethod
     def serialize(self, dto: DTO) -> bytes:
@@ -59,20 +57,19 @@ class ISerializer(ABC):
 class JsonSerializer(ISerializer):
     """JSON serializer for DTO objects."""
 
-    file_suffix: str = "json"
+    suffix: str = "json"
 
     def __init__(self) -> None:
         self._dto_mapping: Dict[ObjectType, Type[DTO]] = {
             ObjectType.DOMAIN_CONFIG: DomainConfigDTO,
             ObjectType.SPECIFICATION: SpecDTO,
             ObjectType.TESTRUN: TestRunDTO,
-            ObjectType.TESTCASE_REPORT: TestCaseReportDTO,
-            ObjectType.TESTRUN_REPORT: TestRunReportDTO,
+            ObjectType.TESTCASE: TestCaseDTO,
             ObjectType.TESTSET: TestSetDTO,
         }
 
     def serialize(self, dto: DTO) -> bytes:
-        return dto.to_json().encode("utf-8")
+        return dto.to_json().encode("utf-8")  # type: ignore[union-attr]
 
     def deserialize(self, data: bytes, object_type: ObjectType) -> DTO:
         if object_type not in self._dto_mapping:
@@ -107,8 +104,7 @@ _DTO_TYPE_MAPPING: Dict[Type[DTO], ObjectType] = {
     DomainConfigDTO: ObjectType.DOMAIN_CONFIG,
     TestSetDTO: ObjectType.TESTSET,
     TestRunDTO: ObjectType.TESTRUN,
-    TestCaseReportDTO: ObjectType.TESTCASE_REPORT,
-    TestRunReportDTO: ObjectType.TESTRUN_REPORT,
+    TestCaseDTO: ObjectType.TESTCASE,
     SpecDTO: ObjectType.SPECIFICATION,
 }
 
@@ -155,25 +151,8 @@ class DtoStorageFile(IDtoStorage):
                     start_ts = datetime.now()
                 date_str = start_ts.strftime("%Y-%m-%d")
                 return f"testruns/{domain}/{date_str}/"
-            case ObjectType.TESTRUN_REPORT:
-                domain = getattr(dto, "domain", "")
-                start_ts = getattr(dto, "start_ts", None)
-                if start_ts is None:
-                    msg = f"{type(dto).__name__} missing start_ts, using now()"
-                    logging.getLogger("datatester").warning(msg)
-                    start_ts = datetime.now()
-                date_str = start_ts.strftime("%Y-%m-%d")
-                return f"testrun_reports/{domain}/{date_str}/"
-            case ObjectType.TESTCASE_REPORT:
-                domain = getattr(dto, "domain", "")
-                start_ts = getattr(dto, "start_ts", None)
-                if start_ts is None:
-                    msg = f"{type(dto).__name__} missing start_ts, using now()"
-                    logging.getLogger("datatester").warning(msg)
-                    start_ts = datetime.now()
-                date_str = start_ts.strftime("%Y-%m-%d")
-                testrun_id = str(getattr(dto, "testrun_id", ""))
-                return f"testcase_reports/{domain}/{date_str}/{testrun_id}/"
+            case ObjectType.TESTCASE:
+                return "testcases/"
             case ObjectType.SPECIFICATION:
                 domain = getattr(dto, "domain", getattr(dto, "testobject", ""))
                 return f"specifications/{domain}/"
@@ -189,10 +168,8 @@ class DtoStorageFile(IDtoStorage):
                 return "testsets/"
             case ObjectType.TESTRUN:
                 return "testruns/"
-            case ObjectType.TESTRUN_REPORT:
-                return "testrun_reports/"
-            case ObjectType.TESTCASE_REPORT:
-                return "testcase_reports/"
+            case ObjectType.TESTCASE:
+                return "testcases/"
             case ObjectType.SPECIFICATION:
                 return "specifications/"
             case _:
@@ -202,8 +179,8 @@ class DtoStorageFile(IDtoStorage):
         object_type = _infer_object_type(dto)
         subfolder = self._get_subfolder(dto, object_type)
         obj_id = dto.id  # type: ignore
-        key = f"{object_type.value.lower()}_{obj_id}.{self.serializer.file_suffix}"
-        full_path = self.storage_location.path + subfolder + key
+        object_key = f"{obj_id}.{self.serializer.suffix}"
+        full_path = self.storage_location.path + subfolder + object_key
 
         serialized = self.serializer.serialize(dto)
         try:
@@ -213,7 +190,7 @@ class DtoStorageFile(IDtoStorage):
             raise DtoStorageFileError(f"Error writing DTO: {str(dto)}") from err
 
     def read_dto(self, object_type: ObjectType, id: str) -> DTO:
-        object_key = f"{object_type.value.lower()}_{id}.{self.serializer.file_suffix}"
+        object_key = f"{id}.{self.serializer.suffix}"
         base_folder = self.storage_location.path + self._get_folder(object_type)
         pattern = base_folder + "**/" + object_key
 
@@ -261,11 +238,7 @@ class DtoStorageFile(IDtoStorage):
                 search_path += f"{filters['testrun_id']}/"
 
         # Build glob pattern for matching files
-        glob_pattern = (
-            search_path
-            + f"**/{object_type.value.lower()}_*."
-            + self.serializer.file_suffix
-        )
+        glob_pattern = search_path + "**/*." + self.serializer.suffix
 
         try:
             matches = self.fs.glob(glob_pattern)

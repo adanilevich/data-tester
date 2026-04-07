@@ -1,20 +1,21 @@
 from typing import List
 
 from src.config import Config
-from src.domain_adapters import (
-    DomainConfigAdapter,
-    TestRunAdapter,
-    ReportAdapter,
-    SpecAdapter,
-    TestSetAdapter,
-)
 from src.domain.report.plugins import (
-    IReportFormatter,
+    ITestCaseFormatter,
+    ITestRunFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
 )
 from src.domain.specification import NamingConventionsFactory, SpecParserFactory
+from src.domain_adapters import (
+    DomainConfigAdapter,
+    ReportAdapter,
+    SpecAdapter,
+    TestRunAdapter,
+    TestSetAdapter,
+)
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,
@@ -26,7 +27,7 @@ from src.dtos import LocationDTO, StorageType
 from src.infrastructure.backend import DemoBackendFactory, DummyBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier, LogNotifier
 from src.infrastructure.storage import DtoStorageFactory, UserStorageFactory
-from src.infrastructure_ports import INotifier, IDtoStorage, IBackendFactory, IUserStorage
+from src.infrastructure_ports import IBackendFactory, IDtoStorage, INotifier, IUserStorage
 
 
 def get_backend_factory(config: Config) -> IBackendFactory:
@@ -80,9 +81,11 @@ class CliDependencyInjector:
 
         self.dto_storage: IDtoStorage = get_dto_storage(config)
         self.user_storage = get_user_storage(config)
-        self.testreport_formatters: List[IReportFormatter] = [
+        self.testcase_formatters: List[ITestCaseFormatter] = [
             TxtTestCaseReportFormatter(),
             XlsxTestCaseDiffFormatter(),
+        ]
+        self.testrun_formatters: List[ITestRunFormatter] = [
             XlsxTestRunReportFormatter(),
         ]
         self.notifiers = get_notifiers(config)
@@ -118,8 +121,8 @@ class CliDependencyInjector:
 
     def report_driver(self) -> ReportDriver:
         handler = ReportAdapter(
-            formatters=self.testreport_formatters,
+            testcase_formatters=self.testcase_formatters,
+            testrun_formatters=self.testrun_formatters,
             dto_storage=self.dto_storage,
-            notifiers=self.notifiers,
         )
         return ReportDriver(report_adapter=handler)

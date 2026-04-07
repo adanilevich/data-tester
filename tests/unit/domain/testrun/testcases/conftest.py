@@ -3,7 +3,6 @@ from __future__ import annotations
 from uuid import uuid4
 
 import pytest
-
 from src.domain.testrun.testcases import (
     AbstractTestCase,
     CompareTestCase,
@@ -15,9 +14,9 @@ from src.domain.testrun.testcases import (
     StageCountTestCase,
 )
 from src.dtos import TestType
-from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.dtos.specification_dtos import SpecDTO, SpecType
 from src.dtos.storage_dtos import LocationDTO
+from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.infrastructure.backend.dummy import DummyBackend
 from src.infrastructure.notifier import InMemoryNotifier
 

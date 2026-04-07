@@ -11,7 +11,6 @@ import os
 from pathlib import Path
 
 import uvicorn
-
 from src.apps.http_app import create_app
 from src.apps.http_di import HttpDependencyInjector
 from src.config import Config

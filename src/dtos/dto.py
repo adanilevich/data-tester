@@ -1,4 +1,5 @@
 from typing import Any, Dict, Literal, Self
+
 from pydantic import BaseModel
 
 

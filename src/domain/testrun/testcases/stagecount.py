@@ -1,13 +1,14 @@
 from typing import Optional
 
-from . import AbstractTestCase, TestCaseError
 from src.dtos import (
-    StagecountSpecDTO,
     DBInstanceDTO,
-    TestType,
-    Result,
     Importance,
+    Result,
+    StagecountSpecDTO,
+    TestType,
 )
+
+from . import AbstractTestCase, TestCaseError
 
 
 class StageCountTestCaseError(TestCaseError):

@@ -1,32 +1,31 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-from functools import wraps
-from typing import ClassVar, Dict, List, Optional, Any
-from uuid import uuid4, UUID
-from datetime import datetime
 import time
+from abc import abstractmethod
+from datetime import datetime
+from functools import wraps
+from typing import Any, ClassVar, Dict, List, Optional
+from uuid import UUID, uuid4
 
-from src.dtos import (
-    AnySpec,
-    TestObjectDTO,
-    Status,
-    Result,
-    TestCaseDTO,
-    DomainConfigDTO,
-    TestType,
-    Importance,
-    NotificationDTO,
-    NotificationProcess,
-)
-from src.dtos.testrun_dtos import TestCaseDefDTO
-
-from src.infrastructure_ports import IBackend, INotifier
 from src.domain.testrun.precondition_checks import (
     Checkable,
     IPreconditionChecker,
     PreConditionChecker,
 )
+from src.dtos import (
+    AnySpec,
+    DomainConfigDTO,
+    Importance,
+    NotificationDTO,
+    NotificationProcess,
+    Result,
+    Status,
+    TestCaseDTO,
+    TestObjectDTO,
+    TestType,
+)
+from src.dtos.testrun_dtos import TestCaseDefDTO
+from src.infrastructure_ports import IBackend, IDtoStorage, INotifier
 
 
 class TestCaseError(Exception):
@@ -76,10 +75,12 @@ class AbstractTestCase(Checkable):
         testrun_id: UUID,
         backend: IBackend,
         notifiers: List[INotifier],
+        dto_storage: IDtoStorage | None = None,
     ) -> None:
         # set infra
         self.notifiers: List[INotifier] = notifiers
         self.backend: IBackend = backend
+        self.dto_storage: IDtoStorage | None = dto_storage
         # set testcase data (context fields first, before any notify call)
         self.id: UUID = uuid4()
         self.testrun_id: UUID = testrun_id
@@ -100,6 +101,11 @@ class AbstractTestCase(Checkable):
         self.diff: Dict[str, List | Dict] = dict()  # list of diffs
         self.status = Status.INITIATED
         self.notify(f"Initiating testcase {self.ttype} for {definition.testobject.name}")
+        self.persist()
+
+    def persist(self):
+        if self.dto_storage is not None:
+            self.dto_storage.write_dto(self.to_dto())
 
     def notify(self, message: str, importance: Importance = Importance.INFO):
         notification = NotificationDTO(
@@ -127,6 +133,7 @@ class AbstractTestCase(Checkable):
 
     def _check_preconditions(self, checker: IPreconditionChecker) -> bool:
         self.status = Status.PRECONDITIONS
+        self.persist()
 
         if self.preconditions is None:
             return True
@@ -179,10 +186,12 @@ class AbstractTestCase(Checkable):
         checker = checker or PreConditionChecker()
         if not self._check_preconditions(checker=checker):
             self.end_ts = datetime.now()
+            self.persist()
             return self.to_dto()
 
         self.status = Status.EXECUTING
         self.notify("Starting execution of core testlogic ...")
+        self.persist()
 
         try:
             self._execute()
@@ -196,7 +205,10 @@ class AbstractTestCase(Checkable):
             self.summary = msg
 
         self.end_ts = datetime.now()
-        return self.to_dto()
+        self.persist()
+        result = self.to_dto()
+
+        return result
 
 
 class _UnknownTestCase(AbstractTestCase):
@@ -221,11 +233,13 @@ class TestCaseCreator:
         testrun_id: UUID,
         backend: IBackend,
         notifiers: List[INotifier],
+        dto_storage: IDtoStorage | None = None,
     ) -> AbstractTestCase:
         testcase_class = AbstractTestCase.known_testcases.get(definition.testtype)
+        args = (definition, testrun_id, backend, notifiers, dto_storage)
         if testcase_class is None:
-            return _UnknownTestCase(definition, testrun_id, backend, notifiers)
-        return testcase_class(definition, testrun_id, backend, notifiers)
+            return _UnknownTestCase(*args)
+        return testcase_class(*args)
 
 
 def time_it(step_name: str):

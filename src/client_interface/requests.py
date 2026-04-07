@@ -3,11 +3,11 @@ from typing import List
 from pydantic import model_validator
 
 from src.dtos import (
-    AnySpec,
     DTO,
-    TestSetDTO,
+    AnySpec,
     DomainConfigDTO,
     LocationDTO,
+    TestSetDTO,
 )
 
 

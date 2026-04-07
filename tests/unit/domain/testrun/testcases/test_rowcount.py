@@ -1,9 +1,8 @@
-import pytest
 import polars as pl
-
+import pytest
 from src.domain.testrun.testcases import AbstractTestCase
 from src.domain.testrun.testcases.rowcount import RowCountTestCaseError
-from src.dtos import RowcountSpecDTO, TestType, SpecType, LocationDTO
+from src.dtos import LocationDTO, RowcountSpecDTO, SpecType, TestType
 
 
 # noinspection PyUnusedLocal

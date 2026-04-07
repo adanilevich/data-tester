@@ -1,17 +1,17 @@
 import pytest
-
+from src.dtos import LocationDTO
 from src.infrastructure.storage.user_storage import (
-    MemoryUserStorage,
     LocalUserStorage,
+    MemoryUserStorage,
 )
 from src.infrastructure_ports import ObjectNotFoundError, StorageTypeUnknownError
-from src.dtos import LocationDTO
 
 
 class TestMemoryUserStorage:
     @pytest.fixture
     def storage(self) -> MemoryUserStorage:
         from typing import cast
+
         from fsspec.implementations.memory import MemoryFileSystem
 
         s = MemoryUserStorage()

@@ -1,18 +1,19 @@
 from uuid import uuid4
-from tests.conftest import DemoData
+
 from src.domain.testrun.testcases import CompareTestCase
 from src.dtos import (
     CompareSpecDTO,
+    LocationDTO,
     SchemaSpecDTO,
+    SpecType,
     TestObjectDTO,
     TestType,
-    SpecType,
-    LocationDTO,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.infrastructure.backend.demo import DemoBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
 
+from tests.conftest import DemoData
 
 sql = CompareSpecDTO(
     location=LocationDTO(path="dummy://this_location"),

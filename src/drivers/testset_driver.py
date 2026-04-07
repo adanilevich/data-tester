@@ -1,11 +1,12 @@
 from typing import List
-from src.dtos.testset_dtos import TestSetDTO
+
 from src.domain_ports import (
     ITestSet,
     ListTestSetsCommand,
     LoadTestSetCommand,
     SaveTestSetCommand,
 )
+from src.dtos.testset_dtos import TestSetDTO
 
 
 class TestSetDriverError(Exception):
