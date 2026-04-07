@@ -1,10 +1,8 @@
 from typing import List
 import pytest
+import polars as pl
 
-from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data,
-    clean_up_demo_data,
-)
+from tests.conftest import DemoData
 from src.infrastructure.backend.demo import (
     DemoBackendFactory,
     DemoBackendError,
@@ -18,30 +16,28 @@ from src.dtos import (
 )
 
 
-@pytest.fixture(scope="module")
-def prepare_demo_data_fixture():
-    prepare_demo_data()
-    yield
-    clean_up_demo_data()
+@pytest.fixture
+def backend_factory(demo_data: DemoData) -> DemoBackendFactory:
+    return DemoBackendFactory(files_path=demo_data.raw_path, db_path=demo_data.db_path)
+
+
+@pytest.fixture
+def backend(domain_config, backend_factory):
+    b = backend_factory.create(domain_config=domain_config)
+    try:
+        yield b
+    finally:
+        b.close()
 
 
 class TestDemoBackendFactory:
-    def test_backend_creation(
-        self,
-        domain_config,
-        prepare_demo_data_fixture,
-    ):
-        factory = DemoBackendFactory()
-        backend = factory.create(domain_config=domain_config)
-        assert backend.config == domain_config
+    def test_backend_creation(self, domain_config, backend_factory):
+        with backend_factory.create(domain_config=domain_config) as backend:
+            assert backend.config == domain_config
 
 
 class TestDemoBackend:
-    db = DBInstanceDTO(
-        domain="payments",
-        stage="test",
-        instance="alpha",
-    )
+    db = DBInstanceDTO(domain="payments", stage="test", instance="alpha")
 
     @pytest.fixture
     def test_query(self):
@@ -51,10 +47,6 @@ class TestDemoBackend:
             FROM payments_test.alpha.core_account_payments
             )
         """
-
-    @pytest.fixture
-    def backend(self, domain_config, prepare_demo_data_fixture):
-        return DemoBackendFactory().create(domain_config=domain_config)
 
     @pytest.mark.parametrize(
         "domain,stage,instance,testobjects_expected",
@@ -177,11 +169,7 @@ class TestDemoBackend:
             )
         assert "Provide a non-empty list of primary keys" in str(err)
 
-    def test_that_unique_keys_are_sampled(
-        self,
-        backend,
-        test_query,
-    ):
+    def test_that_unique_keys_are_sampled(self, backend, test_query):
         primary_keys = ["id"]
         key_sample = backend.get_sample_keys(
             query=test_query,
@@ -192,11 +180,7 @@ class TestDemoBackend:
         assert len(key_sample) == 5
         assert len(set(key_sample)) == 5
 
-    def test_key_sampling_with_underspecified_keys(
-        self,
-        backend,
-        test_query,
-    ):
+    def test_key_sampling_with_underspecified_keys(self, backend, test_query):
         primary_keys = ["account_id", "customer_id"]
         key_sample = backend.get_sample_keys(
             query=test_query,
@@ -281,11 +265,7 @@ class TestDemoBackend:
         )
         assert list(sample.columns) == (columns + ["__concat_key__"])
 
-    def test_sampling_from_query_fails_with_empty_keys(
-        self,
-        backend,
-        test_query,
-    ):
+    def test_sampling_from_query_fails_with_empty_keys(self, backend, test_query):
         with pytest.raises(DemoBackendError) as err:
             backend.get_sample_from_query(
                 query=test_query,
@@ -295,10 +275,7 @@ class TestDemoBackend:
             )
         assert "non-empty" in str(err)
 
-    def test_sampling_from_testobject_fails_for_files(
-        self,
-        backend,
-    ):
+    def test_sampling_from_testobject_fails_for_files(self, backend):
         testobject = TestObjectDTO(
             name="raw_accounts",
             domain="payments",
@@ -324,7 +301,6 @@ class TestDemoBackend:
         assert result == query
 
     def test_run_query_returns_dataframe(self, backend):
-        import polars as pl
 
         query = "SELECT * FROM payments_test.alpha.stage_accounts LIMIT 3"
         result = backend.run_query(query=query, db=self.db)
@@ -344,60 +320,38 @@ class TestDemoBackend:
 
 
 class TestGetTestobjectRowcount:
-    db = DBInstanceDTO(
-        domain="payments",
-        stage="test",
-        instance="alpha",
-    )
-
-    @pytest.fixture
-    def backend(self, domain_config, prepare_demo_data_fixture):
-        return DemoBackendFactory().create(domain_config=domain_config)
+    db = DBInstanceDTO(domain="payments", stage="test", instance="alpha")
 
     def test_db_rowcount_stage_accounts(self, backend):
         testobject = TestObjectDTO(
-            name="stage_accounts",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="stage_accounts", domain="payments", stage="test", instance="alpha"
         )
         count = backend.get_testobject_rowcount(testobject=testobject)
         assert count == 410  # 200 + 210
 
     def test_db_rowcount_stage_transactions(self, backend):
         testobject = TestObjectDTO(
-            name="stage_transactions",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="stage_transactions", domain="payments", stage="test", instance="alpha"
         )
         count = backend.get_testobject_rowcount(testobject=testobject)
         assert count == 1500  # 1000 + 500 (truncated)
 
     def test_db_rowcount_with_filter(self, backend):
         testobject = TestObjectDTO(
-            name="stage_accounts",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="stage_accounts", domain="payments", stage="test", instance="alpha"
         )
         count = backend.get_testobject_rowcount(
             testobject=testobject,
-            filters=[
-                ("m__source_file", "='accounts_2024-01-01.csv'"),
-            ],
+            filters=[("m__source_file", "='accounts_2024-01-01.csv'")],
         )
         assert count == 200
 
-    def test_file_rowcount_returns_correct_count(self, backend):
+    def test_file_rowcount_returns_correct_count(self, backend, demo_data):
         testobject = TestObjectDTO(
-            name="raw_accounts",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="raw_accounts", domain="payments", stage="test", instance="alpha"
         )
         filepath = (
-            "tests/fixtures/demo/raw/payments/test/alpha/accounts/accounts_2024-01-01.csv"
+            f"{demo_data.raw_path}/payments/test/alpha/accounts/accounts_2024-01-01.csv"
         )
         count = backend.get_testobject_rowcount(
             testobject=testobject,
@@ -407,10 +361,7 @@ class TestGetTestobjectRowcount:
 
     def test_file_rowcount_raises_without_filepath(self, backend):
         testobject = TestObjectDTO(
-            name="raw_accounts",
-            domain="payments",
-            stage="test",
-            instance="alpha",
+            name="raw_accounts", domain="payments", stage="test", instance="alpha"
         )
         with pytest.raises(DemoBackendError) as err:
             backend.get_testobject_rowcount(testobject=testobject)
@@ -418,35 +369,21 @@ class TestGetTestobjectRowcount:
 
 
 class TestHarmonizeSchemaExtended:
-    @pytest.fixture
-    def backend(self, domain_config, prepare_demo_data_fixture):
-        return DemoBackendFactory().create(domain_config=domain_config)
-
     def _make_schema(self, columns: dict) -> SchemaSpecDTO:
         return SchemaSpecDTO(
-            location=LocationDTO(
-                path="duckdb://test.schema.table.duck",
-            ),
+            location=LocationDTO(path="duckdb://test.schema.table.duck"),
             columns=columns,
             testobject="test_table",
             spec_type=SpecType.SCHEMA,
         )
 
     def test_harmonize_float_dtypes(self, backend):
-        schema = self._make_schema(
-            {"a": "FLOAT", "b": "REAL", "c": "DOUBLE"},
-        )
+        schema = self._make_schema({"a": "FLOAT", "b": "REAL", "c": "DOUBLE"})
         result = backend.harmonize_schema(schema)
-        assert result.columns == {
-            "a": "float",
-            "b": "float",
-            "c": "float",
-        }
+        assert result.columns == {"a": "float", "b": "float", "c": "float"}
 
     def test_harmonize_decimal_dtypes(self, backend):
-        schema = self._make_schema(
-            {"a": "DECIMAL(10,2)", "b": "NUMERIC"},
-        )
+        schema = self._make_schema({"a": "DECIMAL(10,2)", "b": "NUMERIC"})
         result = backend.harmonize_schema(schema)
         assert result.columns == {"a": "decimal", "b": "decimal"}
 
@@ -456,14 +393,9 @@ class TestHarmonizeSchemaExtended:
         assert result.columns == {"a": "date"}
 
     def test_harmonize_timestamp_dtype(self, backend):
-        schema = self._make_schema(
-            {"a": "TIMESTAMP", "b": "TIMESTAMP WITH TIME ZONE"},
-        )
+        schema = self._make_schema({"a": "TIMESTAMP", "b": "TIMESTAMP WITH TIME ZONE"})
         result = backend.harmonize_schema(schema)
-        assert result.columns == {
-            "a": "timestamp",
-            "b": "timestamp",
-        }
+        assert result.columns == {"a": "timestamp", "b": "timestamp"}
 
     def test_harmonize_complex_dtypes_passthrough(self, backend):
         schema = self._make_schema(

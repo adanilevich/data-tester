@@ -431,8 +431,7 @@ def _write_file(path: Path, data: bytes) -> None:
     path.write_bytes(data)
 
 
-def _create_spec_files(location: Path, specs_base: str) -> None:
-    specs_dir = location / "specs"
+def _create_spec_files(specs_dir: Path, specs_base: str) -> None:
     for filename, content in _payment_specs(specs_base).items():
         _write_file(specs_dir / "payments" / filename, content)
     for filename, content in _sales_specs(specs_base).items():
@@ -440,50 +439,62 @@ def _create_spec_files(location: Path, specs_base: str) -> None:
 
 
 def _create_domain_configs(
-    location: Path,
+    configs_dir: Path,
     specs_base: str,
     reports_base: str,
 ) -> None:
-    configs_dir = location / "configs"
     configs_dir.mkdir(parents=True, exist_ok=True)
     for config in _domain_configs(specs_base, reports_base):
         path = configs_dir / f"domain_config_{config.domain}.json"
         path.write_text(config.to_json())
 
 
-def _create_testsets(location: Path) -> None:
+def _create_testsets(testsets_dir: Path) -> None:
     for testset in _testsets():
-        ts_dir = location / "testsets" / testset.domain
+        ts_dir = testsets_dir / testset.domain
         ts_dir.mkdir(parents=True, exist_ok=True)
-        path = ts_dir / f"testset_{testset.name}.json"
+        path = ts_dir / f"testset_{testset.object_id}.json"
         path.write_text(testset.to_json())
 
+
+# ---------------------------------------------------------------------------
+# Default location
+# ---------------------------------------------------------------------------
+
+_DEFAULT_LOCATION: Path = Path("tests/fixtures/demo/data")
 
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
 
-def prepare_demo_artifacts(location: Path = Path(__file__).parent) -> None:
-    """Generate and persist all demo artifacts at *location*.
+def prepare_demo_artifacts(location: Path = _DEFAULT_LOCATION) -> None:
+    """Generate and persist all demo artifacts under *location*.
 
-    Creates specs/, configs/, and testsets/ subdirectories with all
-    files needed for a demo deployment or e2e test.
+    Layout under *location*::
+
+        internal/domain_configs/    — DomainConfigDTO JSONs (DtoStorageFile)
+        internal/testsets/{domain}/ — TestSetDTO JSONs (DtoStorageFile)
+        user/{domain}/              — spec files (xlsx/sql/json)
     """
-    specs_prefix = f"local://{location / 'specs'}/"
+    user_dir = location / "user"
+    internal_dir = location / "internal"
+    specs_prefix = f"local://{user_dir}/"
     reports_prefix = f"local://{location / 'testreports'}/"
-    _create_spec_files(location, specs_base=specs_prefix)
+
+    _create_spec_files(user_dir, specs_base=specs_prefix)
     _create_domain_configs(
-        location,
+        internal_dir / "domain_configs",
         specs_base=specs_prefix,
         reports_base=reports_prefix,
     )
-    _create_testsets(location)
+    _create_testsets(internal_dir / "testsets")
 
 
-def clean_up_demo_artifacts(location: Path = Path(__file__).parent) -> None:
-    """Delete the entire artifacts directory."""
+def clean_up_demo_artifacts(location: Path = _DEFAULT_LOCATION) -> None:
+    """Delete the artifact subfolders (internal/ and user/) under *location*."""
     fs = LocalFileSystem()
-    path = str(location)
-    if fs.exists(path):
-        fs.rm(path, recursive=True)
+    for sub in ("internal", "user"):
+        path = str(location / sub)
+        if fs.exists(path):
+            fs.rm(path, recursive=True)

@@ -1,9 +1,7 @@
 from __future__ import annotations
 import csv
-import threading
 from typing import Dict, List, Tuple, Optional
 from random import randint
-from time import sleep
 
 import duckdb
 import polars as pl
@@ -55,7 +53,6 @@ class DemoBackend(IBackend):
         domain_config: DomainConfigDTO,
         naming_resolver: DemoNamingResolver,
         query_handler: DemoQueryHandler,
-        fs: Optional[LocalFileSystem] = None,
     ):
         """
         Initialize backend.
@@ -70,6 +67,11 @@ class DemoBackend(IBackend):
             naming_resolver: resolver object which translates between business naming
                 conventions for testobjects and technical coordinates
             query_handler: translates user-provided SQL queries to required stage/instance
+
+        Each instance owns a fresh DuckDB connection with all .db files attached
+        READ_ONLY. The connection is private to this backend instance — no
+        sharing across threads, no cursors of a parent connection — so concurrent
+        testcases cannot deadlock on DuckDB's writer lock.
         """
 
         self.files_path: str = files_path
@@ -77,40 +79,37 @@ class DemoBackend(IBackend):
         self.config: DomainConfigDTO = domain_config
         self.naming_resolver: DemoNamingResolver = naming_resolver
         self.query_handler: DemoQueryHandler = query_handler
-        self.fs: LocalFileSystem = fs or LocalFileSystem()
-        self._con: Optional[duckdb.DuckDBPyConnection] = None
-        self._con_lock = threading.Lock()
+        self.fs: LocalFileSystem = LocalFileSystem()
+        self.con: duckdb.DuckDBPyConnection = duckdb.connect()
+        attach_sql = self._build_attach_statement()
+        if attach_sql:
+            self.con.execute(attach_sql)
 
-    @property
-    def con(self) -> duckdb.DuckDBPyConnection:
-        """Returns a thread-safe cursor to the shared DuckDB connection.
-        The underlying connection is lazily initialized and shared; each call
-        returns a new cursor so that concurrent threads do not interfere."""
-        with self._con_lock:
-            if self._con is None:
-                self._con = duckdb.connect()
-                for attempt in range(5):
-                    try:
-                        self._con.execute(self.attach_data_statement)
-                        break
-                    except duckdb.BinderException:
-                        if attempt < 4:
-                            sleep(0.1 * (attempt + 1))
-                        else:
-                            raise
-        return self._con.cursor()
-
-    @property
-    def attach_data_statement(self) -> str:
-        """Initialize duckdb databases from .db files in specified location"""
+    def _build_attach_statement(self) -> str:
+        """Build the SQL to ATTACH all .db files in db_path as READ_ONLY."""
         statement = ""
         db_files: List[str] = [
-            f for f in self.fs.ls(path=self.db_path) if f.endswith(".db")
+            f for f in self.fs.ls(path=self.db_path, detail=False) if f.endswith(".db")
         ]
         for db_file in db_files:
             db_name: str = db_file.split(sep="/")[-1].removesuffix(".db")
             statement += f"ATTACH IF NOT EXISTS '{db_file}' AS {db_name} (READ_ONLY);\n"
         return statement
+
+    def close(self) -> None:
+        """Close the underlying DuckDB connection.
+
+        Long-running applications and tests that create many backends should
+        call this when done so the file handles and DuckDB session state are
+        released promptly instead of waiting for garbage collection. Safe to
+        call more than once and safe to call on a partially-initialised
+        instance — any error is swallowed.
+        """
+        try:
+            self.con.close()
+        except Exception:
+            pass
+
 
     def list_testobjects(self, db: DBInstanceDTO) -> List[TestObjectDTO]:
         """
@@ -122,7 +121,9 @@ class DemoBackend(IBackend):
         # FIRST: get file-like testobjects
         abs_path = "/".join([self.files_path, domain, stage, instance, ""])
         file_testobjects: List[TestObjectDTO] = []
-        subdirs: List[str] = [p for p in self.fs.ls(path=abs_path) if self.fs.isdir(p)]
+        subdirs: List[str] = [
+            p for p in self.fs.ls(path=abs_path, detail=False) if self.fs.isdir(p)
+        ]
         for dir in subdirs:
             name: str = self.naming_resolver.get_testobject_name(path=dir)
             file_testobjects.append(
@@ -452,13 +453,16 @@ class DemoBackend(IBackend):
         return column_selection
 
     def _setup_test_db_statement(self, key_sample: List[str]) -> str:
-        """SQL statement to re-create a database, populate a table with key values"""
+        """SQL statement to (re)create a connection-local temp table of keys.
+
+        Uses CREATE OR REPLACE TEMP TABLE so the table lives in DuckDB's
+        per-connection ``temp`` schema and cannot collide with anything in
+        another DemoBackend instance.
+        """
         key_values: str = ", ".join([f"('{key_value}')" for key_value in key_sample])
         statement = f"""
-            DROP SCHEMA IF EXISTS __test__ CASCADE;
-            CREATE SCHEMA __test__;
-            CREATE TABLE __test__.__concat_keys__ (__concat_key__ STRING);
-            INSERT INTO __test__.__concat_keys__ VALUES {key_values}
+            CREATE OR REPLACE TEMP TABLE __concat_keys__ (__concat_key__ STRING);
+            INSERT INTO __concat_keys__ VALUES {key_values}
         """
         return statement
 
@@ -513,7 +517,7 @@ class DemoBackend(IBackend):
                 SELECT {column_selection}, {concat_key} AS __concat_key__
                 FROM __expected__
             ) AS __obj__
-            INNER JOIN __test__.__concat_keys__ AS __keys__
+            INNER JOIN __concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
         self.con.execute(self._setup_test_db_statement(key_sample=key_sample))
@@ -549,7 +553,7 @@ class DemoBackend(IBackend):
                 SELECT {column_selection}, {concat_key} AS __concat_key__
                 FROM {coords.catalog}.{coords.schema}.{coords.table}
             ) AS __obj__
-            INNER JOIN __test__.__concat_keys__ AS __keys__
+            INNER JOIN __concat_keys__ AS __keys__
                 ON __obj__.__concat_key__ = __keys__.__concat_key__
         """
         self.con.execute(self._setup_test_db_statement(key_sample=key_sample))

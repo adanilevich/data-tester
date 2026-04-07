@@ -15,6 +15,7 @@ Claude must follow these rules when implementing code changes
 - All code must pass typechecks.
 - Type hints are used in all signatures
 - Always format code with ruff
+- Imports are ALWAYS at the top of the module: Standard python library, then 3rd party, then own modules
 
 ## Architecture
 The project uses hexagonal architecture with clear separation between domain logic, application services and adapters
@@ -37,7 +38,6 @@ The project uses hexagonal architecture with clear separation between domain log
 - `uv run pytest -m infrastructure`: Run infrastructure-dependent tests only
 - `uv run pytest tests/unit/`: Run unit tests only
 - `uv run pytest tests/integration/`: Run integration tests only
-- `./run_checks.sh`: Run all checks: linting, formatting, typechecks, tests
 
 ## MANDATORY: Planning Workflow (do this first before anything else)
 1. When planning, invoke the `planning-with-files:plan` skill using the Skill tool — do NOT use the built-in plan mode as a substitute

@@ -429,6 +429,7 @@ dev = [
     { name = "pygount" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "pytest-timeouts" },
     { name = "ruff" },
     { name = "ty" },
 ]
@@ -459,6 +460,7 @@ dev = [
     { name = "pygount" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
+    { name = "pytest-timeouts" },
     { name = "ruff" },
     { name = "ty", specifier = ">=0.0.26" },
 ]
@@ -1462,6 +1464,15 @@ sdist = { url = "https://files.pythonhosted.org/packages/90/2c/8af215c0f776415f3
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e5/35/f8b19922b6a25bc0880171a2f1a003eaeb93657475193ab516fd87cac9da/pytest_asyncio-1.3.0-py3-none-any.whl", hash = "sha256:611e26147c7f77640e6d0a92a38ed17c3e9848063698d5c93d5aa7aa11cebff5", size = 15075, upload-time = "2025-11-10T16:07:45.537Z" },
 ]
+
+[[package]]
+name = "pytest-timeouts"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cf/47/9a8d7fa18736d69d218e303345dfe21755e956fd863b0f043ef854ff84a6/pytest-timeouts-1.2.1.tar.gz", hash = "sha256:390351afc7ecb422ea0ec38081e0acd91cad416b383944a9a3358087de50c2fb", size = 5002, upload-time = "2019-09-21T06:03:25.167Z" }
 
 [[package]]
 name = "python-dotenv"

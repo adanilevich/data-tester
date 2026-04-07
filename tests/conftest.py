@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from pathlib import Path
+from typing import Dict, List, NamedTuple
 from uuid import uuid4
 from datetime import datetime
 
 import pytest
+from fsspec.implementations.memory import MemoryFileSystem
 
 from src.dtos.notification_dtos import Importance
 from src.dtos.specification_dtos import SpecDTO, SpecType
@@ -38,32 +42,79 @@ from src.domain.testrun.testcases import (
     DummyExceptionTestCase,
 )
 from src.domain.testrun.precondition_checks import Checkable
+from tests.fixtures.demo.prepare_demo_artifacts import (
+    prepare_demo_artifacts,
+    clean_up_demo_artifacts,
+)
+from tests.fixtures.demo.prepare_demo_data import (
+    prepare_demo_data,
+    clean_up_demo_data,
+)
 
 
-# TODO: DELETE THIS
 @pytest.fixture(autouse=True)
 def _clear_memory_filesystem():
     """Clear MemoryFileSystem shared state before and after each test."""
-    from fsspec.implementations.memory import MemoryFileSystem
-
     MemoryFileSystem.store.clear()
     yield
     MemoryFileSystem.store.clear()
 
 
-# TODO: DELETE THIS
+class DemoData(NamedTuple):
+    """Session-scoped demo DWH + artifacts paths."""
+
+    location: Path
+    raw_path: str
+    db_path: str
+    internal_location: str
+
+
+_DEMO_DIR = Path(__file__).parent / "fixtures" / "demo" / "data"
+
+
+@pytest.fixture(scope="session")
+def demo_data():  # noqa: ANN201
+    """Create demo DWH and artifacts once for the entire test session.
+
+    Layout under ``tests/fixtures/demo/data/``::
+
+        raw/        — raw CSV files
+        dbs/        — DuckDB .db files (staging/core/mart)
+        internal/   — domain_configs/ + testsets/ (DtoStorageFile-compatible)
+        user/       — spec files (LocalUserStorage-compatible)
+
+    No shared DuckDB connection is created — each ``DemoBackend`` instance
+    opens its own connection on the .db files.
+    """
+
+    # Clean up any stale state from a previous interrupted run, then build.
+    clean_up_demo_artifacts(_DEMO_DIR)
+    clean_up_demo_data(_DEMO_DIR)
+
+    prepare_demo_data(_DEMO_DIR)
+    prepare_demo_artifacts(_DEMO_DIR)
+
+    yield DemoData(
+        location=_DEMO_DIR,
+        raw_path=str(_DEMO_DIR / "raw"),
+        db_path=str(_DEMO_DIR / "dbs"),
+        internal_location=f"local://{_DEMO_DIR / 'internal'}/",
+    )
+
+    clean_up_demo_artifacts(_DEMO_DIR)
+    clean_up_demo_data(_DEMO_DIR)
+
+
 @pytest.fixture
 def dummy_backend() -> IBackend:
     return DummyBackend()
 
 
-# TODO: DELETE THIS
 @pytest.fixture
 def in_memory_notifier() -> InMemoryNotifier:
     return InMemoryNotifier()
 
 
-# TODO: DELETE THIS
 @pytest.fixture
 def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(

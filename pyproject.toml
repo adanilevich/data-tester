@@ -26,6 +26,7 @@ gcs = ["gcsfs"]  # needed if data is stored in GCS
 dev = [
     "ruff",  # linter / syntax checker and formatter - replaces flake8
     "pytest",  # test framework
+    "pytest-timeouts", # to suppress timeouts during tests
     "pytest-asyncio",  # async test support
     "httpx",  # async HTTP client for FastAPI testing
     "coverage",  # test coverage reports
@@ -46,6 +47,9 @@ default-groups = ["dev"]  # uv will install dev dependency group by default
 [tool.pytest.ini_options]
 minversion = "8.1"
 testpaths = ["tests",]
+setup_timeout = 5
+execution_timeout = 5
+teardown_timeout = 5
 markers = [
     "skip_test: explicitely skip tests",
     "infrastructure: mark test as requiring infrastructure, e.g. a DataPlatform"

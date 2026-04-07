@@ -1,9 +1,5 @@
 from uuid import uuid4
-import pytest
-from tests.fixtures.demo.prepare_demo_data import (
-    prepare_demo_data,
-    clean_up_demo_data,
-)
+from tests.conftest import DemoData
 from src.domain.testrun.testcases import RowCountTestCase
 from src.dtos import (
     RowcountSpecDTO,
@@ -44,14 +40,7 @@ testobject = TestObjectDTO(
 )
 
 
-@pytest.fixture(scope="module")
-def prepare_demo_data_fixture():
-    prepare_demo_data()
-    yield
-    clean_up_demo_data()
-
-
-def test_straight_through_execution(domain_config, prepare_demo_data_fixture):
+def test_straight_through_execution(domain_config, demo_data: DemoData):
     definition = TestDefinitionDTO(
         testobject=testobject,
         testtype=TestType.ROWCOUNT,
@@ -59,11 +48,17 @@ def test_straight_through_execution(domain_config, prepare_demo_data_fixture):
         domain_config=domain_config,
         testrun_id=uuid4(),
     )
-    testcase = RowCountTestCase(
-        definition=definition,
-        backend=DemoBackendFactory().create(domain_config=domain_config),
-        notifiers=[InMemoryNotifier()],
-    )
-
-    testcase.execute()
-    assert testcase.result == testcase.result.OK
+    backend = DemoBackendFactory(
+        files_path=demo_data.raw_path,
+        db_path=demo_data.db_path,
+    ).create(domain_config=domain_config)
+    try:
+        testcase = RowCountTestCase(
+            definition=definition,
+            backend=backend,
+            notifiers=[InMemoryNotifier()],
+        )
+        testcase.execute()
+        assert testcase.result == testcase.result.OK
+    finally:
+        backend.close()
