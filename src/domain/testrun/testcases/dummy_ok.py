@@ -1,5 +1,5 @@
 from .abstract_testcase import AbstractTestCase
-from src.dtos import TestResult, TestType
+from src.dtos import Result, TestType
 
 
 class DummyOkTestCase(AbstractTestCase):
@@ -13,4 +13,4 @@ class DummyOkTestCase(AbstractTestCase):
         self.update_summary("This testcase always returns OK.")
         for detail in [{"detail_1_key": "detail 1", "detail_2_key": "detail 2"}]:
             self.add_detail(detail)
-        self.result = TestResult.OK
+        self.result = Result.OK

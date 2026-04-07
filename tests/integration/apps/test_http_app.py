@@ -155,16 +155,16 @@ class TestFullFlowPayments:
         tr_dto = TestRunDTO.from_json(tr_get_resp.content)
         assert tr_dto.status.value == "FINISHED"
         assert tr_dto.result.value == "NOK"
-        assert len(tr_dto.testcase_results) == 7
+        assert len(tr_dto.results) == 7
 
         _assert_testcase_results(
             [
                 (tc.testobject.name, tc.testtype.value, tc.result.value)
-                for tc in tr_dto.testcase_results
+                for tc in tr_dto.results
             ],
             self.EXPECTED_RESULTS,
         )
-        for tc in tr_dto.testcase_results:
+        for tc in tr_dto.results:
             assert tc.status.value == "FINISHED"
 
         today = datetime.now().strftime("%Y-%m-%d")

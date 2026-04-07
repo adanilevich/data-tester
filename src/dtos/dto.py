@@ -3,11 +3,7 @@ from pydantic import BaseModel
 
 
 class DTO(BaseModel):
-    @property
-    def id(self) -> str:
-        """Object ID for storage purposes. Should be overridden by subclasses."""
-        raise NotImplementedError("Subclasses must implement object_id property")
-
+    pass
     @classmethod
     def from_dict(cls, dict_: dict) -> Self:
         return cls(**dict_)

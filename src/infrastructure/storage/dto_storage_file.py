@@ -201,7 +201,8 @@ class DtoStorageFile(IDtoStorage):
     def write_dto(self, dto: DTO) -> None:
         object_type = _infer_object_type(dto)
         subfolder = self._get_subfolder(dto, object_type)
-        key = f"{object_type.value.lower()}_{dto.id}.{self.serializer.file_suffix}"
+        obj_id = dto.id  # type: ignore
+        key = f"{object_type.value.lower()}_{obj_id}.{self.serializer.file_suffix}"
         full_path = self.storage_location.path + subfolder + key
 
         serialized = self.serializer.serialize(dto)

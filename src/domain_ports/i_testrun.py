@@ -1,11 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 
+from pydantic import UUID4
+
 from src.dtos import DTO, TestRunDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 
 
 class ExecuteTestRunCommand(DTO):
-    testrun: TestRunDTO
+    testrun_def: TestRunDefDTO
+    testrun_id: UUID4 | None = None  # pre-assigned by caller (e.g. HTTP router)
 
 
 class SaveTestRunCommand(DTO):

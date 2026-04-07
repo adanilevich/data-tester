@@ -21,8 +21,8 @@ from src.apps.cli_app import CliApp
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
 from src.dtos import (
-    TestResult,
-    TestStatus,
+    Result,
+    Status,
     TestType,
 )
 
@@ -52,23 +52,23 @@ class TestCliAppE2E:
         # 2. Sales testrun: 6 testcases, overall NOK
         #    NOK because core_customer_transactions COMPARE fails (africa)
         sales_tr = sales_trs[0]
-        assert len(sales_tr.testcase_results) == 6
-        assert sales_tr.result == TestResult.NOK
-        assert sales_tr.status == TestStatus.FINISHED
+        assert len(sales_tr.results) == 6
+        assert sales_tr.result == Result.NOK
+        assert sales_tr.status == Status.FINISHED
 
-        sr = {(tc.testobject.name, tc.testtype): tc for tc in sales_tr.testcase_results}
-        assert sr[("stage_customers", TestType.SCHEMA)].result == TestResult.OK
-        assert sr[("stage_transactions", TestType.SCHEMA)].result == TestResult.OK
+        sr = {(tc.testobject.name, tc.testtype): tc for tc in sales_tr.results}
+        assert sr[("stage_customers", TestType.SCHEMA)].result == Result.OK
+        assert sr[("stage_transactions", TestType.SCHEMA)].result == Result.OK
         assert (
-            sr[("core_customer_transactions", TestType.ROWCOUNT)].result == TestResult.OK
+            sr[("core_customer_transactions", TestType.ROWCOUNT)].result == Result.OK
         )
         assert (
-            sr[("core_customer_transactions", TestType.COMPARE)].result == TestResult.NOK
+            sr[("core_customer_transactions", TestType.COMPARE)].result == Result.NOK
         )
-        assert sr[("stage_customers", TestType.STAGECOUNT)].result == TestResult.OK
-        assert sr[("stage_transactions", TestType.STAGECOUNT)].result == TestResult.OK
-        for tc in sales_tr.testcase_results:
-            assert tc.status == TestStatus.FINISHED
+        assert sr[("stage_customers", TestType.STAGECOUNT)].result == Result.OK
+        assert sr[("stage_transactions", TestType.STAGECOUNT)].result == Result.OK
+        for tc in sales_tr.results:
+            assert tc.status == Status.FINISHED
 
         # 3. Reports persisted with correct results
         report_driver = verify_di.report_driver()
@@ -82,9 +82,9 @@ class TestCliAppE2E:
         for report in sales_tc_reports:
             assert report.domain == "sales"
             assert report.result in (
-                TestResult.OK.value,
-                TestResult.NOK.value,
+                Result.OK.value,
+                Result.NOK.value,
             )
 
-        nok = TestResult.NOK.value
+        nok = Result.NOK.value
         assert len([r for r in sales_tc_reports if r.result == nok]) == 1

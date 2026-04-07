@@ -1,5 +1,5 @@
 from src.config import Config
-from src.dtos import TestRunDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 from src.apps.cli_di import CliDependencyInjector
 
 
@@ -31,12 +31,12 @@ class CliApp:
 
         # execute testrun
         testrun_driver = self.di.testrun_driver()
-        testrun = TestRunDTO.from_testset(
+        testrun_def = TestRunDefDTO.from_testset(
             testset=testset,
             spec_list=specs,
             domain_config=domain_config,
         )
-        testrun = testrun_driver.execute_testrun(testrun)
+        testrun = testrun_driver.execute_testrun(testrun_def)
 
         # generate and save all reports
         report_driver = self.di.report_driver()

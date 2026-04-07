@@ -1,7 +1,7 @@
 from typing import List, Tuple, Any
 
 from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import RowcountSpecDTO, DBInstanceDTO, TestType, TestResult, TestStatus
+from src.dtos import RowcountSpecDTO, DBInstanceDTO, TestType, Result, Status
 
 
 class RowCountTestCaseError(TestCaseError):
@@ -97,8 +97,8 @@ class RowCountTestCase(AbstractTestCase):
 
     def _validate_counts(self, counts_as_tuples: List[Tuple[str, Any]]) -> bool:
         if len(counts_as_tuples) != 2:
-            self.result = TestResult.NA  # type: ignore[assignment]
-            self.status = TestStatus.ABORTED  # type: ignore[assignment]
+            self.result = Result.NA  # type: ignore[assignment]
+            self.status = Status.ABORTED  # type: ignore[assignment]
             summary = "Rowcount validation failed: Counts defined in SQL must be unique."
             self.summary = summary
             return False
@@ -107,10 +107,10 @@ class RowCountTestCase(AbstractTestCase):
 
     def _evaluate_results(self, expected_count: int, actual_count: int):
         if expected_count == actual_count:
-            self.result = TestResult.OK  # type: ignore[assignment]
+            self.result = Result.OK  # type: ignore[assignment]
             self.summary = f"Actual rowcount ({actual_count}) matches expected rowcount."
         else:
-            self.result = TestResult.NOK  # type: ignore[assignment]
+            self.result = Result.NOK  # type: ignore[assignment]
             summary = (
                 f"Actual rowcount ({actual_count}) deviates from "
                 f"expected rowcount ({expected_count})!"

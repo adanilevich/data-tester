@@ -13,7 +13,7 @@ from src.dtos import (
     CompareSpecDTO,
     SchemaSpecDTO,
     DBInstanceDTO,
-    TestResult,
+    Result,
     TestType,
 )
 
@@ -92,10 +92,10 @@ class CompareTestCase(AbstractTestCase):
         diff = self._compare(expected, actual)
 
         if diff.shape[0] == 0:
-            self.result = TestResult.OK
+            self.result = Result.OK
             self.summary = "Sample from testobject equals sample from test sql."
         else:
-            self.result = TestResult.NOK
+            self.result = Result.NOK
             self.summary = f"Testobject differs from SQL in {diff.shape[0]} row(s)."
             # trimm diff to ca. 500 examples to not blow up Excel memory
             diff_example = diff.head(500).to_dict(as_series=False)

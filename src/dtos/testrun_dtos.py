@@ -1,10 +1,11 @@
 from __future__ import annotations
+
 from enum import Enum
-from typing import Union, List, Dict, Self, TYPE_CHECKING
+from typing import Dict, List, Self, Union, TYPE_CHECKING
 from uuid import uuid4
 from datetime import datetime
 
-from pydantic import Field, UUID4
+from pydantic import Field, UUID4, model_validator
 
 from src.dtos.dto import DTO
 from src.dtos.domain_config_dtos import DomainConfigDTO
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 class TestObjectDTO(DTO):
-    """Unambigiusly identifies the testobject (e.g. table) to be tested"""
+    """Unambiguously identifies the testobject (e.g. table) to be tested"""
 
     __test__ = False  # prevents pytest collection
     name: str
@@ -38,7 +39,7 @@ class DBInstanceDTO(DTO):
         )
 
 
-class TestStatus(Enum):
+class Status(Enum):
     __test__ = False  # prevents pytest collection
     NOT_STARTED = "NOT STARTED"
     INITIATED = "INITIATED"
@@ -49,20 +50,7 @@ class TestStatus(Enum):
     FINISHED = "FINISHED"
 
 
-class TestDefinitionDTO(DTO):
-    __test__ = False  # prevents pytest collection
-    testobject: TestObjectDTO
-    testtype: TestType
-    scenario: str | None = Field(default=None)
-    specs: List[AnySpec]
-    labels: List[str] = Field(default=[])
-    testset_id: UUID4 = Field(default_factory=uuid4)
-    testrun_id: UUID4 = Field(default_factory=uuid4)
-    domain_config: DomainConfigDTO
-
-
-class TestResult(Enum):
-    __test__ = False  # prevents pytest collection
+class Result(Enum):
     NA = "N/A"
     OK = "OK"
     NOK = "NOK"
@@ -81,64 +69,32 @@ class TestType(Enum):
     UNKNOWN = "UNKNOWN"
 
 
-class TestDTO(DTO):
-    __test__ = False  # prevents pytest collection
-    # reference fields
-    testrun_id: UUID4 = Field(default_factory=uuid4)
-    testset_id: UUID4 = Field(default_factory=uuid4)
-    report_id: UUID4 | None = None
-    # data object coordinates
-    domain: str
-    stage: str
-    instance: str
-    # dynamic data
-    result: TestResult
-    status: TestStatus
-    start_ts: datetime
-    end_ts: datetime | None = None
-    # user-defined data
-    testset_name: str = Field(default="Testset name not set")
-    labels: List[str] = Field(default=[])
-    domain_config: DomainConfigDTO
+class TestCaseDefDTO(DTO):
+    """Definition of a single testcase — input to test execution, no run-time fields."""
 
-
-class TestCaseDTO(TestDTO):
     __test__ = False  # prevents pytest collection
-    testcase_id: UUID4 = Field(default_factory=uuid4)
     testobject: TestObjectDTO
     testtype: TestType
     scenario: str | None = Field(default=None)
-    diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
-    summary: str
-    facts: List[Dict[str, str | int]]
-    details: List[Dict[str, Union[str, int, float]]]
     specs: List[AnySpec]
-
-    @property
-    def id(self) -> str:
-        return str(self.testcase_id)
-
-
-class TestRunSummaryDTO(DTO):
-    """Summary of testrun progress — updated after each testcase completes."""
-
-    __test__ = False
-    total_testcases: int = 0
-    completed_testcases: int = 0
-    ok_testcases: int = 0
-    nok_testcases: int = 0
-    na_testcases: int = 0
+    labels: List[str] = Field(default=[])
+    testset_id: UUID4 | None = None
+    testset_name: str | None = None
+    domain_config: DomainConfigDTO
 
 
-class TestRunDTO(TestDTO):
+class TestRunDefDTO(DTO):
+    """Definition of a testrun — input to test execution, no run-time fields."""
+
     __test__ = False  # prevents pytest collection
-    testdefinitions: List[TestDefinitionDTO]
-    testcase_results: List[TestCaseDTO] = Field(default=[])
-    summary: TestRunSummaryDTO = Field(default_factory=TestRunSummaryDTO)
-
-    @property
-    def id(self) -> str:
-        return str(self.testrun_id)
+    testcase_defs: List[TestCaseDefDTO]
+    domain: str
+    stage: str
+    instance: str
+    domain_config: DomainConfigDTO
+    labels: List[str] = Field(default=[])
+    testset_id: UUID4 | None = None
+    testset_name: str | None = None
 
     @classmethod
     def from_testset(
@@ -147,11 +103,7 @@ class TestRunDTO(TestDTO):
         spec_list: List[List[AnySpec]],
         domain_config: DomainConfigDTO,
     ) -> Self:
-        """
-        Creates a TestRunDTO from a TestSetDTO, a list of specifications and a
-        domain config.
-        """
-
+        """Creates a TestRunDefDTO from a TestSetDTO, spec list and domain config."""
         if len(spec_list) != len(testset.testcases):
             raise ValueError("spec_list must be same length as testset.testcases")
 
@@ -164,9 +116,7 @@ class TestRunDTO(TestDTO):
         if testset.instance is None:
             raise ValueError("testset.instance must be set")
 
-        testrun_id = uuid4()
-        testdefinitions = []
-
+        testcase_defs = []
         testcase_entries = list(testset.testcases.values())
         for testcase_entry, specs in zip(testcase_entries, spec_list, strict=True):
             testobject = TestObjectDTO(
@@ -175,105 +125,90 @@ class TestRunDTO(TestDTO):
                 stage=testset.stage,
                 instance=testset.instance,
             )
-
-            definition = TestDefinitionDTO(
+            testcase_def = TestCaseDefDTO(
                 testobject=testobject,
                 testtype=testcase_entry.testtype,
                 scenario=testcase_entry.scenario,
                 specs=specs,
                 labels=testset.labels,
                 testset_id=testset.testset_id,
-                testrun_id=testrun_id,
+                testset_name=testset.name,
                 domain_config=domain_config,
             )
-            testdefinitions.append(definition)
+            testcase_defs.append(testcase_def)
 
         return cls(
-            testrun_id=testrun_id,
-            testset_id=testset.testset_id,
-            testset_name=testset.name,
-            labels=testset.labels,
+            testcase_defs=testcase_defs,
             domain=testset.domain,
             stage=testset.stage,
             instance=testset.instance,
-            start_ts=datetime.now(),
-            end_ts=None,
-            result=TestResult.NA,
-            status=TestStatus.NOT_STARTED,
-            testdefinitions=testdefinitions,
-            testcase_results=[],
             domain_config=domain_config,
-            summary=TestRunSummaryDTO(total_testcases=len(testdefinitions)),
+            labels=testset.labels,
+            testset_id=testset.testset_id,
+            testset_name=testset.name,
         )
 
-    @classmethod
-    def from_testcases(cls, testcases: List[TestCaseDTO]) -> Self:
-        result = TestResult.OK
-        if all([tc.result == TestResult.OK for tc in testcases]):
-            result = TestResult.OK
-        elif any([tc.result == TestResult.NOK for tc in testcases]):
-            result = TestResult.NOK
-        else:
-            result = TestResult.NA
 
-        testrun_id = cls._get_testrun_id([testcase.testrun_id for testcase in testcases])
-        testdefinitions = cls._get_testdefinitions(testcases)
+class TestDTO(DTO):
+    __test__ = False  # prevents pytest collection
+    # reference fields
+    testset_id: UUID4 = Field(default_factory=uuid4)
+    report_id: UUID4 | None = None
+    # data object coordinates
+    domain: str
+    stage: str
+    instance: str
+    # dynamic data
+    result: Result
+    status: Status
+    start_ts: datetime
+    end_ts: datetime | None = None
+    # user-defined data
+    testset_name: str = Field(default="Testset name not set")
+    labels: List[str] = Field(default=[])
+    domain_config: DomainConfigDTO
 
-        if all([tc.end_ts is None for tc in testcases]):
-            end_ts = datetime.now()
-        else:
-            end_ts = max([tc.end_ts for tc in testcases if tc.end_ts is not None])
 
-        summary = TestRunSummaryDTO(
-            total_testcases=len(testcases),
-            completed_testcases=len(testcases),
-            ok_testcases=sum(1 for tc in testcases if tc.result == TestResult.OK),
-            nok_testcases=sum(1 for tc in testcases if tc.result == TestResult.NOK),
-            na_testcases=sum(1 for tc in testcases if tc.result == TestResult.NA),
+class TestRunSummaryDTO(DTO):
+    """Summary of testrun progress."""
+
+    __test__ = False
+    total_testcases: int = 0
+    completed_testcases: int = 0
+    ok_testcases: int = 0
+    nok_testcases: int = 0
+    na_testcases: int = 0
+
+
+class TestCaseDTO(TestDTO):
+    __test__ = False  # prevents pytest collection
+    id: UUID4 = Field(default_factory=uuid4)
+    testrun_id: UUID4 = Field(default_factory=uuid4)
+    testobject: TestObjectDTO
+    testtype: TestType
+    scenario: str | None = Field(default=None)
+    diff: Dict[str, Union[List, Dict]]  # diff as a table in record-oriented dict
+    summary: str
+    facts: List[Dict[str, str | int]]
+    details: List[Dict[str, Union[str, int, float]]]
+    specs: List[AnySpec]
+
+
+class TestRunDTO(TestDTO):
+    __test__ = False  # prevents pytest collection
+    id: UUID4 = Field(default_factory=uuid4)
+    testdefinitions: List[TestCaseDefDTO] = Field(default=[])
+    results: List[TestCaseDTO] = Field(default=[])
+    summary: TestRunSummaryDTO = Field(default_factory=TestRunSummaryDTO)
+
+    @model_validator(mode="after")
+    def _compute_summary(self) -> Self:
+        total = len(self.testdefinitions) if self.testdefinitions else len(self.results)
+        self.summary = TestRunSummaryDTO(
+            total_testcases=total,
+            completed_testcases=len(self.results),
+            ok_testcases=sum(1 for tc in self.results if tc.result == Result.OK),
+            nok_testcases=sum(1 for tc in self.results if tc.result == Result.NOK),
+            na_testcases=sum(1 for tc in self.results if tc.result == Result.NA),
         )
-
-        return cls(
-            testrun_id=testrun_id,
-            start_ts=min([tc.start_ts for tc in testcases]),
-            end_ts=end_ts,
-            result=result,
-            testset_id=testcases[0].testset_id,
-            labels=testcases[0].labels,
-            testcase_results=testcases,
-            testset_name="undefined testset",
-            stage=testcases[0].testobject.stage,
-            instance=testcases[0].testobject.instance,
-            domain=testcases[0].domain_config.domain,
-            domain_config=testcases[0].domain_config,
-            status=TestStatus.FINISHED,
-            testdefinitions=testdefinitions,
-            summary=summary,
-        )
-
-    @staticmethod
-    def _get_testrun_id(testrun_ids: List[UUID4]) -> UUID4:
-        number_of_different_testrun_ids = len(set(testrun_ids))
-        if number_of_different_testrun_ids == 0:
-            raise ValueError("At least one testcase must be provided!")
-        elif number_of_different_testrun_ids > 1:
-            raise ValueError("All testcases must belong to same testrun_id!")
-
-        return testrun_ids[0]
-
-    @staticmethod
-    def _get_testdefinitions(testcases: List[TestCaseDTO]) -> List[TestDefinitionDTO]:
-        definitions = []
-        for testcase in testcases:
-            definition = TestDefinitionDTO(
-                testobject=testcase.testobject,
-                testtype=testcase.testtype,
-                scenario=testcase.scenario,
-                specs=testcase.specs,
-                labels=testcase.labels,
-                testset_id=testcase.testset_id,
-                testrun_id=testcase.testrun_id,
-                domain_config=testcase.domain_config,
-            )
-            definitions.append(definition)
-
-        return definitions
+        return self

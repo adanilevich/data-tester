@@ -174,14 +174,14 @@ class Report:
         """Creates and saves all reports for a testrun and its testcases,
         then saves the testrun with updated report_ids."""
         self._notify(
-            f"Creating reports for testrun {testrun.testrun_id}",
+            f"Creating reports for testrun {testrun.id}",
             domain=testrun.domain,
         )
         testrun_report = self.create_testrun_report(testrun)
         self.save_report(testrun_report)
         self._notify("Testrun report created and saved", domain=testrun.domain)
 
-        for testcase in testrun.testcase_results:
+        for testcase in testrun.results:
             testcase_report = self.create_testcase_report(testcase)
             self.save_report(testcase_report)
             self._notify(
@@ -190,7 +190,7 @@ class Report:
             )
 
         self.dto_storage.write_dto(dto=testrun)
-        n = len(testrun.testcase_results)
+        n = len(testrun.results)
         self._notify(
             f"All reports created and saved ({n} testcase report(s))",
             domain=testrun.domain,
