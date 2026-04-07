@@ -43,12 +43,12 @@ class TxtTestCaseReportFormatter(IReportFormatter):
         if not isinstance(report, TestCaseReportDTO):
             raise ReportTypeNotSupportedError(f"Txt format not supported for {report}")
 
-        exclude = {"specifications", "diff"}
+        exclude = {"specs", "diff"}
         content_dict = report.to_dict(exclude=exclude, mode="json")
 
         # add spec filepaths (simplified from full SpecDTO)
-        content_dict["specifications"] = [
-            spec.display_name or spec.location.path for spec in report.specifications
+        content_dict["specs"] = [
+            spec.display_name or spec.location.path for spec in report.specs
         ]
 
         # for schema testcases, add simplified diff showing only differences

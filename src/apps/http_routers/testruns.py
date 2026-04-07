@@ -28,7 +28,7 @@ def execute_testrun(
 ) -> JSONResponse:
     testrun = TestRunDTO.from_testset(
         testset=body.testset,
-        spec_list=body.spec_list,
+        spec_list=body.specs,
         domain_config=body.domain_config,
     )
     testrun.status = TestStatus.INITIATED

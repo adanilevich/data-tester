@@ -7,12 +7,12 @@ from typing import Dict, List, Optional, Any
 import time
 
 from src.dtos import (
+    AnySpec,
     TestObjectDTO,
     TestStatus,
     TestResult,
     TestCaseDTO,
     DomainConfigDTO,
-    SpecDTO,
     TestType,
     TestDefinitionDTO,
     Importance,
@@ -56,6 +56,7 @@ class AbstractTestCase(Checkable):
     ttype: TestType = TestType.ABSTRACT
     preconditions: Optional[List[str]] = None
     required_specs: Optional[List[str]] = None
+    specs: List[AnySpec]  # always set in __init__; narrows Optional from Checkable
     __test__ = False  # prevents pytest collection
 
     def __init__(
@@ -73,7 +74,7 @@ class AbstractTestCase(Checkable):
         self.testset_id: UUID = definition.testset_id
         self.testobject: TestObjectDTO = definition.testobject
         self.scenario: str | None = definition.scenario
-        self.specs: List[SpecDTO] = definition.specs
+        self.specs = definition.specs
         self.domain_config: DomainConfigDTO = definition.domain_config
         self.labels: List[str] = definition.labels
         self.start_ts: datetime = datetime.now()
@@ -147,7 +148,7 @@ class AbstractTestCase(Checkable):
             details=self.details or [],
             result=self.result,
             diff=self.diff,  # must be set by specific implementation
-            specifications=self.specs or [],
+            specs=self.specs,
             start_ts=self.start_ts,
             end_ts=self.end_ts or datetime.now(),
             domain_config=self.domain_config,

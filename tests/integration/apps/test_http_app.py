@@ -5,11 +5,14 @@ Tests the full pipeline against the demo backend, using the session-scoped
 demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 """
 
+from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
+
 from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
 
+from src.dtos.specification_dtos import SpecDTO
 from tests.conftest import DemoData
 from src.apps.http_app import create_app
 from src.config import Config
@@ -25,7 +28,8 @@ from src.dtos import (
 
 
 @pytest.fixture(scope="module")
-def demo_client(demo_data: DemoData):
+def client(demo_data: DemoData):
+    """Test Client for demo data and backend"""
     config = Config(
         DATATESTER_DATA_PLATFORM="DEMO",
         DATATESTER_USER_STORAGE_ENGINE="LOCAL",
@@ -35,12 +39,12 @@ def demo_client(demo_data: DemoData):
     )
     app = create_app(config)
     with TestClient(app) as client:
+        client.timeout = None
         yield client
 
 
 def _assert_testcase_results(
-    results: list[tuple[str, str, str]],
-    expected: list[tuple[str, str, str]]
+    results: list[tuple[str, str, str]], expected: list[tuple[str, str, str]]
 ) -> None:
     """Assert actual results match expected (testobject, testtype, result).
 
@@ -73,27 +77,29 @@ class TestFullFlowPayments:
         ("stage_transactions", "STAGECOUNT", "NOK"),
     ]
 
-    def test_full_flow(self, demo_client: TestClient):
+    def test_full_flow(self, client: TestClient):
+        ### response.content is ALWAYS bytes (i.e. a json)
+        ### response.json is ALWAYS a dict
+        ### put ALWAYS expects a json-serialiable dict, i.e. dto.to_dict()
         # 1. Load domain config, modify, persist, reload and validate
-        dc_get_resp = demo_client.get("/domain-config/payments")
-        assert dc_get_resp.status_code == 200
-        dc_dto = DomainConfigDTO.from_json(dc_get_resp.content)
+        dc_get = client.get("/domain-config/payments")
+        assert dc_get.status_code == 200
+        dc_dto = DomainConfigDTO.from_json(dc_get.content)
+        # This returns the same!!!
+        # dc_dto = DomainConfigDTO.from_dict(dc_get_resp.json())
         assert dc_dto.domain == "payments"
-
         dc_dto.instances = {"test": ["alpha"]}
-        dc_put_resp = demo_client.put(
-            "/domain-config/payments", json=dc_dto.to_dict(mode="json")
-        )
-        assert dc_put_resp.status_code == 204
+        dc_put = client.put("/domain-config/payments", json=dc_dto.to_dict())
+        assert dc_put.status_code == 204
 
-        dc_get_resp = demo_client.get("/domain-config/payments")
-        dc_dto = DomainConfigDTO.from_json(dc_get_resp.content)
+        dc_get = client.get("/domain-config/payments")
+        dc_dto = DomainConfigDTO.from_json(dc_get.content)
         assert dc_dto.instances == {"test": ["alpha"]}
 
         # 2. Load testset, add duplicate testcase, persist, reload and validate
-        ts_get_resp = demo_client.get("/payments/testset")
-        assert ts_get_resp.status_code == 200
-        ts_list = [TestSetDTO.from_dict(t) for t in ts_get_resp.json()]
+        ts_get = client.get("/payments/testset")
+        assert ts_get.status_code == 200
+        ts_list = [TestSetDTO.from_dict(t) for t in ts_get.json()]
         ts_dto = next(t for t in ts_list if t.name == "payments_full")
         assert len(ts_dto.testcases) == 6
 
@@ -105,56 +111,46 @@ class TestFullFlowPayments:
         )
         assert len(ts_dto.testcases) == 7
 
-        ts_put_resp = demo_client.put(
-            f"/payments/testset/{ts_dto.testset_id}",
-            json=ts_dto.to_dict(mode="json"),
-        )
-        assert ts_put_resp.status_code == 204
+        ts_put = client.put(f"/payments/testset/{ts_dto.id}", json=ts_dto.to_dict())
+        assert ts_put.status_code == 204
 
-        ts_get_resp = demo_client.get(f"/payments/testset/{ts_dto.testset_id}")
-        ts_dto = TestSetDTO.from_json(ts_get_resp.content)
+        ts_get = client.get(f"/payments/testset/{ts_dto.testset_id}")
+        ts_dto = TestSetDTO.from_json(ts_get.content)
         assert len(ts_dto.testcases) == 7
         assert "stage_accounts_SCHEMA_dup" in ts_dto.testcases
 
         # 2b. List testobjects via platform endpoint
-        platform_resp = demo_client.get(
-            "/payments/platform/testobjects?stage=test&instance=alpha"
-        )
-        assert platform_resp.status_code == 200
-        testobjects = platform_resp.json()
+        pl_get = client.get("/payments/platform/testobjects?stage=test&instance=alpha")
+        assert pl_get.status_code == 200
+        testobjects = pl_get.json()
         testobject_names = [t["name"] for t in testobjects]
         for tc in ts_dto.testcases.values():
-            assert tc.testobject in testobject_names, (
-                f"Testobject {tc.testobject} not found in platform"
-            )
+            assert tc.testobject in testobject_names
 
-        # 3. Find specifications using DomainConfigDTO method
+        # 3. Find specifications
         locations = dc_dto.specifications_locations_by_instance(
             stage="test", instance="alpha"
         )
-        locations_json = [loc.model_dump() for loc in locations]
-        specs_resp = demo_client.post(
-            "/payments/specification/find",
-            json={"testset": ts_dto.to_dict(mode="json"), "locations": locations_json},
-        )
+        request = FindSpecsRequest(testset=ts_dto, locations=locations)
+        specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200
-        spec_list = specs_resp.json()
+        spec_list_as_dict = specs_resp.json()
+        spec_list = [
+            [SpecDTO.from_dict(spec) for spec in inner_list]
+            for inner_list in spec_list_as_dict
+        ]
         assert len(spec_list) == 7
 
         # 4. Execute testrun
-        run_resp = demo_client.post(
-            "/payments/testrun/",
-            json={
-                "testset": ts_dto.to_dict(mode="json"),
-                "domain_config": dc_dto.to_dict(mode="json"),
-                "spec_list": spec_list,
-            },
+        request = ExecuteTestRunRequest(
+            testset=ts_dto, domain_config=dc_dto, specs=spec_list
         )
+        run_resp = client.post("/payments/testrun/", json=request.to_dict())
         assert run_resp.status_code == 202
         testrun_id = run_resp.json()["testrun_id"]
 
         # 5. Load testrun, convert to DTO, verify every testcase result
-        tr_get_resp = demo_client.get(f"/payments/testrun/{testrun_id}")
+        tr_get_resp = client.get(f"/payments/testrun/{testrun_id}")
         assert tr_get_resp.status_code == 200
         tr_dto = TestRunDTO.from_json(tr_get_resp.content)
         assert tr_dto.status.value == "FINISHED"
@@ -174,7 +170,7 @@ class TestFullFlowPayments:
         today = datetime.now().strftime("%Y-%m-%d")
 
         # 6. Verify testrun reports — by date
-        tr_report_get_resp = demo_client.get(f"/payments/testrun-report/?date={today}")
+        tr_report_get_resp = client.get(f"/payments/testrun-report/?date={today}")
         assert tr_report_get_resp.status_code == 200
         tr_reports = [TestRunReportDTO.from_dict(r) for r in tr_report_get_resp.json()]
         tr_report = next(r for r in tr_reports if str(r.testrun_id) == testrun_id)
@@ -189,7 +185,7 @@ class TestFullFlowPayments:
         )
 
         # 7. Verify testcase reports — by testrun_id
-        tc_trid_get_resp = demo_client.get(
+        tc_trid_get_resp = client.get(
             f"/payments/testcase-report/?testrun_id={testrun_id}"
         )
         assert tc_trid_get_resp.status_code == 200
@@ -205,7 +201,7 @@ class TestFullFlowPayments:
         assert sum(1 for r in tc_reports_by_trid if r.result == "NOK") == 1
 
         # 8. Verify testcase reports — by date
-        tc_date_get_resp = demo_client.get(f"/payments/testcase-report/?date={today}")
+        tc_date_get_resp = client.get(f"/payments/testcase-report/?date={today}")
         assert tc_date_get_resp.status_code == 200
         tc_reports_by_date = [
             TestCaseReportDTO.from_dict(r)

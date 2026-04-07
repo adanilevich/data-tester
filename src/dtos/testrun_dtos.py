@@ -8,7 +8,7 @@ from pydantic import Field, UUID4
 
 from src.dtos.dto import DTO
 from src.dtos.domain_config_dtos import DomainConfigDTO
-from src.dtos.specification_dtos import SpecDTO
+from src.dtos.specification_dtos import AnySpec
 
 if TYPE_CHECKING:
     from src.dtos.testset_dtos import TestSetDTO
@@ -54,7 +54,7 @@ class TestDefinitionDTO(DTO):
     testobject: TestObjectDTO
     testtype: TestType
     scenario: str | None = Field(default=None)
-    specs: List[SpecDTO]
+    specs: List[AnySpec]
     labels: List[str] = Field(default=[])
     testset_id: UUID4 = Field(default_factory=uuid4)
     testrun_id: UUID4 = Field(default_factory=uuid4)
@@ -112,7 +112,11 @@ class TestCaseDTO(TestDTO):
     summary: str
     facts: List[Dict[str, str | int]]
     details: List[Dict[str, Union[str, int, float]]]
-    specifications: List[SpecDTO]
+    specs: List[AnySpec]
+
+    @property
+    def id(self) -> str:
+        return str(self.testcase_id)
 
 
 class TestRunSummaryDTO(DTO):
@@ -133,15 +137,14 @@ class TestRunDTO(TestDTO):
     summary: TestRunSummaryDTO = Field(default_factory=TestRunSummaryDTO)
 
     @property
-    def object_id(self) -> str:
-        """Object ID for storage purposes."""
+    def id(self) -> str:
         return str(self.testrun_id)
 
     @classmethod
     def from_testset(
         cls,
         testset: TestSetDTO,
-        spec_list: List[List[SpecDTO]],
+        spec_list: List[List[AnySpec]],
         domain_config: DomainConfigDTO,
     ) -> Self:
         """
@@ -265,7 +268,7 @@ class TestRunDTO(TestDTO):
                 testobject=testcase.testobject,
                 testtype=testcase.testtype,
                 scenario=testcase.scenario,
-                specs=testcase.specifications,
+                specs=testcase.specs,
                 labels=testcase.labels,
                 testset_id=testcase.testset_id,
                 testrun_id=testcase.testrun_id,

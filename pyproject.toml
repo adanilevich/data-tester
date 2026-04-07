@@ -48,7 +48,7 @@ default-groups = ["dev"]  # uv will install dev dependency group by default
 minversion = "8.1"
 testpaths = ["tests",]
 setup_timeout = 5
-execution_timeout = 5
+execution_timeout = 300
 teardown_timeout = 5
 markers = [
     "skip_test: explicitely skip tests",

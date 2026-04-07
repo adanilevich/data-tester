@@ -54,13 +54,13 @@ def testcase_creator(domain_config, testobject):  # noqa: ANN201
                 testobject=testobject,
                 testtype=ttype,
                 specs=[
-                    SpecDTO(
-                        spec_type=spec_type,
+                    SpecDTO.from_type(
+                        spec_type,
                         location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
                     ),
-                    SpecDTO(
-                        spec_type=spec_type,
+                    SpecDTO.from_type(
+                        spec_type,
                         location=LocationDTO("memory://my_location"),
                         testobject=testobject.name,
                     ),

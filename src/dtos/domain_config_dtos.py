@@ -28,7 +28,7 @@ class DomainConfigDTO(DTO):
     domain: str  # domain name
 
     @property
-    def object_id(self) -> str:
+    def id(self) -> str:
         """Object ID for storage purposes."""
         return self.domain
 

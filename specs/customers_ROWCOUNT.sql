@@ -1,1 +1,0 @@
-SELECT COUNT(*) as __EXPECTED_ROWCOUNT__ FROM customers WHERE active = 1

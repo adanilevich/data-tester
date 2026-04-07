@@ -127,7 +127,7 @@ def testcase_result(testobject, domain_config) -> TestCaseDTO:
         summary="My Summary",
         facts=[{"a": 5}, {"b": "2"}],
         details=[{"a": 5}, {"b": "2"}],
-        specifications=[],
+        specs=[],
         domain_config=domain_config,
         start_ts=datetime.now(),
         end_ts=datetime.now(),

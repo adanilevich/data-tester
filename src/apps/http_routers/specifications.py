@@ -7,6 +7,7 @@ from src.client_interface.requests import FindSpecsRequest
 
 router = APIRouter(tags=["specifications"])
 
+
 ## TODO: change response to list of list of specs
 @router.post("/{domain}/specification/find")
 def find_specifications(

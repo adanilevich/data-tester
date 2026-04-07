@@ -110,7 +110,6 @@ class DemoBackend(IBackend):
         except Exception:
             pass
 
-
     def list_testobjects(self, db: DBInstanceDTO) -> List[TestObjectDTO]:
         """
         Gets both file-like testobjects (e.g. file directories in raw layer)

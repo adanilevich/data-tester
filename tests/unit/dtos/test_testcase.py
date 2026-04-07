@@ -9,7 +9,12 @@ from src.dtos.testrun_dtos import (
     TestType,
 )
 from src.dtos.testset_dtos import TestSetDTO, TestCaseEntryDTO
-from src.dtos.specification_dtos import SpecDTO, SpecType
+from src.dtos.specification_dtos import (
+    AnySpec,
+    CompareSpecDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+)
 from src.dtos.domain_config_dtos import (
     DomainConfigDTO,
     TestCasesConfigDTO,
@@ -64,18 +69,16 @@ class TestTestRunDTO:
         )
 
         # And specifications for each test case
-        spec_list = [
+        spec_list: list[list[AnySpec]] = [
             [
-                SpecDTO(
+                SchemaSpecDTO(
                     location=LocationDTO(path="dummy://spec1"),
-                    spec_type=SpecType.SCHEMA,
                     testobject="table1",
                 )
             ],
             [
-                SpecDTO(
+                RowcountSpecDTO(
                     location=LocationDTO(path="dummy://spec2"),
-                    spec_type=SpecType.ROWCOUNT,
                     testobject="table2",
                 )
             ],
@@ -119,11 +122,10 @@ class TestTestRunDTO:
         )
 
         # And a spec_list with only 1 entry (mismatched length)
-        spec_list = [
+        spec_list: list[list[AnySpec]] = [
             [
-                SpecDTO(
+                SchemaSpecDTO(
                     location=LocationDTO(path="dummy://spec1"),
-                    spec_type=SpecType.SCHEMA,
                     testobject="table1",
                 )
             ]
@@ -150,11 +152,10 @@ class TestTestRunDTO:
             },
         )
 
-        spec_list = [
+        spec_list: list[list[AnySpec]] = [
             [
-                SpecDTO(
+                SchemaSpecDTO(
                     location=LocationDTO(path="dummy://spec1"),
-                    spec_type=SpecType.SCHEMA,
                     testobject="table1",
                 )
             ]
@@ -196,16 +197,14 @@ class TestTestRunDTO:
             },
         )
 
-        spec_list = [
+        spec_list: list[list[AnySpec]] = [
             [
-                SpecDTO(
+                CompareSpecDTO(
                     location=LocationDTO(path="dummy://spec1"),
-                    spec_type=SpecType.COMPARE,
                     testobject="table1",
                 ),
-                SpecDTO(
+                CompareSpecDTO(
                     location=LocationDTO(path="dummy://spec2"),
-                    spec_type=SpecType.COMPARE,
                     testobject="table1",
                 ),
             ]
@@ -247,4 +246,4 @@ class TestTestRunDTO:
         )
 
         # Then object_id should return string representation of testrun_id
-        assert testrun.object_id == str(testrun_id)
+        assert testrun.id == str(testrun_id)

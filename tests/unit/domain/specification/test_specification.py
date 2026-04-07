@@ -65,9 +65,7 @@ class TestSpecification:
         return storage
 
     @pytest.fixture
-    def naming_conventions_factory(
-        self,
-    ) -> NamingConventionsFactory:
+    def naming_conventions_factory(self) -> NamingConventionsFactory:
         """Create a NamingConventionsFactory instance"""
         return NamingConventionsFactory()
 
@@ -117,7 +115,7 @@ class TestSpecification:
 
     def test_find_specs_schema(self, specification: Specification):
         """Test find_specs for schema test type"""
-        location = LocationDTO("memory://specs/")
+        location = LocationDTO("memory:///specs/")
         testcase = TestCaseEntryDTO(
             testobject="table1", testtype=TestType.SCHEMA, domain="test_domain"
         )
@@ -125,17 +123,19 @@ class TestSpecification:
         specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 1
-        assert isinstance(specs[0], SchemaSpecDTO)
-        assert specs[0].testobject == "table1"
-        assert specs[0].spec_type == SpecType.SCHEMA
-        assert specs[0].columns is not None
-        assert "id" in specs[0].columns
-        assert "name" in specs[0].columns
-        assert "created_at" in specs[0].columns
+        spec = specs[0]
+        assert isinstance(spec, SchemaSpecDTO)
+        assert spec.testobject == "table1"
+        assert spec.spec_type == SpecType.SCHEMA
+        assert spec.columns is not None
+        assert spec.location == location.append("table1_schema.xlsx")
+        assert "id" in spec.columns
+        assert "name" in spec.columns
+        assert "created_at" in spec.columns
 
     def test_find_specs_rowcount(self, specification: Specification):
         """Test find_specs for rowcount test type"""
-        location = LocationDTO("memory://specs/")
+        location = LocationDTO("memory:///specs/")
         testcase = TestCaseEntryDTO(
             testobject="table1", testtype=TestType.ROWCOUNT, domain="test_domain"
         )
@@ -143,11 +143,13 @@ class TestSpecification:
         specs = specification.list_specs(location, testcase)
 
         assert len(specs) == 1
-        assert isinstance(specs[0], RowcountSpecDTO)
-        assert specs[0].testobject == "table1"
-        assert specs[0].spec_type == SpecType.ROWCOUNT
-        assert specs[0].query is not None
-        assert "__EXPECTED_ROWCOUNT__" in specs[0].query
+        spec = specs[0]
+        assert isinstance(spec, RowcountSpecDTO)
+        assert spec.testobject == "table1"
+        assert spec.spec_type == SpecType.ROWCOUNT
+        assert spec.location == location.append("table1_ROWCOUNT.sql")
+        assert spec.query is not None
+        assert "__EXPECTED_ROWCOUNT__" in spec.query
 
     def test_find_specs_compare(self, specification: Specification):
         """Test find_specs for compare sample test type"""

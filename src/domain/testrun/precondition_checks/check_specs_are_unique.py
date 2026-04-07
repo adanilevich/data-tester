@@ -1,7 +1,7 @@
-from src.dtos.specification_dtos import SpecDTO
 from typing import Dict, List
 
 from . import AbstractCheck, Checkable
+from src.dtos.specification_dtos import AnySpec
 
 
 class CheckSpecsAreUnique(AbstractCheck):
@@ -13,7 +13,7 @@ class CheckSpecsAreUnique(AbstractCheck):
     name = "specs_are_unique"
 
     def _check(self, checkable: Checkable) -> bool:
-        provided_specs: List[SpecDTO] = checkable.specs or []
+        provided_specs: List[AnySpec] = checkable.specs or []
         provided_spec_type_counts: Dict[str, int] = {}
         for spec in provided_specs:
             spec_type: str = spec.spec_type.value

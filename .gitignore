@@ -4,6 +4,7 @@ agent-artifacts/
 .env
 data/
 examples/
+scribble.py
 
 # macOS
 .DS_Store
