@@ -11,9 +11,11 @@
 | src/apps/http\_routers/domain\_config.py                                        |       16 |        1 |     94% |        13 |
 | src/apps/http\_routers/platform.py                                              |       10 |        0 |    100% |           |
 | src/apps/http\_routers/reports.py                                               |       18 |        2 |     89% |    26, 42 |
-| src/apps/http\_routers/specifications.py                                        |       11 |        0 |    100% |           |
-| src/apps/http\_routers/testruns.py                                              |       40 |        2 |     95% |    37, 48 |
+| src/apps/http\_routers/specifications.py                                        |        9 |        0 |    100% |           |
+| src/apps/http\_routers/testruns.py                                              |       24 |        1 |     96% |        18 |
 | src/apps/http\_routers/testsets.py                                              |       15 |        0 |    100% |           |
+| src/client\_interface/\_\_init\_\_.py                                           |        1 |        0 |    100% |           |
+| src/client\_interface/requests.py                                               |       19 |        1 |     95% |        42 |
 | src/config/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
 | src/config/config.py                                                            |       19 |        1 |     95% |         9 |
 | src/domain/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
@@ -82,7 +84,7 @@
 | src/dtos/dto.py                                                                 |       17 |        0 |    100% |           |
 | src/dtos/notification\_dtos.py                                                  |       22 |        0 |    100% |           |
 | src/dtos/report\_dtos.py                                                        |       65 |        0 |    100% |           |
-| src/dtos/specification\_dtos.py                                                 |       84 |        5 |     94% |40, 52, 96, 109, 122 |
+| src/dtos/specification\_dtos.py                                                 |       84 |        5 |     94% |40, 52, 96, 110, 123 |
 | src/dtos/storage\_dtos.py                                                       |       79 |        5 |     94% |47, 71, 86, 89, 102 |
 | src/dtos/testrun\_dtos.py                                                       |      146 |        8 |     95% |159, 162, 211-214, 220, 254, 256 |
 | src/dtos/testset\_dtos.py                                                       |       34 |        1 |     97% |        25 |
@@ -108,9 +110,9 @@
 | src/infrastructure\_ports/i\_notifier.py                                        |        3 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage.py                                   |        4 |        0 |    100% |           |
 | src/infrastructure\_ports/i\_user\_storage\_factory.py                          |        4 |        0 |    100% |           |
-| **TOTAL**                                                                       | **2939** |  **160** | **95%** |           |
+| **TOTAL**                                                                       | **2941** |  **160** | **95%** |           |
 
-4 empty files skipped.
+5 empty files skipped.
 
 
 ## Setup coverage badge
