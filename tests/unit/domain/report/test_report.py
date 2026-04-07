@@ -73,7 +73,7 @@ class TestReport:
         assert report_dto.summary == testcase_result.summary
         assert report_dto.facts == testcase_result.facts
         assert report_dto.details == testcase_result.details
-        assert report_dto.specifications == testcase_result.specifications
+        assert report_dto.specs == testcase_result.specs
         assert report_dto.result == testcase_result.result.value
         assert report_dto.start_ts == testcase_result.start_ts
         assert report_dto.end_ts == testcase_result.end_ts

@@ -5,9 +5,9 @@ from datetime import datetime
 
 from src.dtos import (
     TestObjectDTO,
-    SpecDTO,
+    SchemaSpecDTO,
+    RowcountSpecDTO,
     TestType,
-    SpecType,
     TestDefinitionDTO,
     TestRunDTO,
     TestStatus,
@@ -30,13 +30,11 @@ class TestTestRun:
     @pytest.fixture
     def specifications(self):
         return [
-            SpecDTO(
-                spec_type=SpecType.SCHEMA,
+            SchemaSpecDTO(
                 location=LocationDTO(path="dummy://loc"),
                 testobject="to",
             ),
-            SpecDTO(
-                spec_type=SpecType.ROWCOUNT,
+            RowcountSpecDTO(
                 location=LocationDTO(path="dummy://loc"),
                 testobject="to",
             ),

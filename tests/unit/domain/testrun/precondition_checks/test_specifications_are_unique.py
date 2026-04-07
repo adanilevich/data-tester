@@ -3,7 +3,14 @@ from typing import Dict
 import pytest
 
 from src.domain.testrun.precondition_checks import CheckSpecsAreUnique, Checkable
-from src.dtos import Importance, SpecDTO, SpecType, TestObjectDTO, LocationDTO
+from src.dtos import (
+    Importance,
+    LocationDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    SpecType,
+    TestObjectDTO,
+)
 from src.infrastructure.backend.dummy import DummyBackend
 
 
@@ -27,10 +34,9 @@ class DummyCheckable(Checkable):
 
 class TestCheckSpecsAreUnique:
     @pytest.fixture
-    def spec(self) -> SpecDTO:
-        return SpecDTO(
+    def spec(self) -> SchemaSpecDTO:
+        return SchemaSpecDTO(
             location=LocationDTO(path="dummy://my_location"),
-            spec_type=SpecType.SCHEMA,
             testobject="doesnt_matter",
         )
 
@@ -62,8 +68,10 @@ class TestCheckSpecsAreUnique:
             SpecType.SCHEMA.value,
             SpecType.ROWCOUNT.value,
         ]
-        new_spec = SpecDTO.from_dict(spec.to_dict())
-        new_spec.spec_type = SpecType.ROWCOUNT
+        new_spec = RowcountSpecDTO(
+            location=spec.location,
+            testobject=spec.testobject,
+        )
         checkable.specs = [spec, new_spec]
         checker = CheckSpecsAreUnique()
 

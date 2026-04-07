@@ -5,7 +5,6 @@ from src.dtos import (
     SpecDTO,
     LocationDTO,
     SpecType,
-    spec_class_by_type,
     Importance,
     NotificationDTO,
     NotificationProcess,
@@ -92,8 +91,9 @@ class Specification:
 
         for file, spec_types in candidates:
             for spec_type in spec_types:
-                spec_class = spec_class_by_type(spec_type)
-                spec = spec_class(location=loc, testobject=testcase.testobject)
+                spec = SpecDTO.from_type(
+                    spec_type=spec_type, location=file, testobject=testcase.testobject
+                )
                 parser = self.parser_factory.get_parser(testcase.domain, spec_type)
                 try:
                     file_bytes: bytes = self.user_storage.read_object(file)

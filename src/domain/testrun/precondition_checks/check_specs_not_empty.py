@@ -1,7 +1,7 @@
-from src.dtos.specification_dtos import SpecDTO
 from typing import List
 
 from . import AbstractCheck, Checkable
+from src.dtos.specification_dtos import AnySpec
 
 
 class CheckSpecsNotEmpty(AbstractCheck):
@@ -14,7 +14,7 @@ class CheckSpecsNotEmpty(AbstractCheck):
     name = "specs_not_empty"
 
     def _check(self, checkable: Checkable) -> bool:
-        provided_specs: List[SpecDTO] = checkable.specs or []
+        provided_specs: List[AnySpec] = checkable.specs or []
         result = True
 
         for required_spec_type in checkable.required_specs or []:

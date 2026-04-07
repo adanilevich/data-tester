@@ -453,7 +453,7 @@ def _create_testsets(testsets_dir: Path) -> None:
     for testset in _testsets():
         ts_dir = testsets_dir / testset.domain
         ts_dir.mkdir(parents=True, exist_ok=True)
-        path = ts_dir / f"testset_{testset.object_id}.json"
+        path = ts_dir / f"testset_{testset.id}.json"
         path.write_text(testset.to_json())
 
 

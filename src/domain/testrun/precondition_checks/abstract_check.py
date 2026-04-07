@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, List, Optional, Callable
 
 from src.infrastructure_ports import IBackend
-from src.dtos import TestObjectDTO, SpecDTO, Importance
+from src.dtos import AnySpec, TestObjectDTO, Importance
 
 
 # registry of all known checks -- populated via AbstractCheck.__init_cubclasses__
@@ -19,7 +19,7 @@ class Checkable(ABC):
     testobject: TestObjectDTO  # checking testobject existence required testobject spec
     backend: IBackend  # precondition checkers orchestrate backend methods
     required_specs: Optional[List[str]] = None
-    specs: Optional[List[SpecDTO]] = None
+    specs: Optional[List[AnySpec]] = None
     summary: str = ""
     details: Optional[List[Dict[str, str | int | float]]] = None
 

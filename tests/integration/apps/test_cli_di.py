@@ -33,9 +33,8 @@ from src.dtos import (
     CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
+    SchemaSpecDTO,
     SchemaTestCaseConfigDTO,
-    SpecType,
-    SpecDTO,
     TestCaseEntryDTO,
     TestCasesConfigDTO,
     TestDefinitionDTO,
@@ -320,8 +319,7 @@ class TestTestRunDriverIntegration:
             ),
             testtype=testtype,
             specs=[
-                SpecDTO(
-                    spec_type=SpecType.SCHEMA,
+                SchemaSpecDTO(
                     location=LocationDTO(path="memory://my_location"),
                     testobject=testobject_name,
                 ),

@@ -7,14 +7,13 @@ from .domain_config_dtos import (
     CompareTestCaseConfigDTO,
 )
 from .specification_dtos import (
+    AnySpec,
     SpecDTO,
     SpecType,
     SchemaSpecDTO,
     RowcountSpecDTO,
     CompareSpecDTO,
     StagecountSpecDTO,
-    SpecFactory,
-    spec_class_by_type,
 )
 from .testrun_dtos import (
     TestObjectDTO,
@@ -34,7 +33,7 @@ from .report_dtos import (
     TestCaseReportDTO,
     TestRunReportDTO,
 )
-from .storage_dtos import LocationDTO, StorageType, ObjectType, ObjectLocationDTO
+from .storage_dtos import LocationDTO, StorageType, ObjectType
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO
 from .testrun_dtos import TestRunDTO, TestRunSummaryDTO
 from .notification_dtos import NotificationDTO, Importance, NotificationProcess

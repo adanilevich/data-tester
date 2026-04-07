@@ -16,8 +16,7 @@ from src.dtos import (
     TestResult,
     LocationDTO,
     DomainConfigDTO,
-    SpecDTO,
-    SpecType,
+    SchemaSpecDTO,
     TestCasesConfigDTO,
     SchemaTestCaseConfigDTO,
     CompareTestCaseConfigDTO,
@@ -94,8 +93,7 @@ def test_definition(test_object, domain_config):
         testobject=test_object,
         testtype=TestType.DUMMY_OK,
         specs=[
-            SpecDTO(
-                spec_type=SpecType.SCHEMA,
+            SchemaSpecDTO(
                 location=LocationDTO(path="memory://specs/"),
                 testobject=test_object.name,
             )

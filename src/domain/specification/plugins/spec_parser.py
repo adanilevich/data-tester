@@ -29,11 +29,12 @@ class XlsxSchemaParser(ISpecParser):
         """
         Parse .xlsx file for database table schema definition.
         """
+        spec = empty_spec.copy()
         try:
             df = pl.read_excel(file, sheet_name="schema")
         # broad exception catch since polars not always raises specific errors
         except Exception as e:
-            spec = self.set_message(empty_spec, f"Error reading schema from .xlsx: {e}")
+            spec.message = f"Error reading schema from .xlsx: {e}"
             spec = cast(SchemaSpecDTO, spec)
             return spec
 
@@ -70,8 +71,8 @@ class XlsxSchemaParser(ISpecParser):
             clustering_columns = []
 
         return SchemaSpecDTO(
-            location=empty_spec.location,
-            testobject=empty_spec.testobject,
+            location=spec.location,
+            testobject=spec.testobject,
             columns=columns,
             primary_keys=primary_keys,
             partition_columns=partition_columns,
@@ -87,21 +88,22 @@ class RowcountSqlParser(ISpecParser):
     spec_type = SpecType.ROWCOUNT
 
     def parse(self, file: bytes, empty_spec: SpecDTO) -> RowcountSpecDTO:
+        spec = empty_spec.copy()
         try:
             content = file.decode("utf-8")
         except Exception as e:
-            spec = self.set_message(empty_spec, f"Error decoding file: {e}")
+            spec.message = f"Error decoding file: {e}"
             spec = cast(RowcountSpecDTO, spec)
             return spec
 
         if "__EXPECTED_ROWCOUNT__" in content:
             return RowcountSpecDTO(
-                location=empty_spec.location,
-                testobject=empty_spec.testobject,
+                location=spec.location,
+                testobject=spec.testobject,
                 query=content,
             )
         else:
-            spec = self.set_message(empty_spec, "Missing __EXPECTED_ROWCOUNT__")
+            spec.message = "Missing __EXPECTED_ROWCOUNT__"
             spec = cast(RowcountSpecDTO, spec)
             return spec
 
@@ -114,20 +116,21 @@ class CompareSqlParser(ISpecParser):
     spec_type = SpecType.COMPARE
 
     def parse(self, file: bytes, empty_spec: SpecDTO) -> CompareSpecDTO:
+        spec = empty_spec.copy()
         try:
             content = file.decode("utf-8")
-        except Exception as e:
-            spec = self.set_message(empty_spec, f"Error decoding file: {e}")
+        except Exception:
+            spec.message = "Error decoding file: {e}"
             return cast(CompareSpecDTO, spec)
 
         if "__EXPECTED__" in content:
             return CompareSpecDTO(
-                location=empty_spec.location,
-                testobject=empty_spec.testobject,
+                location=spec.location,
+                testobject=spec.testobject,
                 query=content,
             )
         else:
-            spec = self.set_message(empty_spec, "Missing __EXPECTED__")
+            spec.message = "Missing __EXPECTED__"
             return cast(CompareSpecDTO, spec)
 
 
@@ -137,18 +140,16 @@ class StagecountJsonParser(ISpecParser):
     spec_type = SpecType.STAGECOUNT
 
     def parse(self, file: bytes, empty_spec: SpecDTO) -> StagecountSpecDTO:
+        spec = empty_spec.copy()
         try:
             data = json.loads(file.decode("utf-8"))
         except Exception as e:
-            spec = self.set_message(
-                empty_spec,
-                f"Error reading stagecount JSON: {e}",
-            )
+            spec.message = f"Error reading stagecount JSON: {e}"
             return cast(StagecountSpecDTO, spec)
 
         return StagecountSpecDTO(
-            location=empty_spec.location,
-            testobject=empty_spec.testobject,
+            location=spec.location,
+            testobject=spec.testobject,
             raw_file_format=data.get("raw_file_format"),
             raw_file_encoding=data.get("raw_file_encoding"),
             skip_lines=data.get("skip_lines"),

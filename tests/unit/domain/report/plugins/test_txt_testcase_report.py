@@ -45,9 +45,9 @@ class TestTxtTestCaseReportFormatter:
         assert "details" in parsed_yaml
         assert "start_ts" in parsed_yaml
         assert "end_ts" in parsed_yaml
-        # then specifications should be present as simplified file paths
-        assert "specifications" in parsed_yaml
-        assert isinstance(parsed_yaml["specifications"], list)
+        # then specs should be present as simplified file paths
+        assert "specs" in parsed_yaml
+        assert isinstance(parsed_yaml["specs"], list)
         # then YAML should preserve original data
         assert parsed_yaml["testcase_id"] == str(testcase_report.testcase_id)
         assert parsed_yaml["testrun_id"] == str(testcase_report.testrun_id)
@@ -74,8 +74,8 @@ class TestTxtTestCaseReportFormatter:
         parsed_yaml = yaml.safe_load(result.decode("utf-8"))
         # then diff should not be present (goes to XLSX diff formatter)
         assert "diff" not in parsed_yaml
-        # but specifications should still be present
-        assert "specifications" in parsed_yaml
+        # but specs should still be present
+        assert "specs" in parsed_yaml
 
     def test_schema_diff_included_simplified(self, testcase_report: TestCaseReportDTO):
         # given a SCHEMA testcase report with diffs

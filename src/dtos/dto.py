@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class DTO(BaseModel):
     @property
-    def object_id(self) -> str:
+    def id(self) -> str:
         """Object ID for storage purposes. Should be overridden by subclasses."""
         raise NotImplementedError("Subclasses must implement object_id property")
 
@@ -15,7 +15,7 @@ class DTO(BaseModel):
     def to_dict(
         self,
         exclude: set | None = None,
-        mode: Literal["json", "python"] = "python",
+        mode: Literal["json", "python"] = "json",
     ) -> Dict[str, Any]:
         return self.model_dump(exclude=exclude, mode=mode)
 

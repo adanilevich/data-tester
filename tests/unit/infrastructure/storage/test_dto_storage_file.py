@@ -69,7 +69,7 @@ class TestMemoryDtoStorage:
         config = _make_domain_config("payments")
         storage.write_dto(config)
 
-        result = storage.read_dto(ObjectType.DOMAIN_CONFIG, config.object_id)
+        result = storage.read_dto(ObjectType.DOMAIN_CONFIG, config.id)
         result = cast(DomainConfigDTO, result)
         assert result.domain == "payments"
 
@@ -77,7 +77,7 @@ class TestMemoryDtoStorage:
         testset = _make_testset("payments", "my_testset")
         storage.write_dto(testset)
 
-        result = storage.read_dto(ObjectType.TESTSET, testset.object_id)
+        result = storage.read_dto(ObjectType.TESTSET, testset.id)
         result = cast(TestSetDTO, result)
         assert result.name == "my_testset"
         assert result.domain == "payments"
@@ -95,14 +95,14 @@ class TestMemoryDtoStorage:
         storage.write_dto(config)
 
         # Verify file exists at expected path
-        expected = f"data/domain_configs/domain_config_{config.object_id}.json"
+        expected = f"data/domain_configs/domain_config_{config.id}.json"
         assert storage.fs.exists(expected)
 
     def test_testset_stored_in_subfolder(self, storage: MemoryDtoStorage):
         testset = _make_testset("payments")
         storage.write_dto(testset)
 
-        expected = f"data/testsets/payments/testset_{testset.object_id}.json"
+        expected = f"data/testsets/payments/testset_{testset.id}.json"
         assert storage.fs.exists(expected)
 
     # --- list_dtos ---

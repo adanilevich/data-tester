@@ -82,6 +82,7 @@ class Report:
         """Creates a report from a testcase result."""
         report = TestCaseReportDTO.from_testcase_result(result)
         result.report_id = report.report_id
+        result.testset_name = result.testset_name
         return report
 
     def create_testrun_report(self, result: TestRunDTO) -> TestRunReportDTO:

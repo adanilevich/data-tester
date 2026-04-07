@@ -1,4 +1,4 @@
-from src.dtos import SchemaSpecDTO, SpecFactory, SpecType
+from src.dtos import SchemaSpecDTO, SpecType
 
 
 def test_creating_spec_from_dict():
@@ -15,28 +15,4 @@ def test_creating_spec_from_dict():
     assert isinstance(spec, SchemaSpecDTO)
 
 
-class TestSpecFactory:
-    def test_that_known_spec_type_is_created(self):
-        # given a dict with a known spec type
-        dict_ = {
-            "location": {"path": "dummy://this"},
-            "spec_type": "schema",
-            "testobject": "doesnt matter",
-            "columns": {"a": "b"},
-        }
-
-        # when creating a spec from the dict
-        spec = SpecFactory().create_from_dict(dict_)
-
-        # then the spec is created correctly
-        assert isinstance(spec, SchemaSpecDTO)
-
-        # and the spec type is correctly set
-        assert spec.spec_type == SpecType.SCHEMA
-
-        # when creating a spec from the dict with a known spec type in uppercase
-        dict_["spec_type"] = "SCHEMA"
-        spec = SpecFactory().create_from_dict(dict_)
-
-        # then the spec is created correctly
-        assert isinstance(spec, SchemaSpecDTO)
+# TODO: create a test for testing SpecDTO.from_dict()

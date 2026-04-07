@@ -179,7 +179,7 @@ class TestRun:
                 labels=definition.labels,
                 diff=dict(),
                 testtype=definition.testtype,
-                specifications=definition.specs,
+                specs=definition.specs,
                 domain_config=definition.domain_config,
                 domain=definition.testobject.domain,
                 stage=definition.testobject.stage,

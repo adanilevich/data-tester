@@ -26,7 +26,6 @@ class TestCompareTestCase:
         columns={"a": "int", "b": "string", "c": "bool"},
         primary_keys=["a", "b"],
         testobject="stage_customers",
-        spec_type=SpecType.COMPARE,
     )
 
     sql = CompareSpecDTO(
@@ -96,8 +95,7 @@ class TestCompareTestCase:
         assert testcase.sample_size == 100
 
     def test_key_sampling_exception_is_caught(self, testcase):
-        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
-        sql.query = "exception"
+        sql = self.sql.model_copy(update={"query": "exception"})
         testcase.specs = [sql, self.schema]
 
         with pytest.raises(CompareTestCaseError) as err:
@@ -112,8 +110,7 @@ class TestCompareTestCase:
         assert "from testobject equals sample from test sql" in testcase.summary
 
     def test_that_diff_is_treated_correctly(self, testcase):
-        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
-        sql.query = "bad"
+        sql = self.sql.model_copy(update={"query": "bad"})
         testcase.specs = [sql, self.schema]
 
         testcase._execute()
@@ -152,8 +149,7 @@ class TestCompareTestCase:
         assert "Primary keys are missing in query" in str(err)
 
     def test_sample_from_query_failure(self, testcase):
-        sql = CompareSpecDTO.from_dict(self.sql.to_dict())
-        sql.query = "error"
+        sql = self.sql.model_copy(update={"query": "error"})
         testcase.specs = [sql, self.schema]
 
         with pytest.raises(QueryExecutionError) as err:

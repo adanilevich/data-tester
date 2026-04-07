@@ -100,9 +100,3 @@ class LocationDTO(DTO):
                 self.path += "/"
         else:
             raise ValueError(f"Unkown location path type: {self.path}")
-
-
-class ObjectLocationDTO(DTO):
-    location: LocationDTO
-    located_object_id: str
-    object_type: ObjectType
