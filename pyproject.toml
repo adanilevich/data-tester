@@ -205,3 +205,51 @@ source_modules = [
 forbidden_modules = [
     "src.domain_adapters",
 ]
+
+[[tool.importlinter.contracts]]
+name = "11. client_interface only imports from dtos"
+type = "forbidden"
+source_modules = ["src.client_interface"]
+forbidden_modules = [
+    "src.apps",
+    "src.ui",
+    "src.domain",
+    "src.domain_ports",
+    "src.domain_adapters",
+    "src.drivers",
+    "src.infrastructure",
+    "src.infrastructure_ports",
+    "src.config",
+]
+
+[[tool.importlinter.contracts]]
+name = "12. ui only imports from client_interface"
+type = "forbidden"
+source_modules = ["src.ui"]
+forbidden_modules = [
+    "src.dtos",
+    "src.domain",
+    "src.domain_ports",
+    "src.domain_adapters",
+    "src.drivers",
+    "src.infrastructure",
+    "src.infrastructure_ports",
+    "src.apps",
+]
+
+[[tool.importlinter.contracts]]
+name = "13. Nothing imports from ui"
+type = "forbidden"
+source_modules = [
+    "src.dtos",
+    "src.domain",
+    "src.domain_ports",
+    "src.domain_adapters",
+    "src.drivers",
+    "src.infrastructure",
+    "src.infrastructure_ports",
+    "src.config",
+    "src.apps",
+    "src.client_interface",
+]
+forbidden_modules = ["src.ui"]

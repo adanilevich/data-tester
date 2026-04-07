@@ -96,6 +96,7 @@ class StagecountSpecDTO(SpecDTO):
         return False
 
 
+# TODO: remove this and write from_dict classes
 class SpecFactory:
     def create_from_dict(self, spec_as_dict: dict) -> SpecDTO:
         requested_spec_type = spec_as_dict["spec_type"]
