@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_a18e4f10aed04e61_dummy_exception_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-07 21:02 +0000
+            created at 2026-04-07 22:17 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -95,7 +95,7 @@
     <p class="run run2"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="nam">CompareSpecDTO</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="nam">SchemaSpecDTO</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="nam">DBInstanceDTO</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">TestResult</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">    <span class="nam">Result</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">    <span class="nam">TestType</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -174,10 +174,10 @@
     <p class="run"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="nam">diff</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_compare</span><span class="op">(</span><span class="nam">expected</span><span class="op">,</span> <span class="nam">actual</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">        <span class="key">if</span> <span class="nam">diff</span><span class="op">.</span><span class="nam">shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="op">==</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">result</span> <span class="op">=</span> <span class="nam">TestResult</span><span class="op">.</span><span class="nam">OK</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">result</span> <span class="op">=</span> <span class="nam">Result</span><span class="op">.</span><span class="nam">OK</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">summary</span> <span class="op">=</span> <span class="str">"Sample from testobject equals sample from test sql."</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">result</span> <span class="op">=</span> <span class="nam">TestResult</span><span class="op">.</span><span class="nam">NOK</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">result</span> <span class="op">=</span> <span class="nam">Result</span><span class="op">.</span><span class="nam">NOK</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">summary</span> <span class="op">=</span> <span class="fst">f"</span><span class="fst">Testobject differs from SQL in </span><span class="op">{</span><span class="nam">diff</span><span class="op">.</span><span class="nam">shape</span><span class="op">[</span><span class="num">0</span><span class="op">]</span><span class="op">}</span><span class="fst"> row(s).</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">            <span class="com"># trimm diff to ca. 500 examples to not blow up Excel memory</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">            <span class="nam">diff_example</span> <span class="op">=</span> <span class="nam">diff</span><span class="op">.</span><span class="nam">head</span><span class="op">(</span><span class="num">500</span><span class="op">)</span><span class="op">.</span><span class="nam">to_dict</span><span class="op">(</span><span class="nam">as_series</span><span class="op">=</span><span class="key">False</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -360,7 +360,7 @@
             <a class="nav" href="z_a18e4f10aed04e61_dummy_exception_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-07 21:02 +0000
+            created at 2026-04-07 22:17 +0000
         </p>
     </div>
 </footer>
