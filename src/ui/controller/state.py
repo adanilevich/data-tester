@@ -6,7 +6,7 @@ from typing import Dict, List
 from nicegui import app
 
 from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
-from src.dtos import AnySpec, SpecDTO
+from src.dtos import TestRunDefDTO
 from src.ui.common import Status
 
 
@@ -109,11 +109,11 @@ class State(ABC):
 
     @property
     @abstractmethod
-    def specs(self) -> Dict[str, List[List[AnySpec]]]:
+    def specs(self) -> Dict[str, List[TestRunDefDTO]]:
         pass
 
     @abstractmethod
-    def set_specs(self, domain: str, specs: List[List[AnySpec]]) -> None:
+    def set_specs(self, domain: str, trd: TestRunDefDTO) -> None:
         pass
 
     @property
@@ -242,17 +242,20 @@ class NiceGuiState(State):
         app.storage.general.setdefault("testruns_status", {})[domain] = status.value
 
     @property
-    def specs(self) -> Dict[str, List[List[AnySpec]]]:
+    def specs(self) -> Dict[str, List[TestRunDefDTO]]:
+        """Specs stored as TestRunDefDTOs — one per testset.
+        Each TestRunDefDTO links every testcase to its specs by name."""
         raw = app.storage.general.get("specs", {})
         return {
-            domain: [[SpecDTO.from_dict(s) for s in group] for group in groups]
-            for domain, groups in raw.items()
+            domain: [TestRunDefDTO.model_validate(d) for d in items]
+            for domain, items in raw.items()
         }
 
-    def set_specs(self, domain: str, specs: List[List[AnySpec]]) -> None:
-        app.storage.general.setdefault("specs", {})[domain] = [
-            [s.to_dict(mode="json") for s in group] for group in specs
-        ]
+    def set_specs(self, domain: str, trd: TestRunDefDTO) -> None:
+        """Append a TestRunDefDTO (one per testset) to the domain's spec cache."""
+        app.storage.general.setdefault("specs", {}).setdefault(domain, []).append(
+            trd.model_dump(mode="json")
+        )
 
     @property
     def specs_status(self) -> Dict[str, Status]:

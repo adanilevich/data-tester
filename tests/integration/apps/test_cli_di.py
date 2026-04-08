@@ -245,9 +245,17 @@ class TestSpecDriverIntegration:
                 )
             },
         )
-        result = driver.find_specifications(testset, [LocationDTO("memory://specs/")])
-        assert len(result) == 1
-        assert len(result[0]) == 0
+        domain_config = DomainConfigDTO(
+            domain="d",
+            instances={"s": ["i"]},
+            compare_datatypes=[],
+            sample_size_default=100,
+            spec_locations={"s": ["memory://specs/"]},
+            reports_location=LocationDTO("memory://reports/"),
+        )
+        result = driver.find_specs(testset=testset, domain_config=domain_config)
+        assert len(result.testcase_defs) == 1
+        assert len(result.testcase_defs[0].specs) == 0
 
     def test_find_multiple_locations(self, di: CliDi):
         self._setup_specs(di)
@@ -276,11 +284,17 @@ class TestSpecDriverIntegration:
                 )
             },
         )
-        result = driver.find_specifications(
-            testset, [LocationDTO("memory://specs/"), LocationDTO("memory://backup/")]
+        domain_config = DomainConfigDTO(
+            domain="d",
+            instances={"s": ["i"]},
+            compare_datatypes=[],
+            sample_size_default=100,
+            spec_locations={"s": ["memory://specs/", "memory://backup/"]},
+            reports_location=LocationDTO("memory://reports/"),
         )
-        assert len(result) == 1
-        assert len(result[0]) == 2  # found in both locations
+        result = driver.find_specs(testset=testset, domain_config=domain_config)
+        assert len(result.testcase_defs) == 1
+        assert len(result.testcase_defs[0].specs) == 2  # found in both locations
 
 
 # --- TestRunDriver ---

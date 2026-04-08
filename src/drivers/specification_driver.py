@@ -1,26 +1,22 @@
-from typing import List
-
-from src.domain_ports import ISpec, ListSpecsCommand
-from src.dtos import LocationDTO, TestSetDTO
+from src.domain_ports import FindSpecsCommand, ISpec
+from src.dtos import DomainConfigDTO, TestSetDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 
 
 class SpecDriver:
-    """
-    Manager for specification handling.
-    Provides methods for finding specifications.
-    """
+    """Manager for finding specifications for a testset."""
 
     def __init__(self, spec_adapter: ISpec):
         self.adapter = spec_adapter
 
-    def find_specifications(self, testset: TestSetDTO, locations: List[LocationDTO]):
+    def find_specs(
+        self, testset: TestSetDTO, domain_config: DomainConfigDTO
+    ) -> TestRunDefDTO:
+        """Find specifications for all testcases in the testset.
+
+        Locations are derived from domain_config internally.
+        Returns a TestRunDefDTO with each testcase linked to its specs by name.
         """
-        Receives a TestSetDTO and returns a TestRunDTO after finding specifications.
-        """
-        specs = self.adapter.list_specs(
-            ListSpecsCommand(
-                testset=testset,
-                locations=locations,
-            )
+        return self.adapter.find_specs(
+            FindSpecsCommand(testset=testset, domain_config=domain_config)
         )
-        return specs

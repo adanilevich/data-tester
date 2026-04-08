@@ -1,6 +1,5 @@
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
-from src.dtos.testrun_dtos import TestRunDefDTO
 
 
 class CliApp:
@@ -21,20 +20,10 @@ class CliApp:
 
         # fetch specifications
         spec_driver = self.di.specification_driver()
-        specs = spec_driver.find_specifications(
-            testset=testset,
-            locations=domain_config.spec_locations_by_stage(
-                stage=testset.stage or testset.default_stage,
-            ),
-        )
+        testrun_def = spec_driver.find_specs(testset=testset, domain_config=domain_config)
 
         # execute testrun
         testrun_driver = self.di.testrun_driver()
-        testrun_def = TestRunDefDTO.from_testset(
-            testset=testset,
-            spec_list=specs,
-            domain_config=domain_config,
-        )
         testrun = testrun_driver.execute_testrun(testrun_def)
 
         return testrun

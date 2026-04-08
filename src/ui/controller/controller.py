@@ -1,8 +1,10 @@
 from typing import List
 
+from nicegui import app
+
 from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
 from src.client_interface.requests import FindSpecsRequest
-from src.dtos import AnySpec
+from src.dtos import TestRunDefDTO
 from src.ui.common import Status
 from src.ui.client import BackendError, DataTesterClient
 
@@ -59,7 +61,7 @@ class Controller:
     def get_testruns_status(self, domain: str) -> Status:
         return self.state.testruns_status.get(domain, Status.UNCLEAR)
 
-    def specs(self, domain: str) -> List[List[AnySpec]]:
+    def specs(self, domain: str) -> List[TestRunDefDTO]:
         return self.state.specs.get(domain, [])
 
     def get_specs_status(self, domain: str) -> Status:
@@ -135,14 +137,11 @@ class Controller:
         try:
             domain_config = self.state.domain_configs[domain]
             testsets = self.state.testsets.get(domain, [])
-            all_specs: List[List[AnySpec]] = []
+            app.storage.general.setdefault("specs", {})[domain] = []
             for testset in testsets:
-                stage = testset.default_stage
-                locations = domain_config.spec_locations_by_stage(stage)
-                request = FindSpecsRequest(testset=testset, locations=locations)
-                groups = await self._client.find_specs(domain, request)
-                all_specs.extend(groups)
-            self.state.set_specs(domain, all_specs)
+                request = FindSpecsRequest(testset=testset, domain_config=domain_config)
+                trd = await self._client.find_specs(domain, request)
+                self.state.set_specs(domain, trd)
             self.state.set_specs_status(domain, Status.LOADED)
             return None
         except BackendError as exc:

@@ -6,8 +6,9 @@ import polars as pl
 import pytest
 from src.domain.specification.plugins import NamingConventionsFactory, SpecParserFactory
 from src.domain_adapters import SpecAdapter
-from src.domain_ports import ListSpecsCommand
+from src.domain_ports import FindSpecsCommand
 from src.dtos import (
+    DomainConfigDTO,
     LocationDTO,
     RowcountSpecDTO,
     SchemaSpecDTO,
@@ -88,6 +89,28 @@ class TestSpecAdapter:
         )
 
     @pytest.fixture
+    def domain_config_single_loc(self) -> DomainConfigDTO:
+        return DomainConfigDTO(
+            domain="test_domain",
+            instances={"dev": ["primary"]},
+            compare_datatypes=[],
+            sample_size_default=100,
+            spec_locations={"dev": ["memory://specs/"]},
+            reports_location=LocationDTO("memory://reports/"),
+        )
+
+    @pytest.fixture
+    def domain_config_multi_loc(self) -> DomainConfigDTO:
+        return DomainConfigDTO(
+            domain="test_domain",
+            instances={"dev": ["primary"]},
+            compare_datatypes=[],
+            sample_size_default=100,
+            spec_locations={"dev": ["memory://specs/", "memory://backup/"]},
+            reports_location=LocationDTO("memory://reports/"),
+        )
+
+    @pytest.fixture
     def test_testset(self) -> TestSetDTO:
         """Create a test TestSetDTO with various test cases"""
         testcases = {
@@ -152,8 +175,9 @@ class TestSpecAdapter:
         self,
         handler: SpecAdapter,
         test_testset: TestSetDTO,
+        domain_config_single_loc: DomainConfigDTO,
     ):
-        """Test list_specs with single location and single testcase"""
+        """Test find_specs with single location and single testcase"""
         single_testcase_testset = TestSetDTO(
             testset_id=test_testset.testset_id,
             name=test_testset.name,
@@ -163,24 +187,25 @@ class TestSpecAdapter:
             testcases={"table1_SCHEMA": test_testset.testcases["table1_SCHEMA"]},
         )
 
-        command = ListSpecsCommand(
-            locations=[LocationDTO("memory://specs/")],
+        command = FindSpecsCommand(
             testset=single_testcase_testset,
+            domain_config=domain_config_single_loc,
         )
 
-        result = handler.list_specs(command)
+        result = handler.find_specs(command)
 
-        assert len(result) == 1
-        assert len(result[0]) == 1
-        assert isinstance(result[0][0], SchemaSpecDTO)
-        assert result[0][0].testobject == "table1"
+        assert len(result.testcase_defs) == 1
+        assert len(result.testcase_defs[0].specs) == 1
+        assert isinstance(result.testcase_defs[0].specs[0], SchemaSpecDTO)
+        assert result.testcase_defs[0].specs[0].testobject == "table1"
 
     def test_list_specs_multiple_locations(
         self,
         handler: SpecAdapter,
         test_testset: TestSetDTO,
+        domain_config_multi_loc: DomainConfigDTO,
     ):
-        """Test list_specs with multiple locations"""
+        """Test find_specs with multiple locations"""
         single_testcase_testset = TestSetDTO(
             testset_id=test_testset.testset_id,
             name=test_testset.name,
@@ -190,54 +215,56 @@ class TestSpecAdapter:
             testcases={"table1_SCHEMA": test_testset.testcases["table1_SCHEMA"]},
         )
 
-        command = ListSpecsCommand(
-            locations=[
-                LocationDTO("memory://specs/"),
-                LocationDTO("memory://backup/"),
-            ],
+        command = FindSpecsCommand(
             testset=single_testcase_testset,
+            domain_config=domain_config_multi_loc,
         )
 
-        result = handler.list_specs(command)
+        result = handler.find_specs(command)
 
-        assert len(result) == 1
-        assert len(result[0]) == 2
-        assert all(isinstance(spec, SchemaSpecDTO) for spec in result[0])
-        assert all(spec.testobject == "table1" for spec in result[0])
+        assert len(result.testcase_defs) == 1
+        assert len(result.testcase_defs[0].specs) == 2
+        assert all(
+            isinstance(spec, SchemaSpecDTO) for spec in result.testcase_defs[0].specs
+        )
+        assert all(spec.testobject == "table1" for spec in result.testcase_defs[0].specs)
 
     def test_list_specs_multiple_testcases(
         self,
         handler: SpecAdapter,
         test_testset: TestSetDTO,
+        domain_config_single_loc: DomainConfigDTO,
     ):
-        """Test list_specs with multiple testcases"""
-        command = ListSpecsCommand(
-            locations=[LocationDTO("memory://specs/")],
+        """Test find_specs with multiple testcases"""
+        command = FindSpecsCommand(
             testset=test_testset,
+            domain_config=domain_config_single_loc,
         )
 
-        result = handler.list_specs(command)
+        result = handler.find_specs(command)
 
-        assert len(result) == 3
+        assert len(result.testcase_defs) == 3
 
         # First testcase: table1_SCHEMA
-        assert len(result[0]) == 1
-        assert isinstance(result[0][0], SchemaSpecDTO)
-        assert result[0][0].testobject == "table1"
+        assert len(result.testcase_defs[0].specs) == 1
+        assert isinstance(result.testcase_defs[0].specs[0], SchemaSpecDTO)
+        assert result.testcase_defs[0].specs[0].testobject == "table1"
 
         # Second testcase: table1_ROWCOUNT
-        assert len(result[1]) == 1
-        assert isinstance(result[1][0], RowcountSpecDTO)
-        assert result[1][0].testobject == "table1"
+        assert len(result.testcase_defs[1].specs) == 1
+        assert isinstance(result.testcase_defs[1].specs[0], RowcountSpecDTO)
+        assert result.testcase_defs[1].specs[0].testobject == "table1"
 
         # Third testcase: table2_COMPARE
-        assert len(result[2]) == 2
-        spec_types = [spec.spec_type for spec in result[2]]
+        assert len(result.testcase_defs[2].specs) == 2
+        spec_types = [spec.spec_type for spec in result.testcase_defs[2].specs]
         assert SpecType.COMPARE in spec_types
         assert SpecType.SCHEMA in spec_types
 
-    def test_list_specs_no_specs_found(self, handler: SpecAdapter):
-        """Test list_specs when no specifications are found"""
+    def test_list_specs_no_specs_found(
+        self, handler: SpecAdapter, domain_config_single_loc: DomainConfigDTO
+    ):
+        """Test find_specs when no specifications are found"""
         testcase = TestCaseEntryDTO(
             testobject="nonexistent_table",
             testtype=TestType.SCHEMA,
@@ -254,18 +281,20 @@ class TestSpecAdapter:
             testcases={"nonexistent_SCHEMA": testcase},
         )
 
-        command = ListSpecsCommand(
-            locations=[LocationDTO("memory://specs/")],
+        command = FindSpecsCommand(
             testset=testset,
+            domain_config=domain_config_single_loc,
         )
 
-        result = handler.list_specs(command)
+        result = handler.find_specs(command)
 
-        assert len(result) == 1
-        assert len(result[0]) == 0
+        assert len(result.testcase_defs) == 1
+        assert len(result.testcase_defs[0].specs) == 0
 
-    def test_list_specs_preserves_testcase_order(self, handler: SpecAdapter):
-        """Test that list_specs preserves the order of testcases"""
+    def test_list_specs_preserves_testcase_order(
+        self, handler: SpecAdapter, domain_config_single_loc: DomainConfigDTO
+    ):
+        """Test that find_specs preserves the order of testcases"""
         testcases = {
             "z_table": TestCaseEntryDTO(
                 testobject="table1",
@@ -293,20 +322,19 @@ class TestSpecAdapter:
             testcases=testcases,
         )
 
-        command = ListSpecsCommand(
-            locations=[LocationDTO("memory://specs/")],
+        command = FindSpecsCommand(
             testset=testset,
+            domain_config=domain_config_single_loc,
         )
 
-        result = handler.list_specs(command)
+        result = handler.find_specs(command)
 
-        assert len(result) == 3
+        assert len(result.testcase_defs) == 3
 
         testcase_list = list(testset.testcases.values())
-        for i, testcase_specs in enumerate(result):
+        for i, tcd in enumerate(result.testcase_defs):
             expected_testcase = testcase_list[i]
-            if len(testcase_specs) > 0:
+            if len(tcd.specs) > 0:
                 assert all(
-                    spec.testobject == expected_testcase.testobject
-                    for spec in testcase_specs
+                    spec.testobject == expected_testcase.testobject for spec in tcd.specs
                 )
