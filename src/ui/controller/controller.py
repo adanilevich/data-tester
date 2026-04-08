@@ -4,7 +4,7 @@ from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, Tes
 from src.client_interface.requests import FindSpecsRequest
 from src.dtos import AnySpec
 from src.ui.common import Status
-from src.ui.data import BackendError, DataTesterClient
+from src.ui.client import BackendError, DataTesterClient
 
 from .state import State
 

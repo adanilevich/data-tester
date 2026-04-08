@@ -1,7 +1,7 @@
 """UI application factory — registers all NiceGUI routes."""
 
 from .controller import Controller, NiceGuiState
-from .data import DataTesterClient
+from .client import DataTesterClient
 from .pages import domain_home, domain_selection
 
 
