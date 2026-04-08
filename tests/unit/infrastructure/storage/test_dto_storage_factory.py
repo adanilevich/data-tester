@@ -1,12 +1,11 @@
 import pytest
-
+from src.dtos import LocationDTO
 from src.infrastructure.storage.dto_storage_factory import DtoStorageFactory
 from src.infrastructure.storage.dto_storage_file import (
     LocalDtoStorage,
     MemoryDtoStorage,
 )
 from src.infrastructure_ports import StorageTypeUnknownError
-from src.dtos import LocationDTO
 
 
 class TestDtoStorageFactory:

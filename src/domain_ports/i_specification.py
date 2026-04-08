@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.dtos import LocationDTO, DTO, SpecDTO, TestSetDTO
+from src.dtos import DTO, LocationDTO, SpecDTO, TestSetDTO
 
 
 class ListSpecsCommand(DTO):

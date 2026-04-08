@@ -3,7 +3,7 @@ from typing import List, Optional, Tuple
 
 import polars as pl
 
-from src.dtos import SchemaSpecDTO, TestObjectDTO, DBInstanceDTO
+from src.dtos import DBInstanceDTO, SchemaSpecDTO, TestObjectDTO
 
 
 class BackendError(Exception):

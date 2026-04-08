@@ -1,14 +1,15 @@
 from src.dtos.storage_dtos import LocationDTO, StorageType
 from src.infrastructure_ports import (
-    IDtoStorageFactory,
     IDtoStorage,
+    IDtoStorageFactory,
     StorageTypeUnknownError,
 )
+
 from .dto_storage_file import (
-    MemoryDtoStorage,
-    LocalDtoStorage,
     GcsDtoStorage,
     JsonSerializer,
+    LocalDtoStorage,
+    MemoryDtoStorage,
 )
 
 

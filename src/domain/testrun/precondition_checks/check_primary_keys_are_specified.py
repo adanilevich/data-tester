@@ -1,7 +1,8 @@
 from typing import List
 
-from . import AbstractCheck, Checkable
 from src.dtos import SchemaSpecDTO
+
+from . import AbstractCheck, Checkable
 
 
 class CheckPrimaryKeysAreSpecified(AbstractCheck):

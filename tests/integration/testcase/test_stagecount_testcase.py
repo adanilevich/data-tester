@@ -1,17 +1,18 @@
 from uuid import uuid4
-from tests.conftest import DemoData
+
 from src.domain.testrun.testcases import StageCountTestCase
 from src.dtos import (
+    LocationDTO,
+    SpecType,
     StagecountSpecDTO,
     TestObjectDTO,
     TestType,
-    SpecType,
-    LocationDTO,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.infrastructure.backend.demo import DemoBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
 
+from tests.conftest import DemoData
 
 spec = StagecountSpecDTO(
     location=LocationDTO(path="dummy://stagecount_spec"),

@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
 
+from src.dtos import AnySpec, Importance, TestObjectDTO
 from src.infrastructure_ports import IBackend
-from src.dtos import AnySpec, TestObjectDTO, Importance
-
 
 # registry of all known checks -- populated via AbstractCheck.__init_cubclasses__
 known_checks: Dict[str, Callable] = {}

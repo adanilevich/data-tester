@@ -1,13 +1,13 @@
 from typing import List
 
-from src.infrastructure_ports import IUserStorage, INotifier
-from src.domain_ports import ISpec, ListSpecsCommand
 from src.domain.specification.plugins import (
     INamingConventionsFactory,
     ISpecParserFactory,
 )
-from src.dtos import SpecDTO
 from src.domain.specification.specification import Specification
+from src.domain_ports import ISpec, ListSpecsCommand
+from src.dtos import SpecDTO
+from src.infrastructure_ports import INotifier, IUserStorage
 
 
 class SpecAdapter(ISpec):

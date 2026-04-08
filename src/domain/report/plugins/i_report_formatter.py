@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src.dtos import TestReportDTO, ReportArtifactFormat, ReportArtifact, ReportType
+
+from src.dtos import ReportArtifact, ReportArtifactFormat, TestCaseDTO, TestRunDTO
 
 
 class ReportFormatterError(Exception):
@@ -7,42 +8,35 @@ class ReportFormatterError(Exception):
 
 
 class ReportTypeNotSupportedError(ReportFormatterError):
-    """
-    Raised when a report type is not supported by the formatter.
-    """
+    """Raised when a report type is not supported by the formatter."""
 
 
-class IReportFormatter(ABC):
-    """
-    Interface definition for a report formatter. Report formatters operate on Report DTOs
-    and serialize the provided report to given format, e.g. JSON, TXT, XLSX.
-    Reports artifacts can be both created for testruns and testcases; for testcases
-    artifacts can be created for both the report itself and the diff.
-    """
-
-    @abstractmethod
-    def create_artifact(self, report: TestReportDTO) -> bytes:
-        """
-        Creates a formatted report artifact for a given report.
-        """
+class ITestCaseFormatter(ABC):
+    """Formats a TestCaseDTO into a report artifact."""
 
     @property
     @abstractmethod
     def artifact_format(self) -> ReportArtifactFormat:
-        """
-        Returns supported artifact format.
-        """
+        """Returns the supported artifact format."""
 
     @property
     @abstractmethod
-    def report_artifact(self) -> ReportArtifact:
-        """
-        Returns supported report artifact type, e.g. 'report' or 'diff'.
-        """
+    def artifact(self) -> ReportArtifact:
+        """Returns the supported artifact type (REPORT or DIFF)."""
+
+    @abstractmethod
+    def create_artifact(self, testcase: TestCaseDTO) -> bytes:
+        """Creates a formatted artifact from a TestCaseDTO."""
+
+
+class ITestRunFormatter(ABC):
+    """Formats a TestRunDTO into a report artifact."""
 
     @property
     @abstractmethod
-    def report_type(self) -> ReportType:
-        """
-        Returns supported report type, e.g. 'testcase' or 'testrun'.
-        """
+    def artifact_format(self) -> ReportArtifactFormat:
+        """Returns the supported artifact format."""
+
+    @abstractmethod
+    def create_artifact(self, testrun: TestRunDTO) -> bytes:
+        """Creates a formatted artifact from a TestRunDTO."""

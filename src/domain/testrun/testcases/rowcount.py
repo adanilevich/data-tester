@@ -1,7 +1,8 @@
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
-from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import RowcountSpecDTO, DBInstanceDTO, TestType, Result, Status
+from src.dtos import DBInstanceDTO, Result, RowcountSpecDTO, Status, TestType
+
+from . import AbstractTestCase, SpecNotFoundError, TestCaseError
 
 
 class RowCountTestCaseError(TestCaseError):

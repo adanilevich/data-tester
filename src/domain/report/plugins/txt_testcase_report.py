@@ -2,21 +2,19 @@ from typing import Any, Dict, List
 
 import yaml
 
+from src.dtos import (
+    ReportArtifact,
+    ReportArtifactFormat,
+    TestCaseDTO,
+)
+
 from .i_report_formatter import (
-    IReportFormatter,
-    ReportTypeNotSupportedError,
+    ITestCaseFormatter,
     ReportFormatterError,
 )
-from src.dtos import (
-    TestReportDTO,
-    TestCaseReportDTO,
-    ReportArtifactFormat,
-    ReportArtifact,
-    ReportType,
-)
 
 
-class TxtTestCaseReportFormatter(IReportFormatter):
+class TxtTestCaseReportFormatter(ITestCaseFormatter):
     """
     Txt-based testcase report with spec filepaths and simplified
     schema diffs.
@@ -27,33 +25,31 @@ class TxtTestCaseReportFormatter(IReportFormatter):
         return ReportArtifactFormat.TXT
 
     @property
-    def report_artifact(self) -> ReportArtifact:
+    def artifact(self) -> ReportArtifact:
         return ReportArtifact.REPORT
 
-    @property
-    def report_type(self) -> ReportType:
-        return ReportType.TESTCASE
-
-    def create_artifact(self, report: TestReportDTO) -> bytes:
+    def create_artifact(self, testcase: TestCaseDTO) -> bytes:
         """
         Creates a txt-based testcase report artifact with spec filepaths
         and simplified schema diffs.
         """
+        exclude = {"specs", "diff", "domain_config"}
+        content_dict = testcase.to_dict(exclude=exclude, mode="json")
 
-        if not isinstance(report, TestCaseReportDTO):
-            raise ReportTypeNotSupportedError(f"Txt format not supported for {report}")
-
-        exclude = {"specs", "diff"}
-        content_dict = report.to_dict(exclude=exclude, mode="json")
+        # convert enum values to strings
+        content_dict["result"] = testcase.result.value
+        content_dict["status"] = testcase.status.value
+        content_dict["testtype"] = testcase.testtype.value
+        content_dict["testobject"] = testcase.testobject.name
 
         # add spec filepaths (simplified from full SpecDTO)
         content_dict["specs"] = [
-            spec.display_name or spec.location.path for spec in report.specs
+            spec.display_name or spec.location.path for spec in testcase.specs
         ]
 
         # for schema testcases, add simplified diff showing only differences
-        if report.testtype == "SCHEMA" and report.diff:
-            content_dict["diff"] = _simplify_schema_diff(report.diff)
+        if testcase.testtype.value == "SCHEMA" and testcase.diff:
+            content_dict["diff"] = _simplify_schema_diff(testcase.diff)
 
         try:
             yaml_bytes = yaml.safe_dump(

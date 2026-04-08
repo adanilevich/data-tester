@@ -9,13 +9,13 @@ try:
 except ImportError:
     GCSFileSystem = None
 
+from src.dtos.storage_dtos import LocationDTO, StorageType
 from src.infrastructure_ports import (
     IUserStorage,
-    StorageError,
     ObjectNotFoundError,
+    StorageError,
     StorageTypeUnknownError,
 )
-from src.dtos.storage_dtos import LocationDTO, StorageType
 
 
 class UserStorageFileError(StorageError):

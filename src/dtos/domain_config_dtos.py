@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from pydantic import Field
 
@@ -6,62 +6,34 @@ from src.dtos.dto import DTO
 from src.dtos.storage_dtos import LocationDTO
 
 
-class SchemaTestCaseConfigDTO(DTO):
-    compare_datatypes: List[str]
-
-
-class CompareTestCaseConfigDTO(DTO):
-    sample_size: int
-    sample_size_per_object: Dict[str, int] = Field(default_factory=dict)
-
-
-class TestCasesConfigDTO(DTO):
-    schema: SchemaTestCaseConfigDTO
-    compare: CompareTestCaseConfigDTO
-
-
 class DomainConfigDTO(DTO):
-    """
-    This represents the business-related configuration for test execution for a domain.
-    """
+    """Configuration for a single domain's test execution."""
 
-    domain: str  # domain name
+    domain: str
+    # stage → list of instance names (e.g. {"test": ["alpha", "beta"], "uat": ["main"]})
+    instances: Dict[str, List[str]]
+    # data types included in schema column-type comparison
+    compare_datatypes: List[str]
+    # default number of rows sampled for compare test cases
+    sample_size_default: int
+    # per-object overrides for sample size, keyed by testobject name
+    sample_size_per_object: Dict[str, int] = Field(default_factory=dict)
+    # stage → list of spec location path strings (e.g. {"test": ["local:///path/"]})
+    spec_locations: Dict[str, List[str]]
+    # storage location where test reports are written
+    reports_location: LocationDTO
 
     @property
     def id(self) -> str:
         """Object ID for storage purposes."""
         return self.domain
 
-    instances: Dict[str, List[str]]  # list of domain instance names per stage
-    specifications_locations: (  # user-managed locations for specifications, can be ...
-        LocationDTO  # a single location
-        | List[LocationDTO]  # a list of locations, e.g. by type or DWH layers
-        | Dict[str, LocationDTO]  # a dict of locations by stage
-        | Dict[str, List[LocationDTO]]  # list or locations by stage.instance
-    )
-    testreports_location: LocationDTO  # storage location for user-facing reports
-    testcases: TestCasesConfigDTO  # testcase specific configuration
+    def spec_locations_by_stage(self, stage: str) -> List[LocationDTO]:
+        """Return spec LocationDTOs for the given stage.
 
-    def _item_as_list(self, input: LocationDTO | List[LocationDTO]) -> List[LocationDTO]:
-        if isinstance(input, LocationDTO):
-            return [input]
-        elif isinstance(input, list):
-            return input
-        else:
-            raise ValueError("Input must be string or list of strings.")
-
-    def specifications_locations_by_instance(
-        self, stage: str, instance: str
-    ) -> List[LocationDTO]:
-        if isinstance(self.specifications_locations, (LocationDTO, list)):
-            return self._item_as_list(self.specifications_locations)
-        else:
-            try:
-                result = self.specifications_locations[f"{stage}.{instance}"]
-                return self._item_as_list(result)
-            except KeyError as err:
-                msg = (
-                    "Specifications locations undefined for stage.instance="
-                    f"{stage}.{instance}"
-                )
-                raise KeyError(msg) from err
+        Raises KeyError if the stage has no configured spec locations.
+        """
+        paths = self.spec_locations.get(stage)
+        if paths is None:
+            raise KeyError(f"No spec locations defined for stage '{stage}'")
+        return [LocationDTO(p) for p in paths]

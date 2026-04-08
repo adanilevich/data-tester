@@ -1,5 +1,6 @@
-from .abstract_testcase import AbstractTestCase
 from src.dtos import Result, TestType
+
+from .abstract_testcase import AbstractTestCase
 
 
 class DummyNokTestCase(AbstractTestCase):

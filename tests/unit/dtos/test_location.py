@@ -1,5 +1,4 @@
 import pytest
-
 from src.dtos.storage_dtos import LocationDTO, StorageType
 
 

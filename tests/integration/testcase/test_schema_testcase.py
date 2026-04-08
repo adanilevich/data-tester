@@ -1,16 +1,18 @@
 from uuid import uuid4
-from tests.conftest import DemoData
+
 from src.domain.testrun.testcases import SchemaTestCase
 from src.dtos import (
+    LocationDTO,
     SchemaSpecDTO,
+    SpecType,
     TestObjectDTO,
     TestType,
-    SpecType,
-    LocationDTO,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO
 from src.infrastructure.backend.demo import DemoBackendFactory
 from src.infrastructure.notifier import InMemoryNotifier
+
+from tests.conftest import DemoData
 
 spec = SchemaSpecDTO(
     location=LocationDTO(path="dummy://this_location"),

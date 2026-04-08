@@ -11,24 +11,31 @@ import os
 from pathlib import Path
 
 import uvicorn
-
 from src.apps.http_app import create_app
 from src.apps.http_di import HttpDependencyInjector
 from src.config import Config
 from src.dtos import DomainConfigDTO, TestSetDTO
 
+from tests.fixtures.demo.prepare_demo_artifacts import (
+    prepare_demo_artifacts,
+    clean_up_demo_artifacts,
+)
+from tests.fixtures.demo.prepare_demo_data import prepare_demo_data, clean_up_demo_data
+
 
 def _setup_demo(config: Config) -> HttpDependencyInjector:
     """Generate demo DWH + artifacts, seed dto storage, return ready DI injector."""
-    from tests.fixtures.demo.prepare_demo_artifacts import prepare_demo_artifacts
-    from tests.fixtures.demo.prepare_demo_data import prepare_demo_data
 
     demo_base = Path("data/demo").resolve()
 
     # Use absolute paths so all storage engines resolve correctly
-    config.DATATESTER_INTERNAL_STORAGE_LOCATION = f"local://{demo_base}/"
+    config.DATATESTER_INTERNAL_STORAGE_LOCATION = f"local://{demo_base}/internal/"
     config.DATATESTER_DEMO_RAW_PATH = str(demo_base / "raw")
     config.DATATESTER_DEMO_DB_PATH = str(demo_base / "dbs")
+
+    print("Cleaning up demo data...")
+    clean_up_demo_artifacts(demo_base)
+    clean_up_demo_data(demo_base)
 
     print("Setting up demo data...")
     prepare_demo_data(demo_base)

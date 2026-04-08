@@ -1,24 +1,25 @@
 from __future__ import annotations
+
 import csv
-from typing import Dict, List, Tuple, Optional
 from random import randint
+from typing import Dict, List, Optional, Tuple
 
 import duckdb
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 
+from src.dtos import (
+    DBInstanceDTO,
+    DomainConfigDTO,
+    LocationDTO,
+    SchemaSpecDTO,
+    SpecType,
+    TestObjectDTO,
+)
+from src.infrastructure_ports import BackendError, IBackend
+
 from .demo_naming_resolver import DemoNamingResolver, TestobjectType
 from .demo_query_handler import DemoQueryHandler
-
-from src.infrastructure_ports import IBackend, BackendError
-from src.dtos import (
-    SchemaSpecDTO,
-    DomainConfigDTO,
-    TestObjectDTO,
-    DBInstanceDTO,
-    SpecType,
-    LocationDTO,
-)
 
 
 class DemoBackendError(BackendError):

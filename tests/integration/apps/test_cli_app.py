@@ -16,15 +16,18 @@ The payments domain is tested separately in test_http_app.py.
 DO NOT USE PAYMENTS DOMAIN HERE TO NOT MIX DATA BETWEEN FIXTURES!!!
 """
 
-from tests.conftest import DemoData
 from src.apps.cli_app import CliApp
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
 from src.dtos import (
+    ReportArtifact,
+    ReportArtifactFormat,
     Result,
     Status,
     TestType,
 )
+
+from tests.conftest import DemoData
 
 
 class TestCliAppE2E:
@@ -70,21 +73,28 @@ class TestCliAppE2E:
         for tc in sales_tr.results:
             assert tc.status == Status.FINISHED
 
-        # 3. Reports persisted with correct results
+        # 3. Testcases are persisted and loadable by id
+        for tc in sales_tr.results:
+            loaded = tr_driver.load_testcase(testcase_id=tc.id)
+            assert str(loaded.id) == str(tc.id)
+            assert loaded.result == tc.result
+            assert loaded.testtype == tc.testtype
+
+        # 4. Report artifacts can be created for all testcases
         report_driver = verify_di.report_driver()
-
-        sales_tr_reports = report_driver.list_testrun_reports(domain="sales")
-        assert len(sales_tr_reports) == 1
-
-        sales_tc_reports = report_driver.list_testcase_reports(domain="sales")
-        assert len(sales_tc_reports) == 6
-
-        for report in sales_tc_reports:
-            assert report.domain == "sales"
-            assert report.result in (
-                Result.OK.value,
-                Result.NOK.value,
+        for tc in sales_tr.results:
+            txt_artifact = report_driver.create_testcase_report_artifact(
+                testcase_id=tc.id,
+                artifact=ReportArtifact.REPORT,
+                artifact_format=ReportArtifactFormat.TXT,
             )
+            assert isinstance(txt_artifact, bytes)
+            assert len(txt_artifact) > 0
 
-        nok = Result.NOK.value
-        assert len([r for r in sales_tc_reports if r.result == nok]) == 1
+        # 5. Testrun XLSX report artifact can be created
+        xlsx_artifact = report_driver.create_testrun_report_artifact(
+            testrun_id=sales_tr.id,
+            artifact_format=ReportArtifactFormat.XLSX,
+        )
+        assert isinstance(xlsx_artifact, bytes)
+        assert xlsx_artifact.startswith(b"PK\x03\x04")

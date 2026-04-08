@@ -1,6 +1,7 @@
-from typing import Tuple, List
+from typing import List, Tuple
 
-from src.dtos import TestCaseEntryDTO, LocationDTO, TestType, SpecType
+from src.dtos import LocationDTO, SpecType, TestCaseEntryDTO, TestType
+
 from .i_naming_conventions import INamingConventions, INamingConventionsFactory
 
 

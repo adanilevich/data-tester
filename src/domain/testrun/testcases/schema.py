@@ -1,8 +1,10 @@
-from typing import List, Optional, Dict, Literal
+from typing import Dict, List, Literal, Optional
+
 from pydantic import Field
 
-from . import AbstractTestCase, TestCaseError, SpecNotFoundError
-from src.dtos import SchemaSpecDTO, Result, DTO, TestType
+from src.dtos import DTO, Result, SchemaSpecDTO, TestType
+
+from . import AbstractTestCase, SpecNotFoundError, TestCaseError
 
 
 class SchemaTestCaseError(TestCaseError):
@@ -131,7 +133,7 @@ class SchemaTestCase(AbstractTestCase):
 
         diff = ColumnDiffDTO(diffs=[])
         result = True
-        compare_datatypes = self.domain_config.testcases.schema.compare_datatypes
+        compare_datatypes = self.domain_config.compare_datatypes
         # narrowing for type checker; guaranteed by specs_not_empty precondition
         assert expected.columns is not None and actual.columns is not None
 

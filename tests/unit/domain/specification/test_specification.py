@@ -1,28 +1,27 @@
 import io
 from unittest.mock import Mock, patch
 
-import pytest
 import polars as pl
-
+import pytest
 from src.domain.specification import Specification
 from src.domain.specification.plugins import (
     NamingConventionsFactory,
-    SpecParserFactory,
     SpecNamingConventionsError,
+    SpecParserFactory,
 )
-from src.infrastructure_ports import StorageError
+from src.dtos import (
+    CompareSpecDTO,
+    LocationDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    SpecType,
+    TestCaseEntryDTO,
+    TestType,
+)
 from src.infrastructure.storage.user_storage import (
     MemoryUserStorage,
 )
-from src.dtos import (
-    LocationDTO,
-    TestCaseEntryDTO,
-    TestType,
-    SpecType,
-    SchemaSpecDTO,
-    RowcountSpecDTO,
-    CompareSpecDTO,
-)
+from src.infrastructure_ports import StorageError
 
 
 def _put(storage: MemoryUserStorage, path: str, data: bytes) -> None:

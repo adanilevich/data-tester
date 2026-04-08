@@ -16,6 +16,8 @@ dependencies = [
     "fsspec",  # needed for demo, 2e2 tests and also for input finders and report storage
     "fastapi",  # HTTP backend framework
     "uvicorn[standard]",  # ASGI server for FastAPI
+    "httpx",  # async HTTP client (used by client_interface and tests)
+    "nicegui",  # NiceGUI frontend framework
     "pip>=26.0.1",
 ]
 
@@ -28,7 +30,6 @@ dev = [
     "pytest",  # test framework
     "pytest-timeouts", # to suppress timeouts during tests
     "pytest-asyncio",  # async test support
-    "httpx",  # async HTTP client for FastAPI testing
     "coverage",  # test coverage reports
     "pygount",  # count lines of code  # enforce import rules for hexagonal architecture
     "import-linter",
@@ -65,10 +66,10 @@ filterwarnings = [
 [tool.coverage.run]
 command_line = "-m pytest -m 'not skip_test and not infrastructure'"
 source = ["src/"]  # only analyze source code in src for coverage
-relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3                                                                                                                                                                                                                 
-omit = [                                                                                                                                                                                            
+relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3
+omit = [
     "src/infrastructure/backend/dummy/*",
-    "src/infrastructure/notifier/in_memory_notifier.py"                                                                                                                             
+    "src/infrastructure/notifier/in_memory_notifier.py"
 ]
 
 
@@ -223,11 +224,10 @@ forbidden_modules = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "12. ui only imports from client_interface"
+name = "12. ui only imports from client_interface and dtos"
 type = "forbidden"
 source_modules = ["src.ui"]
 forbidden_modules = [
-    "src.dtos",
     "src.domain",
     "src.domain_ports",
     "src.domain_adapters",
@@ -235,6 +235,7 @@ forbidden_modules = [
     "src.infrastructure",
     "src.infrastructure_ports",
     "src.apps",
+    "src.config",
 ]
 
 [[tool.importlinter.contracts]]

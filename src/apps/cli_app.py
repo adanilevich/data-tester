@@ -1,6 +1,6 @@
+from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
 from src.dtos.testrun_dtos import TestRunDefDTO
-from src.apps.cli_di import CliDependencyInjector
 
 
 class CliApp:
@@ -23,9 +23,8 @@ class CliApp:
         spec_driver = self.di.specification_driver()
         specs = spec_driver.find_specifications(
             testset=testset,
-            locations=domain_config.specifications_locations_by_instance(
+            locations=domain_config.spec_locations_by_stage(
                 stage=testset.stage or testset.default_stage,
-                instance=testset.instance or testset.default_instance,
             ),
         )
 
@@ -38,6 +37,4 @@ class CliApp:
         )
         testrun = testrun_driver.execute_testrun(testrun_def)
 
-        # generate and save all reports
-        report_driver = self.di.report_driver()
-        report_driver.create_and_save_all_reports(testrun)
+        return testrun

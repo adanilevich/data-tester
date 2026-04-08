@@ -9,18 +9,13 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from src.dtos import (
-    CompareTestCaseConfigDTO,
     DomainConfigDTO,
-    SchemaTestCaseConfigDTO,
-    TestCasesConfigDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
     LocationDTO,
+    Result,
+    Status,
     TestCaseDTO,
     TestObjectDTO,
-    Result,
     TestRunDTO,
-    Status,
     TestType,
 )
 from tests.fixtures.demo.prepare_demo_artifacts import (
@@ -91,15 +86,11 @@ def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
         instances={"test": ["alpha", "beta"], "uat": ["main"]},
-        specifications_locations=[
-            LocationDTO("memory://sqls"),
-            LocationDTO("memory://specs"),
-        ],
-        testreports_location=LocationDTO("memory://testreports"),
-        testcases=TestCasesConfigDTO(
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
-        ),
+        spec_locations={"test": ["memory://sqls", "memory://specs"]},
+        reports_location=LocationDTO("memory://testreports"),
+        compare_datatypes=["int", "string", "bool"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
     return domain_config
 
@@ -156,13 +147,3 @@ def testrun(testcase_result) -> TestRunDTO:
         domain_config=testcase_result.domain_config,
         testset_name="test testset",
     )
-
-
-@pytest.fixture
-def testcase_report(testcase_result) -> TestCaseReportDTO:
-    return TestCaseReportDTO.from_testcase_result(testcase_result)
-
-
-@pytest.fixture
-def testrun_report(testrun) -> TestRunReportDTO:
-    return TestRunReportDTO.from_testrun_result(testrun)

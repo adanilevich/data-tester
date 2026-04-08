@@ -2,62 +2,41 @@ from io import BytesIO
 
 import polars as pl
 
+from src.dtos import (
+    ReportArtifactFormat,
+    TestRunDTO,
+)
+
 from .i_report_formatter import (
-    IReportFormatter,
-    ReportTypeNotSupportedError,
+    ITestRunFormatter,
     ReportFormatterError,
 )
-from src.dtos import (
-    TestReportDTO,
-    TestRunReportDTO,
-    ReportArtifactFormat,
-    ReportArtifact,
-    ReportType,
-)
 
 
-class XlsxTestRunReportFormatter(IReportFormatter):
-    """
-    Excel-based testrun report with only most important info included
-    """
+class XlsxTestRunReportFormatter(ITestRunFormatter):
+    """Excel-based testrun report with only most important info included."""
 
     @property
     def artifact_format(self) -> ReportArtifactFormat:
         return ReportArtifactFormat.XLSX
 
-    @property
-    def report_artifact(self) -> ReportArtifact:
-        return ReportArtifact.REPORT
-
-    @property
-    def report_type(self) -> ReportType:
-        return ReportType.TESTRUN
-
-    def create_artifact(self, report: TestReportDTO) -> bytes:
-        """Creates a xlsx-based testrun report"""
-
-        if not isinstance(report, TestRunReportDTO):
-            msg = "Can't create testrun report from a TestCaseReportDTO object"
-            raise ReportTypeNotSupportedError(msg)
-
-        exclude = {
-            "report_id",
-            "testrun_id",
-            "testset_id",
-            "labels",
-            "start_ts",
-            "end_ts",
-        }
-        testcase_results = [
-            result.to_dict(exclude=exclude) for result in report.testcase_results
+    def create_artifact(self, testrun: TestRunDTO) -> bytes:
+        """Creates a xlsx-based testrun report."""
+        rows = [
+            {
+                "domain": tc.domain,
+                "stage": tc.stage,
+                "instance": tc.instance,
+                "testobject": tc.testobject.name,
+                "testtype": tc.testtype.value,
+                "result": tc.result.value,
+                "summary": tc.summary,
+            }
+            for tc in testrun.results
         ]
 
         try:
-            for row in testcase_results:
-                for k, v in row.items():
-                    if not isinstance(v, (str, int, float, bool, type(None), list)):
-                        row[k] = str(v)
-            df = pl.DataFrame(testcase_results)
+            df = pl.DataFrame(rows)
             excel_io = BytesIO()
             df.write_excel(excel_io)
             return excel_io.getvalue()

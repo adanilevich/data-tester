@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from . import Checkable, known_checks
 
 

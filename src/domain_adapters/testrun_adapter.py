@@ -1,15 +1,16 @@
-from typing import List
+from typing import List, cast
 
-from src.domain_ports import (
-    ITestRun,
-    ExecuteTestRunCommand,
-    SaveTestRunCommand,
-    LoadTestRunCommand,
-    ListTestRunsCommand,
-)
-from src.infrastructure_ports import IBackendFactory, INotifier, IDtoStorage
-from src.dtos import TestRunDTO
 from src.domain.testrun.testrun import TestRun, TestRunLoader
+from src.domain_ports import (
+    ExecuteTestRunCommand,
+    ITestRun,
+    ListTestRunsCommand,
+    LoadTestCaseCommand,
+    LoadTestRunCommand,
+    SaveTestRunCommand,
+)
+from src.dtos import ObjectType, TestCaseDTO, TestRunDTO
+from src.infrastructure_ports import IBackendFactory, IDtoStorage, INotifier
 
 
 class TestRunAdapter(ITestRun):
@@ -51,3 +52,11 @@ class TestRunAdapter(ITestRun):
     def list_testruns(self, command: ListTestRunsCommand) -> List[TestRunDTO]:
         """Lists testruns by domain and optionally date."""
         return self.loader.list_testruns(domain=command.domain, date=command.date)
+
+    def load_testcase(self, command: LoadTestCaseCommand) -> TestCaseDTO:
+        """Loads a persisted testcase by ID."""
+
+        dto = self.dto_storage.read_dto(
+            object_type=ObjectType.TESTCASE, id=str(command.testcase_id)
+        )
+        return cast(TestCaseDTO, dto)

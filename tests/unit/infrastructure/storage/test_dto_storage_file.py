@@ -3,37 +3,33 @@ from uuid import uuid4
 
 import pytest
 from fsspec.implementations.memory import MemoryFileSystem
-
-from src.infrastructure.storage.dto_storage_file import (
-    MemoryDtoStorage,
-    JsonSerializer,
-    DtoStorageFileError,
-)
-from src.infrastructure_ports import ObjectNotFoundError
 from src.dtos import (
+    DTO,
+    DomainConfigDTO,
     LocationDTO,
     ObjectType,
-    DomainConfigDTO,
-    TestSetDTO,
+    TestCaseDTO,
     TestCaseEntryDTO,
+    TestSetDTO,
     TestType,
-    TestCasesConfigDTO,
-    CompareTestCaseConfigDTO,
-    SchemaTestCaseConfigDTO,
-    DTO,
 )
+from src.infrastructure.storage.dto_storage_file import (
+    DtoStorageFileError,
+    JsonSerializer,
+    MemoryDtoStorage,
+)
+from src.infrastructure_ports import ObjectNotFoundError
 
 
 def _make_domain_config(domain: str = "payments") -> DomainConfigDTO:
     return DomainConfigDTO(
         domain=domain,
         instances={"test": ["alpha"]},
-        specifications_locations=[LocationDTO("memory://specs/")],
-        testreports_location=LocationDTO("memory://reports/"),
-        testcases=TestCasesConfigDTO(
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-        ),
+        spec_locations={"test": ["memory://specs/"]},
+        reports_location=LocationDTO("memory://reports/"),
+        compare_datatypes=["int", "string"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
 
 
@@ -94,16 +90,42 @@ class TestMemoryDtoStorage:
         config = _make_domain_config("payments")
         storage.write_dto(config)
 
-        # Verify file exists at expected path
-        expected = f"data/domain_configs/domain_config_{config.id}.json"
+        expected = f"data/domain_configs/{config.id}.json"
         assert storage.fs.exists(expected)
 
     def test_testset_stored_in_subfolder(self, storage: MemoryDtoStorage):
         testset = _make_testset("payments")
         storage.write_dto(testset)
 
-        expected = f"data/testsets/payments/testset_{testset.id}.json"
+        expected = f"data/testsets/payments/{testset.id}.json"
         assert storage.fs.exists(expected)
+
+    def test_write_read_testcase(
+        self, storage: MemoryDtoStorage, testcase_result: TestCaseDTO
+    ):
+        storage.write_dto(testcase_result)
+
+        result = cast(
+            TestCaseDTO,
+            storage.read_dto(ObjectType.TESTCASE, str(testcase_result.id)),
+        )
+        assert result.id == testcase_result.id
+        assert result.testtype == testcase_result.testtype
+        assert result.result == testcase_result.result
+        assert result.testobject.name == testcase_result.testobject.name
+        assert result.testrun_id == testcase_result.testrun_id
+
+    def test_testcase_stored_in_flat_folder(
+        self, storage: MemoryDtoStorage, testcase_result: TestCaseDTO
+    ):
+        storage.write_dto(testcase_result)
+
+        expected = f"data/testcases/{testcase_result.id}.json"
+        assert storage.fs.exists(expected)
+
+    def test_testcase_read_not_found(self, storage: MemoryDtoStorage):
+        with pytest.raises(ObjectNotFoundError):
+            storage.read_dto(ObjectType.TESTCASE, str(uuid4()))
 
     # --- list_dtos ---
 
@@ -150,14 +172,13 @@ class TestMemoryDtoStorage:
     # --- duplicate detection ---
 
     def test_read_dto_multiple_matches_raises(self, storage: MemoryDtoStorage):
-
         config = _make_domain_config("sales")
         serializer = JsonSerializer()
         content = serializer.serialize(config)
-        with storage.fs.open("data/domain_configs/domain_config_sales.json", "wb") as f:
+        with storage.fs.open(f"data/domain_configs/{config.id}.json", "wb") as f:
             f.write(content)
-        with storage.fs.open("data/domain_configs/s/domain_config_sales.json", "wb") as f:
+        with storage.fs.open(f"data/domain_configs/sub/{config.id}.json", "wb") as f:
             f.write(content)
 
         with pytest.raises(DtoStorageFileError, match="Multiple"):
-            storage.read_dto(ObjectType.DOMAIN_CONFIG, "sales")
+            storage.read_dto(ObjectType.DOMAIN_CONFIG, str(config.id))

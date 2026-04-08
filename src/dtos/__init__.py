@@ -2,9 +2,6 @@
 from .dto import DTO
 from .domain_config_dtos import (
     DomainConfigDTO,
-    TestCasesConfigDTO,
-    SchemaTestCaseConfigDTO,
-    CompareTestCaseConfigDTO,
 )
 from .specification_dtos import (
     AnySpec,
@@ -31,10 +28,6 @@ from .testrun_dtos import (
 from .report_dtos import (
     ReportArtifactFormat,
     ReportArtifact,
-    ReportType,
-    TestReportDTO,
-    TestCaseReportDTO,
-    TestRunReportDTO,
 )
 from .storage_dtos import LocationDTO, StorageType, ObjectType
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO

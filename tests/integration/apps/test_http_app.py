@@ -5,26 +5,22 @@ Tests the full pipeline against the demo backend, using the session-scoped
 demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 """
 
-from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
-
-from datetime import datetime
-
 import pytest
 from fastapi.testclient import TestClient
-
-from src.dtos.specification_dtos import SpecDTO
-from tests.conftest import DemoData
 from src.apps.http_app import create_app
+from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
-    TestCaseReportDTO,
-    TestRunDTO,
-    TestRunReportDTO,
-    TestSetDTO,
+    TestCaseDTO,
     TestCaseEntryDTO,
+    TestRunDTO,
+    TestSetDTO,
     TestType,
 )
+from src.dtos.specification_dtos import SpecDTO
+
+from tests.conftest import DemoData
 
 
 @pytest.fixture(scope="module")
@@ -128,9 +124,7 @@ class TestFullFlowPayments:
             assert tc.testobject in testobject_names
 
         # 3. Find specifications
-        locations = dc_dto.specifications_locations_by_instance(
-            stage="test", instance="alpha"
-        )
+        locations = dc_dto.spec_locations_by_stage(stage="test")
         request = FindSpecsRequest(testset=ts_dto, locations=locations)
         specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200
@@ -167,45 +161,32 @@ class TestFullFlowPayments:
         for tc in tr_dto.results:
             assert tc.status.value == "FINISHED"
 
-        today = datetime.now().strftime("%Y-%m-%d")
+        # 6. Verify individual testcase persistence
+        for tc in tr_dto.results:
+            tc_get_resp = client.get(f"/payments/testcase/{tc.id}")
+            assert tc_get_resp.status_code == 200
+            loaded_tc = TestCaseDTO.from_json(tc_get_resp.content)
+            assert str(loaded_tc.id) == str(tc.id)
+            assert loaded_tc.testtype == tc.testtype
+            assert loaded_tc.result == tc.result
 
-        # 6. Verify testrun reports — by date
-        tr_report_get_resp = client.get(f"/payments/testrun-report/?date={today}")
-        assert tr_report_get_resp.status_code == 200
-        tr_reports = [TestRunReportDTO.from_dict(r) for r in tr_report_get_resp.json()]
-        tr_report = next(r for r in tr_reports if str(r.testrun_id) == testrun_id)
-        assert tr_report.result == "NOK"
+        # 7. Verify testcase REPORT/TXT artifact for all testcases
+        for tc in tr_dto.results:
+            artifact_resp = client.get(
+                f"/payments/testcase/{tc.id}/artifact",
+                params={"artifact": "report", "format": "txt"},
+            )
+            assert artifact_resp.status_code == 200
+            assert artifact_resp.headers["content-type"].startswith("text/plain")
+            assert len(artifact_resp.content) > 0
+            content_text = artifact_resp.content.decode("utf-8")
+            assert tc.testtype.value in content_text or tc.result.value in content_text
 
-        _assert_testcase_results(
-            [
-                (tc.testobject, tc.testtype, tc.result)
-                for tc in tr_report.testcase_results
-            ],
-            self.EXPECTED_RESULTS,
+        # 8. Verify testrun REPORT/XLSX artifact
+        tr_artifact_resp = client.get(
+            f"/payments/testrun/{testrun_id}/artifact",
+            params={"format": "xlsx"},
         )
-
-        # 7. Verify testcase reports — by testrun_id
-        tc_trid_get_resp = client.get(
-            f"/payments/testcase-report/?testrun_id={testrun_id}"
-        )
-        assert tc_trid_get_resp.status_code == 200
-        tc_reports_by_trid = [
-            TestCaseReportDTO.from_dict(r) for r in tc_trid_get_resp.json()
-        ]
-        assert len(tc_reports_by_trid) == 7
-
-        _assert_testcase_results(
-            [(r.testobject, r.testtype, r.result) for r in tc_reports_by_trid],
-            self.EXPECTED_RESULTS,
-        )
-        assert sum(1 for r in tc_reports_by_trid if r.result == "NOK") == 1
-
-        # 8. Verify testcase reports — by date
-        tc_date_get_resp = client.get(f"/payments/testcase-report/?date={today}")
-        assert tc_date_get_resp.status_code == 200
-        tc_reports_by_date = [
-            TestCaseReportDTO.from_dict(r)
-            for r in tc_date_get_resp.json()
-            if r["testrun_id"] == testrun_id
-        ]
-        assert len(tc_reports_by_date) == 7
+        assert tr_artifact_resp.status_code == 200
+        assert "spreadsheetml" in tr_artifact_resp.headers["content-type"]
+        assert tr_artifact_resp.content[:4] == b"PK\x03\x04"

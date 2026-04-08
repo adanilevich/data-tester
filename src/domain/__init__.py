@@ -1,6 +1,7 @@
 # ruff: noqa
 from .report import (
-    IReportFormatter,
+    ITestCaseFormatter,
+    ITestRunFormatter,
     XlsxTestCaseDiffFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestRunReportFormatter,

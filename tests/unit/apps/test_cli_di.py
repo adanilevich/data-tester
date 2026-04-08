@@ -1,19 +1,18 @@
 import pytest
-
 from src.apps.cli_di import CliDependencyInjector
 from src.config import Config
+from src.domain.report.plugins import (
+    TxtTestCaseReportFormatter,
+    XlsxTestCaseDiffFormatter,
+    XlsxTestRunReportFormatter,
+)
+from src.domain.specification import NamingConventionsFactory, SpecParserFactory
 from src.domain_adapters import (
     DomainConfigAdapter,
     ReportAdapter,
     SpecAdapter,
     TestRunAdapter,
 )
-from src.domain.report.plugins import (
-    TxtTestCaseReportFormatter,
-    XlsxTestCaseDiffFormatter,
-    XlsxTestRunReportFormatter,
-)
-from src.domain.specification import SpecParserFactory, NamingConventionsFactory
 from src.drivers import (
     DomainConfigDriver,
     ReportDriver,
@@ -55,12 +54,13 @@ class TestCliDependencyInjectorInit:
         injector = CliDependencyInjector(config)
         assert isinstance(injector.user_storage, IUserStorage)
 
-    def test_initializes_three_report_formatters(self, config: Config):
+    def test_initializes_report_formatters(self, config: Config):
         injector = CliDependencyInjector(config)
-        assert len(injector.testreport_formatters) == 3
-        assert isinstance(injector.testreport_formatters[0], TxtTestCaseReportFormatter)
-        assert isinstance(injector.testreport_formatters[1], XlsxTestCaseDiffFormatter)
-        assert isinstance(injector.testreport_formatters[2], XlsxTestRunReportFormatter)
+        assert len(injector.testcase_formatters) == 2
+        assert isinstance(injector.testcase_formatters[0], TxtTestCaseReportFormatter)
+        assert isinstance(injector.testcase_formatters[1], XlsxTestCaseDiffFormatter)
+        assert len(injector.testrun_formatters) == 1
+        assert isinstance(injector.testrun_formatters[0], XlsxTestRunReportFormatter)
 
     def test_initializes_notifiers(self, config: Config):
         config.DATATESTER_NOTIFIERS = ["IN_MEMORY"]
@@ -161,4 +161,4 @@ class TestCliDependencyInjectorDrivers:
         injector = CliDependencyInjector(config)
         driver = injector.report_driver()
         assert isinstance(driver.adapter, ReportAdapter)
-        assert driver.adapter.dto_storage is injector.dto_storage
+        assert driver.adapter.report.dto_storage is injector.dto_storage

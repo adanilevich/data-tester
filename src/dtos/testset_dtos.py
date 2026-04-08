@@ -1,9 +1,8 @@
-from uuid import uuid4
-from typing import List, Dict
 from datetime import datetime
+from typing import Dict, List
+from uuid import uuid4
 
-from pydantic import Field, computed_field
-from pydantic import UUID4
+from pydantic import UUID4, Field, computed_field
 
 from src.dtos.dto import DTO
 from src.dtos.testrun_dtos import TestType

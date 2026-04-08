@@ -1,8 +1,7 @@
 from typing import Dict
 
 import pytest
-
-from src.domain.testrun.precondition_checks import CheckSpecsAreUnique, Checkable
+from src.domain.testrun.precondition_checks import Checkable, CheckSpecsAreUnique
 from src.dtos import (
     Importance,
     LocationDTO,

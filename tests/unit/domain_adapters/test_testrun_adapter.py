@@ -1,30 +1,26 @@
-import pytest
 from uuid import uuid4
 
+import pytest
 from src.domain_adapters import TestRunAdapter
-from src.infrastructure.backend.dummy import DummyBackendFactory
-from src.infrastructure.storage.dto_storage_file import MemoryDtoStorage
-from src.infrastructure.storage.dto_storage_file import JsonSerializer
-from src.infrastructure.notifier import InMemoryNotifier
+from src.domain_ports import (
+    ExecuteTestRunCommand,
+    LoadTestRunCommand,
+    SaveTestRunCommand,
+)
 from src.dtos import (
-    TestRunDTO,
-    TestObjectDTO,
-    TestType,
-    Status,
-    Result,
-    LocationDTO,
     DomainConfigDTO,
+    LocationDTO,
+    Result,
     SchemaSpecDTO,
-    TestCasesConfigDTO,
-    SchemaTestCaseConfigDTO,
-    CompareTestCaseConfigDTO,
+    Status,
+    TestObjectDTO,
+    TestRunDTO,
+    TestType,
 )
 from src.dtos.testrun_dtos import TestCaseDefDTO, TestRunDefDTO
-from src.domain_ports import (
-    SaveTestRunCommand,
-    LoadTestRunCommand,
-    ExecuteTestRunCommand,
-)
+from src.infrastructure.backend.dummy import DummyBackendFactory
+from src.infrastructure.notifier import InMemoryNotifier
+from src.infrastructure.storage.dto_storage_file import JsonSerializer, MemoryDtoStorage
 from src.infrastructure_ports import ObjectNotFoundError
 
 
@@ -65,12 +61,11 @@ def domain_config():
     return DomainConfigDTO(
         domain="test_domain",
         instances={"test_stage": ["test_instance"]},
-        specifications_locations=LocationDTO("memory://specs/"),
-        testreports_location=LocationDTO("memory://reports/"),
-        testcases=TestCasesConfigDTO(
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
-        ),
+        spec_locations={"test_stage": ["memory://specs/"]},
+        reports_location=LocationDTO("memory://reports/"),
+        compare_datatypes=["int", "string"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
 
 

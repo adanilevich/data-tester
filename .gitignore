@@ -5,6 +5,7 @@ agent-artifacts/
 data/
 examples/
 scribble.py
+.nicegui/
 
 # macOS
 .DS_Store

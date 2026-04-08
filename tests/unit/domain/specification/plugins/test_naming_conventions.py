@@ -1,8 +1,8 @@
-from src.dtos import TestCaseEntryDTO, LocationDTO, TestType, SpecType
 from src.domain.specification.plugins.naming_conventions import (
     DefaultNamingConventions,
     NamingConventionsFactory,
 )
+from src.dtos import LocationDTO, SpecType, TestCaseEntryDTO, TestType
 
 
 class TestDefaultNamingConventions:

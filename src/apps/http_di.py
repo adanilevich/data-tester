@@ -10,7 +10,8 @@ from src.apps.cli_di import (
 )
 from src.config import Config
 from src.domain.report.plugins import (
-    IReportFormatter,
+    ITestCaseFormatter,
+    ITestRunFormatter,
     TxtTestCaseReportFormatter,
     XlsxTestCaseDiffFormatter,
     XlsxTestRunReportFormatter,
@@ -40,9 +41,11 @@ class HttpDependencyInjector:
         self.config = config
         self.dto_storage: IDtoStorage = get_dto_storage(config)
         self.user_storage: IUserStorage = get_user_storage(config)
-        self.testreport_formatters: list[IReportFormatter] = [
+        self.testcase_formatters: list[ITestCaseFormatter] = [
             TxtTestCaseReportFormatter(),
             XlsxTestCaseDiffFormatter(),
+        ]
+        self.testrun_formatters: list[ITestRunFormatter] = [
             XlsxTestRunReportFormatter(),
         ]
         self.notifiers: list[INotifier] = get_notifiers(config)
@@ -82,9 +85,9 @@ class HttpDependencyInjector:
 
     def report_driver(self) -> ReportDriver:
         handler = ReportAdapter(
-            formatters=self.testreport_formatters,
+            testcase_formatters=self.testcase_formatters,
+            testrun_formatters=self.testrun_formatters,
             dto_storage=self.dto_storage,
-            notifiers=self.notifiers,
         )
         return ReportDriver(report_adapter=handler)
 

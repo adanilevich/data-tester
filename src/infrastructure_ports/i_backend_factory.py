@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from src.infrastructure_ports.i_backend import IBackend
+
 from src.dtos import DomainConfigDTO
+from src.infrastructure_ports.i_backend import IBackend
 
 
 class IBackendFactory(ABC):

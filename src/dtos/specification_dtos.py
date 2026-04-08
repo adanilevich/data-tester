@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 from enum import Enum
 from typing import Annotated, Any, Callable, Dict, List, Optional, Self, Union
-from pydantic import Discriminator, Tag, model_validator, Field
+
+from pydantic import Discriminator, Field, Tag, model_validator
 
 from src.dtos.dto import DTO
 from src.dtos.storage_dtos import LocationDTO

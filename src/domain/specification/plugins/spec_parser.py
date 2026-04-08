@@ -4,13 +4,14 @@ from typing import cast
 import polars as pl
 
 from src.dtos import (
-    SpecType,
-    SchemaSpecDTO,
-    RowcountSpecDTO,
     CompareSpecDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    SpecType,
     StagecountSpecDTO,
 )
 from src.dtos.specification_dtos import SpecDTO
+
 from .i_spec_parser import (
     ISpecParser,
     ISpecParserFactory,

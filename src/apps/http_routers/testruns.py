@@ -4,7 +4,7 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 
-from src.apps.http_di import ReportDriverDep, TestRunDriverDep
+from src.apps.http_di import TestRunDriverDep
 from src.client_interface.requests import ExecuteTestRunRequest
 from src.dtos import TestRunDTO
 from src.dtos.testrun_dtos import TestRunDefDTO
@@ -25,7 +25,6 @@ def execute_testrun(
     body: ExecuteTestRunRequest,
     background_tasks: BackgroundTasks,
     testrun_driver: TestRunDriverDep,
-    report_driver: ReportDriverDep,
 ) -> JSONResponse:
     testrun_def = TestRunDefDTO.from_testset(
         testset=body.testset,
@@ -37,8 +36,7 @@ def execute_testrun(
     testrun_id = uuid4()
 
     def _run(trd: TestRunDefDTO) -> None:
-        result = testrun_driver.execute_testrun(testrun_def=trd, testrun_id=testrun_id)
-        report_driver.create_and_save_all_reports(testrun=result)
+        testrun_driver.execute_testrun(testrun_def=trd, testrun_id=testrun_id)
 
     background_tasks.add_task(_run, testrun_def)
     return JSONResponse({"testrun_id": str(testrun_id)}, status_code=202)

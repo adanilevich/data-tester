@@ -1,14 +1,13 @@
 import pytest
-
-from src.dtos import DomainConfigDTO, LocationDTO
 from src.domain.domain_config import (
     DomainConfig,
     DomainConfigNotUniqueError,
 )
+from src.dtos import DomainConfigDTO, LocationDTO
 from src.infrastructure.storage.dto_storage_file import (
+    JsonSerializer,
     MemoryDtoStorage,
 )
-from src.infrastructure.storage.dto_storage_file import JsonSerializer
 
 
 class TestDomainConfig:
@@ -88,9 +87,8 @@ class TestDomainConfig:
         fetched_config = fetched_configs["testdomain"]
         assert fetched_config.domain == config.domain
         assert fetched_config.instances == config.instances
-        assert fetched_config.specifications_locations == config.specifications_locations
-        assert fetched_config.testreports_location == config.testreports_location
-        assert fetched_config.testcases == config.testcases
+        assert fetched_config.spec_locations == config.spec_locations
+        assert fetched_config.reports_location == config.reports_location
 
     def test_save_and_load(
         self,
@@ -105,6 +103,5 @@ class TestDomainConfig:
 
         assert loaded.domain == "loadtest"
         assert loaded.instances == config.instances
-        assert loaded.specifications_locations == config.specifications_locations
-        assert loaded.testreports_location == config.testreports_location
-        assert loaded.testcases == config.testcases
+        assert loaded.spec_locations == config.spec_locations
+        assert loaded.reports_location == config.reports_location

@@ -9,8 +9,9 @@ from src.apps.http_routers import (
     platform,
     reports,
     specifications,
-    testsets,
+    testcases,
     testruns,
+    testsets,
 )
 from src.config import Config
 
@@ -27,5 +28,6 @@ def create_app(config: Config, di: HttpDependencyInjector | None = None) -> Fast
     app.include_router(testsets.router)
     app.include_router(specifications.router)
     app.include_router(testruns.router)
+    app.include_router(testcases.router)
     app.include_router(reports.router)
     return app

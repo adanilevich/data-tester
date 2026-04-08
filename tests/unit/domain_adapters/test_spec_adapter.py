@@ -1,22 +1,22 @@
-import pytest
 import io
-from uuid import uuid4
 from datetime import datetime
-import polars as pl
+from uuid import uuid4
 
-from src.domain_adapters import SpecAdapter
+import polars as pl
+import pytest
 from src.domain.specification.plugins import NamingConventionsFactory, SpecParserFactory
-from src.infrastructure.storage.user_storage import MemoryUserStorage
+from src.domain_adapters import SpecAdapter
 from src.domain_ports import ListSpecsCommand
 from src.dtos import (
     LocationDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    SpecType,
     TestCaseEntryDTO,
     TestSetDTO,
     TestType,
-    SpecType,
-    SchemaSpecDTO,
-    RowcountSpecDTO,
 )
+from src.infrastructure.storage.user_storage import MemoryUserStorage
 
 
 def _put(storage: MemoryUserStorage, path: str, data: bytes) -> None:

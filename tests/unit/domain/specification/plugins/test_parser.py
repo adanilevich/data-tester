@@ -1,21 +1,21 @@
-from src.domain.specification.plugins.i_spec_parser import SpecParserError
 import io
-import pytest
-import polars as pl
 
-from src.dtos import (
-    SpecType,
-    CompareSpecDTO,
-    SchemaSpecDTO,
-    RowcountSpecDTO,
-    SpecDTO,
-    LocationDTO,
-)
+import polars as pl
+import pytest
 from src.domain.specification.plugins import (
-    XlsxSchemaParser,
-    RowcountSqlParser,
     CompareSqlParser,
+    RowcountSqlParser,
     SpecParserFactory,
+    XlsxSchemaParser,
+)
+from src.domain.specification.plugins.i_spec_parser import SpecParserError
+from src.dtos import (
+    CompareSpecDTO,
+    LocationDTO,
+    RowcountSpecDTO,
+    SchemaSpecDTO,
+    SpecDTO,
+    SpecType,
 )
 
 
