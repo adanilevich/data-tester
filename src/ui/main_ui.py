@@ -30,7 +30,7 @@ from nicegui import ui
 
 from .app import register_routes
 from .config import UIConfig
-from .data import DataTesterClient
+from .client import DataTesterClient
 
 
 def create_ui(config: UIConfig | None = None) -> None:
