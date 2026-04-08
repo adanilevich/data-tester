@@ -6,7 +6,8 @@ Data Tester is a flexible, extensible framework for automating business validati
 ## Tech Stack
 - Python
 - pydantic for data validation
-- fastapi for backend
+- FastAPI for backend
+- NiceGUI for frontend
 - fsspec for file system interaction
 
 ## Code Style and Quality Standards
@@ -28,6 +29,7 @@ The project uses hexagonal architecture with clear separation between domain log
 - `src/infrastructure_ports`: contains driven (infrastructure) ports (interfaces) which are used as contracts by drivers and domain logic
 - `src/infrastructure`: contains implementations of the infrastructure ports, the most important are `storage`, `notifiers`, `backend` (aka `data_platform`)
 - `src/apps`: contains applications (`..._app.py` modules, e.g. cli client, http client) and dependency injection which assemble all objects (`..._di.py` modules)
+- `src/ui`: contains ui code
 
 ## Commands
 - `uv sync`: install dependencies
@@ -39,13 +41,14 @@ The project uses hexagonal architecture with clear separation between domain log
 - `uv run pytest tests/unit/`: Run unit tests only
 - `uv run pytest tests/integration/`: Run integration tests only
 
-## MANDATORY: Planning Workflow (do this first before anything else)
-1. When planning, invoke the `planning-with-files:plan` skill using the Skill tool — do NOT use the built-in plan mode as a substitute
-2. Write your plan to `agent-artifacts/plans/{task-title}.md`. **DO NOT prompt for permission to create folders**
-3. **DO NOT present the plan to the user or prompt for implementation until step 2 is complete** 
-4. Execute all checks before finalizing code. Fix any occuring issues
-5. **MANDATORY**: DO NOT ask for permissions if they are already provided in `local.settings.json`.
-6. After implementation write a summary to `agent-artifacts/summaries/summary-{task-title}.md`
+**MANDATORY**: DO NOT ask for permissions if they are already provided in `local.settings.json`.
+
+## MANDATORY: Planning and Summary Workflow (do this first before anything else)
+1. When planning, invoke the `planning-with-files:plan` skill using the Skill tool — do NOT use the built-in plan mode as a substitute. 
+2. Write intermediate results `task-plan.md`, `findings.md`, `progress.md` of `planning-with-files` to `/agent-artifacts/tmp` under task-specific subfolder 
+3. Write your final plan in HUMAN-READABLE format to `agent-artifacts/plans/{task-title}.md`. **DO NOT prompt for permission to create folders**
+4. **DO NOT present the plan to the user or prompt for implementation until step 3 is complete** 
+5. After implementation write a summary to `agent-artifacts/summaries/summary-{task-title}.md`
 
 ## Before prompting for implementation verify
 - [ ] Final plan persisted to `agent-artifacts/plans/plan-{task-title}.md`
