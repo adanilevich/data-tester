@@ -26,17 +26,14 @@ from src.drivers import (
 )
 from src.drivers.testset_driver import TestSetNotFoundError
 from src.dtos import (
-    CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
     ReportArtifact,
     ReportArtifactFormat,
     Result,
     SchemaSpecDTO,
-    SchemaTestCaseConfigDTO,
     Status,
     TestCaseEntryDTO,
-    TestCasesConfigDTO,
     TestObjectDTO,
     TestRunDTO,
     TestSetDTO,
@@ -129,7 +126,6 @@ class TestDomainConfigDriverIntegration:
         loaded = driver.load_domain_config(domain="roundtrip_domain")
         assert loaded.domain == "roundtrip_domain"
         assert loaded.instances == dc.instances
-        assert loaded.testcases == dc.testcases
 
     def test_list_multiple_configs(self, di: CliDi, domain_config: DomainConfigDTO):
         driver = di.domain_config_driver()
@@ -295,12 +291,11 @@ class TestTestRunDriverIntegration:
         return DomainConfigDTO(
             domain="my_domain",
             instances={},
-            specifications_locations=[],
-            testreports_location=LocationDTO("memory://my_location"),
-            testcases=TestCasesConfigDTO(
-                schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare=CompareTestCaseConfigDTO(sample_size=100),
-            ),
+            spec_locations={},
+            reports_location=LocationDTO("memory://my_location"),
+            compare_datatypes=["int", "str"],
+            sample_size_default=100,
+            sample_size_per_object={},
         )
 
     def _make_testcase_def(
@@ -393,12 +388,11 @@ class TestReportDriverIntegration:
         return DomainConfigDTO(
             domain="my_domain",
             instances={},
-            specifications_locations=[],
-            testreports_location=LocationDTO("memory://my_location"),
-            testcases=TestCasesConfigDTO(
-                schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "str"]),
-                compare=CompareTestCaseConfigDTO(sample_size=100),
-            ),
+            spec_locations={},
+            reports_location=LocationDTO("memory://my_location"),
+            compare_datatypes=["int", "str"],
+            sample_size_default=100,
+            sample_size_per_object={},
         )
 
     def _make_testcase_def(

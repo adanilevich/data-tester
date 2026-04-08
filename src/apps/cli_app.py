@@ -23,9 +23,8 @@ class CliApp:
         spec_driver = self.di.specification_driver()
         specs = spec_driver.find_specifications(
             testset=testset,
-            locations=domain_config.specifications_locations_by_instance(
+            locations=domain_config.spec_locations_by_stage(
                 stage=testset.stage or testset.default_stage,
-                instance=testset.instance or testset.default_instance,
             ),
         )
 

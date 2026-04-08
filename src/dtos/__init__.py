@@ -2,9 +2,6 @@
 from .dto import DTO
 from .domain_config_dtos import (
     DomainConfigDTO,
-    TestCasesConfigDTO,
-    SchemaTestCaseConfigDTO,
-    CompareTestCaseConfigDTO,
 )
 from .specification_dtos import (
     AnySpec,

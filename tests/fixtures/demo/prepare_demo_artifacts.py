@@ -25,13 +25,10 @@ from typing import List
 import polars as pl
 from fsspec.implementations.local import LocalFileSystem
 from src.dtos import (
-    CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
-    SchemaTestCaseConfigDTO,
     StagecountSpecDTO,
     TestCaseEntryDTO,
-    TestCasesConfigDTO,
     TestSetDTO,
     TestType,
 )
@@ -100,30 +97,23 @@ def _domain_configs(
         DomainConfigDTO(
             domain="payments",
             instances={"test": ["alpha", "beta"], "uat": ["main"]},
-            specifications_locations=[
-                LocationDTO(f"{specs_base}payments/"),
-            ],
-            testreports_location=LocationDTO(reports_base),
-            testcases=TestCasesConfigDTO(
-                compare=CompareTestCaseConfigDTO(sample_size=100),
-                schema=SchemaTestCaseConfigDTO(
-                    compare_datatypes=["int", "string", "float", "date"],
-                ),
-            ),
+            spec_locations={
+                "test": [f"{specs_base}payments/"],
+                "uat": [f"{specs_base}payments/"],
+            },
+            reports_location=LocationDTO(reports_base),
+            compare_datatypes=["int", "string", "float", "date"],
+            sample_size_default=100,
+            sample_size_per_object={},
         ),
         DomainConfigDTO(
             domain="sales",
             instances={"test": ["main"]},
-            specifications_locations=[
-                LocationDTO(f"{specs_base}sales/"),
-            ],
-            testreports_location=LocationDTO(reports_base),
-            testcases=TestCasesConfigDTO(
-                compare=CompareTestCaseConfigDTO(sample_size=50),
-                schema=SchemaTestCaseConfigDTO(
-                    compare_datatypes=["int", "string"],
-                ),
-            ),
+            spec_locations={"test": [f"{specs_base}sales/"]},
+            reports_location=LocationDTO(reports_base),
+            compare_datatypes=["int", "string"],
+            sample_size_default=50,
+            sample_size_per_object={},
         ),
     ]
 

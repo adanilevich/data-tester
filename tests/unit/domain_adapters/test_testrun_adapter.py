@@ -8,14 +8,11 @@ from src.domain_ports import (
     SaveTestRunCommand,
 )
 from src.dtos import (
-    CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
     Result,
     SchemaSpecDTO,
-    SchemaTestCaseConfigDTO,
     Status,
-    TestCasesConfigDTO,
     TestObjectDTO,
     TestRunDTO,
     TestType,
@@ -64,12 +61,11 @@ def domain_config():
     return DomainConfigDTO(
         domain="test_domain",
         instances={"test_stage": ["test_instance"]},
-        specifications_locations=LocationDTO("memory://specs/"),
-        testreports_location=LocationDTO("memory://reports/"),
-        testcases=TestCasesConfigDTO(
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string"]),
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
-        ),
+        spec_locations={"test_stage": ["memory://specs/"]},
+        reports_location=LocationDTO("memory://reports/"),
+        compare_datatypes=["int", "string"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
 
 

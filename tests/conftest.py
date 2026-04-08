@@ -9,14 +9,11 @@ import pytest
 from fsspec.implementations.memory import MemoryFileSystem
 
 from src.dtos import (
-    CompareTestCaseConfigDTO,
     DomainConfigDTO,
     LocationDTO,
     Result,
-    SchemaTestCaseConfigDTO,
     Status,
     TestCaseDTO,
-    TestCasesConfigDTO,
     TestObjectDTO,
     TestRunDTO,
     TestType,
@@ -89,15 +86,11 @@ def domain_config() -> DomainConfigDTO:
     domain_config = DomainConfigDTO(
         domain="payments",
         instances={"test": ["alpha", "beta"], "uat": ["main"]},
-        specifications_locations=[
-            LocationDTO("memory://sqls"),
-            LocationDTO("memory://specs"),
-        ],
-        testreports_location=LocationDTO("memory://testreports"),
-        testcases=TestCasesConfigDTO(
-            compare=CompareTestCaseConfigDTO(sample_size=100, sample_size_per_object={}),
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["int", "string", "bool"]),
-        ),
+        spec_locations={"test": ["memory://sqls", "memory://specs"]},
+        reports_location=LocationDTO("memory://testreports"),
+        compare_datatypes=["int", "string", "bool"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
     return domain_config
 

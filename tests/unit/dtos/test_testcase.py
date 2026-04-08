@@ -2,12 +2,7 @@ from datetime import datetime
 from uuid import uuid4
 
 import pytest
-from src.dtos.domain_config_dtos import (
-    CompareTestCaseConfigDTO,
-    DomainConfigDTO,
-    SchemaTestCaseConfigDTO,
-    TestCasesConfigDTO,
-)
+from src.dtos.domain_config_dtos import DomainConfigDTO
 from src.dtos.specification_dtos import (
     AnySpec,
     CompareSpecDTO,
@@ -32,12 +27,11 @@ def domain_config():
     return DomainConfigDTO(
         domain="test_domain",
         instances={"dev": ["instance1"], "prod": ["instance2"]},
-        specifications_locations=LocationDTO(path="dummy://specs"),
-        testreports_location=LocationDTO(path="dummy://reports"),
-        testcases=TestCasesConfigDTO(
-            compare=CompareTestCaseConfigDTO(sample_size=100),
-            schema=SchemaTestCaseConfigDTO(compare_datatypes=["string", "int"]),
-        ),
+        spec_locations={"dev": ["dummy://specs"], "prod": ["dummy://specs"]},
+        reports_location=LocationDTO(path="dummy://reports"),
+        compare_datatypes=["string", "int"],
+        sample_size_default=100,
+        sample_size_per_object={},
     )
 
 
@@ -145,12 +139,11 @@ class TestTestRunDefDTO:
         different_domain_config = DomainConfigDTO(
             domain="different_domain",
             instances={"dev": ["instance1"]},
-            specifications_locations=LocationDTO(path="dummy://specs"),
-            testreports_location=LocationDTO(path="dummy://reports"),
-            testcases=TestCasesConfigDTO(
-                compare=CompareTestCaseConfigDTO(sample_size=100),
-                schema=SchemaTestCaseConfigDTO(compare_datatypes=["string"]),
-            ),
+            spec_locations={"dev": ["dummy://specs"]},
+            reports_location=LocationDTO(path="dummy://reports"),
+            compare_datatypes=["string"],
+            sample_size_default=100,
+            sample_size_per_object={},
         )
 
         msg = "domain_config.domain must be same as testset.domain"

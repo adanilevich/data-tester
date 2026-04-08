@@ -106,10 +106,9 @@ class CompareTestCase(AbstractTestCase):
 
     @property
     def sample_size(self) -> int:
-        config = self.domain_config.testcases.compare
-        sample_size = config.sample_size_per_object.get(self.testobject.name)
+        sample_size = self.domain_config.sample_size_per_object.get(self.testobject.name)
         if sample_size is None:
-            sample_size = config.sample_size
+            sample_size = self.domain_config.sample_size_default
             self.notify("Using default sample size for comparison")
         else:
             self.notify("Using object specific sample size for comparison")

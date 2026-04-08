@@ -124,9 +124,7 @@ class TestFullFlowPayments:
             assert tc.testobject in testobject_names
 
         # 3. Find specifications
-        locations = dc_dto.specifications_locations_by_instance(
-            stage="test", instance="alpha"
-        )
+        locations = dc_dto.spec_locations_by_stage(stage="test")
         request = FindSpecsRequest(testset=ts_dto, locations=locations)
         specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200

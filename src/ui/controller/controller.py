@@ -138,10 +138,7 @@ class Controller:
             all_specs: List[List[AnySpec]] = []
             for testset in testsets:
                 stage = testset.default_stage
-                instance = testset.default_instance
-                locations = domain_config.specifications_locations_by_instance(
-                    stage, instance
-                )
+                locations = domain_config.spec_locations_by_stage(stage)
                 request = FindSpecsRequest(testset=testset, locations=locations)
                 groups = await self._client.find_specs(domain, request)
                 all_specs.extend(groups)

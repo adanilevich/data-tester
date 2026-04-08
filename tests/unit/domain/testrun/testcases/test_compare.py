@@ -81,15 +81,15 @@ class TestCompareTestCase:
         return testcase_
 
     def test_default_sample_size_is_used_if_specific_not_specified(self, testcase):
-        testcase.domain_config.testcases.compare.sample_size_per_object = {}
-        testcase.domain_config.testcases.compare.sample_size = 1
+        testcase.domain_config.sample_size_per_object = {}
+        testcase.domain_config.sample_size_default = 1
 
         assert testcase.sample_size == 1
 
     def test_specific_sample_size_is_used_if_specified(self, testcase):
         sizes = {testcase.testobject.name: 100}
-        testcase.domain_config.testcases.compare.sample_size_per_object = sizes
-        testcase.domain_config.testcases.compare.sample_size = 1
+        testcase.domain_config.sample_size_per_object = sizes
+        testcase.domain_config.sample_size_default = 1
 
         assert testcase.sample_size == 100
 

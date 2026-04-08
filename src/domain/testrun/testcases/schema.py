@@ -133,7 +133,7 @@ class SchemaTestCase(AbstractTestCase):
 
         diff = ColumnDiffDTO(diffs=[])
         result = True
-        compare_datatypes = self.domain_config.testcases.schema.compare_datatypes
+        compare_datatypes = self.domain_config.compare_datatypes
         # narrowing for type checker; guaranteed by specs_not_empty precondition
         assert expected.columns is not None and actual.columns is not None
 
