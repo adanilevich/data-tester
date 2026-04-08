@@ -11,14 +11,14 @@ def register(controller: Controller) -> None:
 
     @ui.page("/{domain}/")
     async def domain_home(domain: str) -> None:
-        # Sync storage when user navigates directly via URL
-        if controller.domain != domain:
-            controller.domain = domain
-
         _ = NavBar(controller).render()
         _ = StatusBar(controller).render()
 
-        ui.notify(f"Teset status: {controller.get_testset_status(domain).value}")
+        # load_backend_data refreshes domain_configs first, so domain setter
+        # validation is safe to call after it.
+        await controller.load_backend_data(domain)
+        if controller.domain != domain:
+            controller.domain = domain
 
         with ui.column().classes(
             "flex-1 flex items-center justify-center min-h-screen "

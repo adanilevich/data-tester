@@ -60,9 +60,6 @@ def register(controller: Controller) -> None:
                         ui.notify("Please select a domain.", type="warning")
                         return
                     controller.domain = chosen
-                    error_msg_testsets = await controller.load_testsets(chosen)
-                    if error_msg_testsets:
-                        ui.notify(f"Error in testset loading: f{error_msg_testsets}")
                     ui.navigate.to(f"/{chosen}/")
 
 
