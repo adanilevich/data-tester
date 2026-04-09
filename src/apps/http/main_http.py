@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 
 import uvicorn
+from dotenv import load_dotenv
 from src.apps.http.app import create_app
 from src.config import Config
 
@@ -48,6 +49,8 @@ def _setup_demo(config: Config) -> None:
 
 def main() -> None:
     is_local = os.environ.get("DATATESTER_ENV", "LOCAL") == "LOCAL"
+    if is_local:
+        load_dotenv(".env")
     config = Config(_env_file=".env" if is_local else None)  # ty: ignore[unknown-argument]
 
     if config.DATATESTER_DATA_PLATFORM == "DEMO":

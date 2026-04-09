@@ -42,3 +42,13 @@ class Config(BaseSettings):
 
     # GCP DEPLOYMENT CONFIGURATIONS
     DATATESTER_GCP_PROJECT: str | None = Field(default=None)
+
+    # DEMO LATENCY SIMULATION — for local demo use only.
+    # Adds random latency per call (10 steps between delay_ms/10 and delay_ms).
+    # Realistic values:
+    # backend ~1000ms (BigQuery) -> meaning each query ca 500 ms
+    # dto_storage ~100ms (SSD) -> meaning each list / write / read ca. 50 ms
+    # user_storage ~500ms (GCS) -> meaning each list / write / read ca 250 ms
+    DATATESTER_DEMO_BACKEND_DELAY_MS: int = Field(default=0)
+    DATATESTER_DEMO_DTO_STORAGE_DELAY_MS: int = Field(default=0)
+    DATATESTER_DEMO_USER_STORAGE_DELAY_MS: int = Field(default=0)
