@@ -9,7 +9,7 @@
 | src/apps/cli/main\_cli.py                                                       |       13 |       13 |      0% |      7-24 |
 | src/apps/http/app.py                                                            |       20 |        0 |    100% |           |
 | src/apps/http/di.py                                                             |       62 |        0 |    100% |           |
-| src/apps/http/main\_http.py                                                     |       27 |       27 |      0% |     10-61 |
+| src/apps/http/main\_http.py                                                     |       30 |       30 |      0% |     10-64 |
 | src/apps/http/routers/domain\_config.py                                         |       16 |        1 |     94% |        13 |
 | src/apps/http/routers/platform.py                                               |       10 |        0 |    100% |           |
 | src/apps/http/routers/reports.py                                                |       17 |        0 |    100% |           |
@@ -20,7 +20,7 @@
 | src/client\_interface/\_\_init\_\_.py                                           |        1 |        0 |    100% |           |
 | src/client\_interface/requests.py                                               |       11 |        1 |     91% |        27 |
 | src/config/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
-| src/config/config.py                                                            |       19 |        1 |     95% |         9 |
+| src/config/config.py                                                            |       22 |        1 |     95% |         9 |
 | src/domain/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
 | src/domain/domain\_config/\_\_init\_\_.py                                       |        2 |        0 |    100% |           |
 | src/domain/domain\_config/domain\_config.py                                     |       24 |        2 |     92% |     50-51 |
@@ -93,16 +93,17 @@
 | src/dtos/testset\_dtos.py                                                       |       33 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                      |        4 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
-| src/infrastructure/backend/demo/demo\_backend.py                                |      227 |       11 |     95% |111-112, 224, 249-251, 265, 272-273, 401, 536 |
+| src/infrastructure/backend/demo/demo\_backend.py                                |      229 |       11 |     95% |113-114, 226, 251-253, 267, 274-275, 403, 538 |
 | src/infrastructure/backend/demo/demo\_backend\_factory.py                       |       16 |        0 |    100% |           |
 | src/infrastructure/backend/demo/demo\_naming\_resolver.py                       |       42 |        4 |     90% |58, 62, 64, 68 |
 | src/infrastructure/backend/demo/demo\_query\_handler.py                         |       25 |        1 |     96% |        41 |
+| src/infrastructure/demo\_latency.py                                             |       27 |        2 |     93% |     25-26 |
 | src/infrastructure/notifier/\_\_init\_\_.py                                     |        3 |        0 |    100% |           |
 | src/infrastructure/notifier/log\_notifier.py                                    |       24 |        0 |    100% |           |
 | src/infrastructure/storage/\_\_init\_\_.py                                      |        6 |        0 |    100% |           |
 | src/infrastructure/storage/dto\_storage\_factory.py                             |       19 |        1 |     95% |        40 |
-| src/infrastructure/storage/dto\_storage\_file.py                                |      157 |       32 |     80% |87-88, 149-151, 156-160, 173-176, 189-190, 199-200, 211-212, 234, 236, 238, 245-246, 255-261, 264, 294-296 |
-| src/infrastructure/storage/user\_storage.py                                     |       67 |       13 |     81% |47-48, 53-54, 64-65, 73-74, 81-82, 99-101 |
+| src/infrastructure/storage/dto\_storage\_file.py                                |      159 |       32 |     80% |88-89, 151-153, 158-162, 175-178, 191-192, 201-202, 213-214, 236, 238, 240, 247-248, 257-263, 266, 296-298 |
+| src/infrastructure/storage/user\_storage.py                                     |       69 |       13 |     81% |49-50, 55-56, 66-67, 75-76, 83-84, 101-103 |
 | src/infrastructure/storage/user\_storage\_factory.py                            |       21 |        1 |     95% |        26 |
 | src/infrastructure\_ports/\_\_init\_\_.py                                       |        9 |        0 |    100% |           |
 | src/infrastructure\_ports/errors.py                                             |        7 |        0 |    100% |           |
@@ -120,15 +121,15 @@
 | src/ui/components/\_\_init\_\_.py                                               |        2 |        2 |      0% |       2-3 |
 | src/ui/components/example\_reusable.py                                          |       21 |       21 |      0% |      1-46 |
 | src/ui/components/navbar.py                                                     |       24 |       24 |      0% |      3-58 |
-| src/ui/components/statusbar.py                                                  |       28 |       28 |      0% |      3-57 |
+| src/ui/components/statusbar.py                                                  |       34 |       34 |      0% |      3-71 |
 | src/ui/config.py                                                                |        8 |        8 |      0% |      3-36 |
 | src/ui/controller/\_\_init\_\_.py                                               |        2 |        2 |      0% |       2-3 |
-| src/ui/controller/controller.py                                                 |      140 |      140 |      0% |     1-230 |
+| src/ui/controller/controller.py                                                 |      164 |      164 |      0% |     1-256 |
 | src/ui/controller/state.py                                                      |       97 |       97 |      0% |     1-292 |
 | src/ui/main\_ui.py                                                              |       14 |       14 |      0% |     30-71 |
-| src/ui/pages/domain\_home.py                                                    |       14 |       14 |      0% |      3-30 |
+| src/ui/pages/domain\_home.py                                                    |       12 |       12 |      0% |      3-25 |
 | src/ui/pages/domain\_selection.py                                               |       29 |       29 |      0% |      7-66 |
-| **TOTAL**                                                                       | **3225** |  **618** | **81%** |           |
+| **TOTAL**                                                                       | **3292** |  **651** | **80%** |           |
 
 7 empty files skipped.
 
