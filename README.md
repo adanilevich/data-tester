@@ -4,19 +4,21 @@
 
 | Name                                                                            |    Stmts |     Miss |   Cover |   Missing |
 |-------------------------------------------------------------------------------- | -------: | -------: | ------: | --------: |
-| src/apps/cli\_app.py                                                            |       18 |        0 |    100% |           |
-| src/apps/cli\_di.py                                                             |       64 |        2 |     97% |    43, 60 |
-| src/apps/http\_app.py                                                           |       20 |        0 |    100% |           |
-| src/apps/http\_di.py                                                            |       62 |        0 |    100% |           |
-| src/apps/http\_routers/domain\_config.py                                        |       16 |        1 |     94% |        13 |
-| src/apps/http\_routers/platform.py                                              |       10 |        0 |    100% |           |
-| src/apps/http\_routers/reports.py                                               |       17 |        0 |    100% |           |
-| src/apps/http\_routers/specifications.py                                        |        9 |        0 |    100% |           |
-| src/apps/http\_routers/testcases.py                                             |       12 |        2 |     83% |     20-21 |
-| src/apps/http\_routers/testruns.py                                              |       23 |        1 |     96% |        19 |
-| src/apps/http\_routers/testsets.py                                              |       15 |        0 |    100% |           |
+| src/apps/cli/app.py                                                             |       16 |        0 |    100% |           |
+| src/apps/cli/di.py                                                              |       64 |        2 |     97% |    43, 60 |
+| src/apps/cli/main\_cli.py                                                       |       13 |       13 |      0% |      7-24 |
+| src/apps/http/app.py                                                            |       20 |        0 |    100% |           |
+| src/apps/http/di.py                                                             |       62 |        0 |    100% |           |
+| src/apps/http/main\_http.py                                                     |       27 |       27 |      0% |     10-61 |
+| src/apps/http/routers/domain\_config.py                                         |       16 |        1 |     94% |        13 |
+| src/apps/http/routers/platform.py                                               |       10 |        0 |    100% |           |
+| src/apps/http/routers/reports.py                                                |       17 |        0 |    100% |           |
+| src/apps/http/routers/specifications.py                                         |        8 |        0 |    100% |           |
+| src/apps/http/routers/testcases.py                                              |       12 |        2 |     83% |     20-21 |
+| src/apps/http/routers/testruns.py                                               |       23 |        1 |     96% |        19 |
+| src/apps/http/routers/testsets.py                                               |       15 |        0 |    100% |           |
 | src/client\_interface/\_\_init\_\_.py                                           |        1 |        0 |    100% |           |
-| src/client\_interface/requests.py                                               |       11 |        1 |     91% |        28 |
+| src/client\_interface/requests.py                                               |       11 |        1 |     91% |        27 |
 | src/config/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
 | src/config/config.py                                                            |       19 |        1 |     95% |         9 |
 | src/domain/\_\_init\_\_.py                                                      |        2 |        0 |    100% |           |
@@ -35,7 +37,7 @@
 | src/domain/specification/plugins/i\_spec\_parser.py                             |       10 |        3 |     70% |     33-35 |
 | src/domain/specification/plugins/naming\_conventions.py                         |       39 |        3 |     92% | 28, 74-75 |
 | src/domain/specification/plugins/spec\_parser.py                                |       75 |       12 |     84% |95-98, 123-125, 134-135, 147-149 |
-| src/domain/specification/specification.py                                       |       43 |        1 |     98% |        77 |
+| src/domain/specification/specification.py                                       |       43 |        1 |     98% |        78 |
 | src/domain/testrun/\_\_init\_\_.py                                              |        1 |        0 |    100% |           |
 | src/domain/testrun/precondition\_checks/\_\_init\_\_.py                         |        9 |        0 |    100% |           |
 | src/domain/testrun/precondition\_checks/abstract\_check.py                      |       20 |        1 |     95% |        56 |
@@ -63,7 +65,7 @@
 | src/domain\_adapters/domain\_config\_adapter.py                                 |       17 |        0 |    100% |           |
 | src/domain\_adapters/platform\_adapter.py                                       |       10 |        0 |    100% |           |
 | src/domain\_adapters/report\_adapter.py                                         |       12 |        0 |    100% |           |
-| src/domain\_adapters/specification\_adapter.py                                  |       22 |        0 |    100% |           |
+| src/domain\_adapters/specification\_adapter.py                                  |       26 |        0 |    100% |           |
 | src/domain\_adapters/testrun\_adapter.py                                        |       24 |        0 |    100% |           |
 | src/domain\_adapters/testset\_adapter.py                                        |       14 |        0 |    100% |           |
 | src/domain\_ports/\_\_init\_\_.py                                               |        7 |        0 |    100% |           |
@@ -77,7 +79,7 @@
 | src/drivers/domain\_config\_driver.py                                           |       15 |        0 |    100% |           |
 | src/drivers/platform\_driver.py                                                 |        9 |        0 |    100% |           |
 | src/drivers/report\_driver.py                                                   |       12 |        0 |    100% |           |
-| src/drivers/specification\_driver.py                                            |        9 |        0 |    100% |           |
+| src/drivers/specification\_driver.py                                            |        8 |        0 |    100% |           |
 | src/drivers/testrun\_driver.py                                                  |       23 |        2 |     91% |     33-34 |
 | src/drivers/testset\_driver.py                                                  |       24 |        0 |    100% |           |
 | src/dtos/\_\_init\_\_.py                                                        |        8 |        0 |    100% |           |
@@ -85,9 +87,9 @@
 | src/dtos/dto.py                                                                 |       16 |        0 |    100% |           |
 | src/dtos/notification\_dtos.py                                                  |       22 |        0 |    100% |           |
 | src/dtos/report\_dtos.py                                                        |        7 |        0 |    100% |           |
-| src/dtos/specification\_dtos.py                                                 |       97 |        9 |     91% |42, 54, 63, 69, 72, 82, 124, 139, 142 |
+| src/dtos/specification\_dtos.py                                                 |       97 |       11 |     89% |42, 54, 63, 66-69, 72, 82, 124, 139, 142 |
 | src/dtos/storage\_dtos.py                                                       |       74 |        5 |     93% |47, 71, 86, 89, 102 |
-| src/dtos/testrun\_dtos.py                                                       |      126 |        2 |     98% |  114, 117 |
+| src/dtos/testrun\_dtos.py                                                       |      131 |        2 |     98% |  114, 117 |
 | src/dtos/testset\_dtos.py                                                       |       33 |        1 |     97% |        24 |
 | src/infrastructure/backend/\_\_init\_\_.py                                      |        4 |        0 |    100% |           |
 | src/infrastructure/backend/demo/\_\_init\_\_.py                                 |        3 |        0 |    100% |           |
@@ -117,18 +119,18 @@
 | src/ui/common.py                                                                |        6 |        6 |      0% |       1-8 |
 | src/ui/components/\_\_init\_\_.py                                               |        2 |        2 |      0% |       2-3 |
 | src/ui/components/example\_reusable.py                                          |       21 |       21 |      0% |      1-46 |
-| src/ui/components/navbar.py                                                     |       24 |       24 |      0% |      3-56 |
+| src/ui/components/navbar.py                                                     |       24 |       24 |      0% |      3-58 |
 | src/ui/components/statusbar.py                                                  |       28 |       28 |      0% |      3-57 |
-| src/ui/config.py                                                                |        7 |        7 |      0% |      3-29 |
+| src/ui/config.py                                                                |        8 |        8 |      0% |      3-36 |
 | src/ui/controller/\_\_init\_\_.py                                               |        2 |        2 |      0% |       2-3 |
-| src/ui/controller/controller.py                                                 |      126 |      126 |      0% |     1-170 |
-| src/ui/controller/state.py                                                      |       98 |       98 |      0% |     1-290 |
-| src/ui/main\_ui.py                                                              |       11 |       11 |      0% |     29-66 |
+| src/ui/controller/controller.py                                                 |      140 |      140 |      0% |     1-230 |
+| src/ui/controller/state.py                                                      |       97 |       97 |      0% |     1-292 |
+| src/ui/main\_ui.py                                                              |       14 |       14 |      0% |     30-71 |
 | src/ui/pages/domain\_home.py                                                    |       14 |       14 |      0% |      3-30 |
 | src/ui/pages/domain\_selection.py                                               |       29 |       29 |      0% |      7-66 |
-| **TOTAL**                                                                       | **3163** |  **559** | **82%** |           |
+| **TOTAL**                                                                       | **3225** |  **618** | **81%** |           |
 
-5 empty files skipped.
+7 empty files skipped.
 
 
 ## Setup coverage badge
