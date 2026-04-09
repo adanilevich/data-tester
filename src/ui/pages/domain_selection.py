@@ -22,8 +22,7 @@ def register(make_controller: ControllerFactory) -> None:
         error_msg = await controller.load_domains()
 
         with ui.column().classes(
-            "flex-1 flex items-center justify-center min-h-screen "
-            "bg-[#0f1117] w-full"
+            "flex-1 flex items-center justify-center min-h-screen bg-[#0f1117] w-full"
         ):
             with ui.card().classes(
                 "bg-[#161b27] border border-slate-700 rounded-xl "

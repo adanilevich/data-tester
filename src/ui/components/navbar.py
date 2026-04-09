@@ -24,8 +24,8 @@ _DISABLED_LINK = (
     "select-none"
 )
 
-class NavBar:
 
+class NavBar:
     def __init__(self, controller: Controller):
         self.controller = controller
 
@@ -52,8 +52,10 @@ class NavBar:
                         ui.label(label).classes(_DISABLED_LINK)
 
             with ui.row().classes("items-center"):
-                with ui.button(icon="settings").props("flat dense").classes(
-                    ICON_BUTTON_SECONDARY_CLASSES
+                with (
+                    ui.button(icon="settings")
+                    .props("flat dense")
+                    .classes(ICON_BUTTON_SECONDARY_CLASSES)
                 ):
                     with ui.menu():
                         ui.menu_item(

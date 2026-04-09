@@ -28,7 +28,6 @@ _CHIPS_DATA: list[tuple[str, str]] = [
 
 
 class StatusBar:
-
     def __init__(
         self,
         controller: Controller,
@@ -52,8 +51,7 @@ class StatusBar:
         domain = self._domain or self.controller.domain
 
         with ui.footer().classes(
-            "flex items-center px-6 py-2 "
-            "bg-[#0b0d13] border-t border-slate-800 h-10"
+            "flex items-center px-6 py-2 bg-[#0b0d13] border-t border-slate-800 h-10"
         ) as footer:
             with ui.row().classes("items-center").style("gap: 2.5rem;"):
                 # --- Domain selector: refreshes until domains are loaded ---
@@ -120,9 +118,7 @@ class StatusBar:
     def _render_domain_selector(self, domain: str | None) -> None:
         """Render the domain indicator/selector. Called once — never refreshed."""
         dot = "bg-teal-400" if domain else "bg-slate-600"
-        domain_text = (
-            f"Domain: {domain.capitalize()}" if domain else "No domain selected"
-        )
+        domain_text = f"Domain: {domain.capitalize()}" if domain else "No domain selected"
 
         def _navigate_to_domain(d: str) -> None:
             ui.navigate.to(f"/{d}/testsets")
@@ -131,13 +127,15 @@ class StatusBar:
             ui.element("div").classes(f"w-3 h-2 rounded-sm {dot}")
             domains = self.controller.domains
             if domain and len(domains) > 1:
-                with ui.button(domain_text).props("flat dense no-caps").classes(
-                    f"{STATUS_CHIP_TEXT_CLASSES} p-0 min-w-0 "
-                    + ICON_BUTTON_SECONDARY_CLASSES
+                with (
+                    ui.button(domain_text)
+                    .props("flat dense no-caps")
+                    .classes(
+                        f"{STATUS_CHIP_TEXT_CLASSES} p-0 min-w-0 "
+                        + ICON_BUTTON_SECONDARY_CLASSES
+                    )
                 ):
-                    with ui.menu().classes(
-                        "bg-[#161b27] border border-slate-700"
-                    ):
+                    with ui.menu().classes("bg-[#161b27] border border-slate-700"):
                         for d in sorted(domains):
                             is_current = d == domain
                             ui.menu_item(

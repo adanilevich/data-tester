@@ -179,9 +179,7 @@ def _render_testcase_dialog(tc: TestCaseDTO) -> None:
                 with (
                     ui.expansion("Diff")
                     .classes("w-full")
-                    .style(
-                        "color: #94a3b8; font-family: monospace; font-size: 0.75rem;"
-                    )
+                    .style("color: #94a3b8; font-family: monospace; font-size: 0.75rem;")
                     .props("dark dense")
                 ):
                     ui.code(
@@ -194,9 +192,7 @@ def _render_testcase_dialog(tc: TestCaseDTO) -> None:
                 with (
                     ui.expansion("Facts")
                     .classes("w-full")
-                    .style(
-                        "color: #94a3b8; font-family: monospace; font-size: 0.75rem;"
-                    )
+                    .style("color: #94a3b8; font-family: monospace; font-size: 0.75rem;")
                     .props("dark dense")
                 ):
                     _render_kv_table(
@@ -209,9 +205,7 @@ def _render_testcase_dialog(tc: TestCaseDTO) -> None:
                 with (
                     ui.expansion("Details")
                     .classes("w-full")
-                    .style(
-                        "color: #94a3b8; font-family: monospace; font-size: 0.75rem;"
-                    )
+                    .style("color: #94a3b8; font-family: monospace; font-size: 0.75rem;")
                     .props("dark dense")
                 ):
                     headers = list(tc.details[0].keys())
@@ -223,11 +217,15 @@ def _render_testcase_dialog(tc: TestCaseDTO) -> None:
                             with ui.element("thead"):
                                 with ui.element("tr"):
                                     for h in headers:
-                                        with ui.element("th").style(
-                                            "text-align: left; padding: 3px 8px; "
-                                            "color: #64748b; font-weight: 600; "
-                                            "white-space: nowrap;"
-                                        ).style(TABLE_HEADER_BORDER_STYLE):
+                                        with (
+                                            ui.element("th")
+                                            .style(
+                                                "text-align: left; padding: 3px 8px; "
+                                                "color: #64748b; font-weight: 600; "
+                                                "white-space: nowrap;"
+                                            )
+                                            .style(TABLE_HEADER_BORDER_STYLE)
+                                        ):
                                             ui.label(str(h))
                             with ui.element("tbody"):
                                 for row in tc.details:
@@ -258,9 +256,7 @@ def _render_result_matrix(testrun: TestRunDTO) -> None:
     rows: list[str] = sorted({tc.testobject.name for tc in testrun.results})
 
     if not rows or not columns:
-        ui.label("No test results available.").classes(
-            "text-slate-500 text-xs font-mono"
-        )
+        ui.label("No test results available.").classes("text-slate-500 text-xs font-mono")
         return
 
     cell_map = {(tc.testobject.name, tc.testtype): tc for tc in testrun.results}
@@ -294,9 +290,9 @@ def _render_testrun_card(testrun: TestRunDTO) -> None:
                 with ui.icon("circle", size="xs").classes(fg):
                     ui.tooltip(testrun.status.value)
                 result_color = _RESULT_COLOR.get(testrun.result, "#94a3b8")
-                with ui.icon(
-                    _RESULT_ICON.get(testrun.result, "help"), size="xs"
-                ).style(f"color: {result_color};"):
+                with ui.icon(_RESULT_ICON.get(testrun.result, "help"), size="xs").style(
+                    f"color: {result_color};"
+                ):
                     ui.tooltip(testrun.result.value)
                 with ui.element("div").classes("flex flex-col"):
                     ui.label(testrun.testset_name).classes(CARD_ITEM_TITLE_CLASSES)
@@ -356,11 +352,7 @@ def register(make_controller: ControllerFactory) -> None:
         NavBar(controller).render()
         StatusBar(controller, domain).render()
 
-        with (
-            ui.column()
-            .classes(PAGE_CONTENT_COLUMN_CLASSES)
-            .style("row-gap: 1rem;")
-        ):
+        with ui.column().classes(PAGE_CONTENT_COLUMN_CLASSES).style("row-gap: 1rem;"):
             ui.label("Testruns").classes(
                 "text-white font-mono font-bold text-xl tracking-widest"
             )

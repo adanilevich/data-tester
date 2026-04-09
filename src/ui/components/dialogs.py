@@ -20,8 +20,10 @@ def base_dialog(title: str) -> Generator[ui.dialog, None, None]:
             "min-width: 600px; max-width: 90vw; "
             "background: #161b27; border: 1px solid #334155;"
         ):
-            with ui.row().classes("items-center justify-between w-full").style(
-                "margin-bottom: 0.75rem;"
+            with (
+                ui.row()
+                .classes("items-center justify-between w-full")
+                .style("margin-bottom: 0.75rem;")
             ):
                 ui.label(title).classes(
                     "text-white font-mono font-bold text-base tracking-widest"

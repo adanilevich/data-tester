@@ -119,9 +119,7 @@ class NiceGuiState(State):
             for stage, entries in raw.items()
         }
 
-    def set_specs(
-        self, domain: str, stage: str, entries: list[SpecEntryDTO]
-    ) -> None:
+    def set_specs(self, domain: str, stage: str, entries: list[SpecEntryDTO]) -> None:
         outer = dict(app.storage.general.get("specs", {}))
         inner = dict(outer.get(domain, {}))
         inner[stage] = [e.model_dump(mode="json") for e in entries]

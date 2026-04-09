@@ -5,9 +5,11 @@ import warnings
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
-_DEFAULT_SECRET = ("dev-secret-change-in-productiondev-secret-change-in-production" +
+_DEFAULT_SECRET = (
     "dev-secret-change-in-productiondev-secret-change-in-production"
+    + "dev-secret-change-in-productiondev-secret-change-in-production"
 )
+
 
 class UIConfig(BaseSettings):
     """Configuration for the NiceGUI frontend process.

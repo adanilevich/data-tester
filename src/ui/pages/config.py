@@ -10,9 +10,7 @@ from src.ui.components import NavBar, StatusBar
 from src.ui.controller import ControllerFactory
 from src.ui.styles import CARD_SURFACE_PADDED_CLASSES, SELECT_INPUT_PROPS
 
-_SECTION_LABEL = (
-    "text-slate-500 text-xs font-mono font-bold uppercase tracking-widest"
-)
+_SECTION_LABEL = "text-slate-500 text-xs font-mono font-bold uppercase tracking-widest"
 _CARD_STYLE = CARD_SURFACE_PADDED_CLASSES
 _INPUT_PROPS = SELECT_INPUT_PROPS
 _CHIP_STYLE = "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded"
@@ -24,14 +22,18 @@ def _render_chip(text: str) -> None:
 
 
 def _render_remove_chip(text: str, on_remove: Any) -> None:
-    with ui.element("div").classes(
-        "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded "
-        "flex items-center"
-    ).style("gap: 0.25rem"):
+    with (
+        ui.element("div")
+        .classes(
+            "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded "
+            "flex items-center"
+        )
+        .style("gap: 0.25rem")
+    ):
         ui.label(text)
-        ui.button(icon="close", on_click=on_remove).props(
-            "flat dense round"
-        ).classes("text-slate-400 hover:text-red-400").style(
+        ui.button(icon="close", on_click=on_remove).props("flat dense round").classes(
+            "text-slate-400 hover:text-red-400"
+        ).style(
             "font-size: 0.65rem; padding: 0;"
             " min-height: unset; height: 1rem; width: 1rem;"
         )
@@ -56,12 +58,16 @@ def register(make_controller: ControllerFactory) -> None:
         # Edit-mode flag — mutable dict so closures share the same reference
         edit_mode: dict[str, bool] = {"value": False}
 
-        with ui.column().classes("w-full min-h-screen bg-[#0f1117] px-6 py-6").style(
-            "row-gap: 1.5rem;"
+        with (
+            ui.column()
+            .classes("w-full min-h-screen bg-[#0f1117] px-6 py-6")
+            .style("row-gap: 1.5rem;")
         ):
             # Header row
-            with ui.row().classes("w-full items-center justify-between").style(
-                "gap: 1rem;"
+            with (
+                ui.row()
+                .classes("w-full items-center justify-between")
+                .style("gap: 1rem;")
             ):
                 ui.label("Configuration").classes(
                     "text-white font-mono font-bold text-xl tracking-widest"
@@ -111,15 +117,19 @@ def register(make_controller: ControllerFactory) -> None:
                         @ui.refreshable
                         def instances_section() -> None:
                             for stage, inst_list in instances_work.items():
-                                with ui.row().classes("items-center w-full").style(
-                                    "gap: 0.5rem;"
+                                with (
+                                    ui.row()
+                                    .classes("items-center w-full")
+                                    .style("gap: 0.5rem;")
                                 ):
                                     ui.label(stage).classes(
                                         "text-slate-300 text-xs font-mono w-24"
                                     )
-                                    with ui.row().classes(
-                                        "flex-1 flex-wrap items-center"
-                                    ).style("gap: 0.4rem;"):
+                                    with (
+                                        ui.row()
+                                        .classes("flex-1 flex-wrap items-center")
+                                        .style("gap: 0.4rem;")
+                                    ):
                                         for inst in inst_list:
                                             if is_edit:
 
@@ -167,13 +177,10 @@ def register(make_controller: ControllerFactory) -> None:
                                                 s: str, inp_ref: ui.select
                                             ) -> Any:
                                                 def _add(_: Any = None) -> None:
-                                                    val = str(
-                                                        inp_ref.value or ""
-                                                    ).strip()
+                                                    val = str(inp_ref.value or "").strip()
                                                     if (
                                                         val
-                                                        and val
-                                                        not in instances_work[s]
+                                                        and val not in instances_work[s]
                                                     ):
                                                         instances_work[s].append(val)
                                                         inp_ref.set_value(None)
@@ -211,8 +218,8 @@ def register(make_controller: ControllerFactory) -> None:
                                         )
 
                             if is_edit:
-                                with ui.row().classes("items-center").style(
-                                    "gap: 0.5rem;"
+                                with (
+                                    ui.row().classes("items-center").style("gap: 0.5rem;")
                                 ):
                                     avail_stages = sorted(
                                         {
@@ -257,15 +264,18 @@ def register(make_controller: ControllerFactory) -> None:
                         @ui.refreshable
                         def spec_locations_section() -> None:
                             for stage, paths in spec_locs_work.items():
-                                with ui.row().classes("items-start w-full").style(
-                                    "gap: 0.5rem;"
+                                with (
+                                    ui.row()
+                                    .classes("items-start w-full")
+                                    .style("gap: 0.5rem;")
                                 ):
                                     ui.label(stage).classes(
-                                        "text-slate-300 text-xs font-mono"
-                                        " w-24 shrink-0"
+                                        "text-slate-300 text-xs font-mono w-24 shrink-0"
                                     )
-                                    with ui.column().classes("flex-1").style(
-                                        "gap: 0.4rem;"
+                                    with (
+                                        ui.column()
+                                        .classes("flex-1")
+                                        .style("gap: 0.4rem;")
                                     ):
                                         for idx, path in enumerate(paths):
                                             if is_edit:
@@ -291,9 +301,11 @@ def register(make_controller: ControllerFactory) -> None:
 
                                                     return _remove
 
-                                                with ui.row().classes(
-                                                    "items-center w-full"
-                                                ).style("gap: 0.4rem;"):
+                                                with (
+                                                    ui.row()
+                                                    .classes("items-center w-full")
+                                                    .style("gap: 0.4rem;")
+                                                ):
                                                     ui.input(
                                                         value=path,
                                                         on_change=_make_path_change(
@@ -378,8 +390,10 @@ def register(make_controller: ControllerFactory) -> None:
 
                         @ui.refreshable
                         def datatypes_section() -> None:
-                            with ui.row().classes("flex-wrap items-center").style(
-                                "gap: 0.4rem;"
+                            with (
+                                ui.row()
+                                .classes("flex-wrap items-center")
+                                .style("gap: 0.4rem;")
                             ):
                                 for dt in compare_datatypes_work:
                                     if is_edit:
@@ -391,9 +405,7 @@ def register(make_controller: ControllerFactory) -> None:
 
                                             return _remove
 
-                                        _render_remove_chip(
-                                            dt, _make_remove_dt(dt)
-                                        )
+                                        _render_remove_chip(dt, _make_remove_dt(dt))
                                     else:
                                         _render_chip(dt)
 
@@ -413,9 +425,9 @@ def register(make_controller: ControllerFactory) -> None:
                                             datatypes_section.refresh()
 
                                     new_dt_inp.on("keydown.enter", _add_dt)
-                                    ui.button(
-                                        icon="add", on_click=_add_dt
-                                    ).props("flat dense round").classes("text-teal-400")
+                                    ui.button(icon="add", on_click=_add_dt).props(
+                                        "flat dense round"
+                                    ).classes("text-teal-400")
 
                         datatypes_section()
 
@@ -447,9 +459,9 @@ def register(make_controller: ControllerFactory) -> None:
                                     _INPUT_PROPS
                                 )
                             else:
-                                ui.label(
-                                    str(sample_size_default_work["value"])
-                                ).classes("text-slate-400 text-xs font-mono")
+                                ui.label(str(sample_size_default_work["value"])).classes(
+                                    "text-slate-400 text-xs font-mono"
+                                )
 
                         @ui.refreshable
                         def per_object_section() -> None:
@@ -505,9 +517,9 @@ def register(make_controller: ControllerFactory) -> None:
                                                             on_change=_make_po_change(
                                                                 obj_name
                                                             ),
-                                                        ).style(
-                                                            "width: 7rem;"
-                                                        ).props(_INPUT_PROPS)
+                                                        ).style("width: 7rem;").props(
+                                                            _INPUT_PROPS
+                                                        )
                                                     else:
                                                         ui.label(str(sample)).classes(
                                                             "text-slate-400"
@@ -543,8 +555,8 @@ def register(make_controller: ControllerFactory) -> None:
                                 )
 
                             if is_edit:
-                                with ui.row().classes("items-center").style(
-                                    "gap: 0.5rem;"
+                                with (
+                                    ui.row().classes("items-center").style("gap: 0.5rem;")
                                 ):
                                     all_obj_names = sorted(
                                         {
@@ -598,9 +610,7 @@ def register(make_controller: ControllerFactory) -> None:
 
                         async def _save(_: Any = None) -> None:
                             try:
-                                reports_loc = LocationDTO(
-                                    reports_location_work["value"]
-                                )
+                                reports_loc = LocationDTO(reports_location_work["value"])
                             except ValueError as exc:
                                 ui.notify(
                                     f"Invalid reports location: {exc}",
@@ -629,9 +639,9 @@ def register(make_controller: ControllerFactory) -> None:
                             edit_mode["value"] = False
                             config_content.refresh()
 
-                        ui.button("Cancel", on_click=_cancel).props(
-                            "flat dense"
-                        ).classes("text-slate-400 font-mono text-xs")
+                        ui.button("Cancel", on_click=_cancel).props("flat dense").classes(
+                            "text-slate-400 font-mono text-xs"
+                        )
                         ui.button("Save", on_click=_save).classes(
                             "bg-teal-500 text-[#0f1117] font-bold font-mono text-xs"
                         ).props("dense")

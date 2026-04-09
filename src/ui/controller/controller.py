@@ -28,6 +28,14 @@ _log = logging.getLogger("datatester")
 # Type alias for the controller factory used by page handlers.
 ControllerFactory = Callable[[], "Controller"]
 
+_TTL_MAP: dict[str, str] = {
+    "testsets": "DATATESTER_UI_TTL_TESTSETS",
+    "testobjects": "DATATESTER_UI_TTL_TESTOBJECTS",
+    "testruns": "DATATESTER_UI_TTL_TESTRUNS",
+    "specs": "DATATESTER_UI_TTL_SPECS",
+    "domain_configs": "DATATESTER_UI_TTL_DOMAIN_CONFIGS",
+}
+
 
 class Controller:
     def __init__(
@@ -47,9 +55,10 @@ class Controller:
         last = self.state.get_last_loaded(domain, data_type)
         if last is None:
             return False
-        ttl: int = getattr(
-            self._config, f"DATATESTER_UI_TTL_{data_type.upper()}", 60
-        )
+        config_field = _TTL_MAP.get(data_type)
+        if config_field is None:
+            return False
+        ttl: int = getattr(self._config, config_field, 60)
         return (time.time() - last) < ttl
 
     @property
@@ -139,7 +148,10 @@ class Controller:
             return None
         self.state.set_testobjects_status(domain, Status.LOADING)
         try:
-            domain_config = self.state.domain_configs[domain]
+            domain_config = self.state.domain_configs.get(domain)
+            if domain_config is None:
+                self.state.set_testobjects_status(domain, Status.ERROR)
+                return f"Domain config for '{domain}' not yet loaded."
             all_testobjects: list[TestObjectDTO] = []
             for stage, instances in domain_config.instances.items():
                 for instance in instances:
@@ -191,7 +203,10 @@ class Controller:
             return None
         self.state.set_specs_status(domain, Status.LOADING)
         try:
-            domain_config = self.state.domain_configs[domain]
+            domain_config = self.state.domain_configs.get(domain)
+            if domain_config is None:
+                self.state.set_specs_status(domain, Status.ERROR)
+                return f"Domain config for '{domain}' not yet loaded."
             all_testobjects = self.state.testobjects.get(domain, [])
 
             # WE only need one instance per stage since specs are stored per stage only
@@ -224,6 +239,7 @@ class Controller:
                     default_instance=instance,
                     testcases=testcases,
                 )
+                # TODO: might flood the backend with requests - NO only one per stage
                 request = FindSpecsDTO(testset=testset, domain_config=domain_config)
                 testrun_def = await self._client.find_specs(domain, request)
                 entries: list[SpecEntryDTO] = []

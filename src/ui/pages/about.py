@@ -40,10 +40,14 @@ def register(make_controller: ControllerFactory) -> None:
         with ui.column().classes(
             "w-full min-h-screen bg-[#0f1117] px-6 py-8 items-center"
         ):
-            with ui.card().classes(
-                "w-full max-w-4xl bg-[#161b27] border border-slate-700 "
-                "rounded-xl shadow-2xl p-8"
-            ).props("flat"):
+            with (
+                ui.card()
+                .classes(
+                    "w-full max-w-4xl bg-[#161b27] border border-slate-700 "
+                    "rounded-xl shadow-2xl p-8"
+                )
+                .props("flat")
+            ):
                 ui.markdown(_prepare_readme(content)).classes(
                     "prose prose-invert max-w-none"
                 )

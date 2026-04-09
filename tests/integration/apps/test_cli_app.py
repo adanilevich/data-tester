@@ -61,12 +61,8 @@ class TestCliAppE2E:
         sr = {(tc.testobject.name, tc.testtype): tc for tc in sales_tr.results}
         assert sr[("stage_customers", TestType.SCHEMA)].result == Result.OK
         assert sr[("stage_transactions", TestType.SCHEMA)].result == Result.OK
-        assert (
-            sr[("core_customer_transactions", TestType.ROWCOUNT)].result == Result.OK
-        )
-        assert (
-            sr[("core_customer_transactions", TestType.COMPARE)].result == Result.NOK
-        )
+        assert sr[("core_customer_transactions", TestType.ROWCOUNT)].result == Result.OK
+        assert sr[("core_customer_transactions", TestType.COMPARE)].result == Result.NOK
         assert sr[("stage_customers", TestType.STAGECOUNT)].result == Result.OK
         assert sr[("stage_transactions", TestType.STAGECOUNT)].result == Result.OK
         for tc in sales_tr.results:

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 class DTO(BaseModel):
     pass
+
     @classmethod
     def from_dict(cls, dict_: dict) -> Self:
         return cls(**dict_)

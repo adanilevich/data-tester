@@ -15,8 +15,8 @@ class TestSet:
 
     def save_testset(self, testset: TestSetDTO) -> None:
         """Saves a TestSetDTO to internal storage."""
-        testset.modified_at = datetime.now()
-        self.storage.write_dto(dto=testset)
+        to_save = testset.model_copy(update={"modified_at": datetime.now()})
+        self.storage.write_dto(dto=to_save)
 
     def load_testset(self, testset_id: str) -> TestSetDTO:
         """Retrieves a TestSetDTO by testset_id."""

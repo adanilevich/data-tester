@@ -115,6 +115,7 @@ def testrun_def(testcase_def, domain_config):
 def testrun(testrun_def, dto_storage, dummy_platform_factory, notifiers):
     """Create and persist an initial testrun for save/load tests"""
     from src.domain.testrun.testrun import TestRun
+
     testrun_id = uuid4()
     tr = TestRun(
         testrun_def=testrun_def,

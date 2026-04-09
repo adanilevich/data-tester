@@ -101,9 +101,7 @@ class State(ABC):
         pass
 
     @abstractmethod
-    def set_specs(
-        self, domain: str, stage: str, entries: list[SpecEntryDTO]
-    ) -> None:
+    def set_specs(self, domain: str, stage: str, entries: list[SpecEntryDTO]) -> None:
         pass
 
     @property

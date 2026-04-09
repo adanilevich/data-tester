@@ -33,35 +33,27 @@ class DataTesterClient:
         async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.get(path)
             if not response.is_success:
-                raise BackendError(
-                    status_code=response.status_code, detail=response.text
-                )
+                raise BackendError(status_code=response.status_code, detail=response.text)
             return response.json()
 
     async def _post(self, path: str, body: Any) -> Any:
         async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.post(path, json=body)
             if not response.is_success:
-                raise BackendError(
-                    status_code=response.status_code, detail=response.text
-                )
+                raise BackendError(status_code=response.status_code, detail=response.text)
             return response.json()
 
     async def _delete(self, path: str) -> None:
         async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.delete(path)
             if not response.is_success:
-                raise BackendError(
-                    status_code=response.status_code, detail=response.text
-                )
+                raise BackendError(status_code=response.status_code, detail=response.text)
 
     async def _put(self, path: str, body: Any) -> None:
         async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.put(path, json=body)
             if not response.is_success:
-                raise BackendError(
-                    status_code=response.status_code, detail=response.text
-                )
+                raise BackendError(status_code=response.status_code, detail=response.text)
 
     async def get_domain_configs(self) -> dict[str, DomainConfigDTO]:
         data: dict[str, Any] = await self._get("/domain-config")

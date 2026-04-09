@@ -26,14 +26,14 @@ def load_testset(domain: str, testset_id: str, driver: TestSetDriverDep) -> Test
 def save_testset(
     domain: str, testset_id: str, dto: TestSetDTO, driver: TestSetDriverDep
 ) -> Response:
+    if str(dto.testset_id) != testset_id:
+        raise HTTPException(status_code=422, detail="testset_id in URL must match body")
     driver.save_testset(testset=dto)
     return Response(status_code=204)
 
 
 @router.delete("/{domain}/testset/{testset_id}", status_code=204)
-def delete_testset(
-    domain: str, testset_id: str, driver: TestSetDriverDep
-) -> Response:
+def delete_testset(domain: str, testset_id: str, driver: TestSetDriverDep) -> Response:
     try:
         driver.delete_testset(testset_id=testset_id)
     except ObjectNotFoundError as err:

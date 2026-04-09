@@ -194,6 +194,8 @@ class DtoStorageFile(IDtoStorage):
     def read_dto(self, object_type: ObjectType, id: str) -> DTO:
         object_key = f"{id}.{self.serializer.suffix}"
         base_folder = self.storage_location.path + self._get_folder(object_type)
+        # TODO: full recursive glob is O(n) in stored objects — replace with a
+        # deterministic path by encoding the subfolder into the ID.
         pattern = base_folder + "**/" + object_key
 
         try:
@@ -218,14 +220,14 @@ class DtoStorageFile(IDtoStorage):
     def delete_dto(self, object_type: ObjectType, id: str) -> None:
         object_key = f"{id}.{self.serializer.suffix}"
         base_folder = self.storage_location.path + self._get_folder(object_type)
+        # TODO: full recursive glob is O(n) in stored objects — replace with a
+        # deterministic path by encoding the subfolder into the ID.
         pattern = base_folder + "**/" + object_key
 
         try:
             matches = self.fs.glob(pattern)
         except Exception as err:
-            raise DtoStorageFileError(
-                f"Error searching for {object_type} {id}"
-            ) from err
+            raise DtoStorageFileError(f"Error searching for {object_type} {id}") from err
 
         if not matches:
             raise ObjectNotFoundError(f"Object {id} of type {object_type}")

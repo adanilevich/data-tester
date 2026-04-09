@@ -118,9 +118,7 @@ class TestReport:
                 artifact_format=ReportArtifactFormat.TXT,
             )
 
-    def test_create_testrun_artifact_no_formatter(
-        self, dto_storage, testrun: TestRunDTO
-    ):
+    def test_create_testrun_artifact_no_formatter(self, dto_storage, testrun: TestRunDTO):
         r = Report(
             testcase_formatters=[],
             testrun_formatters=[],

@@ -72,9 +72,7 @@ class Report:
         """Loads a TestRunDTO from storage and creates the requested artifact."""
         formatter = self._testrun_formatters.get(artifact_format)
         if formatter is None:
-            raise NoFormatterFoundError(
-                f"Formatter for {artifact_format} not registered"
-            )
+            raise NoFormatterFoundError(f"Formatter for {artifact_format} not registered")
         testrun = cast(
             TestRunDTO,
             self.dto_storage.read_dto(ObjectType.TESTRUN, testrun_id),

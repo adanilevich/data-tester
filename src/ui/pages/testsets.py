@@ -277,8 +277,10 @@ def register(make_controller: ControllerFactory) -> None:
                         ui.label(
                             f"Stage: {ts.stage}  ·  Instance: {ts.instance}"
                         ).classes("font-mono text-xs text-slate-400 mb-4")
-                        with ui.row().classes("items-center justify-end w-full").style(
-                            "gap: 0.5rem;"
+                        with (
+                            ui.row()
+                            .classes("items-center justify-end w-full")
+                            .style("gap: 0.5rem;")
                         ):
                             ui.button("Cancel", on_click=dlg.close).props(
                                 "flat dense"
@@ -310,8 +312,10 @@ def register(make_controller: ControllerFactory) -> None:
                         ui.label("This cannot be undone.").classes(
                             "font-mono text-xs text-red-400 mb-4"
                         )
-                        with ui.row().classes("items-center justify-end w-full").style(
-                            "gap: 0.5rem;"
+                        with (
+                            ui.row()
+                            .classes("items-center justify-end w-full")
+                            .style("gap: 0.5rem;")
                         ):
                             ui.button("Cancel", on_click=dlg.close).props(
                                 "flat dense"
@@ -353,9 +357,13 @@ def register(make_controller: ControllerFactory) -> None:
             selected: dict[tuple[str, TestType], bool] = {}
             edit_testset_id: dict[str, str | None] = {"value": None}
 
-            with ui.dialog() as new_testset_dialog, ui.card().props("dark").classes(
-                "bg-[#161b27] border border-slate-700"
-            ).style("min-width: 700px; max-width: 90vw;"):
+            with (
+                ui.dialog() as new_testset_dialog,
+                ui.card()
+                .props("dark")
+                .classes("bg-[#161b27] border border-slate-700")
+                .style("min-width: 700px; max-width: 90vw;"),
+            ):
                 dialog_title = ui.label("New Testset").classes(
                     "text-white font-mono font-bold text-base tracking-widest mb-2"
                 )
@@ -410,9 +418,7 @@ def register(make_controller: ControllerFactory) -> None:
                 def matrix_view() -> None:
                     current_stage = str(dialog_stage_select.value or "")
                     all_objects = controller.testobjects(domain)
-                    stage_objects = [
-                        o for o in all_objects if o.stage == current_stage
-                    ]
+                    stage_objects = [o for o in all_objects if o.stage == current_stage]
                     obj_names = sorted(
                         {o.name for o in stage_objects if _applicable_for(o.name)}
                     )
@@ -517,8 +523,10 @@ def register(make_controller: ControllerFactory) -> None:
                     else:
                         ui.navigate.to(f"/{domain}/testruns")
 
-                with ui.row().classes("items-center justify-end w-full").style(
-                    "gap: 0.5rem; margin-top: 1rem;"
+                with (
+                    ui.row()
+                    .classes("items-center justify-end w-full")
+                    .style("gap: 0.5rem; margin-top: 1rem;")
                 ):
                     ui.button("Cancel", on_click=new_testset_dialog.close).props(
                         "flat dense"
