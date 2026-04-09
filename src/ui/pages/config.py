@@ -10,12 +10,13 @@ from src.dtos import LocationDTO
 from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar
 from src.ui.controller import Controller, NiceGuiState
+from src.ui.styles import CARD_SURFACE_PADDED_CLASSES, SELECT_INPUT_PROPS
 
 _SECTION_LABEL = (
     "text-slate-500 text-xs font-mono font-bold uppercase tracking-widest"
 )
-_CARD_STYLE = "w-full bg-[#161b27] border border-slate-700 rounded-lg"
-_INPUT_PROPS = "dark outlined dense color=teal-4"
+_CARD_STYLE = CARD_SURFACE_PADDED_CLASSES
+_INPUT_PROPS = SELECT_INPUT_PROPS
 _CHIP_STYLE = "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded"
 
 
@@ -189,24 +190,23 @@ def register(client: DataTesterClient) -> None:
                                                 "text-teal-400"
                                             )
 
-                                if is_edit:
+                                    if is_edit:
 
-                                    def _make_remove_stage(s: str) -> Any:
-                                        def _remove(_: Any = None) -> None:
-                                            del instances_work[s]
-                                            spec_locs_work.pop(s, None)
-                                            instances_section.refresh()
-                                            spec_locations_section.refresh()
+                                        def _make_remove_stage(s: str) -> Any:
+                                            def _remove(_: Any = None) -> None:
+                                                del instances_work[s]
+                                                spec_locs_work.pop(s, None)
+                                                instances_section.refresh()
+                                                spec_locations_section.refresh()
 
-                                        return _remove
+                                            return _remove
 
-                                    ui.button(
-                                        "Remove stage",
-                                        icon="delete",
-                                        on_click=_make_remove_stage(stage),
-                                    ).props("flat dense").classes(
-                                        "text-red-400 text-xs font-mono"
-                                    )
+                                        ui.button(
+                                            icon="delete",
+                                            on_click=_make_remove_stage(stage),
+                                        ).props("flat dense round").classes(
+                                            "text-red-400"
+                                        )
 
                             if is_edit:
                                 with ui.row().classes("items-center").style(
@@ -267,30 +267,16 @@ def register(client: DataTesterClient) -> None:
                                     ):
                                         for idx, path in enumerate(paths):
                                             if is_edit:
-                                                path_input = (
-                                                    ui.input(value=path)
-                                                    .classes("font-mono w-full")
-                                                    .props(_INPUT_PROPS)
-                                                )
 
                                                 def _make_path_change(
-                                                    s: str, i: int, inp: ui.input
+                                                    s: str, i: int
                                                 ) -> Any:
-                                                    def _on_change(
-                                                        _: Any = None,
-                                                    ) -> None:
+                                                    def _on_change(e: Any) -> None:
                                                         spec_locs_work[s][i] = str(
-                                                            inp.value or ""
+                                                            e.value or ""
                                                         )
 
                                                     return _on_change
-
-                                                path_input.on(
-                                                    "input",
-                                                    _make_path_change(
-                                                        stage, idx, path_input
-                                                    ),
-                                                )
 
                                                 def _make_remove_path(
                                                     s: str, i: int
@@ -303,14 +289,25 @@ def register(client: DataTesterClient) -> None:
 
                                                     return _remove
 
-                                                ui.button(
-                                                    icon="remove_circle_outline",
-                                                    on_click=_make_remove_path(
-                                                        stage, idx
-                                                    ),
-                                                ).props("flat dense round").classes(
-                                                    "text-red-400"
-                                                )
+                                                with ui.row().classes(
+                                                    "items-center w-full"
+                                                ).style("gap: 0.4rem;"):
+                                                    ui.input(
+                                                        value=path,
+                                                        on_change=_make_path_change(
+                                                            stage, idx
+                                                        ),
+                                                    ).classes("font-mono flex-1").props(
+                                                        _INPUT_PROPS
+                                                    )
+                                                    ui.button(
+                                                        icon="remove_circle_outline",
+                                                        on_click=_make_remove_path(
+                                                            stage, idx
+                                                        ),
+                                                    ).props("flat dense round").classes(
+                                                        "text-red-400"
+                                                    )
                                             else:
                                                 ui.label(path).classes(
                                                     "text-slate-400 text-xs font-mono"
@@ -359,18 +356,14 @@ def register(client: DataTesterClient) -> None:
                     with ui.column().classes("w-full q-pa-md").style("gap: 0.5rem;"):
                         ui.label("Reports Location").classes(_SECTION_LABEL)
                         if is_edit:
-                            reports_inp = (
-                                ui.input(value=reports_location_work["value"])
-                                .classes("font-mono w-full")
-                                .props(_INPUT_PROPS)
-                            )
 
-                            def _on_reports_change(_: Any = None) -> None:
-                                reports_location_work["value"] = str(
-                                    reports_inp.value or ""
-                                )
+                            def _on_reports_change(e: Any) -> None:
+                                reports_location_work["value"] = str(e.value or "")
 
-                            reports_inp.on("input", _on_reports_change)
+                            ui.input(
+                                value=reports_location_work["value"],
+                                on_change=_on_reports_change,
+                            ).classes("font-mono w-full").props(_INPUT_PROPS)
                         else:
                             ui.label(reports_location_work["value"]).classes(
                                 "text-slate-400 text-xs font-mono"
@@ -434,26 +427,23 @@ def register(client: DataTesterClient) -> None:
                                 "text-slate-300 text-xs font-mono w-24"
                             )
                             if is_edit:
-                                ss_inp = (
-                                    ui.number(
-                                        value=sample_size_default_work["value"],
-                                        min=1,
-                                        step=1,
-                                    )
-                                    .classes("font-mono")
-                                    .style("width: 8rem;")
-                                    .props(_INPUT_PROPS)
-                                )
 
-                                def _on_ss_change(_: Any = None) -> None:
+                                def _on_ss_change(e: Any) -> None:
                                     try:
                                         sample_size_default_work["value"] = int(
-                                            ss_inp.value or 1
+                                            e.value or 1
                                         )
                                     except (ValueError, TypeError):
                                         pass
 
-                                ss_inp.on("input", _on_ss_change)
+                                ui.number(
+                                    value=sample_size_default_work["value"],
+                                    min=1,
+                                    step=1,
+                                    on_change=_on_ss_change,
+                                ).classes("font-mono").style("width: 8rem;").props(
+                                    _INPUT_PROPS
+                                )
                             else:
                                 ui.label(
                                     str(sample_size_default_work["value"])
@@ -489,25 +479,14 @@ def register(client: DataTesterClient) -> None:
                                                     "padding: 4px 8px;"
                                                 ):
                                                     if is_edit:
-                                                        po_inp = (
-                                                            ui.number(
-                                                                value=sample,
-                                                                min=1,
-                                                                step=1,
-                                                            )
-                                                            .style("width: 7rem;")
-                                                            .props(_INPUT_PROPS)
-                                                        )
 
                                                         def _make_po_change(
-                                                            n: str, inp: ui.number
+                                                            n: str,
                                                         ) -> Any:
-                                                            def _ch(
-                                                                _: Any = None,
-                                                            ) -> None:
+                                                            def _ch(e: Any) -> None:
                                                                 try:
                                                                     per_obj_work[n] = int(
-                                                                        inp.value or 1
+                                                                        e.value or 1
                                                                     )
                                                                 except (
                                                                     ValueError,
@@ -517,12 +496,16 @@ def register(client: DataTesterClient) -> None:
 
                                                             return _ch
 
-                                                        po_inp.on(
-                                                            "input",
-                                                            _make_po_change(
-                                                                obj_name, po_inp
+                                                        ui.number(
+                                                            value=sample,
+                                                            min=1,
+                                                            step=1,
+                                                            on_change=_make_po_change(
+                                                                obj_name
                                                             ),
-                                                        )
+                                                        ).style(
+                                                            "width: 7rem;"
+                                                        ).props(_INPUT_PROPS)
                                                     else:
                                                         ui.label(str(sample)).classes(
                                                             "text-slate-400"

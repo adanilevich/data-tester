@@ -15,7 +15,7 @@ class TestSet:
 
     def save_testset(self, testset: TestSetDTO) -> None:
         """Saves a TestSetDTO to internal storage."""
-        testset.last_updated = datetime.now()
+        testset.modified_at = datetime.now()
         self.storage.write_dto(dto=testset)
 
     def load_testset(self, testset_id: str) -> TestSetDTO:

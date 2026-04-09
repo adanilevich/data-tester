@@ -77,6 +77,7 @@ class TestFullFlowPayments:
         ### response.content is ALWAYS bytes (i.e. a json)
         ### response.json is ALWAYS a dict
         ### put ALWAYS expects a json-serialiable dict, i.e. dto.to_dict()
+
         # 1. Load domain config, modify, persist, reload and validate
         dc_get = client.get("/domain-config/payments")
         assert dc_get.status_code == 200

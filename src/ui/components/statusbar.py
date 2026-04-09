@@ -4,6 +4,7 @@ from nicegui import ui
 
 from src.ui.common import Status
 from src.ui.controller import Controller
+from src.ui.styles import ICON_BUTTON_SECONDARY_CLASSES, STATUS_CHIP_TEXT_CLASSES
 
 _DOT_COLOR: dict[Status, str] = {
     Status.LOADED: "bg-teal-400",
@@ -23,9 +24,7 @@ class StatusBar:
         dot = _DOT_COLOR[status]
         with ui.row().classes("items-center").style("gap: 0.75rem;"):
             ui.element("div").classes(f"w-3 h-2 rounded-sm {dot}")
-            ui.label(f"{label}: {status.value}").classes(
-                "font-mono text-xs text-slate-400 tracking-widest"
-            )
+            ui.label(f"{label}: {status.value}").classes(STATUS_CHIP_TEXT_CLASSES)
 
     def render(self) -> ui.footer:
         domain = self._domain or self.controller.domain
@@ -95,8 +94,8 @@ class StatusBar:
             domains = self.controller.domains
             if domain and len(domains) > 1:
                 with ui.button(domain_text).props("flat dense no-caps").classes(
-                    "font-mono text-xs text-slate-400 tracking-widest "
-                    "p-0 min-w-0 hover:text-teal-400 transition-colors duration-150"
+                    f"{STATUS_CHIP_TEXT_CLASSES} p-0 min-w-0 "
+                    + ICON_BUTTON_SECONDARY_CLASSES
                 ):
                     with ui.menu().classes(
                         "bg-[#161b27] border border-slate-700"
@@ -115,6 +114,4 @@ class StatusBar:
                                 )
                             )
             else:
-                ui.label(domain_text).classes(
-                    "font-mono text-xs text-slate-400 tracking-widest"
-                )
+                ui.label(domain_text).classes(STATUS_CHIP_TEXT_CLASSES)

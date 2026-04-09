@@ -10,6 +10,22 @@ from src.ui.client import DataTesterClient
 from src.ui.common import Status as LoadStatus
 from src.ui.components import NavBar, StatusBar, render_testobject_matrix
 from src.ui.controller import Controller, NiceGuiState
+from src.ui.styles import (
+    CARD_HEADER_ROW_CLASSES,
+    CARD_ITEM_DATE_CLASSES,
+    CARD_ITEM_META_CLASSES,
+    CARD_ITEM_TITLE_CLASSES,
+    CARD_SURFACE_CLASSES,
+    CARD_TITLE_GROUP_CLASSES,
+    DIALOG_SEPARATOR_STYLE,
+    ICON_BUTTON_PRIMARY_CLASSES,
+    ICON_BUTTON_SECONDARY_CLASSES,
+    MATRIX_CELL_NA_STYLE,
+    PAGE_CONTENT_COLUMN_CLASSES,
+    SELECT_INPUT_PROPS,
+    TABLE_HEADER_BORDER_STYLE,
+    TABLE_ROW_BORDER_STYLE,
+)
 
 _STATUS_BADGE: dict[RunStatus, tuple[str, str]] = {
     RunStatus.FINISHED: ("bg-teal-900", "text-teal-400"),
@@ -91,13 +107,13 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
                 ):
                     ui.label(tc.status.value)
 
-            ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+            ui.separator().style(DIALOG_SEPARATOR_STYLE)
 
             # 2. Summary
             ui.label("Summary").classes("text-slate-500 text-xs font-mono font-bold")
             ui.label(tc.summary).classes("text-slate-300 text-xs font-mono")
 
-            ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+            ui.separator().style(DIALOG_SEPARATOR_STYLE)
 
             # 3. Metadata table
             ui.label("Metadata").classes("text-slate-500 text-xs font-mono font-bold")
@@ -122,7 +138,7 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
 
             # 4. Specs
             if tc.specs:
-                ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+                ui.separator().style(DIALOG_SEPARATOR_STYLE)
                 ui.label("Specs").classes("text-slate-500 text-xs font-mono font-bold")
                 seen_spec_types: set[str] = set()
                 for spec in tc.specs:
@@ -146,7 +162,7 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
 
             # 5. Expandable: Diff
             if tc.diff:
-                ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+                ui.separator().style(DIALOG_SEPARATOR_STYLE)
                 with (
                     ui.expansion("Diff")
                     .classes("w-full")
@@ -161,7 +177,7 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
 
             # 6. Expandable: Facts
             if tc.facts:
-                ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+                ui.separator().style(DIALOG_SEPARATOR_STYLE)
                 with (
                     ui.expansion("Facts")
                     .classes("w-full")
@@ -176,7 +192,7 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
 
             # 7. Expandable: Details
             if tc.details:
-                ui.separator().style("background: #1e293b; margin: 0.75rem 0;")
+                ui.separator().style(DIALOG_SEPARATOR_STYLE)
                 with (
                     ui.expansion("Details")
                     .classes("w-full")
@@ -197,15 +213,12 @@ def _show_testcase_dialog(tc: TestCaseDTO) -> None:
                                         with ui.element("th").style(
                                             "text-align: left; padding: 3px 8px; "
                                             "color: #64748b; font-weight: 600; "
-                                            "border-bottom: 1px solid #1e293b; "
                                             "white-space: nowrap;"
-                                        ):
+                                        ).style(TABLE_HEADER_BORDER_STYLE):
                                             ui.label(str(h))
                             with ui.element("tbody"):
                                 for row in tc.details:
-                                    with ui.element("tr").style(
-                                        "border-bottom: 1px solid #0f172a;"
-                                    ):
+                                    with ui.element("tr").style(TABLE_ROW_BORDER_STYLE):
                                         for h in headers:
                                             with ui.element("td").style(
                                                 "padding: 3px 8px; color: #94a3b8; "
@@ -244,7 +257,7 @@ def _render_result_matrix(testrun: TestRunDTO) -> None:
                 "click", lambda _, tc=tc: _show_testcase_dialog(tc)
             )
         else:
-            ui.label("—").style("color: #475569; font-size: 0.7rem;")
+            ui.label("—").style(MATRIX_CELL_NA_STYLE)
 
     render_testobject_matrix(rows, columns, cell_fn)
 
@@ -254,37 +267,34 @@ def _render_testrun_card(testrun: TestRunDTO) -> None:
 
     with (
         ui.card()
-        .classes("w-full bg-[#161b27] border border-slate-700 rounded-lg p-0")
+        .classes(CARD_SURFACE_CLASSES)
         .props("flat")
     ):
-        with ui.row().classes("w-full items-center px-4 py-2").style("gap: 0.75rem;"):
+        with ui.row().classes(CARD_HEADER_ROW_CLASSES).style("gap: 0.75rem;"):
             toggle_btn = (
                 ui.button(icon="expand_more")
                 .props("flat dense round")
                 .classes("text-slate-400")
             )
-            _, fg = _STATUS_BADGE.get(testrun.status, ("bg-slate-700", "text-slate-400"))
-            with ui.icon("circle", size="xs").classes(fg):
-                ui.tooltip(testrun.status.value)
-            result_color = _RESULT_COLOR.get(testrun.result, "#94a3b8")
-            with ui.icon(
-                _RESULT_ICON.get(testrun.result, "help"), size="xs"
-            ).style(f"color: {result_color};"):
-                ui.tooltip(testrun.result.value)
-            with ui.element("div").classes("flex flex-col flex-1"):
-                ui.label(testrun.testset_name).classes(
-                    "font-bold text-white text-sm font-mono"
+            with ui.row().classes(CARD_TITLE_GROUP_CLASSES).style("gap: 0.4rem;"):
+                _, fg = _STATUS_BADGE.get(
+                    testrun.status, ("bg-slate-700", "text-slate-400")
                 )
-                ui.label(testrun.start_ts.strftime("%Y-%m-%d %H:%M:%S")).classes(
-                    "text-slate-500 text-xs font-mono"
-                )
+                with ui.icon("circle", size="xs").classes(fg):
+                    ui.tooltip(testrun.status.value)
+                result_color = _RESULT_COLOR.get(testrun.result, "#94a3b8")
+                with ui.icon(
+                    _RESULT_ICON.get(testrun.result, "help"), size="xs"
+                ).style(f"color: {result_color};"):
+                    ui.tooltip(testrun.result.value)
+                with ui.element("div").classes("flex flex-col"):
+                    ui.label(testrun.testset_name).classes(CARD_ITEM_TITLE_CLASSES)
+                    ui.label(testrun.start_ts.strftime("%Y-%m-%d %H:%M:%S")).classes(
+                        CARD_ITEM_DATE_CLASSES
+                    )
 
-            ui.label(f"Stage: {testrun.stage}").classes(
-                "text-slate-400 text-xs font-mono"
-            )
-            ui.label(f"Instance: {testrun.instance}").classes(
-                "text-slate-400 text-xs font-mono"
-            )
+            ui.label(f"Stage: {testrun.stage}").classes(CARD_ITEM_META_CLASSES)
+            ui.label(f"Instance: {testrun.instance}").classes(CARD_ITEM_META_CLASSES)
 
             with ui.element("div").classes(
                 "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded"
@@ -302,9 +312,7 @@ def _render_testrun_card(testrun: TestRunDTO) -> None:
             ui.button(
                 icon="summarize",
                 on_click=lambda: ui.notify("Reports not yet implemented", type="info"),
-            ).props("flat dense round").classes(
-                "text-teal-400 hover:text-teal-300 transition-colors duration-150"
-            )
+            ).props("flat dense round").classes(ICON_BUTTON_PRIMARY_CLASSES)
 
         body = ui.element("div").classes("px-4 pb-3 w-full")
         with body:
@@ -331,7 +339,7 @@ def register(client: DataTesterClient) -> None:
 
         with (
             ui.column()
-            .classes("w-full min-h-screen bg-[#0f1117] px-6 py-6")
+            .classes(PAGE_CONTENT_COLUMN_CLASSES)
             .style("row-gap: 1rem;")
         ):
             ui.label("Testruns").classes(
@@ -355,7 +363,7 @@ def register(client: DataTesterClient) -> None:
                         label="Stage",
                     )
                     .classes("font-mono w-40")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 instance_select = (
                     ui.select(
@@ -364,7 +372,7 @@ def register(client: DataTesterClient) -> None:
                         label="Instance",
                     )
                     .classes("font-mono w-40")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 result_select = (
                     ui.select(
@@ -378,7 +386,7 @@ def register(client: DataTesterClient) -> None:
                         label="Result",
                     )
                     .classes("font-mono w-40")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 status_select = (
                     ui.select(
@@ -387,7 +395,7 @@ def register(client: DataTesterClient) -> None:
                         label="Status",
                     )
                     .classes("font-mono w-44")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 search_input = (
                     ui.input(placeholder="Search testobject...")
@@ -409,9 +417,7 @@ def register(client: DataTesterClient) -> None:
 
                 ui.button(icon="refresh", on_click=_on_refresh).props(
                     "flat dense round"
-                ).classes(
-                    "text-slate-400 hover:text-teal-400 transition-colors duration-150"
-                )
+                ).classes(ICON_BUTTON_SECONDARY_CLASSES)
 
             @ui.refreshable
             def testrun_list() -> None:

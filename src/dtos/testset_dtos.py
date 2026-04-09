@@ -49,4 +49,4 @@ class TestSetDTO(DTO):
     def id(self) -> str:
         return str(self.testset_id)
 
-    last_updated: datetime = Field(default_factory=datetime.now)
+    modified_at: datetime = Field(default_factory=datetime.now)

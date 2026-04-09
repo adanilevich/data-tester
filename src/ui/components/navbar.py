@@ -3,6 +3,7 @@
 from nicegui import ui
 
 from src.ui.controller import Controller
+from src.ui.styles import ICON_BUTTON_SECONDARY_CLASSES
 
 _NAV_ITEMS = [
     ("Testsets", "/{domain}/testsets"),
@@ -52,7 +53,7 @@ class NavBar:
 
             with ui.row().classes("items-center"):
                 with ui.button(icon="settings").props("flat dense").classes(
-                    "text-slate-400 hover:text-teal-400 transition-colors duration-150"
+                    ICON_BUTTON_SECONDARY_CLASSES
                 ):
                     with ui.menu():
                         ui.menu_item(

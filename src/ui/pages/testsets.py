@@ -7,6 +7,19 @@ from src.dtos import TestType
 from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar, render_testobject_matrix
 from src.ui.controller import Controller, NiceGuiState
+from src.ui.styles import (
+    CARD_HEADER_ROW_CLASSES,
+    CARD_ITEM_DATE_CLASSES,
+    CARD_ITEM_META_CLASSES,
+    CARD_ITEM_TITLE_CLASSES,
+    CARD_SURFACE_CLASSES,
+    CARD_TITLE_GROUP_CLASSES,
+    ICON_BUTTON_PRIMARY_CLASSES,
+    ICON_BUTTON_SECONDARY_CLASSES,
+    MATRIX_CELL_NA_STYLE,
+    PAGE_CONTENT_COLUMN_CLASSES,
+    SELECT_INPUT_PROPS,
+)
 
 _IGNORED_TESTTYPES = {
     TestType.ABSTRACT,
@@ -60,7 +73,7 @@ def _render_matrix(testset: TestSetDTO) -> None:
             ):
                 ui.tooltip("Testcase is missing in testset")
         else:
-            with ui.label("—").style("color: #475569; font-size: 0.7rem;"):
+            with ui.label("—").style(MATRIX_CELL_NA_STYLE):
                 ui.tooltip("Testcase is not applicable to the test object")
 
     render_testobject_matrix(testobjects, testtypes, cell_fn)
@@ -71,17 +84,15 @@ def _render_testset_card(testset: TestSetDTO) -> None:
     count = len(testset.testcases)
     expanded = {"open": False}
 
-    with ui.card().classes(
-        "w-full bg-[#161b27] border border-slate-700 rounded-lg p-0"
-    ).props("flat"):
+    with ui.card().classes(CARD_SURFACE_CLASSES).props("flat"):
         # Header row — always visible
-        with ui.row().classes("w-full items-center px-4 py-2").style("gap: 0.75rem;"):
+        with ui.row().classes(CARD_HEADER_ROW_CLASSES).style("gap: 0.75rem;"):
             toggle_btn = (
                 ui.button(icon="expand_more")
                 .props("flat dense round")
                 .classes("text-slate-400")
             )
-            with ui.row().classes("items-center flex-1").style("gap: 0.4rem;"):
+            with ui.row().classes(CARD_TITLE_GROUP_CLASSES).style("gap: 0.4rem;"):
                 if testset.description:
                     with ui.icon("info_outline", size="xs").classes(
                         "text-teal-400 cursor-default"
@@ -92,14 +103,14 @@ def _render_testset_card(testset: TestSetDTO) -> None:
                         "text-amber-500 cursor-default"
                     ):
                         ui.tooltip(testset.comment).classes("text-base")
-                ui.label(testset.name).classes(
-                    "font-bold text-white text-sm font-mono"
-                )
-            ui.label(f"Stage: {testset.default_stage}").classes(
-                "text-slate-400 text-xs font-mono"
-            )
+                with ui.element("div").classes("flex flex-col"):
+                    ui.label(testset.name).classes(CARD_ITEM_TITLE_CLASSES)
+                    ui.label(testset.modified_at.strftime("%Y-%m-%d %H:%M:%S")).classes(
+                        CARD_ITEM_DATE_CLASSES
+                    )
+            ui.label(f"Stage: {testset.default_stage}").classes(CARD_ITEM_META_CLASSES)
             ui.label(f"Instance: {testset.default_instance}").classes(
-                "text-slate-400 text-xs font-mono"
+                CARD_ITEM_META_CLASSES
             )
             with ui.element("div").classes(
                 "bg-slate-700 text-teal-400 text-xs font-mono px-2 py-0.5 rounded"
@@ -110,9 +121,7 @@ def _render_testset_card(testset: TestSetDTO) -> None:
                 on_click=lambda: ui.notify(
                     "Executions are not yet possible", type="info"
                 ),
-            ).props("flat dense round").classes(
-                "text-teal-400 hover:text-teal-300 transition-colors duration-150"
-            )
+            ).props("flat dense round").classes(ICON_BUTTON_PRIMARY_CLASSES)
 
         # Matrix body — hidden until toggled
         body = ui.element("div").classes("px-4 pb-3 w-full")
@@ -143,9 +152,7 @@ def register(client: DataTesterClient) -> None:
             controller.load_backend_data(domain), name=f"load_{domain}"
         )
 
-        with ui.column().classes("w-full min-h-screen bg-[#0f1117] px-6 py-6").style(
-            "row-gap: 1rem;"
-        ):
+        with ui.column().classes(PAGE_CONTENT_COLUMN_CLASSES).style("row-gap: 1rem;"):
             ui.label("Testsets").classes(
                 "text-white font-mono font-bold text-xl tracking-widest"
             )
@@ -174,7 +181,7 @@ def register(client: DataTesterClient) -> None:
                         label="Stage",
                     )
                     .classes("font-mono w-40")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 instance_select = (
                     ui.select(
@@ -183,7 +190,7 @@ def register(client: DataTesterClient) -> None:
                         label="Instance",
                     )
                     .classes("font-mono w-40")
-                    .props("dark outlined dense color=teal-4")
+                    .props(SELECT_INPUT_PROPS)
                 )
                 search_input = (
                     ui.input(placeholder="Search testobject...")
@@ -203,9 +210,7 @@ def register(client: DataTesterClient) -> None:
 
                 ui.button(icon="refresh", on_click=_on_refresh).props(
                     "flat dense round"
-                ).classes(
-                    "text-slate-400 hover:text-teal-400 transition-colors duration-150"
-                )
+                ).classes(ICON_BUTTON_SECONDARY_CLASSES)
 
             @ui.refreshable
             def testset_list() -> None:
