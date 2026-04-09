@@ -1,7 +1,7 @@
 """Entrypoint for the Data Tester HTTP backend.
 
 Usage:
-    uv run python main.py
+    uv run python -m src.apps.http.main_http
 
 Set configuration via a .env file in the project root (see .env.example).
 If DATATESTER_DATA_PLATFORM=DEMO, demo data is generated and seeded on every run.
@@ -11,8 +11,8 @@ import os
 from pathlib import Path
 
 import uvicorn
-from src.apps.http_app import create_app
-from src.apps.http_di import HttpDependencyInjector
+from src.apps.http.app import create_app
+from src.apps.http.di import HttpDependencyInjector
 from src.config import Config
 from src.dtos import DomainConfigDTO, TestSetDTO
 
@@ -26,6 +26,8 @@ from tests.fixtures.demo.prepare_demo_data import prepare_demo_data, clean_up_de
 def _setup_demo(config: Config) -> HttpDependencyInjector:
     """Generate demo DWH + artifacts, seed dto storage, return ready DI injector."""
 
+    # this will resolve to CURRENT working directory, not file path, i.e.
+    # if we run this from root, it will write data to root, as expected
     demo_base = Path("data/demo").resolve()
 
     # Use absolute paths so all storage engines resolve correctly

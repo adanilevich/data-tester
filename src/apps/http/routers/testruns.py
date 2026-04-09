@@ -4,7 +4,7 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 
-from src.apps.http_di import TestRunDriverDep
+from src.apps.http.di import TestRunDriverDep
 from src.client_interface.requests import ExecuteTestRunRequest
 from src.dtos import TestRunDTO
 from src.dtos.testrun_dtos import TestRunDefDTO

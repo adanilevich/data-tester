@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter
 
-from src.apps.http_di import DomainConfigDriverDep, PlatformDriverDep
+from src.apps.http.di import DomainConfigDriverDep, PlatformDriverDep
 from src.dtos import DBInstanceDTO, TestObjectDTO
 
 router = APIRouter(tags=["platform"])

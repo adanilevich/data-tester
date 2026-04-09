@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter
 from fastapi.responses import Response
 
-from src.apps.http_di import ReportDriverDep
+from src.apps.http.di import ReportDriverDep
 from src.dtos import ReportArtifact, ReportArtifactFormat
 
 router = APIRouter(tags=["reports"])

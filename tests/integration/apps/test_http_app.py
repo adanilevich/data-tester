@@ -7,7 +7,7 @@ demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 
 import pytest
 from fastapi.testclient import TestClient
-from src.apps.http_app import create_app
+from src.apps.http.app import create_app
 from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
 from src.config import Config
 from src.dtos import (

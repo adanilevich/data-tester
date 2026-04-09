@@ -1,4 +1,4 @@
-from src.apps.cli_di import CliDependencyInjector
+from src.apps.cli.di import CliDependencyInjector
 from src.config import Config
 
 

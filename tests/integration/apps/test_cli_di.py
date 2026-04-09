@@ -10,7 +10,7 @@ from typing import List, cast
 
 import polars as pl
 import pytest
-from src.apps.cli_di import CliDependencyInjector as CliDi
+from src.apps.cli.di import CliDependencyInjector as CliDi
 from src.config import Config
 from src.domain_adapters import SpecAdapter
 from src.domain_ports import (

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.apps.http_di import SpecDriverDep
+from src.apps.http.di import SpecDriverDep
 from src.client_interface.requests import FindSpecsRequest
 from src.dtos.testrun_dtos import TestRunDefDTO
 

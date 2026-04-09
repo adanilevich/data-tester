@@ -2,7 +2,7 @@ from typing import Dict
 
 from fastapi import APIRouter, Response
 
-from src.apps.http_di import DomainConfigDriverDep
+from src.apps.http.di import DomainConfigDriverDep
 from src.dtos import DomainConfigDTO
 
 router = APIRouter(tags=["domain-config"])

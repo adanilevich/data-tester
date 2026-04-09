@@ -3,8 +3,8 @@ from typing import AsyncGenerator
 
 from fastapi import FastAPI
 
-from src.apps.http_di import HttpDependencyInjector
-from src.apps.http_routers import (
+from src.apps.http.di import HttpDependencyInjector
+from src.apps.http.routers import (
     domain_config,
     platform,
     reports,

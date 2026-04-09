@@ -16,8 +16,8 @@ The payments domain is tested separately in test_http_app.py.
 DO NOT USE PAYMENTS DOMAIN HERE TO NOT MIX DATA BETWEEN FIXTURES!!!
 """
 
-from src.apps.cli_app import CliApp
-from src.apps.cli_di import CliDependencyInjector
+from src.apps.cli.app import CliApp
+from src.apps.cli.di import CliDependencyInjector
 from src.config import Config
 from src.dtos import (
     ReportArtifact,

@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException
 
-from src.apps.http_di import TestRunDriverDep
+from src.apps.http.di import TestRunDriverDep
 from src.dtos import TestCaseDTO
 from src.infrastructure_ports import ObjectNotFoundError
 
