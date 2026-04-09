@@ -1,14 +1,13 @@
 """UI application factory — registers all NiceGUI routes."""
 
-from .controller import Controller, NiceGuiState
 from .client import DataTesterClient
-from .pages import domain_home, domain_selection
+from .pages import about, config, domain_selection, testsets, testruns
 
 
 def register_routes(client: DataTesterClient) -> None:
     """Register all page routes with NiceGUI."""
-    state = NiceGuiState()
-    controller = Controller(client=client, state=state)
-
-    domain_selection.register(controller)
-    domain_home.register(controller)
+    domain_selection.register(client)
+    testsets.register(client)
+    testruns.register(client)
+    config.register(client)
+    about.register(client)

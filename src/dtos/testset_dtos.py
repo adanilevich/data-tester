@@ -37,6 +37,7 @@ class TestSetDTO(DTO):
     stage: str | None = None  # stage where testset is executed
     instance: str | None = None  # Exectution instance
     testcases: Dict[str, TestCaseEntryDTO]  # dict by identifier
+    comment: str = Field(default="")
 
     def model_post_init(self, __context):
         if self.stage is None:

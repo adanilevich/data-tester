@@ -3,7 +3,7 @@
 Only imports from src.dtos and src.client_interface (import-linter contract 12).
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
 import httpx
 
@@ -41,9 +41,15 @@ class DataTesterClient:
                 raise BackendError(status_code=response.status_code, detail=response.text)
             return response.json()
 
-    async def get_domain_configs(self) -> Dict[str, DomainConfigDTO]:
+    async def _put(self, path: str, body: Any) -> None:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
+            response = await client.put(path, json=body)
+            if not response.is_success:
+                raise BackendError(status_code=response.status_code, detail=response.text)
+
+    async def get_domain_configs(self) -> dict[str, DomainConfigDTO]:
         """Fetch all domain configurations from the backend."""
-        data: Dict[str, Any] = await self._get("/domain-config")
+        data: dict[str, Any] = await self._get("/domain-config")
         return {
             domain: DomainConfigDTO.model_validate(cfg) for domain, cfg in data.items()
         }
@@ -53,21 +59,21 @@ class DataTesterClient:
         data: Any = await self._get(f"/domain-config/{domain}")
         return DomainConfigDTO.model_validate(data)
 
-    async def get_testsets(self, domain: str) -> List[TestSetDTO]:
+    async def get_testsets(self, domain: str) -> list[TestSetDTO]:
         """Fetch testsets by domain name."""
         data: Any = await self._get(f"/{domain}/testset")
         return [TestSetDTO.model_validate(testset) for testset in data]
 
     async def get_testobjects(
         self, domain: str, stage: str, instance: str
-    ) -> List[TestObjectDTO]:
+    ) -> list[TestObjectDTO]:
         """Fetch testobjects for a specific stage/instance."""
         data: Any = await self._get(
             f"/{domain}/platform/testobjects?stage={stage}&instance={instance}"
         )
         return [TestObjectDTO.model_validate(o) for o in data]
 
-    async def get_testruns(self, domain: str) -> List[TestRunDTO]:
+    async def get_testruns(self, domain: str) -> list[TestRunDTO]:
         """Fetch all testruns for a domain."""
         data: Any = await self._get(f"/{domain}/testrun/")
         return [TestRunDTO.model_validate(r) for r in data]
@@ -80,3 +86,7 @@ class DataTesterClient:
             f"/{domain}/specification/find", body.model_dump(mode="json")
         )
         return TestRunDefDTO.model_validate(data)
+
+    async def save_domain_config(self, domain: str, dto: DomainConfigDTO) -> None:
+        """Save a domain configuration via PUT /domain-config/{domain}."""
+        await self._put(f"/domain-config/{domain}", dto.model_dump(mode="json"))

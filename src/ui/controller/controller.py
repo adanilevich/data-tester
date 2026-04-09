@@ -1,5 +1,4 @@
 import logging
-from typing import Dict, List, Set
 from uuid import uuid4
 
 from src.client_interface import (
@@ -36,11 +35,11 @@ class Controller:
         return self.state.domain
 
     @domain.setter
-    def domain(self, val: str) -> None:
+    def domain(self, val: str | None) -> None:
         self.state.domain = val
 
     @property
-    def domains(self) -> List[str]:
+    def domains(self) -> list[str]:
         return self.state.domains
 
     # --- accessors ---
@@ -51,25 +50,25 @@ class Controller:
     def get_domain_config_status(self, domain: str) -> Status:
         return self.state.domain_configs_status.get(domain, Status.UNCLEAR)
 
-    def testsets(self, domain: str) -> List[TestSetDTO]:
+    def testsets(self, domain: str) -> list[TestSetDTO]:
         return self.state.testsets.get(domain, [])
 
     def get_testset_status(self, domain: str) -> Status:
         return self.state.testsets_status.get(domain, Status.UNCLEAR)
 
-    def testobjects(self, domain: str) -> List[TestObjectDTO]:
+    def testobjects(self, domain: str) -> list[TestObjectDTO]:
         return self.state.testobjects.get(domain, [])
 
     def get_testobjects_status(self, domain: str) -> Status:
         return self.state.testobjects_status.get(domain, Status.UNCLEAR)
 
-    def testruns(self, domain: str) -> List[TestRunDTO]:
+    def testruns(self, domain: str) -> list[TestRunDTO]:
         return self.state.testruns.get(domain, [])
 
     def get_testruns_status(self, domain: str) -> Status:
         return self.state.testruns_status.get(domain, Status.UNCLEAR)
 
-    def specs(self, domain: str) -> Dict[str, List[SpecEntryDTO]]:
+    def specs(self, domain: str) -> dict[str, list[SpecEntryDTO]]:
         """stage → List[SpecEntryDTO]: specs discovered for the given domain."""
         return self.state.specs(domain)
 
@@ -118,7 +117,7 @@ class Controller:
         self.state.set_testobjects_status(domain, Status.LOADING)
         try:
             domain_config = self.state.domain_configs[domain]
-            all_testobjects: List[TestObjectDTO] = []
+            all_testobjects: list[TestObjectDTO] = []
             for stage, instances in domain_config.instances.items():
                 for instance in instances:
                     objects = await self._client.get_testobjects(domain, stage, instance)
@@ -170,8 +169,8 @@ class Controller:
 
             # Collect unique testobject names per stage; record one representative
             # instance. Specs are stored per stage only so any instance works.
-            stage_instance: Dict[str, str] = {}  # stage → representative instance
-            stage_testobject_names: Dict[str, Set[str]] = {}  # stage → testobject names
+            stage_instance: dict[str, str] = {}  # stage → representative instance
+            stage_testobject_names: dict[str, set[str]] = {}  # stage → testobject names
             for obj in all_testobjects:
                 if obj.stage not in stage_instance:  # first time we see this stage
                     stage_instance[obj.stage] = obj.instance
@@ -207,7 +206,7 @@ class Controller:
                 )
                 request = FindSpecsRequest(testset=testset, domain_config=domain_config)
                 testrun_def = await self._client.find_specs(domain, request)
-                entries: List[SpecEntryDTO] = []
+                entries: list[SpecEntryDTO] = []
                 for testcase_def in testrun_def.testcase_defs:
                     all_specs = [spec for spec in testcase_def.specs]
                     non_empty_specs = [spec for spec in all_specs if not spec.empty]
@@ -254,3 +253,23 @@ class Controller:
         if self.domain != domain:
             self.domain = domain
         return None
+
+    async def save_config(self, domain: str, dto: DomainConfigDTO) -> str | None:
+        """Save domain config via PUT. Updates state on success.
+
+        Returns error string or None on success.
+        """
+        try:
+            await self._client.save_domain_config(domain, dto)
+            configs = self.state.domain_configs
+            configs[domain] = dto
+            self.state.domain_configs = configs
+            return None
+        except BackendError as exc:
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("save_config(%s): %s", domain, err)
+            return err
+        except Exception as exc:
+            err = f"Could not reach backend: {exc}"
+            _log.error("save_config(%s): %s", domain, err)
+            return err

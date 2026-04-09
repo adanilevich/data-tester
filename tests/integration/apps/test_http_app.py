@@ -96,7 +96,7 @@ class TestFullFlowPayments:
         ts_get = client.get("/payments/testset")
         assert ts_get.status_code == 200
         ts_list = [TestSetDTO.from_dict(t) for t in ts_get.json()]
-        ts_dto = next(t for t in ts_list if t.name == "payments_full")
+        ts_dto = next(t for t in ts_list if t.name == "Payments Partial")
         assert len(ts_dto.testcases) == 6
 
         ts_dto.testcases["stage_accounts_SCHEMA_dup"] = TestCaseEntryDTO(

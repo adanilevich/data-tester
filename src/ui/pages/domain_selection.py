@@ -6,15 +6,17 @@ stores the selection in state, and redirects to the domain home page.
 
 from nicegui import ui
 
+from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar
-from src.ui.controller import Controller
+from src.ui.controller import Controller, NiceGuiState
 
 
-def register(controller: Controller) -> None:
+def register(client: DataTesterClient) -> None:
     """Register the domain-selection page route."""
 
     @ui.page("/")
     async def domain_selection() -> None:
+        controller = Controller(client=client, state=NiceGuiState())
         NavBar(controller).render()
         StatusBar(controller).render()
 
@@ -38,9 +40,7 @@ def register(controller: Controller) -> None:
                 if error_msg:
                     with ui.row().classes("items-center mb-4"):
                         ui.icon("error_outline").classes("text-red-500 mr-2")
-                        ui.label(error_msg).classes(
-                            "text-red-400 text-sm font-mono"
-                        )
+                        ui.label(error_msg).classes("text-red-400 text-sm font-mono")
 
                 if not controller.domains:
                     ui.label("No domains available.").classes(
@@ -60,8 +60,7 @@ def register(controller: Controller) -> None:
                         ui.notify("Please select a domain.", type="warning")
                         return
                     controller.domain = chosen
-                    ui.navigate.to(f"/{chosen}/")
-
+                    ui.navigate.to(f"/{chosen}/testsets")
 
                 ui.button("Confirm", on_click=on_confirm).classes(
                     "mt-6 w-full bg-teal-500 hover:bg-teal-400 "

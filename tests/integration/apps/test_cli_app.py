@@ -42,19 +42,18 @@ class TestCliAppE2E:
 
         # --- Execute sales domain ---
         app = CliApp(config)
-        app.run_tests("sales", "sales_validation")
+        sales_tr = app.run_tests("sales", "Sales Validation")
 
         # --- Verify using fresh DI ---
         verify_di = CliDependencyInjector(config)
 
-        # 1. Testruns persisted
+        # 1. Testruns persisted (20 pre-created demo runs + 1 new)
         tr_driver = verify_di.testrun_driver()
         sales_trs = tr_driver.list_testruns(domain="sales")
-        assert len(sales_trs) == 1
+        assert len(sales_trs) == 21
 
         # 2. Sales testrun: 6 testcases, overall NOK
         #    NOK because core_customer_transactions COMPARE fails (africa)
-        sales_tr = sales_trs[0]
         assert len(sales_tr.results) == 6
         assert sales_tr.result == Result.NOK
         assert sales_tr.status == Status.FINISHED
