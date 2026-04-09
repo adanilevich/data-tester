@@ -7,15 +7,16 @@ demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 
 import pytest
 from fastapi.testclient import TestClient
+
 from src.apps.http.app import create_app
-from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
+    FindSpecsDTO,
     TestCaseDTO,
     TestCaseEntryDTO,
-    TestRunDTO,
     TestRunDefDTO,
+    TestRunDTO,
     TestSetDTO,
     TestType,
 )
@@ -125,7 +126,7 @@ class TestFullFlowPayments:
             assert tc.testobject in testobject_names
 
         # 3. Find specifications
-        request = FindSpecsRequest(testset=ts_dto, domain_config=dc_dto)
+        request = FindSpecsDTO(testset=ts_dto, domain_config=dc_dto)
         specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200
         trd = TestRunDefDTO.model_validate(specs_resp.json())
@@ -133,10 +134,10 @@ class TestFullFlowPayments:
         assert len(spec_list) == 7
 
         # 4. Execute testrun
-        request = ExecuteTestRunRequest(
-            testset=ts_dto, domain_config=dc_dto, specs=spec_list
+        testrun_def = TestRunDefDTO.from_testset(
+            testset=ts_dto, spec_list=spec_list, domain_config=dc_dto
         )
-        run_resp = client.post("/payments/testrun/", json=request.to_dict())
+        run_resp = client.post("/payments/testrun/", json=testrun_def.to_dict())
         assert run_resp.status_code == 202
         testrun_id = run_resp.json()["testrun_id"]
 

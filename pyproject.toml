@@ -16,7 +16,7 @@ dependencies = [
     "fsspec",  # needed for demo, 2e2 tests and also for input finders and report storage
     "fastapi",  # HTTP backend framework
     "uvicorn[standard]",  # ASGI server for FastAPI
-    "httpx",  # async HTTP client (used by client_interface and tests)
+    "httpx",  # async HTTP client (used by ui client and tests)
     "nicegui",  # NiceGUI frontend framework
     "pip>=26.0.1",
 ]
@@ -208,23 +208,7 @@ forbidden_modules = [
 ]
 
 [[tool.importlinter.contracts]]
-name = "11. client_interface only imports from dtos"
-type = "forbidden"
-source_modules = ["src.client_interface"]
-forbidden_modules = [
-    "src.apps",
-    "src.ui",
-    "src.domain",
-    "src.domain_ports",
-    "src.domain_adapters",
-    "src.drivers",
-    "src.infrastructure",
-    "src.infrastructure_ports",
-    "src.config",
-]
-
-[[tool.importlinter.contracts]]
-name = "12. ui only imports from client_interface and dtos"
+name = "12. ui only imports from dtos"
 type = "forbidden"
 source_modules = ["src.ui"]
 forbidden_modules = [
@@ -251,6 +235,5 @@ source_modules = [
     "src.infrastructure_ports",
     "src.config",
     "src.apps",
-    "src.client_interface",
 ]
 forbidden_modules = ["src.ui"]

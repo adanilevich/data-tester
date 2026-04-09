@@ -33,3 +33,4 @@ from .report_dtos import (
 from .storage_dtos import LocationDTO, StorageType, ObjectType
 from .testset_dtos import TestSetDTO, TestCaseEntryDTO
 from .notification_dtos import NotificationDTO, Importance, NotificationProcess
+from .find_specs_dto import FindSpecsDTO

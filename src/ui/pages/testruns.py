@@ -4,8 +4,7 @@ import json
 
 from nicegui import background_tasks, ui
 
-from src.client_interface import TestRunDTO
-from src.dtos import Result, Status as RunStatus, TestCaseDTO, TestType
+from src.dtos import Result, Status as RunStatus, TestCaseDTO, TestRunDTO, TestType
 from src.ui.client import DataTesterClient
 from src.ui.common import Status as LoadStatus
 from src.ui.components import NavBar, StatusBar, render_testobject_matrix
@@ -245,7 +244,9 @@ def _render_result_matrix(testrun: TestRunDTO) -> None:
     rows: list[str] = sorted({tc.testobject.name for tc in testrun.results})
 
     if not rows or not columns:
-        ui.label("No test results available.").classes("text-slate-500 text-xs font-mono")
+        ui.label("No test results available.").classes(
+            "text-slate-500 text-xs font-mono"
+        )
         return
 
     cell_map = {(tc.testobject.name, tc.testtype): tc for tc in testrun.results}
@@ -265,11 +266,7 @@ def _render_result_matrix(testrun: TestRunDTO) -> None:
 def _render_testrun_card(testrun: TestRunDTO) -> None:
     expanded = {"open": False}
 
-    with (
-        ui.card()
-        .classes(CARD_SURFACE_CLASSES)
-        .props("flat")
-    ):
+    with ui.card().classes(CARD_SURFACE_CLASSES).props("flat"):
         with ui.row().classes(CARD_HEADER_ROW_CLASSES).style("gap: 0.75rem;"):
             toggle_btn = (
                 ui.button(icon="expand_more")
@@ -474,15 +471,25 @@ def register(client: DataTesterClient) -> None:
 
             testrun_list()
 
-            async def _load() -> None:
+            async def _load_and_start_polling() -> None:
                 await controller.load_testruns(domain)
                 stage_select.options = ["All"] + _get_stages()
                 stage_select.update()
                 instance_select.options = ["All"] + _get_instances()
                 instance_select.update()
                 testrun_list.refresh()
+                # Activate polling if preliminary items already exist after initial load
+                if controller.state.preliminary_testruns(domain):
+                    poll_timer.activate()
 
-            background_tasks.create(_load())
+            async def _poll() -> None:
+                await controller.load_testruns(domain)
+                testrun_list.refresh()
+                if not controller.state.preliminary_testruns(domain):
+                    poll_timer.deactivate()
+
+            poll_timer = ui.timer(5.0, _poll, active=False)
+            background_tasks.create(_load_and_start_polling())
 
             def _on_stage_change(_: object = None) -> None:
                 raw = stage_select.value

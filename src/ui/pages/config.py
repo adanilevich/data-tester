@@ -5,8 +5,7 @@ from typing import Any
 
 from nicegui import background_tasks, ui
 
-from src.client_interface import DomainConfigDTO
-from src.dtos import LocationDTO
+from src.dtos import DomainConfigDTO, LocationDTO
 from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar
 from src.ui.controller import Controller, NiceGuiState

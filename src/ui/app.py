@@ -1,7 +1,7 @@
 """UI application factory — registers all NiceGUI routes."""
 
 from .client import DataTesterClient
-from .pages import about, config, domain_selection, testsets, testruns
+from .pages import about, config, domain_selection, specs, testsets, testruns
 
 
 def register_routes(client: DataTesterClient) -> None:
@@ -9,5 +9,6 @@ def register_routes(client: DataTesterClient) -> None:
     domain_selection.register(client)
     testsets.register(client)
     testruns.register(client)
+    specs.register(client)
     config.register(client)
     about.register(client)
