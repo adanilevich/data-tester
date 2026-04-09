@@ -8,6 +8,8 @@ _NAV_ITEMS = [
     ("Testsets", "/{domain}/testsets"),
     ("Executions", "/{domain}/executions"),
     ("Reports", "/{domain}/reports"),
+    ("Specs", "/{domain}/specs"),
+    ("Config", "/{domain}/config"),
 ]
 
 _ACTIVE_LINK = (

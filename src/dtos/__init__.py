@@ -21,6 +21,7 @@ from .testrun_dtos import (
     TestDTO,
     TestCaseDefDTO,
     TestRunDefDTO,
+    SpecEntryDTO,
     TestCaseDTO,
     TestRunSummaryDTO,
     TestRunDTO,

@@ -33,3 +33,10 @@ class UIConfig(BaseSettings):
             "Must be changed for any non-local deployment."
         ),
     )
+    DATATESTER_DATA_PLATFORM: str = Field(
+        default="DUMMY",
+        description=(
+            "Target data platform (DUMMY, DEMO, …). "
+            "When DEMO, the UI clears all ui cache on startup and on each new connection."
+        ),
+    )

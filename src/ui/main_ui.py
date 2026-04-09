@@ -20,13 +20,14 @@ Configuration via environment variables (all optional — shown with defaults)::
     DATATESTER_UI_PORT=3000                            # UI server port
     DATATESTER_UI_HOST=0.0.0.0                        # UI bind address
     DATATESTER_UI_STORAGE_SECRET=dev-secret-change-in-production
+    DATATESTER_DATA_PLATFORM=DUMMY   # set DEMO to reset storage on startup
 
 Open your browser at http://localhost:3000 (or whatever port you configured).
 
 ===========================================================================
 """
 
-from nicegui import ui
+from nicegui import app, ui
 
 from .app import register_routes
 from .config import UIConfig
@@ -46,6 +47,10 @@ def create_ui(config: UIConfig | None = None) -> None:
     client = DataTesterClient(base_url=cfg.DATATESTER_UI_BACKEND_URL)
 
     register_routes(client)
+
+    if cfg.DATATESTER_DATA_PLATFORM == "DEMO":
+        app.on_startup(lambda: app.storage.general.clear())
+        app.on_connect(lambda: app.storage.user.clear())
 
     ui.run(
         host=cfg.DATATESTER_UI_HOST,

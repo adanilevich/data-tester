@@ -149,6 +149,19 @@ class TestRunDefDTO(DTO):
         )
 
 
+class SpecEntryDTO(DTO):
+    """Slim spec entry for UI discovery: specs per testobject/testtype/scenario.
+
+    Stored in UI state keyed by domain → stage.
+    Only entries with at least one non-empty spec are stored.
+    """
+
+    testobject_name: str
+    testtype: TestType
+    scenario: str | None = None
+    specs: List[AnySpec]
+
+
 class TestDTO(DTO):
     __test__ = False  # prevents pytest collection
     # reference fields

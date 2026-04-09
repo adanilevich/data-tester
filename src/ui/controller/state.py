@@ -6,7 +6,7 @@ from typing import Dict, List
 from nicegui import app
 
 from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
-from src.dtos import TestRunDefDTO
+from src.dtos import SpecEntryDTO
 from src.ui.common import Status
 
 
@@ -107,13 +107,13 @@ class State(ABC):
     def set_testruns_status(self, domain: str, status: Status) -> None:
         pass
 
-    @property
     @abstractmethod
-    def specs(self) -> Dict[str, List[TestRunDefDTO]]:
+    def specs(self, domain: str) -> Dict[str, List[SpecEntryDTO]]:
+        """stage → List[SpecEntryDTO]: specs discovered for the given domain."""
         pass
 
     @abstractmethod
-    def set_specs(self, domain: str, trd: TestRunDefDTO) -> None:
+    def set_specs(self, domain: str, stage: str, entries: List[SpecEntryDTO]) -> None:
         pass
 
     @property
@@ -241,21 +241,20 @@ class NiceGuiState(State):
     def set_testruns_status(self, domain: str, status: Status) -> None:
         app.storage.general.setdefault("testruns_status", {})[domain] = status.value
 
-    @property
-    def specs(self) -> Dict[str, List[TestRunDefDTO]]:
-        """Specs stored as TestRunDefDTOs — one per testset.
-        Each TestRunDefDTO links every testcase to its specs by name."""
-        raw = app.storage.general.get("specs", {})
+    def specs(self, domain: str) -> Dict[str, List[SpecEntryDTO]]:
+        """stage → List[SpecEntryDTO]: specs discovered for the given domain.
+        Only entries with at least one non-empty spec attached are stored."""
+        raw = app.storage.general.get("specs", {}).get(domain, {})
         return {
-            domain: [TestRunDefDTO.model_validate(d) for d in items]
-            for domain, items in raw.items()
+            stage: [SpecEntryDTO.model_validate(e) for e in entries]
+            for stage, entries in raw.items()
         }
 
-    def set_specs(self, domain: str, trd: TestRunDefDTO) -> None:
-        """Append a TestRunDefDTO (one per testset) to the domain's spec cache."""
-        app.storage.general.setdefault("specs", {}).setdefault(domain, []).append(
-            trd.model_dump(mode="json")
-        )
+    def set_specs(self, domain: str, stage: str, entries: List[SpecEntryDTO]) -> None:
+        """Overwrite spec entries for domain/stage. Other stages are untouched."""
+        (app.storage.general.setdefault("specs", {}).setdefault(domain, {})[stage]) = [
+            e.model_dump(mode="json") for e in entries
+        ]
 
     @property
     def specs_status(self) -> Dict[str, Status]:
