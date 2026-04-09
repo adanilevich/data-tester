@@ -9,7 +9,7 @@ import httpx
 
 from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
 from src.client_interface.requests import FindSpecsRequest
-from src.dtos import AnySpec, SpecDTO
+from src.dtos import TestRunDefDTO
 
 
 class BackendError(Exception):
@@ -74,9 +74,9 @@ class DataTesterClient:
 
     async def find_specs(
         self, domain: str, body: FindSpecsRequest
-    ) -> List[List[AnySpec]]:
+    ) -> TestRunDefDTO:
         """Find specifications for a testset."""
         data: Any = await self._post(
             f"/{domain}/specification/find", body.model_dump(mode="json")
         )
-        return [[SpecDTO.from_dict(s) for s in group] for group in data]
+        return TestRunDefDTO.model_validate(data)

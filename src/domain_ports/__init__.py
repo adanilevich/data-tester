@@ -10,7 +10,7 @@ from .i_report import (
     CreateTestRunReportArtifactCommand,
     IReport,
 )
-from .i_specification import ISpec, ListSpecsCommand
+from .i_specification import FindSpecsCommand, ISpec
 from .i_testrun import (
     ExecuteTestRunCommand,
     ITestRun,
@@ -35,7 +35,7 @@ __all__ = [
     "CreateTestCaseReportArtifactCommand",
     "CreateTestRunReportArtifactCommand",
     "ISpec",
-    "ListSpecsCommand",
+    "FindSpecsCommand",
     "ITestRun",
     "ExecuteTestRunCommand",
     "SaveTestRunCommand",

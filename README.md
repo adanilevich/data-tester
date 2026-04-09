@@ -59,7 +59,8 @@ The framework is built to:
 
 ## Run
 
-- Run HTTP backend with `uv run python main.py`
+- Run FastAPI HTTP backend with `uv run python src/apps/http/main_http.py` from PROJECT ROOT! -> this will create demo data in project_root/data if DATATESTER_DATA_PLATFORM == DEMO!
+- Run Nice GUI frontend with `uv run python -m src.ui.main_ui` - this will create NiceGUI storage data in project_root `nicegui`
 ---
 
 For more details, see the source code and module-level documentation.

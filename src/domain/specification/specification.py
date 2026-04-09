@@ -1,7 +1,8 @@
-from typing import List, Tuple
+from typing import List, Tuple, cast
 
 from src.domain.specification.plugins import INamingConventionsFactory, ISpecParserFactory
 from src.dtos import (
+    AnySpec,
     Importance,
     LocationDTO,
     NotificationDTO,
@@ -81,12 +82,12 @@ class Specification:
 
         return candidates
 
-    def list_specs(self, loc: LocationDTO, testcase: TestCaseEntryDTO) -> List[SpecDTO]:
+    def list_specs(self, loc: LocationDTO, testcase: TestCaseEntryDTO) -> List[AnySpec]:
         """
         Find specification files for a given testcase in the
         provided location.
         """
-        results: List[SpecDTO] = []
+        results: List[AnySpec] = []
         candidates = self.find_candidates(loc, testcase)
 
         for file, spec_types in candidates:
@@ -105,7 +106,7 @@ class Specification:
                         domain=testcase.domain,
                         importance=Importance.WARNING,
                     )
-                results.append(spec)
+                results.append(cast(AnySpec, spec))
 
         self._notify(
             f"Found {len(results)} spec(s) for {testcase.testobject} in {loc.path}",

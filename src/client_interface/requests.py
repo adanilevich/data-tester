@@ -6,14 +6,13 @@ from src.dtos import (
     DTO,
     AnySpec,
     DomainConfigDTO,
-    LocationDTO,
     TestSetDTO,
 )
 
 
 class FindSpecsRequest(DTO):
     testset: TestSetDTO
-    locations: List[LocationDTO]
+    domain_config: DomainConfigDTO
 
 
 class ExecuteTestRunRequest(DTO):

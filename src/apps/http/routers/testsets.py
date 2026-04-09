@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Response
 
-from src.apps.http_di import TestSetDriverDep
+from src.apps.http.di import TestSetDriverDep
 from src.dtos import TestSetDTO
 
 router = APIRouter(tags=["testsets"])

@@ -1,8 +1,15 @@
-from typing import List
+from typing import Dict, List, Set
+from uuid import uuid4
 
-from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
+from src.client_interface import (
+    DomainConfigDTO,
+    TestCaseEntryDTO,
+    TestObjectDTO,
+    TestRunDTO,
+    TestSetDTO,
+)
 from src.client_interface.requests import FindSpecsRequest
-from src.dtos import AnySpec
+from src.dtos import SpecEntryDTO, TestType
 from src.ui.common import Status
 from src.ui.client import BackendError, DataTesterClient
 
@@ -59,8 +66,9 @@ class Controller:
     def get_testruns_status(self, domain: str) -> Status:
         return self.state.testruns_status.get(domain, Status.UNCLEAR)
 
-    def specs(self, domain: str) -> List[List[AnySpec]]:
-        return self.state.specs.get(domain, [])
+    def specs(self, domain: str) -> Dict[str, List[SpecEntryDTO]]:
+        """stage → List[SpecEntryDTO]: specs discovered for the given domain."""
+        return self.state.specs(domain)
 
     def get_specs_status(self, domain: str) -> Status:
         return self.state.specs_status.get(domain, Status.UNCLEAR)
@@ -130,19 +138,71 @@ class Controller:
             return f"Could not reach backend: {exc}"
 
     async def load_specs(self, domain: str) -> str | None:
-        """Find specs for all testsets of a domain. Requires testsets to be loaded."""
+        """Discover specs for every testobject on the platform, grouped by stage.
+
+        Builds one ephemeral TestSetDTO per stage (one TestCaseEntryDTO per
+        testobject × TestType). Drops entries with no specs found.
+        Specs are stage-level so one representative instance per stage suffices.
+        """
         self.state.set_specs_status(domain, Status.LOADING)
         try:
             domain_config = self.state.domain_configs[domain]
-            testsets = self.state.testsets.get(domain, [])
-            all_specs: List[List[AnySpec]] = []
-            for testset in testsets:
-                stage = testset.default_stage
-                locations = domain_config.spec_locations_by_stage(stage)
-                request = FindSpecsRequest(testset=testset, locations=locations)
-                groups = await self._client.find_specs(domain, request)
-                all_specs.extend(groups)
-            self.state.set_specs(domain, all_specs)
+            all_testobjects = self.state.testobjects.get(domain, [])
+
+            # Collect unique testobject names per stage; record one representative
+            # instance. Specs are stored per stage only so any instance works.
+            stage_instance: Dict[str, str] = {}  # stage → representative instance
+            stage_testobject_names: Dict[str, Set[str]] = {}  # stage → testobject names
+            for obj in all_testobjects:
+                if obj.stage not in stage_instance:  # first time we see this stage
+                    stage_instance[obj.stage] = obj.instance
+                    stage_testobject_names[obj.stage] = set()
+                stage_testobject_names[obj.stage].add(obj.name)
+
+            # All types except those without naming conventions:
+            # ABSTRACT, UNKNOWN, DUMMY_*.
+            _IGNORED_TESTTYPES = {
+                TestType.ABSTRACT,
+                TestType.UNKNOWN,
+                TestType.DUMMY_OK,
+                TestType.DUMMY_NOK,
+                TestType.DUMMY_EXCEPTION,
+            }
+            _TESTTYPES = [tt for tt in TestType if tt not in _IGNORED_TESTTYPES]
+
+            for stage, instance in stage_instance.items():  # one testset per stage
+                testcases = {
+                    f"{name}_{tt.value}": TestCaseEntryDTO(
+                        testobject=name, testtype=tt, domain=domain
+                    )
+                    for name in stage_testobject_names[stage]
+                    for tt in _TESTTYPES
+                }
+                testset = TestSetDTO(
+                    testset_id=uuid4(),
+                    name=f"{domain}_{stage}_discovery",
+                    domain=domain,
+                    default_stage=stage,
+                    default_instance=instance,
+                    testcases=testcases,
+                )
+                request = FindSpecsRequest(testset=testset, domain_config=domain_config)
+                testrun_def = await self._client.find_specs(domain, request)
+                entries: List[SpecEntryDTO] = []
+                for testcase_def in testrun_def.testcase_defs:
+                    all_specs = [spec for spec in testcase_def.specs]
+                    non_empty_specs = [spec for spec in all_specs if not spec.empty]
+                    if non_empty_specs:
+                        entries.append(
+                            SpecEntryDTO(
+                                testobject_name=testcase_def.testobject.name,
+                                testtype=testcase_def.testtype,
+                                scenario=testcase_def.scenario,
+                                specs=non_empty_specs,
+                            )
+                        )
+                self.state.set_specs(domain, stage, entries)
+
             self.state.set_specs_status(domain, Status.LOADED)
             return None
         except BackendError as exc:

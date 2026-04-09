@@ -7,7 +7,7 @@ demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 
 import pytest
 from fastapi.testclient import TestClient
-from src.apps.http_app import create_app
+from src.apps.http.app import create_app
 from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
 from src.config import Config
 from src.dtos import (
@@ -15,10 +15,10 @@ from src.dtos import (
     TestCaseDTO,
     TestCaseEntryDTO,
     TestRunDTO,
+    TestRunDefDTO,
     TestSetDTO,
     TestType,
 )
-from src.dtos.specification_dtos import SpecDTO
 
 from tests.conftest import DemoData
 
@@ -124,15 +124,11 @@ class TestFullFlowPayments:
             assert tc.testobject in testobject_names
 
         # 3. Find specifications
-        locations = dc_dto.spec_locations_by_stage(stage="test")
-        request = FindSpecsRequest(testset=ts_dto, locations=locations)
+        request = FindSpecsRequest(testset=ts_dto, domain_config=dc_dto)
         specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200
-        spec_list_as_dict = specs_resp.json()
-        spec_list = [
-            [SpecDTO.from_dict(spec) for spec in inner_list]
-            for inner_list in spec_list_as_dict
-        ]
+        trd = TestRunDefDTO.model_validate(specs_resp.json())
+        spec_list = [tcd.specs for tcd in trd.testcase_defs]
         assert len(spec_list) == 7
 
         # 4. Execute testrun

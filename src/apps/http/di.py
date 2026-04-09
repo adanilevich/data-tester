@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import Depends, Request
 
-from src.apps.cli_di import (
+from src.apps.cli.di import (
     get_backend_factory,
     get_dto_storage,
     get_notifiers,

@@ -1,5 +1,5 @@
 import pytest
-from src.apps.cli_di import CliDependencyInjector
+from src.apps.cli.di import CliDependencyInjector
 from src.config import Config
 from src.domain.report.plugins import (
     TxtTestCaseReportFormatter,

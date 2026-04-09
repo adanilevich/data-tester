@@ -1,24 +1,19 @@
 from abc import ABC, abstractmethod
-from typing import List
 
-from src.dtos import DTO, LocationDTO, SpecDTO, TestSetDTO
+from src.dtos import DTO, DomainConfigDTO, TestSetDTO
+from src.dtos.testrun_dtos import TestRunDefDTO
 
 
-class ListSpecsCommand(DTO):
-    locations: List[LocationDTO]
+class FindSpecsCommand(DTO):
     testset: TestSetDTO
+    domain_config: DomainConfigDTO
 
 
 class ISpec(ABC):
-    """
-    Interface for handling specification commands.
-    """
+    """Interface for finding specifications for a given testset."""
 
     @abstractmethod
-    def list_specs(self, command: ListSpecsCommand) -> List[List[SpecDTO]]:
-        """
-        Fetch specifications for a given testset in given locations. For each testcase
-        in command.testset.testcases, corresponding specifications are searched
-        and retrieved. Returns a list of specification lists, same length as
-        command.testset.testcases: each entry is a list for a given testcase.
-        """
+    def find_specs(self, command: FindSpecsCommand) -> TestRunDefDTO:
+        """Find specifications for each testcase in command.testset, using locations
+        derived from command.domain_config. Returns a TestRunDefDTO linking each
+        testcase to its found specs by name."""
