@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_d2cd1e26569dc216___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-09 11:32 +0000
+            created at 2026-04-09 21:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -154,14 +154,12 @@
     <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">        <span class="str">"""Loads a TestRunDTO from storage and creates the requested artifact."""</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">        <span class="nam">formatter</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_testrun_formatters</span><span class="op">.</span><span class="nam">get</span><span class="op">(</span><span class="nam">artifact_format</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">        <span class="key">if</span> <span class="nam">formatter</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">            <span class="key">raise</span> <span class="nam">NoFormatterFoundError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">                <span class="fst">f"</span><span class="fst">Formatter for </span><span class="op">{</span><span class="nam">artifact_format</span><span class="op">}</span><span class="fst"> not registered</span><span class="fst">"</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">            <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">        <span class="nam">testrun</span> <span class="op">=</span> <span class="nam">cast</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">            <span class="nam">TestRunDTO</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">dto_storage</span><span class="op">.</span><span class="nam">read_dto</span><span class="op">(</span><span class="nam">ObjectType</span><span class="op">.</span><span class="nam">TESTRUN</span><span class="op">,</span> <span class="nam">testrun_id</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">        <span class="key">return</span> <span class="nam">formatter</span><span class="op">.</span><span class="nam">create_artifact</span><span class="op">(</span><span class="nam">testrun</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">            <span class="key">raise</span> <span class="nam">NoFormatterFoundError</span><span class="op">(</span><span class="fst">f"</span><span class="fst">Formatter for </span><span class="op">{</span><span class="nam">artifact_format</span><span class="op">}</span><span class="fst"> not registered</span><span class="fst">"</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">        <span class="nam">testrun</span> <span class="op">=</span> <span class="nam">cast</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">            <span class="nam">TestRunDTO</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">            <span class="nam">self</span><span class="op">.</span><span class="nam">dto_storage</span><span class="op">.</span><span class="nam">read_dto</span><span class="op">(</span><span class="nam">ObjectType</span><span class="op">.</span><span class="nam">TESTRUN</span><span class="op">,</span> <span class="nam">testrun_id</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">        <span class="key">return</span> <span class="nam">formatter</span><span class="op">.</span><span class="nam">create_artifact</span><span class="op">(</span><span class="nam">testrun</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -171,7 +169,7 @@
             <a class="nav" href="z_d2cd1e26569dc216___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-09 11:32 +0000
+            created at 2026-04-09 21:13 +0000
         </p>
     </div>
 </footer>
