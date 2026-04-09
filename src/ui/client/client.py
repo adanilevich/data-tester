@@ -28,14 +28,14 @@ class DataTesterClient:
         self._base_url = base_url.rstrip("/")
 
     async def _get(self, path: str) -> Any:
-        async with httpx.AsyncClient(base_url=self._base_url) as client:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.get(path)
             if not response.is_success:
                 raise BackendError(status_code=response.status_code, detail=response.text)
             return response.json()
 
     async def _post(self, path: str, body: Any) -> Any:
-        async with httpx.AsyncClient(base_url=self._base_url) as client:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.post(path, json=body)
             if not response.is_success:
                 raise BackendError(status_code=response.status_code, detail=response.text)

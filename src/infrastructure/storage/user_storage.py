@@ -10,6 +10,7 @@ except ImportError:
     GCSFileSystem = None
 
 from src.dtos.storage_dtos import LocationDTO, StorageType
+from src.infrastructure.demo_latency import randomly_slow_class
 from src.infrastructure_ports import (
     IUserStorage,
     ObjectNotFoundError,
@@ -22,6 +23,7 @@ class UserStorageFileError(StorageError):
     """Error raised by file-based user storage implementations."""
 
 
+@randomly_slow_class("DATATESTER_DEMO_USER_STORAGE_DELAY_MS")
 class UserStorageFile(IUserStorage):
     """Base class for fsspec-based user storage. Read-only for user-managed files."""
 

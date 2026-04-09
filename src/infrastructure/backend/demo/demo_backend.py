@@ -16,6 +16,7 @@ from src.dtos import (
     SpecType,
     TestObjectDTO,
 )
+from src.infrastructure.demo_latency import randomly_slow_class
 from src.infrastructure_ports import BackendError, IBackend
 
 from .demo_naming_resolver import DemoNamingResolver, TestobjectType
@@ -28,6 +29,7 @@ class DemoBackendError(BackendError):
     """
 
 
+@randomly_slow_class("DATATESTER_DEMO_BACKEND_DELAY_MS")
 class DemoBackend(IBackend):
     """
     Local backend: File storage is simply fixtures stored on disks. Table storage is a

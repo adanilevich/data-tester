@@ -1,6 +1,6 @@
 """Domain home page — route: /{domain}/"""
 
-from nicegui import ui
+from nicegui import background_tasks, ui
 
 from src.ui.components import NavBar, StatusBar
 from src.ui.controller import Controller
@@ -12,13 +12,8 @@ def register(controller: Controller) -> None:
     @ui.page("/{domain}/")
     async def domain_home(domain: str) -> None:
         _ = NavBar(controller).render()
-        _ = StatusBar(controller).render()
-
-        # load_backend_data refreshes domain_configs first, so domain setter
-        # validation is safe to call after it.
-        await controller.load_backend_data(domain)
-        if controller.domain != domain:
-            controller.domain = domain
+        _ = StatusBar(controller, domain).render()
+        background_tasks.create(controller.load_backend_data(domain))
 
         with ui.column().classes(
             "flex-1 flex items-center justify-center min-h-screen "

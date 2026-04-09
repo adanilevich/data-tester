@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List, Set
 from uuid import uuid4
 
@@ -14,6 +15,8 @@ from src.ui.common import Status
 from src.ui.client import BackendError, DataTesterClient
 
 from .state import State
+
+_log = logging.getLogger("datatester")
 
 
 class Controller:
@@ -83,9 +86,13 @@ class Controller:
             self.state.domains = list(configs.keys())
             return None
         except BackendError as exc:
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("load_domains: %s", err)
+            return err
         except Exception as exc:
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("load_domains: %s", err)
+            return err
 
     async def load_testsets(self, domain: str) -> str | None:
         """Fetch testsets for a domain. Returns error message or None."""
@@ -97,10 +104,14 @@ class Controller:
             return None
         except BackendError as exc:
             self.state.set_testsets_status(domain, Status.ERROR)
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("load_testsets(%s): %s", domain, err)
+            return err
         except Exception as exc:
             self.state.set_testsets_status(domain, Status.ERROR)
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("load_testsets(%s): %s", domain, err)
+            return err
 
     async def load_testobjects(self, domain: str) -> str | None:
         """Fetch testobjects for all stage/instance combos of a domain."""
@@ -117,10 +128,14 @@ class Controller:
             return None
         except BackendError as exc:
             self.state.set_testobjects_status(domain, Status.ERROR)
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("load_testobjects(%s): %s", domain, err)
+            return err
         except Exception as exc:
             self.state.set_testobjects_status(domain, Status.ERROR)
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("load_testobjects(%s): %s", domain, err)
+            return err
 
     async def load_testruns(self, domain: str) -> str | None:
         """Fetch all testruns for a domain."""
@@ -132,10 +147,14 @@ class Controller:
             return None
         except BackendError as exc:
             self.state.set_testruns_status(domain, Status.ERROR)
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("load_testruns(%s): %s", domain, err)
+            return err
         except Exception as exc:
             self.state.set_testruns_status(domain, Status.ERROR)
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("load_testruns(%s): %s", domain, err)
+            return err
 
     async def load_specs(self, domain: str) -> str | None:
         """Discover specs for every testobject on the platform, grouped by stage.
@@ -207,10 +226,14 @@ class Controller:
             return None
         except BackendError as exc:
             self.state.set_specs_status(domain, Status.ERROR)
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("load_specs(%s): %s", domain, err)
+            return err
         except Exception as exc:
             self.state.set_specs_status(domain, Status.ERROR)
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("load_specs(%s): %s", domain, err)
+            return err
 
     async def load_backend_data(self, domain: str) -> str | None:
         """Load domain configs then all objects for the given domain.
@@ -227,4 +250,7 @@ class Controller:
         await self.load_testobjects(domain)
         await self.load_testruns(domain)
         await self.load_specs(domain)
+
+        if self.domain != domain:
+            self.domain = domain
         return None

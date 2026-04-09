@@ -23,6 +23,7 @@ from src.dtos import (
     TestRunDTO,
     TestSetDTO,
 )
+from src.infrastructure.demo_latency import randomly_slow_class
 from src.infrastructure_ports import (
     IDtoStorage,
     ObjectNotFoundError,
@@ -117,6 +118,7 @@ def _infer_object_type(dto: DTO) -> ObjectType:
     raise DtoStorageFileError(f"Cannot infer ObjectType for DTO: {str(dto)}")
 
 
+@randomly_slow_class("DATATESTER_DEMO_DTO_STORAGE_DELAY_MS")
 class DtoStorageFile(IDtoStorage):
     """
     File-based DTO storage using fsspec. Storage location is fixed at
