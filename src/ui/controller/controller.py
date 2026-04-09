@@ -1,4 +1,6 @@
 import logging
+import time
+from collections.abc import Callable
 from datetime import datetime
 from uuid import UUID, uuid4
 
@@ -16,17 +18,39 @@ from src.dtos import (
 )
 from src.dtos import Status as RunStatus
 from src.ui.client import BackendError, DataTesterClient
-from src.ui.common import Status
+from src.ui.common import IGNORED_TESTTYPES, Status
+from src.ui.config import UIConfig
 
 from .state import State, StateError
 
 _log = logging.getLogger("datatester")
 
+# Type alias for the controller factory used by page handlers.
+ControllerFactory = Callable[[], "Controller"]
+
 
 class Controller:
-    def __init__(self, client: DataTesterClient, state: State) -> None:
+    def __init__(
+        self,
+        client: DataTesterClient,
+        state: State,
+        config: UIConfig | None = None,
+    ) -> None:
         self._client: DataTesterClient = client
         self.state: State = state
+        self._config = config
+
+    def _is_fresh(self, domain: str, data_type: str) -> bool:
+        """Return True if cached data for this domain+type is within its TTL."""
+        if self._config is None:
+            return False
+        last = self.state.get_last_loaded(domain, data_type)
+        if last is None:
+            return False
+        ttl: int = getattr(
+            self._config, f"DATATESTER_UI_TTL_{data_type.upper()}", 60
+        )
+        return (time.time() - last) < ttl
 
     @property
     def domain(self) -> str | None:
@@ -89,12 +113,15 @@ class Controller:
             _log.error("load_domains: %s", err)
             return err
 
-    async def load_testsets(self, domain: str) -> str | None:
+    async def load_testsets(self, domain: str, force: bool = False) -> str | None:
+        if not force and self._is_fresh(domain, "testsets"):
+            return None
         self.state.set_testsets_status(domain, Status.LOADING)
         try:
             testsets = await self._client.get_testsets(domain)
             self.state.set_testsets(domain, testsets)
             self.state.set_testsets_status(domain, Status.LOADED)
+            self.state.set_last_loaded(domain, "testsets")
             return None
         except BackendError as exc:
             self.state.set_testsets_status(domain, Status.ERROR)
@@ -107,7 +134,9 @@ class Controller:
             _log.error("load_testsets(%s): %s", domain, err)
             return err
 
-    async def load_testobjects(self, domain: str) -> str | None:
+    async def load_testobjects(self, domain: str, force: bool = False) -> str | None:
+        if not force and self._is_fresh(domain, "testobjects"):
+            return None
         self.state.set_testobjects_status(domain, Status.LOADING)
         try:
             domain_config = self.state.domain_configs[domain]
@@ -118,6 +147,7 @@ class Controller:
                     all_testobjects.extend(objects)
             self.state.set_testobjects(domain, all_testobjects)
             self.state.set_testobjects_status(domain, Status.LOADED)
+            self.state.set_last_loaded(domain, "testobjects")
             return None
         except BackendError as exc:
             self.state.set_testobjects_status(domain, Status.ERROR)
@@ -130,12 +160,15 @@ class Controller:
             _log.error("load_testobjects(%s): %s", domain, err)
             return err
 
-    async def load_testruns(self, domain: str) -> str | None:
+    async def load_testruns(self, domain: str, force: bool = False) -> str | None:
+        if not force and self._is_fresh(domain, "testruns"):
+            return None
         self.state.set_testruns_status(domain, Status.LOADING)
         try:
             testruns = await self._client.get_testruns(domain)
             self.state.set_testruns(domain, testruns)
             self.state.set_testruns_status(domain, Status.LOADED)
+            self.state.set_last_loaded(domain, "testruns")
             # Remove preliminary runs that now have real counterparts
             loaded_ids = {str(tr.id) for tr in testruns}
             for ptr in self.state.preliminary_testruns(domain):
@@ -153,11 +186,17 @@ class Controller:
             _log.error("load_testruns(%s): %s", domain, err)
             return err
 
-    async def load_specs(self, domain: str) -> str | None:
+    async def load_specs(self, domain: str, force: bool = False) -> str | None:
+        if not force and self._is_fresh(domain, "specs"):
+            return None
         self.state.set_specs_status(domain, Status.LOADING)
         try:
             domain_config = self.state.domain_configs[domain]
             all_testobjects = self.state.testobjects.get(domain, [])
+
+            # WE only need one instance per stage since specs are stored per stage only
+            # in the following steps we deduplicate testobjects to have exactly one copy
+            # of testobject per stage
 
             stage_instance: dict[str, str] = {}
             stage_testobject_names: dict[str, set[str]] = {}
@@ -167,14 +206,7 @@ class Controller:
                     stage_testobject_names[obj.stage] = set()
                 stage_testobject_names[obj.stage].add(obj.name)
 
-            _IGNORED_TESTTYPES = {
-                TestType.ABSTRACT,
-                TestType.UNKNOWN,
-                TestType.DUMMY_OK,
-                TestType.DUMMY_NOK,
-                TestType.DUMMY_EXCEPTION,
-            }
-            _TESTTYPES = [tt for tt in TestType if tt not in _IGNORED_TESTTYPES]
+            _TESTTYPES = [tt for tt in TestType if tt not in IGNORED_TESTTYPES]
 
             for stage, instance in stage_instance.items():
                 testcases = {
@@ -210,6 +242,7 @@ class Controller:
                 self.state.set_specs(domain, stage, entries)
 
             self.state.set_specs_status(domain, Status.LOADED)
+            self.state.set_last_loaded(domain, "specs")
             return None
         except BackendError as exc:
             self.state.set_specs_status(domain, Status.ERROR)
@@ -222,16 +255,18 @@ class Controller:
             _log.error("load_specs(%s): %s", domain, err)
             return err
 
-    async def load_backend_data(self, domain: str) -> str | None:
-        error = await self.load_domains()
-        if error:
-            self.state.set_domain_config_status(domain, Status.ERROR)
-            return error
-        self.state.set_domain_config_status(domain, Status.LOADED)
-        await self.load_testsets(domain)
-        await self.load_testobjects(domain)
-        await self.load_testruns(domain)
-        await self.load_specs(domain)
+    async def load_backend_data(self, domain: str, force: bool = False) -> str | None:
+        if force or not self._is_fresh(domain, "domain_configs"):
+            error = await self.load_domains()
+            if error:
+                self.state.set_domain_config_status(domain, Status.ERROR)
+                return error
+            self.state.set_domain_config_status(domain, Status.LOADED)
+            self.state.set_last_loaded(domain, "domain_configs")
+        await self.load_testsets(domain, force=force)
+        await self.load_testobjects(domain, force=force)
+        await self.load_testruns(domain, force=force)
+        await self.load_specs(domain, force=force)
         if self.domain != domain:
             self.domain = domain
         return None
@@ -252,6 +287,25 @@ class Controller:
             _log.error("save_config(%s): %s", domain, err)
             return err
 
+    async def delete_testset(self, domain: str, testset_id: str) -> str | None:
+        try:
+            await self._client.delete_testset(domain, testset_id)
+            existing = [
+                ts
+                for ts in self.state.testsets.get(domain, [])
+                if str(ts.testset_id) != testset_id
+            ]
+            self.state.set_testsets(domain, existing)
+            return None
+        except BackendError as exc:
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("delete_testset(%s, %s): %s", domain, testset_id, err)
+            return err
+        except Exception as exc:
+            err = f"Could not reach backend: {exc}"
+            _log.error("delete_testset(%s, %s): %s", domain, testset_id, err)
+            return err
+
     async def save_testset(self, domain: str, testset: TestSetDTO) -> str | None:
         try:
             await self._client.save_testset(domain, testset)
@@ -267,9 +321,13 @@ class Controller:
             self.state.set_testsets(domain, existing)
             return None
         except BackendError as exc:
-            return f"Backend error {exc.status_code}: {exc.detail}"
+            err = f"Backend error {exc.status_code}: {exc.detail}"
+            _log.error("save_testset(%s, %s): %s", domain, testset.testset_id, err)
+            return err
         except Exception as exc:
-            return f"Could not reach backend: {exc}"
+            err = f"Could not reach backend: {exc}"
+            _log.error("save_testset(%s, %s): %s", domain, testset.testset_id, err)
+            return err
 
     def build_testrun_def(
         self, domain: str, testset: TestSetDTO
@@ -321,4 +379,5 @@ class Controller:
             domain_config=self.state.domain_config,
         )
         self.state.add_preliminary_testrun(domain, preliminary)
+        self.state.invalidate_last_loaded(domain, "testruns")
         return testrun_id, None

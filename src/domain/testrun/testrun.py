@@ -156,7 +156,7 @@ class TestRun:
             testset_id=self.testset_id,
             labels=self.labels,
             start_ts=self.start_ts,
-            end_ts=self.end_ts or datetime.now(),
+            end_ts=self.end_ts,
             result=self.result,
             results=self.results,
             testdefinitions=self.testcase_defs,

@@ -182,3 +182,31 @@ class TestMemoryDtoStorage:
 
         with pytest.raises(DtoStorageFileError, match="Multiple"):
             storage.read_dto(ObjectType.DOMAIN_CONFIG, str(config.id))
+
+    # --- delete_dto ---
+
+    def test_delete_dto_removes_file(self, storage: MemoryDtoStorage):
+        testset = _make_testset("payments", "to_delete")
+        storage.write_dto(testset)
+        expected = f"data/testsets/payments/{testset.id}.json"
+        assert storage.fs.exists(expected)
+
+        storage.delete_dto(ObjectType.TESTSET, str(testset.id))
+
+        assert not storage.fs.exists(expected)
+
+    def test_delete_dto_not_found_raises(self, storage: MemoryDtoStorage):
+        with pytest.raises(ObjectNotFoundError):
+            storage.delete_dto(ObjectType.TESTSET, str(uuid4()))
+
+    def test_delete_dto_multiple_matches_raises(self, storage: MemoryDtoStorage):
+        testset = _make_testset("payments", "dup")
+        serializer = JsonSerializer()
+        content = serializer.serialize(testset)
+        with storage.fs.open(f"data/testsets/{testset.id}.json", "wb") as f:
+            f.write(content)
+        with storage.fs.open(f"data/testsets/sub/{testset.id}.json", "wb") as f:
+            f.write(content)
+
+        with pytest.raises(DtoStorageFileError, match="Multiple"):
+            storage.delete_dto(ObjectType.TESTSET, str(testset.id))

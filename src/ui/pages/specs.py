@@ -1,5 +1,7 @@
 """Specs page — route: /{domain}/specs"""
 
+import logging
+
 from nicegui import background_tasks, ui
 
 from src.dtos import SpecEntryDTO, TestType
@@ -9,9 +11,8 @@ from src.dtos.specification_dtos import (
     SchemaSpecDTO,
     StagecountSpecDTO,
 )
-from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar
-from src.ui.controller import Controller, NiceGuiState
+from src.ui.controller import ControllerFactory
 from src.ui.styles import (
     CARD_HEADER_ROW_CLASSES,
     CARD_ITEM_DATE_CLASSES,
@@ -23,6 +24,8 @@ from src.ui.styles import (
     TABLE_HEADER_BORDER_STYLE,
     TABLE_ROW_BORDER_STYLE,
 )
+
+_log = logging.getLogger("datatester")
 
 _SPEC_TESTTYPES = [
     TestType.SCHEMA,
@@ -113,6 +116,14 @@ def _render_spec_content(spec: object) -> None:
 
 
 def _show_spec_dialog(stage: str, entry: SpecEntryDTO) -> None:
+    try:
+        _render_spec_dialog(stage, entry)
+    except Exception as exc:
+        _log.error("Failed to render spec dialog: %s", exc)
+        ui.notify("Could not display spec details.", type="negative")
+
+
+def _render_spec_dialog(stage: str, entry: SpecEntryDTO) -> None:
     _SPEC_SEP_STYLE = "background: #475569; height: 2px; margin: 1.5rem 0;"
 
     with (
@@ -182,7 +193,7 @@ def _render_spec_card(stage: str, entry: SpecEntryDTO) -> None:
     card.on("click", lambda _e, s=stage, en=entry: _show_spec_dialog(s, en))
 
 
-def register(client: DataTesterClient) -> None:
+def register(make_controller: ControllerFactory) -> None:
     @ui.page("/{domain}/specs")
     async def specs_page(
         domain: str,
@@ -190,7 +201,11 @@ def register(client: DataTesterClient) -> None:
         testobject: str = "",
         spectype: str = "All",
     ) -> None:
-        controller = Controller(client=client, state=NiceGuiState())
+        controller = make_controller()
+        known = controller.state.domains
+        if known and domain not in known:
+            ui.navigate.to("/")
+            return
         NavBar(controller).render()
         StatusBar(controller, domain).render()
         background_tasks.create_lazy(
@@ -276,3 +291,11 @@ def register(client: DataTesterClient) -> None:
             stage_select.on("update:model-value", lambda _: spec_list.refresh())
             testobject_input.on("update:model-value", lambda _: spec_list.refresh())
             spectype_select.on("update:model-value", lambda _: spec_list.refresh())
+
+            async def _bg_refresh() -> None:
+                """Periodic background reload — TTL guards prevent over-fetching."""
+                await controller.load_backend_data(domain)
+                spec_list.refresh()
+
+            bg_timer = ui.timer(5.0, _bg_refresh)
+            ui.context.client.on_disconnect(lambda: bg_timer.cancel())

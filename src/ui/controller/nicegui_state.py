@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from nicegui import app
 
 from src.dtos import DomainConfigDTO, SpecEntryDTO, TestObjectDTO, TestRunDTO, TestSetDTO
@@ -8,7 +10,11 @@ from src.ui.controller.state import State, StateError
 
 
 class NiceGuiState(State):
-    """Concrete State backed by app.storage.*. Never caches storage objects."""
+    """
+    Concrete State backed by app.storage.*. Never caches storage objects.
+    We specifically use app.storage.general for objects which are loaded from backend
+    and reused across users of a domain. DO NOT change this to app.storage.user
+    """
 
     @property
     def domain_configs(self) -> dict[str, DomainConfigDTO]:
@@ -166,3 +172,16 @@ class NiceGuiState(State):
         inner.pop(testrun_id, None)
         outer[domain] = inner
         app.storage.user["preliminary_testruns"] = outer
+
+    def get_last_loaded(self, domain: str, data_type: str) -> float | None:
+        return app.storage.general.get("last_loaded", {}).get(f"{domain}_{data_type}")
+
+    def set_last_loaded(self, domain: str, data_type: str) -> None:
+        current = dict(app.storage.general.get("last_loaded", {}))
+        current[f"{domain}_{data_type}"] = time.time()
+        app.storage.general["last_loaded"] = current
+
+    def invalidate_last_loaded(self, domain: str, data_type: str) -> None:
+        current = dict(app.storage.general.get("last_loaded", {}))
+        current.pop(f"{domain}_{data_type}", None)
+        app.storage.general["last_loaded"] = current

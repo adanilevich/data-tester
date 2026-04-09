@@ -77,3 +77,15 @@ def test_list_testsets_empty(testset: TestSet):
 def test_load_nonexistent_testset_raises(testset: TestSet):
     with pytest.raises(ObjectNotFoundError):
         testset.load_testset(str(uuid4()))
+
+
+def test_delete_testset(testset: TestSet, testset_dto: TestSetDTO):
+    testset.save_testset(testset=testset_dto)
+    testset.delete_testset(testset_id=str(testset_dto.testset_id))
+    with pytest.raises(ObjectNotFoundError):
+        testset.load_testset(testset_id=str(testset_dto.testset_id))
+
+
+def test_delete_nonexistent_testset_raises(testset: TestSet):
+    with pytest.raises(ObjectNotFoundError):
+        testset.delete_testset(testset_id=str(uuid4()))

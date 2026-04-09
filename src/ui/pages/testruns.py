@@ -1,14 +1,14 @@
 """Testruns page — route: /{domain}/testruns"""
 
 import json
+import logging
 
 from nicegui import background_tasks, ui
 
 from src.dtos import Result, Status as RunStatus, TestCaseDTO, TestRunDTO, TestType
-from src.ui.client import DataTesterClient
 from src.ui.common import Status as LoadStatus
 from src.ui.components import NavBar, StatusBar, render_testobject_matrix
-from src.ui.controller import Controller, NiceGuiState
+from src.ui.controller import ControllerFactory
 from src.ui.styles import (
     CARD_HEADER_ROW_CLASSES,
     CARD_ITEM_DATE_CLASSES,
@@ -24,6 +24,12 @@ from src.ui.styles import (
     SELECT_INPUT_PROPS,
     TABLE_HEADER_BORDER_STYLE,
     TABLE_ROW_BORDER_STYLE,
+)
+
+_log = logging.getLogger("datatester")
+
+_TERMINAL_STATUSES: frozenset[RunStatus] = frozenset(
+    {RunStatus.FINISHED, RunStatus.ERROR, RunStatus.ABORTED}
 )
 
 _STATUS_BADGE: dict[RunStatus, tuple[str, str]] = {
@@ -73,6 +79,14 @@ def _render_kv_table(rows: list[tuple[str, str]]) -> None:
 
 
 def _show_testcase_dialog(tc: TestCaseDTO) -> None:
+    try:
+        _render_testcase_dialog(tc)
+    except Exception as exc:
+        _log.error("Failed to render testcase dialog: %s", exc)
+        ui.notify("Could not display test case details.", type="negative")
+
+
+def _render_testcase_dialog(tc: TestCaseDTO) -> None:
     with (
         ui.dialog() as dlg,
         ui.card().style(
@@ -286,9 +300,13 @@ def _render_testrun_card(testrun: TestRunDTO) -> None:
                     ui.tooltip(testrun.result.value)
                 with ui.element("div").classes("flex flex-col"):
                     ui.label(testrun.testset_name).classes(CARD_ITEM_TITLE_CLASSES)
-                    ui.label(testrun.start_ts.strftime("%Y-%m-%d %H:%M:%S")).classes(
-                        CARD_ITEM_DATE_CLASSES
-                    )
+                    ui.label(
+                        f"started: {testrun.start_ts.strftime('%Y-%m-%d %H:%M:%S')}"
+                    ).classes(CARD_ITEM_DATE_CLASSES)
+                    if testrun.end_ts and testrun.status in _TERMINAL_STATUSES:
+                        ui.label(
+                            f"ended:   {testrun.end_ts.strftime('%Y-%m-%d %H:%M:%S')}"
+                        ).classes(CARD_ITEM_DATE_CLASSES)
 
             ui.label(f"Stage: {testrun.stage}").classes(CARD_ITEM_META_CLASSES)
             ui.label(f"Instance: {testrun.instance}").classes(CARD_ITEM_META_CLASSES)
@@ -327,10 +345,14 @@ def _render_testrun_card(testrun: TestRunDTO) -> None:
         toggle_btn.on("click", _toggle)
 
 
-def register(client: DataTesterClient) -> None:
+def register(make_controller: ControllerFactory) -> None:
     @ui.page("/{domain}/testruns")
     async def testruns_page(domain: str) -> None:
-        controller = Controller(client=client, state=NiceGuiState())
+        controller = make_controller()
+        known = controller.state.domains
+        if known and domain not in known:
+            ui.navigate.to("/")
+            return
         NavBar(controller).render()
         StatusBar(controller, domain).render()
 
@@ -401,7 +423,7 @@ def register(client: DataTesterClient) -> None:
                 )
 
                 async def _on_refresh() -> None:
-                    await controller.load_backend_data(domain)
+                    await controller.load_backend_data(domain, force=True)
                     stage_select.options = ["All"] + _get_stages()
                     stage_select.value = "All"
                     stage_select.update()
@@ -472,7 +494,7 @@ def register(client: DataTesterClient) -> None:
             testrun_list()
 
             async def _load_and_start_polling() -> None:
-                await controller.load_testruns(domain)
+                await controller.load_testruns(domain, force=True)
                 stage_select.options = ["All"] + _get_stages()
                 stage_select.update()
                 instance_select.options = ["All"] + _get_instances()
@@ -483,13 +505,24 @@ def register(client: DataTesterClient) -> None:
                     poll_timer.activate()
 
             async def _poll() -> None:
-                await controller.load_testruns(domain)
+                await controller.load_testruns(domain, force=True)
                 testrun_list.refresh()
                 if not controller.state.preliminary_testruns(domain):
                     poll_timer.deactivate()
 
             poll_timer = ui.timer(5.0, _poll, active=False)
-            background_tasks.create(_load_and_start_polling())
+
+            async def _bg_refresh() -> None:
+                """Periodic background reload — TTL guards prevent over-fetching."""
+                await controller.load_testruns(domain)
+                testrun_list.refresh()
+
+            bg_timer = ui.timer(5.0, _bg_refresh)
+            ui.context.client.on_disconnect(lambda: bg_timer.cancel())
+
+            background_tasks.create_lazy(
+                _load_and_start_polling(), name=f"load_testruns_{domain}"
+            )
 
             def _on_stage_change(_: object = None) -> None:
                 raw = stage_select.value

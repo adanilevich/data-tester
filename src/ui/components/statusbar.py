@@ -1,10 +1,15 @@
 """Shared status bar component shown at the bottom of every page."""
 
+import time
+from typing import Any
+
 from nicegui import ui
 
-from src.ui.common import Status
+from src.ui.common import Status, format_elapsed
 from src.ui.controller import Controller
 from src.ui.styles import ICON_BUTTON_SECONDARY_CLASSES, STATUS_CHIP_TEXT_CLASSES
+
+_client_chips_timers: dict[str, Any] = {}
 
 _DOT_COLOR: dict[Status, str] = {
     Status.LOADED: "bg-teal-400",
@@ -13,18 +18,35 @@ _DOT_COLOR: dict[Status, str] = {
     Status.UNCLEAR: "bg-slate-600",
 }
 
+_CHIPS_DATA: list[tuple[str, str]] = [
+    ("Config", "domain_configs"),
+    ("Testsets", "testsets"),
+    ("Testobjects", "testobjects"),
+    ("Testruns", "testruns"),
+    ("Specs", "specs"),
+]
+
 
 class StatusBar:
 
-    def __init__(self, controller: Controller, domain: str | None = None):
+    def __init__(
+        self,
+        controller: Controller,
+        domain: str | None = None,
+        refresh_interval: float = 1.0,
+    ):
         self.controller = controller
         self._domain = domain
+        self._refresh_interval = refresh_interval
 
-    def _chip(self, label: str, status: Status) -> None:
+    def _chip(self, label: str, status: Status, elapsed: str | None = None) -> None:
         dot = _DOT_COLOR[status]
+        text = f"{label}: {status.value}"
+        if elapsed and status == Status.LOADED:
+            text = f"{label}: {status.value} ({elapsed})"
         with ui.row().classes("items-center").style("gap: 0.75rem;"):
             ui.element("div").classes(f"w-3 h-2 rounded-sm {dot}")
-            ui.label(f"{label}: {status.value}").classes(STATUS_CHIP_TEXT_CLASSES)
+            ui.label(text).classes(STATUS_CHIP_TEXT_CLASSES)
 
     def render(self) -> ui.footer:
         domain = self._domain or self.controller.domain
@@ -48,36 +70,52 @@ class StatusBar:
 
                 _selector_timer = ui.timer(0.5, _maybe_refresh_selector)
 
-                # --- Status chips: refresh every 0.5 s ---
+                # --- Status chips: one timer per client connection ---
                 if domain:
 
                     @ui.refreshable
                     def _chips() -> None:
-                        self._chip(
-                            "Config",
-                            self.controller.get_domain_config_status(domain),
-                        )
-                        self._chip(
-                            "Testsets",
-                            self.controller.get_testset_status(domain),
-                        )
-                        self._chip(
-                            "Testobjects",
-                            self.controller.get_testobjects_status(domain),
-                        )
-                        self._chip(
-                            "Testruns",
-                            self.controller.get_testruns_status(domain),
-                        )
-                        self._chip(
-                            "Specs",
-                            self.controller.get_specs_status(domain),
-                        )
+                        for label, data_type in _CHIPS_DATA:
+                            status = self._get_status(data_type, domain)
+                            last = self.controller.state.get_last_loaded(
+                                domain, data_type
+                            )
+                            elapsed = (
+                                format_elapsed(time.time() - last)
+                                if last is not None
+                                else None
+                            )
+                            self._chip(label, status, elapsed)
 
                     _chips()
-                    ui.timer(0.5, _chips.refresh)
+
+                    # Per-client timer: cancel the previous one for this client (if
+                    # navigating between pages), then create a fresh timer pointing
+                    # at the current _chips refreshable.
+                    client_id = str(ui.context.client.id)
+                    if client_id in _client_chips_timers:
+                        _client_chips_timers[client_id].cancel()
+                    chips_timer = ui.timer(self._refresh_interval, _chips.refresh)
+                    _client_chips_timers[client_id] = chips_timer
+                    _cid = client_id
+                    ui.context.client.on_disconnect(
+                        lambda: _client_chips_timers.pop(_cid, None)
+                    )
 
         return footer
+
+    def _get_status(self, data_type: str, domain: str) -> Status:
+        getter_map = {
+            "domain_configs": self.controller.get_domain_config_status,
+            "testsets": self.controller.get_testset_status,
+            "testobjects": self.controller.get_testobjects_status,
+            "testruns": self.controller.get_testruns_status,
+            "specs": self.controller.get_specs_status,
+        }
+        getter = getter_map.get(data_type)
+        if getter is None:
+            return Status.UNCLEAR
+        return getter(domain)
 
     def _render_domain_selector(self, domain: str | None) -> None:
         """Render the domain indicator/selector. Called once — never refreshed."""

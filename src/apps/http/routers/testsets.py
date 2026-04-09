@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, HTTPException, Response
 
 from src.apps.http.di import TestSetDriverDep
 from src.dtos import TestSetDTO
+from src.infrastructure_ports import ObjectNotFoundError
 
 router = APIRouter(tags=["testsets"])
 
@@ -15,7 +16,10 @@ def list_testsets(domain: str, driver: TestSetDriverDep) -> List[TestSetDTO]:
 
 @router.get("/{domain}/testset/{testset_id}", response_model=TestSetDTO)
 def load_testset(domain: str, testset_id: str, driver: TestSetDriverDep) -> TestSetDTO:
-    return driver.load_testset(testset_id=testset_id)
+    try:
+        return driver.load_testset(testset_id=testset_id)
+    except ObjectNotFoundError as err:
+        raise HTTPException(status_code=404, detail=str(err)) from err
 
 
 @router.put("/{domain}/testset/{testset_id}", status_code=204)
@@ -23,4 +27,15 @@ def save_testset(
     domain: str, testset_id: str, dto: TestSetDTO, driver: TestSetDriverDep
 ) -> Response:
     driver.save_testset(testset=dto)
+    return Response(status_code=204)
+
+
+@router.delete("/{domain}/testset/{testset_id}", status_code=204)
+def delete_testset(
+    domain: str, testset_id: str, driver: TestSetDriverDep
+) -> Response:
+    try:
+        driver.delete_testset(testset_id=testset_id)
+    except ObjectNotFoundError as err:
+        raise HTTPException(status_code=404, detail=str(err)) from err
     return Response(status_code=204)

@@ -46,7 +46,7 @@ def create_ui(config: UIConfig | None = None) -> None:
     cfg = config or UIConfig()
     client = DataTesterClient(base_url=cfg.DATATESTER_UI_BACKEND_URL)
 
-    register_routes(client)
+    register_routes(client, cfg)
 
     if cfg.DATATESTER_DATA_PLATFORM == "DEMO":
         app.on_startup(lambda: app.storage.general.clear())

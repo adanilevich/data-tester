@@ -17,6 +17,10 @@ class ListTestSetsCommand(DTO):
     domain: str
 
 
+class DeleteTestSetCommand(DTO):
+    testset_id: str
+
+
 class ITestSet(ABC):
     @abstractmethod
     def save_testset(self, command: SaveTestSetCommand) -> None:
@@ -29,6 +33,10 @@ class ITestSet(ABC):
         """
         Loads a TestSetDTO by testset_id.
         """
+
+    @abstractmethod
+    def delete_testset(self, command: DeleteTestSetCommand) -> None:
+        """Deletes a testset by ID."""
 
     @abstractmethod
     def list_testsets(self, command: ListTestSetsCommand) -> List[TestSetDTO]:

@@ -142,3 +142,18 @@ class State(ABC):
     @abstractmethod
     def remove_preliminary_testrun(self, domain: str, testrun_id: str) -> None:
         pass
+
+    @abstractmethod
+    def get_last_loaded(self, domain: str, data_type: str) -> float | None:
+        """Return the Unix timestamp of the last successful load, or None."""
+        pass
+
+    @abstractmethod
+    def set_last_loaded(self, domain: str, data_type: str) -> None:
+        """Record the current time as the last successful load timestamp."""
+        pass
+
+    @abstractmethod
+    def invalidate_last_loaded(self, domain: str, data_type: str) -> None:
+        """Clear the last-loaded timestamp, forcing a reload on next access."""
+        pass

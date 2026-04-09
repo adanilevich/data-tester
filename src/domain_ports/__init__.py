@@ -20,6 +20,7 @@ from .i_testrun import (
     SaveTestRunCommand,
 )
 from .i_testset import (
+    DeleteTestSetCommand,
     ITestSet,
     ListTestSetsCommand,
     LoadTestSetCommand,
@@ -43,6 +44,7 @@ __all__ = [
     "LoadTestCaseCommand",
     "ListTestRunsCommand",
     "ITestSet",
+    "DeleteTestSetCommand",
     "SaveTestSetCommand",
     "LoadTestSetCommand",
     "ListTestSetsCommand",

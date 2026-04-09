@@ -6,9 +6,9 @@ from uuid import UUID
 from nicegui import background_tasks, ui
 
 from src.dtos import DomainConfigDTO, TestCaseEntryDTO, TestSetDTO, TestType
-from src.ui.client import DataTesterClient
+from src.ui.common import IGNORED_TESTTYPES
 from src.ui.components import NavBar, StatusBar, render_testobject_matrix
-from src.ui.controller import Controller, NiceGuiState
+from src.ui.controller import ControllerFactory
 from src.ui.styles import (
     CARD_HEADER_ROW_CLASSES,
     CARD_ITEM_DATE_CLASSES,
@@ -23,14 +23,7 @@ from src.ui.styles import (
     SELECT_INPUT_PROPS,
 )
 
-_IGNORED_TESTTYPES = {
-    TestType.ABSTRACT,
-    TestType.UNKNOWN,
-    TestType.DUMMY_OK,
-    TestType.DUMMY_NOK,
-    TestType.DUMMY_EXCEPTION,
-}
-_APPLICABLE_TESTTYPES: set[TestType] = set(TestType) - _IGNORED_TESTTYPES
+_APPLICABLE_TESTTYPES: set[TestType] = set(TestType) - IGNORED_TESTTYPES
 _STAGE_NA: set[TestType] = {TestType.ROWCOUNT, TestType.COMPARE}
 _NON_STAGE_NA: set[TestType] = {TestType.STAGECOUNT}
 
@@ -49,7 +42,7 @@ def _matrix_columns(testset: TestSetDTO) -> list[TestType]:
     cols: set[TestType] = set()
     for tc in testset.testcases.values():
         cols |= _applicable_for(tc.testobject)
-    cols |= {tc.testtype for tc in testset.testcases.values()} - _IGNORED_TESTTYPES
+    cols |= {tc.testtype for tc in testset.testcases.values()} - IGNORED_TESTTYPES
     return sorted(cols, key=lambda t: t.value)
 
 
@@ -87,6 +80,7 @@ def _render_testset_card(
     testset: TestSetDTO,
     on_run: Callable[[], object],
     on_edit: Callable[[], object],
+    on_delete: Callable[[], object],
 ) -> None:
     count = len(testset.testcases)
     expanded = {"open": False}
@@ -129,6 +123,10 @@ def _render_testset_card(
             ):
                 ui.label(f"{count} testcases")
             ui.button(
+                icon="delete",
+                on_click=on_delete,
+            ).props("flat dense round").classes(ICON_BUTTON_SECONDARY_CLASSES)
+            ui.button(
                 icon="edit",
                 on_click=on_edit,
             ).props("flat dense round").classes(ICON_BUTTON_SECONDARY_CLASSES)
@@ -153,12 +151,16 @@ def _render_testset_card(
         toggle_btn.on("click", _toggle)
 
 
-def register(client: DataTesterClient) -> None:
+def register(make_controller: ControllerFactory) -> None:
     """Register the testsets page route."""
 
     @ui.page("/{domain}/testsets")
     async def testsets_page(domain: str) -> None:
-        controller = Controller(client=client, state=NiceGuiState())
+        controller = make_controller()
+        known = controller.state.domains
+        if known and domain not in known:
+            ui.navigate.to("/")
+            return
         NavBar(controller).render()
         StatusBar(controller, domain).render()
         background_tasks.create_lazy(
@@ -212,7 +214,7 @@ def register(client: DataTesterClient) -> None:
                 )
 
                 async def _on_refresh() -> None:
-                    await controller.load_backend_data(domain)
+                    await controller.load_backend_data(domain, force=True)
                     stage_select.options = ["All"] + _get_stages()
                     stage_select.value = "All"
                     stage_select.update()
@@ -295,6 +297,41 @@ def register(client: DataTesterClient) -> None:
                             )
                     dlg.open()
 
+                async def _confirm_delete(ts: TestSetDTO) -> None:
+                    with (
+                        ui.dialog() as dlg,
+                        ui.card()
+                        .props("dark")
+                        .classes("bg-[#161b27] border border-slate-700"),
+                    ):
+                        ui.label(f"Delete '{ts.name}'?").classes(
+                            "font-mono text-sm text-slate-200 mb-1"
+                        )
+                        ui.label("This cannot be undone.").classes(
+                            "font-mono text-xs text-red-400 mb-4"
+                        )
+                        with ui.row().classes("items-center justify-end w-full").style(
+                            "gap: 0.5rem;"
+                        ):
+                            ui.button("Cancel", on_click=dlg.close).props(
+                                "flat dense"
+                            ).classes("text-slate-400 font-mono text-xs")
+
+                            async def _confirm(_: object = None) -> None:
+                                dlg.close()
+                                err = await controller.delete_testset(
+                                    domain, str(ts.testset_id)
+                                )
+                                if err:
+                                    ui.notify(err, type="negative")
+                                else:
+                                    testset_list.refresh()
+
+                            ui.button("Delete", on_click=_confirm).props("dense").classes(
+                                "bg-red-700 text-white font-mono text-xs"
+                            )
+                    dlg.open()
+
                 for ts in filtered:
 
                     async def _on_run(ts: TestSetDTO = ts) -> None:
@@ -303,7 +340,12 @@ def register(client: DataTesterClient) -> None:
                     def _on_edit(ts: TestSetDTO = ts) -> None:
                         _open_edit_dialog(ts)
 
-                    _render_testset_card(ts, on_run=_on_run, on_edit=_on_edit)
+                    async def _on_delete(ts: TestSetDTO = ts) -> None:
+                        await _confirm_delete(ts)
+
+                    _render_testset_card(
+                        ts, on_run=_on_run, on_edit=_on_edit, on_delete=_on_delete
+                    )
 
             testset_list()
 
@@ -537,3 +579,11 @@ def register(client: DataTesterClient) -> None:
             stage_select.on("update:model-value", _on_stage_change)
             instance_select.on("update:model-value", lambda _: testset_list.refresh())
             search_input.on("update:model-value", lambda _: testset_list.refresh())
+
+            async def _bg_refresh() -> None:
+                """Periodic background reload — TTL guards prevent over-fetching."""
+                await controller.load_backend_data(domain)
+                testset_list.refresh()
+
+            bg_timer = ui.timer(5.0, _bg_refresh)
+            ui.context.client.on_disconnect(lambda: bg_timer.cancel())

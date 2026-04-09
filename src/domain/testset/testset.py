@@ -23,6 +23,10 @@ class TestSet:
         dto = self.storage.read_dto(object_type=ObjectType.TESTSET, id=testset_id)
         return cast(TestSetDTO, dto)
 
+    def delete_testset(self, testset_id: str) -> None:
+        """Deletes a TestSetDTO by testset_id."""
+        self.storage.delete_dto(object_type=ObjectType.TESTSET, id=testset_id)
+
     def list_testsets(self, domain: str) -> List[TestSetDTO]:
         """
         Lists all TestSetDTOs that match the provided domain name.

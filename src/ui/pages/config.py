@@ -6,9 +6,8 @@ from typing import Any
 from nicegui import background_tasks, ui
 
 from src.dtos import DomainConfigDTO, LocationDTO
-from src.ui.client import DataTesterClient
 from src.ui.components import NavBar, StatusBar
-from src.ui.controller import Controller, NiceGuiState
+from src.ui.controller import ControllerFactory
 from src.ui.styles import CARD_SURFACE_PADDED_CLASSES, SELECT_INPUT_PROPS
 
 _SECTION_LABEL = (
@@ -38,12 +37,16 @@ def _render_remove_chip(text: str, on_remove: Any) -> None:
         )
 
 
-def register(client: DataTesterClient) -> None:
+def register(make_controller: ControllerFactory) -> None:
     """Register the config page route."""
 
     @ui.page("/{domain}/config")
     async def config_page(domain: str) -> None:
-        controller = Controller(client=client, state=NiceGuiState())
+        controller = make_controller()
+        known = controller.state.domains
+        if known and domain not in known:
+            ui.navigate.to("/")
+            return
         NavBar(controller).render()
         StatusBar(controller, domain).render()
         background_tasks.create_lazy(

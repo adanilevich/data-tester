@@ -188,3 +188,13 @@ class TestFullFlowPayments:
         assert tr_artifact_resp.status_code == 200
         assert "spreadsheetml" in tr_artifact_resp.headers["content-type"]
         assert tr_artifact_resp.content[:4] == b"PK\x03\x04"
+
+        # 9. Delete testset and verify it is gone
+        ts_delete = client.delete(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_delete.status_code == 204
+
+        ts_get_deleted = client.get(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_get_deleted.status_code == 404
+
+        ts_delete_again = client.delete(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_delete_again.status_code == 404

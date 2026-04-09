@@ -47,6 +47,14 @@ class DataTesterClient:
                 )
             return response.json()
 
+    async def _delete(self, path: str) -> None:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
+            response = await client.delete(path)
+            if not response.is_success:
+                raise BackendError(
+                    status_code=response.status_code, detail=response.text
+                )
+
     async def _put(self, path: str, body: Any) -> None:
         async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
             response = await client.put(path, json=body)
@@ -102,3 +110,6 @@ class DataTesterClient:
             f"/{domain}/testset/{testset.testset_id}",
             testset.model_dump(mode="json"),
         )
+
+    async def delete_testset(self, domain: str, testset_id: str) -> None:
+        await self._delete(f"/{domain}/testset/{testset_id}")

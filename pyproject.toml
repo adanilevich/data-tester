@@ -69,7 +69,14 @@ source = ["src/"]  # only analyze source code in src for coverage
 relative_files = true  # use relative files to be picked up by github action py-cov-action/python-coverage-comment-action@v3
 omit = [
     "src/infrastructure/backend/dummy/*",
-    "src/infrastructure/notifier/in_memory_notifier.py"
+    "src/infrastructure_ports/*",
+    "src/infrastructure/notifier/in_memory_notifier.py",
+    "src/ui/components/*",
+    "src/ui/pages/*",
+    "src/ui/app.py",
+    "src/ui/main_ui.py",
+    "src/ui/styles.py*",
+    "src/ui/common.py*"
 ]
 
 
