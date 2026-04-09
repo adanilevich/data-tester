@@ -1,6 +1,7 @@
 from typing import List
 
 from src.domain_ports import (
+    DeleteTestSetCommand,
     ITestSet,
     ListTestSetsCommand,
     LoadTestSetCommand,
@@ -42,6 +43,11 @@ class TestSetDriver:
         """Loads a testset by ID."""
         command = LoadTestSetCommand(testset_id=testset_id)
         return self.adapter.load_testset(command=command)
+
+    def delete_testset(self, testset_id: str) -> None:
+        """Deletes a testset by ID."""
+        command = DeleteTestSetCommand(testset_id=testset_id)
+        self.adapter.delete_testset(command=command)
 
     def list_testsets(self, domain: str) -> List[TestSetDTO]:
         """Lists all testsets for the given domain."""

@@ -143,7 +143,7 @@ class TestSpecAdapter:
             default_stage="dev",
             default_instance="primary",
             testcases=testcases,
-            last_updated=datetime.now(),
+            modified_at=datetime.now(),
         )
 
     def _create_test_xlsx_schema(self) -> bytes:

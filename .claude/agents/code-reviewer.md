@@ -3,7 +3,6 @@ name: code-reviewer
 description: Use this agent proactively to review code for quality, best practices, performance and scalability
 tools: Glob, Grep, Read, WebFetch, Skill, mcp__context7__resolve-library-id, mcp__context7__query-docs
 skills:
-  - planning-with-files
   - frontend-design
   - pythonista-nicegui
 model: inherit

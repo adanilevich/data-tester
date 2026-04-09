@@ -3,7 +3,6 @@ name: nicegui-expert
 description: Use this agent proactively to analyze, plan and implement NiceGUI frontend code
 tools: "Glob, Grep, Read, WebFetch, Write, Skill, mcp__context7__resolve-library-id, mcp__context7__query-docs"
 skills: 
-  - planning-with-files
   - frontend-design
   - pythonista-nicegui
 mcpServers: 

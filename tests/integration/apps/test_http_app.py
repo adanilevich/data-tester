@@ -7,15 +7,16 @@ demo_data fixture. The sales domain is tested separately in test_cli_app.py.
 
 import pytest
 from fastapi.testclient import TestClient
+
 from src.apps.http.app import create_app
-from src.client_interface.requests import ExecuteTestRunRequest, FindSpecsRequest
 from src.config import Config
 from src.dtos import (
     DomainConfigDTO,
+    FindSpecsDTO,
     TestCaseDTO,
     TestCaseEntryDTO,
-    TestRunDTO,
     TestRunDefDTO,
+    TestRunDTO,
     TestSetDTO,
     TestType,
 )
@@ -77,6 +78,7 @@ class TestFullFlowPayments:
         ### response.content is ALWAYS bytes (i.e. a json)
         ### response.json is ALWAYS a dict
         ### put ALWAYS expects a json-serialiable dict, i.e. dto.to_dict()
+
         # 1. Load domain config, modify, persist, reload and validate
         dc_get = client.get("/domain-config/payments")
         assert dc_get.status_code == 200
@@ -96,7 +98,7 @@ class TestFullFlowPayments:
         ts_get = client.get("/payments/testset")
         assert ts_get.status_code == 200
         ts_list = [TestSetDTO.from_dict(t) for t in ts_get.json()]
-        ts_dto = next(t for t in ts_list if t.name == "payments_full")
+        ts_dto = next(t for t in ts_list if t.name == "Payments Partial")
         assert len(ts_dto.testcases) == 6
 
         ts_dto.testcases["stage_accounts_SCHEMA_dup"] = TestCaseEntryDTO(
@@ -124,7 +126,7 @@ class TestFullFlowPayments:
             assert tc.testobject in testobject_names
 
         # 3. Find specifications
-        request = FindSpecsRequest(testset=ts_dto, domain_config=dc_dto)
+        request = FindSpecsDTO(testset=ts_dto, domain_config=dc_dto)
         specs_resp = client.post("/payments/specification/find", json=request.to_dict())
         assert specs_resp.status_code == 200
         trd = TestRunDefDTO.model_validate(specs_resp.json())
@@ -132,10 +134,10 @@ class TestFullFlowPayments:
         assert len(spec_list) == 7
 
         # 4. Execute testrun
-        request = ExecuteTestRunRequest(
-            testset=ts_dto, domain_config=dc_dto, specs=spec_list
+        testrun_def = TestRunDefDTO.from_testset(
+            testset=ts_dto, spec_list=spec_list, domain_config=dc_dto
         )
-        run_resp = client.post("/payments/testrun/", json=request.to_dict())
+        run_resp = client.post("/payments/testrun/", json=testrun_def.to_dict())
         assert run_resp.status_code == 202
         testrun_id = run_resp.json()["testrun_id"]
 
@@ -186,3 +188,13 @@ class TestFullFlowPayments:
         assert tr_artifact_resp.status_code == 200
         assert "spreadsheetml" in tr_artifact_resp.headers["content-type"]
         assert tr_artifact_resp.content[:4] == b"PK\x03\x04"
+
+        # 9. Delete testset and verify it is gone
+        ts_delete = client.delete(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_delete.status_code == 204
+
+        ts_get_deleted = client.get(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_get_deleted.status_code == 404
+
+        ts_delete_again = client.delete(f"/payments/testset/{ts_dto.testset_id}")
+        assert ts_delete_again.status_code == 404

@@ -265,4 +265,5 @@ class TestTestRunDTOAutoSummary:
         assert testrun.id == testrun_id
         # id is a plain field (UUID4), not a string property
         import uuid
+
         assert isinstance(testrun.id, uuid.UUID)

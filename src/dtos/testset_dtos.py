@@ -37,6 +37,7 @@ class TestSetDTO(DTO):
     stage: str | None = None  # stage where testset is executed
     instance: str | None = None  # Exectution instance
     testcases: Dict[str, TestCaseEntryDTO]  # dict by identifier
+    comment: str = Field(default="")
 
     def model_post_init(self, __context):
         if self.stage is None:
@@ -48,4 +49,4 @@ class TestSetDTO(DTO):
     def id(self) -> str:
         return str(self.testset_id)
 
-    last_updated: datetime = Field(default_factory=datetime.now)
+    modified_at: datetime = Field(default_factory=datetime.now)

@@ -3,6 +3,7 @@ from uuid import uuid4
 import pytest
 from src.domain_adapters import TestSetAdapter
 from src.domain_ports import (
+    DeleteTestSetCommand,
     ListTestSetsCommand,
     LoadTestSetCommand,
     SaveTestSetCommand,
@@ -85,3 +86,16 @@ def test_load_nonexistent_testset_raises(handler):
     load_cmd = LoadTestSetCommand(testset_id=str(uuid4()))
     with pytest.raises(ObjectNotFoundError):
         handler.load_testset(load_cmd)
+
+
+def test_delete_testset(handler, testset_dto):
+    handler.save_testset(SaveTestSetCommand(testset=testset_dto))
+    handler.delete_testset(DeleteTestSetCommand(testset_id=str(testset_dto.testset_id)))
+    with pytest.raises(ObjectNotFoundError):
+        handler.load_testset(LoadTestSetCommand(testset_id=str(testset_dto.testset_id)))
+
+
+def test_delete_nonexistent_testset_raises(handler):
+    cmd = DeleteTestSetCommand(testset_id=str(uuid4()))
+    with pytest.raises(ObjectNotFoundError):
+        handler.delete_testset(cmd)

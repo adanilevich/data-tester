@@ -169,7 +169,7 @@ class AbstractTestCase(Checkable):
             diff=self.diff,  # must be set by specific implementation
             specs=self.specs,
             start_ts=self.start_ts,
-            end_ts=self.end_ts or datetime.now(),
+            end_ts=self.end_ts,
             domain_config=self.domain_config,
             domain=self.testobject.domain,
             stage=self.testobject.stage,

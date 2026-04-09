@@ -2,6 +2,7 @@ from typing import List
 
 from src.domain.testset.testset import TestSet
 from src.domain_ports import (
+    DeleteTestSetCommand,
     ITestSet,
     ListTestSetsCommand,
     LoadTestSetCommand,
@@ -20,6 +21,9 @@ class TestSetAdapter(ITestSet):
 
     def load_testset(self, command: LoadTestSetCommand) -> TestSetDTO:
         return self.testset.load_testset(testset_id=command.testset_id)
+
+    def delete_testset(self, command: DeleteTestSetCommand) -> None:
+        self.testset.delete_testset(testset_id=command.testset_id)
 
     def list_testsets(self, command: ListTestSetsCommand) -> List[TestSetDTO]:
         return self.testset.list_testsets(domain=command.domain)

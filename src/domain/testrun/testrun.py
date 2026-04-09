@@ -83,9 +83,6 @@ class TestRun:
         self.status: Status = Status.INITIATED
         self.results: List[TestCaseDTO] = []
 
-        # persist initial state
-        self.persist()
-
     def notify(self, message: str, importance: Importance = Importance.INFO):
         notification = NotificationDTO(
             domain=self.domain,
@@ -119,6 +116,9 @@ class TestRun:
                 result = future.result()
                 with self._lock:
                     self.results.append(result)
+                    # TODO: persisting after every testcase is O(N²) in serialization work
+                    # for large testsets — throttle to every N completions or a time-based
+                    # interval instead.
                     self.persist()
 
         # testrun result is only OK if all testcases are OK
@@ -156,7 +156,7 @@ class TestRun:
             testset_id=self.testset_id,
             labels=self.labels,
             start_ts=self.start_ts,
-            end_ts=self.end_ts or datetime.now(),
+            end_ts=self.end_ts,
             result=self.result,
             results=self.results,
             testdefinitions=self.testcase_defs,

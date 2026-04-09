@@ -1,37 +1,37 @@
 """Shared navigation bar component."""
 
 from nicegui import ui
-from src.ui.controller import Controller
 
+from src.ui.controller import Controller
+from src.ui.styles import ICON_BUTTON_SECONDARY_CLASSES
 
 _NAV_ITEMS = [
     ("Testsets", "/{domain}/testsets"),
-    ("Executions", "/{domain}/executions"),
-    ("Reports", "/{domain}/reports"),
+    ("Testruns", "/{domain}/testruns"),
     ("Specs", "/{domain}/specs"),
     ("Config", "/{domain}/config"),
 ]
 
-_ACTIVE_LINK = (
-    "text-teal-400 border-b-2 border-teal-400 "
+_LINK_BASE = (
     "font-semibold tracking-wide uppercase text-xs px-4 py-3 "
-    "transition-colors duration-150"
+    "transition-colors duration-150 border-b-2"
 )
+_SELECTED_LINK = f"text-white border-teal-400 {_LINK_BASE}"
+_NAV_LINK = f"text-slate-400 hover:text-teal-400 border-transparent {_LINK_BASE}"
 _DISABLED_LINK = (
     "text-slate-600 cursor-not-allowed "
     "font-semibold tracking-wide uppercase text-xs px-4 py-3 "
     "select-none"
 )
 
-_SETTINGS_ITEMS = ["First", "Second", "Third"]
-
 
 class NavBar:
-
     def __init__(self, controller: Controller):
         self.controller = controller
 
     def render(self) -> ui.header:
+        current_route = ui.context.client.page.path
+
         with ui.header(elevated=True).classes(
             "flex items-center justify-between px-6 py-0 "
             "bg-[#0f1117] border-b border-slate-800 h-14"
@@ -44,15 +44,30 @@ class NavBar:
                 for label, path_template in _NAV_ITEMS:
                     if self.controller.domain:
                         href = path_template.format(domain=self.controller.domain)
-                        ui.link(label, href).classes(_ACTIVE_LINK)
+                        is_current = path_template == current_route
+                        ui.link(label, href).classes(
+                            _SELECTED_LINK if is_current else _NAV_LINK
+                        )
                     else:
                         ui.label(label).classes(_DISABLED_LINK)
 
             with ui.row().classes("items-center"):
-                with ui.button(icon="settings").props("flat dense").classes(
-                    "text-slate-400 hover:text-teal-400 transition-colors duration-150"
+                with (
+                    ui.button(icon="settings")
+                    .props("flat dense")
+                    .classes(ICON_BUTTON_SECONDARY_CLASSES)
                 ):
                     with ui.menu():
-                        for item in _SETTINGS_ITEMS:
-                            ui.menu_item(item)
+                        ui.menu_item(
+                            "Domain Selection",
+                            on_click=self._go_to_domain_selection,
+                        )
+                        ui.menu_item(
+                            "About",
+                            on_click=lambda: ui.navigate.to("/about"),
+                        )
         return header
+
+    def _go_to_domain_selection(self) -> None:
+        self.controller.domain = None
+        ui.navigate.to("/")

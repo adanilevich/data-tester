@@ -43,6 +43,16 @@ class IDtoStorage(ABC):
         """
 
     @abstractmethod
+    def delete_dto(self, object_type: ObjectType, id: str) -> None:
+        """
+        Deletes a DTO by its type and ID.
+
+        Raises:
+            ObjectNotFoundError: If object is not found
+            StorageError: For other storage errors
+        """
+
+    @abstractmethod
     def list_dtos(
         self,
         object_type: ObjectType,

@@ -33,9 +33,7 @@ def get_testcase_artifact(
     return Response(
         content=content,
         media_type=_MEDIA_TYPES[format],
-        headers={
-            "Content-Disposition": f"attachment; filename={testcase_id}.{ext}"
-        },
+        headers={"Content-Disposition": f"attachment; filename={testcase_id}.{ext}"},
     )
 
 
@@ -54,7 +52,5 @@ def get_testrun_artifact(
     return Response(
         content=content,
         media_type=_MEDIA_TYPES[format],
-        headers={
-            "Content-Disposition": f"attachment; filename={testrun_id}.{ext}"
-        },
+        headers={"Content-Disposition": f"attachment; filename={testrun_id}.{ext}"},
     )

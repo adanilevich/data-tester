@@ -7,22 +7,22 @@ stores the selection in state, and redirects to the domain home page.
 from nicegui import ui
 
 from src.ui.components import NavBar, StatusBar
-from src.ui.controller import Controller
+from src.ui.controller import ControllerFactory
 
 
-def register(controller: Controller) -> None:
+def register(make_controller: ControllerFactory) -> None:
     """Register the domain-selection page route."""
 
     @ui.page("/")
     async def domain_selection() -> None:
+        controller = make_controller()
         NavBar(controller).render()
         StatusBar(controller).render()
 
         error_msg = await controller.load_domains()
 
         with ui.column().classes(
-            "flex-1 flex items-center justify-center min-h-screen "
-            "bg-[#0f1117] w-full"
+            "flex-1 flex items-center justify-center min-h-screen bg-[#0f1117] w-full"
         ):
             with ui.card().classes(
                 "bg-[#161b27] border border-slate-700 rounded-xl "
@@ -38,9 +38,7 @@ def register(controller: Controller) -> None:
                 if error_msg:
                     with ui.row().classes("items-center mb-4"):
                         ui.icon("error_outline").classes("text-red-500 mr-2")
-                        ui.label(error_msg).classes(
-                            "text-red-400 text-sm font-mono"
-                        )
+                        ui.label(error_msg).classes("text-red-400 text-sm font-mono")
 
                 if not controller.domains:
                     ui.label("No domains available.").classes(
@@ -60,8 +58,7 @@ def register(controller: Controller) -> None:
                         ui.notify("Please select a domain.", type="warning")
                         return
                     controller.domain = chosen
-                    ui.navigate.to(f"/{chosen}/")
-
+                    ui.navigate.to(f"/{chosen}/testsets")
 
                 ui.button("Confirm", on_click=on_confirm).classes(
                     "mt-6 w-full bg-teal-500 hover:bg-teal-400 "

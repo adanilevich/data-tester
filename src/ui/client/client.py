@@ -1,20 +1,24 @@
 """Async HTTP client for the Data Tester backend API.
 
-Only imports from src.dtos and src.client_interface (import-linter contract 12).
+Only imports from src.dtos (import-linter contract 12).
 """
 
-from typing import Any, Dict, List
+from typing import Any
+from uuid import UUID
 
 import httpx
 
-from src.client_interface import DomainConfigDTO, TestObjectDTO, TestRunDTO, TestSetDTO
-from src.client_interface.requests import FindSpecsRequest
-from src.dtos import TestRunDefDTO
+from src.dtos import (
+    DomainConfigDTO,
+    FindSpecsDTO,
+    TestObjectDTO,
+    TestRunDefDTO,
+    TestRunDTO,
+    TestSetDTO,
+)
 
 
 class BackendError(Exception):
-    """Raised when the backend returns an unexpected response."""
-
     def __init__(self, status_code: int, detail: str) -> None:
         self.status_code = status_code
         self.detail = detail
@@ -22,8 +26,6 @@ class BackendError(Exception):
 
 
 class DataTesterClient:
-    """Async HTTP client for the Data Tester FastAPI backend."""
-
     def __init__(self, base_url: str) -> None:
         self._base_url = base_url.rstrip("/")
 
@@ -41,42 +43,65 @@ class DataTesterClient:
                 raise BackendError(status_code=response.status_code, detail=response.text)
             return response.json()
 
-    async def get_domain_configs(self) -> Dict[str, DomainConfigDTO]:
-        """Fetch all domain configurations from the backend."""
-        data: Dict[str, Any] = await self._get("/domain-config")
+    async def _delete(self, path: str) -> None:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
+            response = await client.delete(path)
+            if not response.is_success:
+                raise BackendError(status_code=response.status_code, detail=response.text)
+
+    async def _put(self, path: str, body: Any) -> None:
+        async with httpx.AsyncClient(base_url=self._base_url, timeout=30.0) as client:
+            response = await client.put(path, json=body)
+            if not response.is_success:
+                raise BackendError(status_code=response.status_code, detail=response.text)
+
+    async def get_domain_configs(self) -> dict[str, DomainConfigDTO]:
+        data: dict[str, Any] = await self._get("/domain-config")
         return {
             domain: DomainConfigDTO.model_validate(cfg) for domain, cfg in data.items()
         }
 
     async def get_domain_config(self, domain: str) -> DomainConfigDTO:
-        """Fetch a single domain configuration by domain name."""
         data: Any = await self._get(f"/domain-config/{domain}")
         return DomainConfigDTO.model_validate(data)
 
-    async def get_testsets(self, domain: str) -> List[TestSetDTO]:
-        """Fetch testsets by domain name."""
+    async def get_testsets(self, domain: str) -> list[TestSetDTO]:
         data: Any = await self._get(f"/{domain}/testset")
         return [TestSetDTO.model_validate(testset) for testset in data]
 
     async def get_testobjects(
         self, domain: str, stage: str, instance: str
-    ) -> List[TestObjectDTO]:
-        """Fetch testobjects for a specific stage/instance."""
+    ) -> list[TestObjectDTO]:
         data: Any = await self._get(
             f"/{domain}/platform/testobjects?stage={stage}&instance={instance}"
         )
         return [TestObjectDTO.model_validate(o) for o in data]
 
-    async def get_testruns(self, domain: str) -> List[TestRunDTO]:
-        """Fetch all testruns for a domain."""
+    async def get_testruns(self, domain: str) -> list[TestRunDTO]:
         data: Any = await self._get(f"/{domain}/testrun/")
         return [TestRunDTO.model_validate(r) for r in data]
 
-    async def find_specs(
-        self, domain: str, body: FindSpecsRequest
-    ) -> TestRunDefDTO:
-        """Find specifications for a testset."""
+    async def find_specs(self, domain: str, body: FindSpecsDTO) -> TestRunDefDTO:
         data: Any = await self._post(
             f"/{domain}/specification/find", body.model_dump(mode="json")
         )
         return TestRunDefDTO.model_validate(data)
+
+    async def execute_testrun(self, domain: str, testrun_def: TestRunDefDTO) -> UUID:
+        """Submit a testrun for execution. Returns the pre-generated testrun_id."""
+        data: Any = await self._post(
+            f"/{domain}/testrun/", testrun_def.model_dump(mode="json")
+        )
+        return UUID(data["testrun_id"])
+
+    async def save_domain_config(self, domain: str, dto: DomainConfigDTO) -> None:
+        await self._put(f"/domain-config/{domain}", dto.model_dump(mode="json"))
+
+    async def save_testset(self, domain: str, testset: TestSetDTO) -> None:
+        await self._put(
+            f"/{domain}/testset/{testset.testset_id}",
+            testset.model_dump(mode="json"),
+        )
+
+    async def delete_testset(self, domain: str, testset_id: str) -> None:
+        await self._delete(f"/{domain}/testset/{testset_id}")

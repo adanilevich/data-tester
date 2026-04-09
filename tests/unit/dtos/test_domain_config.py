@@ -21,9 +21,7 @@ def domain_config() -> DomainConfigDTO:
 
 
 class TestDomainConfigDTO:
-    def test_spec_locations_by_stage_known_stage(
-        self, domain_config: DomainConfigDTO
-    ):
+    def test_spec_locations_by_stage_known_stage(self, domain_config: DomainConfigDTO):
         result = domain_config.spec_locations_by_stage("test")
         assert result == [LocationDTO("local://specs/payments/")]
 
@@ -34,9 +32,7 @@ class TestDomainConfigDTO:
         result = domain_config.spec_locations_by_stage("test")
         assert result == [LocationDTO("local://a/"), LocationDTO("local://b/")]
 
-    def test_spec_locations_by_stage_unknown_stage(
-        self, domain_config: DomainConfigDTO
-    ):
+    def test_spec_locations_by_stage_unknown_stage(self, domain_config: DomainConfigDTO):
         with pytest.raises(KeyError):
             domain_config.spec_locations_by_stage("unknown_stage")
 
